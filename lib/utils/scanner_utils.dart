@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+//import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 
 class ScannerUtils {
@@ -21,7 +21,7 @@ class ScannerUtils {
     );
   }
 
-  static Future<dynamic> detect({
+  /*static Future<dynamic> detect({
     @required CameraImage image,
     @required Future<dynamic> Function(FirebaseVisionImage image) detectInImage,
     @required int imageRotation,
@@ -32,7 +32,7 @@ class ScannerUtils {
         _buildMetaData(image, _rotationIntToImageRotation(imageRotation)),
       ),
     );
-  }
+  }*/
 
   static Uint8List _concatenatePlanes(List<Plane> planes) {
     final WriteBuffer allBytes = WriteBuffer();
@@ -42,7 +42,7 @@ class ScannerUtils {
     return allBytes.done().buffer.asUint8List();
   }
 
-  static FirebaseVisionImageMetadata _buildMetaData(
+  /*static FirebaseVisionImageMetadata _buildMetaData(
     CameraImage image,
     ImageRotation rotation,
   ) {
@@ -60,9 +60,9 @@ class ScannerUtils {
         },
       ).toList(),
     );
-  }
+  }*/
 
-  static ImageRotation _rotationIntToImageRotation(int rotation) {
+  /*static ImageRotation _rotationIntToImageRotation(int rotation) {
     switch (rotation) {
       case 0:
         return ImageRotation.rotation0;
@@ -74,5 +74,5 @@ class ScannerUtils {
         assert(rotation == 270);
         return ImageRotation.rotation270;
     }
-  }
+  }*/
 }
