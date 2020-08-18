@@ -1,4 +1,4 @@
-import 'package:hermezwallet/model/wallet_setup.dart';
+import 'package:hermez/model/wallet_setup.dart';
 
 abstract class WalletSetupAction {}
 

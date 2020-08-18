@@ -1,6 +1,6 @@
-import 'package:hermezwallet/app_config.dart';
-import 'package:hermezwallet/router.dart';
-import 'package:hermezwallet/services_provider.dart';
+import 'package:hermez/app_config.dart';
+import 'package:hermez/router.dart';
+import 'package:hermez/services_provider.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -1,8 +1,8 @@
-import 'package:hermezwallet/model/wallet.dart';
-import 'package:hermezwallet/service/address_service.dart';
-import 'package:hermezwallet/service/configuration_service.dart';
-import 'package:hermezwallet/service/contract_service.dart';
-import 'package:hermezwallet/service/rollup_service.dart';
+import 'package:hermez/model/wallet.dart';
+import 'package:hermez/service/address_service.dart';
+import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/rollup_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 import 'package:http/http.dart' as http;

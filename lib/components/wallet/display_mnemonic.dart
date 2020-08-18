@@ -1,4 +1,4 @@
-import 'package:hermezwallet/components/copyButton/copy_button.dart';
+import 'package:hermez/components/copyButton/copy_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';

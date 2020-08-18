@@ -1,8 +1,8 @@
-import 'package:hermezwallet/components/form/paper_form.dart';
-import 'package:hermezwallet/components/form/paper_input.dart';
-import 'package:hermezwallet/components/form/paper_radio.dart';
-import 'package:hermezwallet/components/form/paper_validation_summary.dart';
-import 'package:hermezwallet/model/wallet_setup.dart';
+import 'package:hermez/components/form/paper_form.dart';
+import 'package:hermez/components/form/paper_input.dart';
+import 'package:hermez/components/form/paper_radio.dart';
+import 'package:hermez/components/form/paper_validation_summary.dart';
+import 'package:hermez/model/wallet_setup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 

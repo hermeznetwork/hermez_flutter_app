@@ -1,5 +1,5 @@
 import 'package:built_collection/built_collection.dart';
-import 'package:hermezwallet/model/wallet.dart';
+import 'package:hermez/model/wallet.dart';
 
 abstract class WalletAction {}
 

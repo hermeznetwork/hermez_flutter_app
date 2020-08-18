@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:hermezwallet/context/transfer/wallet_transfer_state.dart';
-import 'package:hermezwallet/model/wallet_transfer.dart';
-import 'package:hermezwallet/service/configuration_service.dart';
-import 'package:hermezwallet/service/contract_service.dart';
+import 'package:hermez/context/transfer/wallet_transfer_state.dart';
+import 'package:hermez/model/wallet_transfer.dart';
+import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/contract_service.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:web3dart/credentials.dart';
 

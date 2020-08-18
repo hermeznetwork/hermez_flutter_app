@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:built_collection/built_collection.dart';
-import 'package:hermezwallet/model/account.dart';
-import 'package:hermezwallet/model/token.dart';
-import 'package:hermezwallet/model/transaction.dart';
+import 'package:hermez/model/account.dart';
+import 'package:hermez/model/token.dart';
+import 'package:hermez/model/transaction.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'configuration_service.dart';

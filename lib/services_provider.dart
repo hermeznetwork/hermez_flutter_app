@@ -1,9 +1,9 @@
-import 'package:hermezwallet/app_config.dart';
-import 'package:hermezwallet/service/address_service.dart';
-import 'package:hermezwallet/service/configuration_service.dart';
-import 'package:hermezwallet/service/contract_service.dart';
-import 'package:hermezwallet/service/rollup_service.dart';
-import 'package:hermezwallet/utils/contract_parser.dart';
+import 'package:hermez/app_config.dart';
+import 'package:hermez/service/address_service.dart';
+import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/rollup_service.dart';
+import 'package:hermez/utils/contract_parser.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';

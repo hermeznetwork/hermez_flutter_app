@@ -1,7 +1,7 @@
-import 'package:hermezwallet/model/wallet.dart';
-import 'package:hermezwallet/service/configuration_service.dart';
+import 'package:hermez/model/wallet.dart';
+import 'package:hermez/service/configuration_service.dart';
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:hermezwallet/utils/hd_key.dart';
+import 'package:hermez/utils/hd_key.dart';
 import "package:hex/hex.dart";
 import 'package:web3dart/credentials.dart';
 

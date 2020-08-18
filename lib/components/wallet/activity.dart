@@ -1,4 +1,4 @@
-import 'package:hermezwallet/model/wallet.dart';
+import 'package:hermez/model/wallet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';

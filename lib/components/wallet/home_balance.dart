@@ -1,7 +1,7 @@
-import 'package:hermezwallet/components/copyButton/copy_button.dart';
-import 'package:hermezwallet/model/wallet.dart';
-import 'package:hermezwallet/utils/eth_amount_formatter.dart';
-import 'package:hermezwallet/wallet_account_details_page.dart';
+import 'package:hermez/components/copyButton/copy_button.dart';
+import 'package:hermez/model/wallet.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
+import 'package:hermez/wallet_account_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math';
