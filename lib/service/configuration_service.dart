@@ -56,8 +56,6 @@ class ConfigurationService implements IConfigurationService {
       return WalletDefaultCurrency.EUR;
     } else  if (defaultCurrencyString == "USD") {
       return WalletDefaultCurrency.USD;
-    } else if (defaultCurrencyString == "DAI") {
-      return WalletDefaultCurrency.DAI;
     }
     return WalletDefaultCurrency.EUR;
   }

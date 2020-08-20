@@ -3,34 +3,34 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1087248227022-2uj4vchfbud4tdaoekte9got3h7bpcea.apps.googleusercontent.com</string>
+	<string>897659123359-gbvtov7icruceq8s2m6auacsqrrrhlar.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1087248227022-2uj4vchfbud4tdaoekte9got3h7bpcea</string>
+	<string>com.googleusercontent.apps.897659123359-gbvtov7icruceq8s2m6auacsqrrrhlar</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCiOJ99AgB3hM5N7ZxS2dG7SV3G7ER9goQ</string>
+	<string>AIzaSyB1yXUi_fRNPD0E7Pk0HXAXga17BQAcYMA</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1087248227022</string>
+	<string>897659123359</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.iden3.hermezwallet</string>
 	<key>PROJECT_ID</key>
-	<string>hermezwallet-18c58</string>
+	<string>hermez-d1848</string>
 	<key>STORAGE_BUCKET</key>
-	<string>hermezwallet-18c58.appspot.com</string>
+	<string>hermez-d1848.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
 	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1087248227022:ios:333c89b3229394831a4e9f</string>
+	<string>1:897659123359:ios:d37ff3c49133aab88bd4aa</string>
 	<key>DATABASE_URL</key>
-	<string>https://hermezwallet-18c58.firebaseio.com</string>
+	<string>https://hermez-d1848.firebaseio.com</string>
 </dict>
 </plist>

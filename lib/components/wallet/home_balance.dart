@@ -7,12 +7,13 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math';
 
 class HomeBalance extends StatelessWidget {
-  HomeBalance({this.address, this.ethBalance, this.tokenBalance, this.defaultCurrency, this.cryptoList});
+  HomeBalance({this.controller, this.address, this.ethBalance, this.tokenBalance, this.defaultCurrency, this.cryptoList});
 
   final String address;
   final BigInt ethBalance;
   final BigInt tokenBalance;
   final WalletDefaultCurrency defaultCurrency;
+  final PageController controller;
   final List cryptoList;
 
   final bool _loading = false;
@@ -49,6 +50,44 @@ class HomeBalance extends StatelessWidget {
           child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Expanded(child:
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    IconButton(
+                      icon: ImageIcon(
+                        AssetImage('assets/account.png'),
+                      ),
+                  onPressed: () {
+                    controller.animateToPage(
+                      0,
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.linear,
+                    );
+                    //Navigator.of(context).pushNamed("/settings");
+                  },
+                    )],
+                  ),
+                ),
+                IconButton(
+                  icon: ImageIcon(
+                    AssetImage('assets/scan.png'),
+                  ),
+                  onPressed: () {
+                    controller.animateToPage(
+                      2,
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.linear,
+                    );
+                    //Navigator.of(context).pushNamed("/settings");
+                  },
+                )
+              ],
+            ),
             SizedBox(height: 40),
             Padding(
               padding: const EdgeInsets.only(left: 30.0),
@@ -57,14 +96,12 @@ class HomeBalance extends StatelessWidget {
                 child: Container(
                   child: Row(children: <Widget>[
                     Text(
-                      "Total value in "+ defaultCurrency.toString().split('.').last ,
+                      "Total Value",
                       style: TextStyle(fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
                           fontSize: 18)
                       ,textAlign: TextAlign.left,
                     ),
-                    SizedBox(width: 5),
-                    Image.asset("assets/arrow_down.png")
                   ])
                 ),
               ),

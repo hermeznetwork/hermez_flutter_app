@@ -1,35 +1,42 @@
 {
   "project_info": {
-    "project_number": "1087248227022",
-    "firebase_url": "https://hermezwallet-18c58.firebaseio.com",
-    "project_id": "hermezwallet-18c58",
-    "storage_bucket": "hermezwallet-18c58.appspot.com"
+    "project_number": "897659123359",
+    "firebase_url": "https://hermez-d1848.firebaseio.com",
+    "project_id": "hermez-d1848",
+    "storage_bucket": "hermez-d1848.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1087248227022:android:a6caf26e51a7fbe5",
+        "mobilesdk_app_id": "1:897659123359:android:250525cd963feb588bd4aa",
         "android_client_info": {
           "package_name": "com.iden3.hermezwallet"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1087248227022-8k648l9jcc33da5d0hdd8me46eaeqira.apps.googleusercontent.com",
+          "client_id": "897659123359-h7vgn74h7f4vf7f4cps0egopjiq5kt1p.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDAV_JhknsPbDt-VoLCNnYLvtCwJm57GCE"
+          "current_key": "AIzaSyBGqKQcQGUYgBEJ0AgL0DvRsUf3z5Vqux8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1087248227022-8k648l9jcc33da5d0hdd8me46eaeqira.apps.googleusercontent.com",
+              "client_id": "897659123359-h7vgn74h7f4vf7f4cps0egopjiq5kt1p.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "897659123359-gbvtov7icruceq8s2m6auacsqrrrhlar.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.iden3.hermezwallet"
+              }
             }
           ]
         }

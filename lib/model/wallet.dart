@@ -3,7 +3,7 @@ import 'package:built_value/built_value.dart';
 
 part 'wallet.g.dart';
 
-enum WalletDefaultCurrency { EUR, USD, DAI }
+enum WalletDefaultCurrency { EUR, USD }
 
 abstract class Wallet implements Built<Wallet, WalletBuilder> {
   @nullable

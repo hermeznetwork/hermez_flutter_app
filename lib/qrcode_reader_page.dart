@@ -4,7 +4,7 @@
 
 import 'package:hermez/utils/scanner_utils.dart';
 import 'package:camera/camera.dart';
-//import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'utils/detector_painters.dart';
@@ -24,13 +24,13 @@ class QRCodeReaderPage extends StatefulWidget {
 class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
   static final RegExp _basicAddress =
       RegExp(r'^(0x)?[0-9a-f]{40}', caseSensitive: false);
-  //List<Barcode> _scanResults;
+  List<Barcode> _scanResults;
   CameraController _camera;
   bool _isDetecting = false;
   CameraLensDirection _direction = CameraLensDirection.back;
 
-  /*final BarcodeDetector _barcodeDetector =
-      FirebaseVision.instance.barcodeDetector();*/
+  final BarcodeDetector _barcodeDetector =
+      FirebaseVision.instance.barcodeDetector();
 
   @override
   void initState() {
@@ -56,7 +56,7 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
 
       _isDetecting = true;
 
-      /*ScannerUtils.detect(
+      ScannerUtils.detect(
         image: image,
         detectInImage: _barcodeDetector.detectInImage,
         imageRotation: description.sensorOrientation,
@@ -86,16 +86,16 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
           }
         }
         _isDetecting = false;
-      });*/
+      });
     });
   }
 
   Widget _buildResults() {
-    /*if (_scanResults == null ||
+    if (_scanResults == null ||
         _camera == null ||
         !_camera.value.isInitialized) {
       return Container();
-    }*/
+    }
 
     final Size imageSize = Size(
       _camera.value.previewSize.height,
@@ -103,7 +103,7 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
     );
 
     return CustomPaint(
-      painter: BarcodeDetectorPainter(imageSize, List()/*_scanResults*/),
+      painter: BarcodeDetectorPainter(imageSize, _scanResults),
     );
   }
 
@@ -144,9 +144,6 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: _buildImage(),
       floatingActionButton: FloatingActionButton(
         onPressed: _toggleCameraDirection,
@@ -160,7 +157,7 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
   @override
   void dispose() {
     _camera.dispose().then((_) {
-      //_barcodeDetector.close();
+      _barcodeDetector.close();
     });
 
     super.dispose();
