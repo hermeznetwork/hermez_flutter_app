@@ -121,7 +121,7 @@ class HomeBalance extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
-            buildButtonsRow(),
+            buildButtonsRow(context),
             SizedBox(height: 20),
             Container(
               color: Colors.white,
@@ -147,7 +147,7 @@ class HomeBalance extends StatelessWidget {
     }
   }
 
-  buildButtonsRow() {
+  buildButtonsRow(BuildContext context) {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -180,7 +180,7 @@ class HomeBalance extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10.0),
                   side: BorderSide(color: Colors.grey[300])),
               onPressed: () {
-                //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
+                Navigator.of(context).pushNamed("/transfer_amount");
               },
               padding: EdgeInsets.all(20.0),
               color: Colors.white,

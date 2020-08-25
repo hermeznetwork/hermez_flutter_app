@@ -9,6 +9,7 @@ import 'package:hermez/wallet_settings_page.dart';
 import 'package:hermez/wallet_settings_qrcode_page.dart';
 import 'package:hermez/wallet_settings_currency_page.dart';
 import 'package:hermez/wallet_amount_page.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez/wallet_transfer_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -96,6 +97,11 @@ Map<String, WidgetBuilder> getRoutes(context) {
             return WalletTransferPage(title: "Send Tokens");
           },
         ),
+    '/transfer_amount': (BuildContext context) => WalletTransferProvider(
+      builder: (context, store) {
+        return WalletTransferAmountPage();
+      },
+    ),
     '/qrcode_reader': (BuildContext context) => QRCodeReaderPage(
           title: "Scan QRCode",
           onScanned: ModalRoute.of(context).settings.arguments,

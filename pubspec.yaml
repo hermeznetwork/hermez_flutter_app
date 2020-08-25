@@ -82,6 +82,7 @@ flutter:
     - pending.png
     - upload.png
     - arrow_down.png
+    - arrows_up_down.png
     - settings.png
     - scan.png
   # An image asset can refer to one or more resolution-specific "variants", see
