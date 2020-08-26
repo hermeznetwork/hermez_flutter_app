@@ -154,64 +154,103 @@ class HomeBalance extends StatelessWidget {
           SizedBox(width: 20.0),
           Expanded(
             child:
+            // takes in an object and color and returns a circle avatar with first letter and required color
             FlatButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  side: BorderSide(color: Colors.grey[300])),
-              onPressed: () {
-                //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
-              },
-              padding: EdgeInsets.all(20.0),
-              color: Colors.white,
-              textColor: Colors.black,
-              child: Text("Deposit",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                  )),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),),
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/transfer_amount");
+                },
+                padding: EdgeInsets.all(20.0),
+                color: Colors.transparent,
+                textColor: Colors.black,
+                child: Column(children: <Widget>[
+                  CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Color.fromRGBO(247, 222, 207, 1.0),
+                      child: Image.asset("assets/send.png",
+                        width: 35,
+                        height: 35,
+                        fit:BoxFit.fill,
+                        color: Color.fromRGBO(231, 90, 43, 1.0),)
+
+                  ),
+                  SizedBox(height: 10,),
+                  Text("Send",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ],)
             ),
           ),
           SizedBox(width: 20.0),
           Expanded(
             child:
+            // takes in an object and color and returns a circle avatar with first letter and required color
             FlatButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  side: BorderSide(color: Colors.grey[300])),
-              onPressed: () {
-                Navigator.of(context).pushNamed("/transfer_amount");
-              },
-              padding: EdgeInsets.all(20.0),
-              color: Colors.white,
-              textColor: Colors.black,
-              child: Text("Transfer",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                  )),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),),
+                onPressed: () {
+                  //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
+                },
+                padding: EdgeInsets.all(20.0),
+                color: Colors.transparent,
+                textColor: Colors.black,
+                child: Column(children: <Widget>[
+                  CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Color.fromRGBO(247, 222, 207, 1.0),
+                      child: Image.asset("assets/add.png",
+                        width: 25,
+                        height: 25,
+                        fit:BoxFit.fill,
+                        color: Color.fromRGBO(231, 90, 43, 1.0),)
+
+                  ),
+                  SizedBox(height: 10,),
+                  Text("Deposit",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ],)
             ),
           ),
           SizedBox(width: 20.0),
           Expanded(
             child:
+            // takes in an object and color and returns a circle avatar with first letter and required color
             FlatButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  side: BorderSide(color: Colors.grey[300])),
-              onPressed: () {
-                //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.SEND));
-              },
-              color: Colors.white,
-              textColor: Colors.black,
-              padding: EdgeInsets.all(20.0),
-              child: Text("Withdraw",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.bold,
-                ),),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),),
+                onPressed: () {
+                  // Navigator.of(context).pushNamed("/transfer_amount");
+                },
+                padding: EdgeInsets.all(20.0),
+                color: Colors.transparent,
+                textColor: Colors.black,
+                child: Column(children: <Widget>[
+                  CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Color.fromRGBO(247, 222, 207, 1.0),
+                      child: Image.asset("assets/withdraw.png",
+                        width: 15,
+                        height: 28,
+                        fit:BoxFit.fill,
+                        color: Color.fromRGBO(231, 90, 43, 1.0),)
+
+                  ),
+                  SizedBox(height: 10,),
+                  Text("Withdraw",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ],)
             ),
           ),
           SizedBox(width: 20.0),

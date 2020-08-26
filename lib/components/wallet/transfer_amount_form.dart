@@ -1,3 +1,4 @@
+import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/form/paper_input.dart';
 import 'package:hermez/components/form/paper_validation_summary.dart';
@@ -33,20 +34,45 @@ class TransferAmountForm extends HookWidget {
         child: SingleChildScrollView(
           child: PaperForm(
             actionButtons: <Widget>[
-              RaisedButton(
-                child: const Text('Confirm'),
-                onPressed: () {
-                  this.onSubmit(
-                    toController.value.text,
-                    amountController.value.text,
-                  );
-                },
-              )
+
+              Column(children: <Widget>[
+                FlatButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40.0),
+                      side: BorderSide(color: Color.fromRGBO(211, 87, 46, 1.0))),
+                  onPressed: () {
+                    this.onSubmit(
+                      toController.value.text,
+                      amountController.value.text,
+                    );
+                  },
+                  padding: EdgeInsets.all(20.0),
+                  color: Color.fromRGBO(211, 87, 46, 1.0),
+                  textColor: Colors.white,
+                  child: Text("Confirm",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  margin: EdgeInsets.only(top: 20.0),
+                  child:
+                  Text("Fee: €0.1"/*element['name']*/,
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ),
+              ],)
             ],
             children: <Widget>[
               PaperValidationSummary(transferStore.state.errors.toList()),
               _buildTokenRow(context, null),
-              _buildAmountRow(context, null),
+              _buildAmountRow(context, null, amountController),
               /*PaperInput(
                 controller: toController,
                 labelText: 'To',
@@ -143,7 +169,7 @@ class TransferAmountForm extends HookWidget {
   }
 
 
-  Widget _buildAmountRow(BuildContext context, dynamic element) {
+  Widget _buildAmountRow(BuildContext context, dynamic element, dynamic amountController) {
     // returns a row with the desired properties
     return Container(
         padding: EdgeInsets.only(bottom: 15.0),
@@ -151,9 +177,6 @@ class TransferAmountForm extends HookWidget {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 side: BorderSide(color: Color.fromRGBO(130, 130, 130, 1.0))),
-            onPressed: () {
-              //Navigator.of(context).pushNamed("/account_details", arguments: WalletAccountDetailsArguments(element, color));
-            },
             padding: EdgeInsets.all(15.0),
             color: Colors.transparent,
             textColor: Colors.black,
@@ -170,13 +193,13 @@ class TransferAmountForm extends HookWidget {
                         )),
                   ),
                   Container(
+                    margin: EdgeInsets.only(top: 10.0),
                     child:
-                    Text("50"/*element['name']*/,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 48.0,
-                          fontWeight: FontWeight.w600,
-                        )),
+                    AmountInput(
+                      controller: amountController,
+                      labelText: 'Amount',
+                      hintText: 'And amount',
+                    ),
                   ),
                   Divider(
                     color: Colors.grey[150],
