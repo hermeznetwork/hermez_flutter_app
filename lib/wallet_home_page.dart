@@ -5,8 +5,6 @@ import 'package:hermez/qrcode_reader_page.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_settings_page.dart';
 import 'package:provider/provider.dart';
-import 'components/dialog/alert.dart';
-import 'components/menu/main_menu.dart';
 import 'context/wallet/wallet_handler.dart';
 import 'context/wallet/wallet_provider.dart';
 

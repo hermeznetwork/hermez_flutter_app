@@ -9,6 +9,7 @@ import 'package:hermez/wallet_settings_page.dart';
 import 'package:hermez/wallet_settings_qrcode_page.dart';
 import 'package:hermez/wallet_settings_currency_page.dart';
 import 'package:hermez/wallet_amount_page.dart';
+import 'package:hermez/wallet_token_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez/wallet_transfer_page.dart';
 import 'package:flutter/material.dart';
@@ -92,16 +93,17 @@ Map<String, WidgetBuilder> getRoutes(context) {
         ),
     '/amount': (BuildContext context) => AmountPage(),
     '/receiver': (BuildContext context) => ReceiverPage(arguments: ModalRoute.of(context).settings.arguments),
+    '/token_selector': (BuildContext context) => WalletTransferProvider(
+      builder: (context, store) {
+        return WalletTokenSelectorPage(ModalRoute.of(context).settings.arguments);
+      },
+    ),
     '/transfer': (BuildContext context) => WalletTransferProvider(
           builder: (context, store) {
             return WalletTransferPage(title: "Send Tokens");
           },
         ),
-    '/transfer_amount': (BuildContext context) => WalletTransferProvider(
-      builder: (context, store) {
-        return WalletTransferAmountPage();
-      },
-    ),
+    '/transfer_amount': (BuildContext context) => WalletAmountPage(arguments: ModalRoute.of(context).settings.arguments),
     '/qrcode_reader': (BuildContext context) => QRCodeReaderPage(
           title: "Scan QRCode",
           onScanned: ModalRoute.of(context).settings.arguments,

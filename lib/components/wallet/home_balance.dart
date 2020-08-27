@@ -1,8 +1,10 @@
 import 'package:hermez/components/copyButton/copy_button.dart';
+import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:flutter/material.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math';
 
@@ -25,9 +27,10 @@ class HomeBalance extends StatelessWidget {
   ];
 
   List _elements = [
-    {'symbol': 'WETH', 'name' : 'Wrapped Ether', 'value': '4.345646' },
-    {'symbol': 'USDT', 'name' : 'Tether', 'value': '100.345646' },
-    {'symbol': 'DAI', 'name' : 'DAI', 'value': '200.00' },
+
+    {'symbol': 'USDT', 'name' : 'Tether', 'value': 100.345646, 'price': '€998.45' },
+    {'symbol': 'ETH', 'name' : 'Ethereum', 'value': 4.345646, 'price': '€684.14' },
+    {'symbol': 'DAI', 'name' : 'DAI', 'value': 200.00, 'price': '€156.22' },
   ];
 
   /*@override
@@ -159,7 +162,7 @@ class HomeBalance extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),),
                 onPressed: () {
-                  Navigator.of(context).pushNamed("/transfer_amount");
+                  Navigator.of(context).pushNamed("/token_selector", arguments: AmountType.SEND);
                 },
                 padding: EdgeInsets.all(20.0),
                 color: Colors.transparent,
@@ -193,7 +196,7 @@ class HomeBalance extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),),
                 onPressed: () {
-                  //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
+                  Navigator.of(context).pushNamed("/token_selector", arguments: AmountType.DEPOSIT);
                 },
                 padding: EdgeInsets.all(20.0),
                 color: Colors.transparent,
@@ -276,15 +279,16 @@ class HomeBalance extends StatelessWidget {
           final index = i;
           print(index);
           final element = _elements[index];
-          final Color color = _colors[index %
-              _colors.length]; //iterate through indexes and get the next colour
-          return _buildRow(context, element, color); //build the row widget
+          //final Color color = _colors[index %
+          //    _colors.length];
+          return AccountRow(element['name'], element['symbol'], element['price'], element['value'], null);//iterate through indexes and get the next colour
+          //return _buildRow(context, element, color); //build the row widget
         })
     ),
     );
   }
 
-  Widget _buildRow(BuildContext context, dynamic element, Color color) {
+  /*Widget _buildRow(BuildContext context, dynamic element, Color color) {
     // returns a row with the desired properties
     return Container(
         padding: EdgeInsets.only(bottom: 15.0),
@@ -355,7 +359,7 @@ class HomeBalance extends StatelessWidget {
               ]),
           )
         ));
-  }
+  }*/
 
   //takes in an object and returns the price with 2 decimal places
   /*String cryptoPrice(Map crypto) {
