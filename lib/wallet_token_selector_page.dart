@@ -18,7 +18,15 @@ class WalletTokenSelectorPage extends HookWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(amountType == AmountType.DEPOSIT ? "Deposit" : "Send"),
+        title: Text((() {
+          if(amountType == AmountType.DEPOSIT){
+            return "Deposit";
+          }else if (amountType == AmountType.SEND){
+            return "Send";
+          } else {
+            return "Withdraw";
+          }
+        })()),
         elevation: 0.0,
       ),
       body: Container(

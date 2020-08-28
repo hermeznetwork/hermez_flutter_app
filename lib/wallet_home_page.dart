@@ -21,6 +21,8 @@ class WalletHomePage extends HookWidget {
     initialPage: 1
   );
 
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
 
@@ -35,12 +37,15 @@ class WalletHomePage extends HookWidget {
     final _children = <Widget>[
       settingsPage(context),
       HomeBalance(
-        controller: controller,
-        address: store.state.address,
-        ethBalance: store.state.ethBalance,
-        tokenBalance: store.state.tokenBalance,
-        defaultCurrency: store.state.defaultCurrency,
-        cryptoList: store.state.cryptoList,
+        arguments: HomeBalanceArguments(
+          controller,
+          store.state.address,
+          store.state.ethBalance,
+          store.state.tokenBalance,
+          store.state.defaultCurrency,
+          store.state.cryptoList,
+          _scaffoldKey,
+        ),
       ),
       QRCodeReaderPage(
         title: "Scan QRCode",
@@ -57,6 +62,7 @@ class WalletHomePage extends HookWidget {
 
 
     return Scaffold(
+      key: _scaffoldKey,
       /*appBar: AppBar(
         //title: Text(_currentIndex.value == 2 ? "Activity" : title),
         //backgroundColor: _currentIndex.value == 2 ? Colors.white : Color.fromRGBO(249, 244, 235, 1.0),

@@ -1,3 +1,4 @@
+import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/form/paper_validation_summary.dart';
@@ -24,6 +25,7 @@ class TransferAmountForm extends HookWidget {
   Widget build(BuildContext context) {
     //final toController = useTextEditingController(text: token);
     final amountController = useTextEditingController();
+    final addressController = useTextEditingController();
     //final transferStore = useWalletTransfer(context);
 
     /*useEffect(() {
@@ -78,7 +80,7 @@ class TransferAmountForm extends HookWidget {
                 Navigator.of(context).pushReplacementNamed("/token_selector", arguments: amountType);
               },),
               _buildAmountRow(context, null, amountController),
-              amountType == AmountType.SEND ? _buildAddressToRow(context, null, amountController) : Container()
+              amountType == AmountType.SEND ? _buildAddressToRow(context, null, addressController) : Container()
               /*PaperInput(
                 controller: toController,
                 labelText: 'To',
@@ -203,8 +205,6 @@ class TransferAmountForm extends HookWidget {
                     child:
                     AmountInput(
                       controller: amountController,
-                      labelText: 'Amount',
-                      hintText: 'And amount',
                     ),
                   ),
                   Divider(
@@ -244,7 +244,7 @@ class TransferAmountForm extends HookWidget {
         ));
   }
 
-  Widget _buildAddressToRow(BuildContext context, dynamic element, dynamic amountController) {
+  Widget _buildAddressToRow(BuildContext context, dynamic element, dynamic addressController) {
     // returns a row with the desired properties
     return Container(
         padding: EdgeInsets.only(bottom: 15.0),
@@ -260,14 +260,9 @@ class TransferAmountForm extends HookWidget {
                   Row(
                     children: <Widget>[
                       Expanded(
-                        child: Text("To hez:0x address",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: Color.fromRGBO(130, 130, 130, 1.0),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        child: AddressInput(
+                          controller: addressController,
+                        )
                       ),
                       Container(
                         child: Text("Paste",

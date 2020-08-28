@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hermez/components/copyButton/copy_button.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/model/wallet.dart';
@@ -8,15 +9,28 @@ import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math';
 
-class HomeBalance extends StatelessWidget {
-  HomeBalance({this.controller, this.address, this.ethBalance, this.tokenBalance, this.defaultCurrency, this.cryptoList});
-
+class HomeBalanceArguments {
   final String address;
   final BigInt ethBalance;
   final BigInt tokenBalance;
   final WalletDefaultCurrency defaultCurrency;
   final PageController controller;
   final List cryptoList;
+  final scaffoldKey;
+
+  HomeBalanceArguments(this.controller, this.address, this.ethBalance, this.tokenBalance, this.defaultCurrency, this.cryptoList, this.scaffoldKey);
+}
+
+class HomeBalance extends StatefulWidget {
+  HomeBalance({Key key, this.arguments}) : super(key : key);
+
+  final HomeBalanceArguments arguments;
+
+  @override
+  _HomeBalanceState createState() => _HomeBalanceState();
+}
+
+class _HomeBalanceState extends State<HomeBalance> {
 
   final bool _loading = false;
   final List<Color> _colors = [
@@ -32,6 +46,8 @@ class HomeBalance extends StatelessWidget {
     {'symbol': 'ETH', 'name' : 'Ethereum', 'value': 4.345646, 'price': '€684.14' },
     {'symbol': 'DAI', 'name' : 'DAI', 'value': 200.00, 'price': '€156.22' },
   ];
+
+  List<bool> _selections = [false, true];
 
   /*@override
   void initState() {
@@ -57,23 +73,55 @@ class HomeBalance extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                Expanded(child:
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    IconButton(
-                      icon: ImageIcon(
-                        AssetImage('assets/account.png'),
-                      ),
+                IconButton(
+                  icon: ImageIcon(
+                    AssetImage('assets/account.png'),
+                  ),
                   onPressed: () {
-                    controller.animateToPage(
+                    widget.arguments.controller.animateToPage(
                       0,
                       duration: Duration(milliseconds: 300),
                       curve: Curves.linear,
                     );
                     //Navigator.of(context).pushNamed("/settings");
                   },
-                    )],
+                ),
+                Expanded(child:
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    ToggleButtons(
+                      children: <Widget>[
+                        Text(
+                          "L1",
+                          style: TextStyle(fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20)
+                          ,
+                        ),
+                        Text(
+                          "L2",
+                          style: TextStyle(fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20)
+                          ,
+                        ),
+                      ],
+                      fillColor: Color.fromRGBO(51, 51, 51, 1.0),
+                      selectedColor: Color.fromRGBO(249, 244, 235, 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderColor: Color.fromRGBO(51, 51, 51, 1.0),
+                      selectedBorderColor: Color.fromRGBO(51, 51, 51, 1.0),
+                      borderWidth: 2,
+                      isSelected: _selections,
+                      onPressed: (int index) {
+                        setState(() {
+                          _selections = [false, false];
+                          _selections[index] = true;
+                        });
+                      },
+                    )
+                    ],
                   ),
                 ),
                 IconButton(
@@ -81,7 +129,7 @@ class HomeBalance extends StatelessWidget {
                     AssetImage('assets/scan.png'),
                   ),
                   onPressed: () {
-                    controller.animateToPage(
+                    widget.arguments.controller.animateToPage(
                       2,
                       duration: Duration(milliseconds: 300),
                       curve: Curves.linear,
@@ -91,37 +139,45 @@ class HomeBalance extends StatelessWidget {
                 )
               ],
             ),
-            SizedBox(height: 40),
-            Padding(
-              padding: const EdgeInsets.only(left: 30.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: Container(
-                  child: Row(children: <Widget>[
-                    Text(
-                      "Total Value",
-                      style: TextStyle(fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18)
-                      ,textAlign: TextAlign.left,
-                    ),
-                  ])
-                ),
+            SizedBox(height: 30),
+            Container(
+              margin: EdgeInsets.only(left: 40, right: 40),
+              child:
+                FlatButton(
+                  shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40.0),
+                  side: BorderSide(color: Color.fromRGBO(51, 51, 51, 0.05))),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: _selections[0] == true ? widget.arguments.address : "hez:" + widget.arguments.address));
+                    widget.arguments.scaffoldKey.currentState.showSnackBar(SnackBar(
+                      content: Text("Copied"),
+                    ));
+                  },
+                  padding: EdgeInsets.all(20.0),
+                  color: Color.fromRGBO(51, 51, 51, 0.05),
+                  textColor: Color.fromRGBO(51, 51, 51, 0.60),
+                  child: Text(_selections[0] == true ? widget.arguments.address : "hez:" + widget.arguments.address,
+                  maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Color.fromRGBO(51, 51, 51, 0.60),
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
+
+                  )),
               ),
             ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 30.0),
-              child: SizedBox(
+            SizedBox(height: 30),
+            SizedBox(
                 width: double.infinity,
                 child:
-                Row(children: <Widget>[
-                  Text("€1543,80",//"\$${EthAmountFormatter(tokenBalance).format()}",
+                Row(mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                  Text(_selections[0] == true ? "€184.50" : "€67.02",//"\$${EthAmountFormatter(tokenBalance).format()}",
                       style: TextStyle(fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w800,
                           fontSize: 40)),
                 ])
-              ),
             ),
             SizedBox(height: 20),
             buildButtonsRow(context),
@@ -230,7 +286,7 @@ class HomeBalance extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),),
                 onPressed: () {
-                  // Navigator.of(context).pushNamed("/transfer_amount");
+                  Navigator.of(context).pushNamed("/token_selector", arguments: AmountType.WITHDRAW);
                 },
                 padding: EdgeInsets.all(20.0),
                 color: Colors.transparent,
