@@ -14,6 +14,7 @@ import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez/wallet_transfer_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/wallet_transaction_details_page.dart';
 import 'package:provider/provider.dart';
 
 import 'context/wallet/wallet_provider.dart';
@@ -104,6 +105,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
           },
         ),
     '/transfer_amount': (BuildContext context) => WalletAmountPage(arguments: ModalRoute.of(context).settings.arguments),
+    '/transaction_details': (BuildContext context) => TransactionDetailsPage(arguments: ModalRoute.of(context).settings.arguments),
     '/qrcode_reader': (BuildContext context) => QRCodeReaderPage(
           title: "Scan QRCode",
           onScanned: ModalRoute.of(context).settings.arguments,

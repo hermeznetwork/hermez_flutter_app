@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
@@ -26,6 +27,8 @@ class TransferAmountForm extends HookWidget {
     //final toController = useTextEditingController(text: token);
     final amountController = useTextEditingController();
     final addressController = useTextEditingController();
+
+
     //final transferStore = useWalletTransfer(context);
 
     /*useEffect(() {
@@ -46,10 +49,11 @@ class TransferAmountForm extends HookWidget {
                       borderRadius: BorderRadius.circular(40.0),
                       side: BorderSide(color: Color.fromRGBO(211, 87, 46, 1.0))),
                   onPressed: () {
-                    /*this.onSubmit(
+                    this.onSubmit(
                       //toController.value.text,
                       amountController.value.text,
-                    );*/
+                      amountController.value.text,
+                    );
                   },
                   padding: EdgeInsets.all(15.0),
                   color: Color.fromRGBO(211, 87, 46, 1.0),
@@ -265,12 +269,21 @@ class TransferAmountForm extends HookWidget {
                         )
                       ),
                       Container(
-                        child: Text("Paste",
-                          style: TextStyle(
-                            color: Color.fromRGBO(130, 130, 130, 1.0),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
+                        child: FlatButton(
+                          child:
+                            Text("Paste",
+                            style: TextStyle(
+                              color: Color.fromRGBO(130, 130, 130, 1.0),
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
+                            onPressed:() {
+                              getClipBoardData().then((String result){
+                                addressController.clear();
+                                addressController.text = result;
+                              });
+                            },
                         ),
                       ),
                       SizedBox(width: 20,),
@@ -291,5 +304,10 @@ class TransferAmountForm extends HookWidget {
         backgroundColor: Colors.white,
         child: Image.asset(icon)
     );
+  }
+
+  Future<String> getClipBoardData() async {
+    ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+    return data.text;
   }
 }

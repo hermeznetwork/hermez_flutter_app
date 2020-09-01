@@ -35,12 +35,19 @@ class WalletTokenSelectorPage extends HookWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   SizedBox(height: 10,),
-                  Text("Available tokens to " + (amountType == AmountType.DEPOSIT ? "deposit" : "send"),
+                  Text((() {
+                    if(amountType == AmountType.DEPOSIT){
+                      return "Available tokens to deposit";
+                    }else if (amountType == AmountType.SEND){
+                      return "Available tokens to send";
+                    } else {
+                      return "Available tokens to withdraw";
+                    }
+                  })(),
                     style: TextStyle(fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18)
-                    ,textAlign: TextAlign.left,
-                  ),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18)
+                      ,textAlign: TextAlign.left,),
                   SizedBox(height: 10,),
                   buildAccountsList()
                 ])
