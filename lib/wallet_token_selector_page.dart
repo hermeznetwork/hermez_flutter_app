@@ -6,7 +6,7 @@ import 'package:hermez/wallet_transfer_amount_page.dart';
 class WalletTokenSelectorPage extends HookWidget {
   WalletTokenSelectorPage(this.amountType);
 
-  final AmountType amountType;
+  final TransactionType amountType;
 
   List _elements = [
     {'symbol': 'USDT', 'name' : 'Tether', 'value': 100.345646, 'price': '€998.45' },
@@ -19,9 +19,9 @@ class WalletTokenSelectorPage extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text((() {
-          if(amountType == AmountType.DEPOSIT){
+          if(amountType == TransactionType.DEPOSIT){
             return "Deposit";
-          }else if (amountType == AmountType.SEND){
+          }else if (amountType == TransactionType.SEND){
             return "Send";
           } else {
             return "Withdraw";
@@ -36,9 +36,9 @@ class WalletTokenSelectorPage extends HookWidget {
                 children: <Widget>[
                   SizedBox(height: 10,),
                   Text((() {
-                    if(amountType == AmountType.DEPOSIT){
+                    if(amountType == TransactionType.DEPOSIT){
                       return "Available tokens to deposit";
-                    }else if (amountType == AmountType.SEND){
+                    }else if (amountType == TransactionType.SEND){
                       return "Available tokens to send";
                     } else {
                       return "Available tokens to withdraw";

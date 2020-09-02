@@ -19,7 +19,7 @@ class TransferAmountForm extends HookWidget {
 
   final dynamic token;
   final int amount;
-  final AmountType amountType;
+  final TransactionType amountType;
   final void Function(String token, String amount) onSubmit;
 
   @override
@@ -58,7 +58,7 @@ class TransferAmountForm extends HookWidget {
                   padding: EdgeInsets.all(15.0),
                   color: Color.fromRGBO(211, 87, 46, 1.0),
                   textColor: Colors.white,
-                  child: Text(amountType == AmountType.DEPOSIT ? "Confirm" : "Next",
+                  child: Text(amountType == TransactionType.DEPOSIT ? "Continue" : "Next",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16.0,
@@ -84,7 +84,7 @@ class TransferAmountForm extends HookWidget {
                 Navigator.of(context).pushReplacementNamed("/token_selector", arguments: amountType);
               },),
               _buildAmountRow(context, null, amountController),
-              amountType == AmountType.SEND ? _buildAddressToRow(context, null, addressController) : Container()
+              amountType == TransactionType.SEND ? _buildAddressToRow(context, null, addressController) : Container()
               /*PaperInput(
                 controller: toController,
                 labelText: 'To',

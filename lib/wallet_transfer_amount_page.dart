@@ -7,14 +7,20 @@ import 'package:hermez/wallet_transaction_details_page.dart';
 import 'components/wallet/loading.dart';
 import 'components/wallet/transfer_amount_form.dart';
 
-enum AmountType {
+enum TransactionType {
   DEPOSIT,
   SEND,
   WITHDRAW
 }
 
+enum TransactionStatus {
+  PENDING,
+  CONFIRMED,
+  INVALID
+}
+
 class AmountArguments {
-  final AmountType amountType;
+  final TransactionType amountType;
   final dynamic token;
 
   AmountArguments(this.amountType, this.token);
@@ -38,7 +44,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.arguments.amountType == AmountType.DEPOSIT ?  "Deposit" : "Send"),
+        title: Text(widget.arguments.amountType == TransactionType.DEPOSIT ?  "Deposit" : "Send"),
         elevation: 0.0,
       ),
       body:  TransferAmountForm(
@@ -46,7 +52,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
               amountType: widget.arguments.amountType,
               onSubmit: (address, amount) async {
                 //var success = await transferStore.transfer(address, amount);
-                Navigator.pushNamed(context, "/transaction_details", arguments: TransactionDetailsArguments(widget.arguments.amountType, widget.arguments.token, amount));
+                Navigator.pushReplacementNamed(context, "/transaction_details", arguments: TransactionDetailsArguments(widget.arguments.amountType, widget.arguments.token, amount));
                 //if (success) {
                   //Navigator.popUntil(context, ModalRoute.withName('/'));
                 //}

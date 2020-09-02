@@ -218,7 +218,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),),
                 onPressed: () {
-                  Navigator.of(context).pushNamed("/token_selector", arguments: AmountType.SEND);
+                  Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.SEND);
                 },
                 padding: EdgeInsets.all(20.0),
                 color: Colors.transparent,
@@ -252,7 +252,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),),
                 onPressed: () {
-                  Navigator.of(context).pushNamed("/token_selector", arguments: AmountType.DEPOSIT);
+                  Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.DEPOSIT);
                 },
                 padding: EdgeInsets.all(20.0),
                 color: Colors.transparent,
@@ -286,7 +286,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),),
                 onPressed: () {
-                  Navigator.of(context).pushNamed("/token_selector", arguments: AmountType.WITHDRAW);
+                  Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.WITHDRAW);
                 },
                 padding: EdgeInsets.all(20.0),
                 color: Colors.transparent,
