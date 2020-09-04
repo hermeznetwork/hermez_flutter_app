@@ -134,9 +134,9 @@ class Activity extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Container(
-                    color: double.parse(element['value']) < 0 ? Colors.transparent : Color.fromRGBO(228, 244, 235, 1.0),
+                    //color: double.parse(element['value']) < 0 ? Colors.transparent : Color.fromRGBO(228, 244, 235, 1.0),
                     padding: EdgeInsets.all(5.0),
-                    child: Text(element['value'] + " " + element['symbol'],
+                    child: Text("€36.45",
                       style: TextStyle(fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w800,
                           color: double.parse(element['value']) < 0 ? Colors.black : Colors.green,
@@ -146,7 +146,7 @@ class Activity extends StatelessWidget {
                   ),
                 Container(
                     padding: EdgeInsets.all(5.0),
-                    child: Text("€36.45",
+                    child: Text(element['value'] + " " + element['symbol'],
                     style: TextStyle(fontFamily: 'ModernEra',
                         fontWeight: FontWeight.w600,
                         color: Colors.black54,

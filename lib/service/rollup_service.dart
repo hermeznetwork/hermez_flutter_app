@@ -20,6 +20,8 @@ class RollupService implements IRollupService {
 
   final String mockedEthereumAddress = '0xaa942cfcd25ad4d90a62358b0dd84f33b398262a';
 
+  String url = 'https://jsonplaceholder.typicode.com/posts';
+
   @override
   Future<List<Account>> getAccounts(web3.EthereumAddress ethereumAddress) async {
     // TODO: implement getAccounts
