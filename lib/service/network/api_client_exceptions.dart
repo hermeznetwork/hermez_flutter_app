@@ -5,4 +5,5 @@ class UnknownApiException implements Exception{
 }
 
 class ItemNotFoundException implements Exception{}
+class InternalServerErrorException implements Exception{}
 class NetworkException implements Exception{}

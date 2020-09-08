@@ -1,21 +1,22 @@
 
 import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez/service/network/model/pagination.dart';
 
 class AccountsResponse {
   final List<Account> accounts;
-  final int nextPage;
+  final Pagination pagination;
 
-  AccountsResponse({this.accounts, this.nextPage});
+  AccountsResponse({this.accounts, this.pagination});
 
   factory AccountsResponse.fromJson(Map<String, dynamic> json) {
     return AccountsResponse(
         accounts: json['accounts'],
-        nextPage: json['nextPage']);
+        pagination: json['pagination']);
   }
 
   Map<String, dynamic> toJson() => {
     'accounts': accounts,
-    'nextPage': nextPage,
+    'pagination': pagination,
   };
 
 }

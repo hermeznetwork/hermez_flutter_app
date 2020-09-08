@@ -1,32 +1,35 @@
 
 
 class Account {
-  final int accountIdx;
+  final int accountIndex;
   final int tokenId;
+  final String tokenSymbol;
   final int nonce;
   final String balance;
   final String publicKey;
-  final String ethAddr;
+  final String ethereumAddress;
 
-  Account({this.accountIdx, this.tokenId, this.nonce, this.balance, this.publicKey, this.ethAddr});
+  Account({this.accountIndex, this.tokenId, this.tokenSymbol, this.nonce, this.balance, this.publicKey, this.ethereumAddress});
 
   factory Account.fromJson(Map<String, dynamic> json) {
     return Account(
-        accountIdx: json['accountIdx'],
+        accountIndex: json['accountIndex'],
         tokenId: json['tokenId'],
+        tokenSymbol: json['tokenSymbol'],
         nonce: json['nonce'],
         balance: json['balance'],
         publicKey: json['publicKey'],
-        ethAddr: json['ethAddr']);
+        ethereumAddress: json['ethereumAddress']);
   }
 
   Map<String, dynamic> toJson() => {
-    'accountIdx': accountIdx,
+    'accountIndex': accountIndex,
     'tokenId': tokenId,
+    'tokenSymbol': tokenSymbol,
     'nonce': nonce,
     'balance': balance,
     'publicKey': publicKey,
-    'ethAddr': ethAddr,
+    'ethereumAddress': ethereumAddress,
   };
 
 }

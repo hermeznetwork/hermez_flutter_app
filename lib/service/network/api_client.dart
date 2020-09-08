@@ -3,36 +3,46 @@ library api_testing_flutter_kata;
 import 'dart:convert';
 import 'dart:io';
 
-//import 'package:api_testing_flutter_kata/exceptions/api_client_exceptions.dart';
-//import 'package:api_testing_flutter_kata/model/register_request.dart';
 import 'package:hermez/service/network/api_client_exceptions.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/accounts_response.dart';
+import 'package:hermez/service/network/model/exits_request.dart';
 import 'package:hermez/service/network/model/register_request.dart';
 import 'package:http/http.dart' as http;
 
 import 'model/accounts_request.dart';
+import 'model/exit.dart';
+import 'model/exits_response.dart';
 
 class ApiClient {
   final String _baseAddress;
 
-  final String REGISTER_AUTH_URL = "/register/authorization";
+  final String REGISTER_AUTH_URL = "/account-creation-authorization";
   final String ACCOUNTS_URL = "/accounts/";
+  final String EXITS_URL = "/exits/";
 
   ApiClient(this._baseAddress);
 
-  Future<bool> register(RegisterRequest request) async {
+  Future<bool> authorizeAccountCreation(RegisterRequest request) async {
     final response = await _post(REGISTER_AUTH_URL, request.toJson());
     return response.statusCode == 200;
   }
 
+  Future<bool> getCreationAuthorization(String hermezEthereumAddress) async {
+    final response = await _get(REGISTER_AUTH_URL + '/' + hermezEthereumAddress, null);
+    return response.statusCode == 200;
+  }
+
   Future<List<Account>> getAccounts(AccountsRequest request) async {
-
-    final response = await _get(ACCOUNTS_URL + request.ethAddr, null);
-
+    final response = await _get(ACCOUNTS_URL + request.hermezEthereumAddress, null);
     final AccountsResponse accountsResponse = AccountsResponse.fromJson(json.decode(response.body));
-
     return accountsResponse.accounts;
+  }
+
+  Future<List<Exit>> getExits(ExitsRequest request) async {
+    final response = await _get(EXITS_URL + request.hermezEthereumAddress, request.toQueryParams());
+    final ExitsResponse exitsResponse = ExitsResponse.fromJson(json.decode(response.body));
+    return exitsResponse.exits;
   }
 
 
@@ -138,8 +148,10 @@ class ApiClient {
   }
 
   http.Response returnResponseOrThrowException(http.Response response) {
-    if (response.statusCode == 404) {
+    if (response.statusCode == 404) { // Not found
       throw ItemNotFoundException();
+    } else if (response.statusCode == 500) {
+      throw InternalServerErrorException();
     } else if (response.statusCode > 400) {
       throw UnknownApiException(response.statusCode);
     } else {

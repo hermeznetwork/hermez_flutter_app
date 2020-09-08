@@ -224,19 +224,19 @@ class _HomeBalanceState extends State<HomeBalance> {
                 onPressed: () async {
                   var apiClient = new ApiClient("http://10.0.2.2:4010");
                   var params = {
-                    "timestamp": "2020-09-04T14:10:48.641Z",
-                    "ethAddr": "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
-                    "bjj": "hez:bx1894ff413c66e6dea79b352804a7c4c3982d73605a6313a9acfcd6c092dbc82a",
+                    "timestamp": "2020-09-08T14:19:19.128Z",
+                    "ethereumAddress": "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
+                    "bjj": "hez:HVrB8xQHAYt9QTpPUsj3RGOzDmrCI4IgrYslTeTqo6Ix",
                     "signature": "72024a43f546b0e1d9d5d7c4c30c259102a9726363adcc4ec7b6aea686bcb5116f485c5542d27c4092ae0ceaf38e3bb44417639bd2070a58ba1aa1aab9d92c03"
                   };
                   var request = RegisterRequest.fromJson(params);
-                  bool result = await apiClient.register(request);
+                  bool result = await apiClient.authorizeAccountCreation(request);
 
                   /*if (result) {
                     Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.SEND);
                   }*/
                   var params2 = {
-                    "ethAddr": "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
+                    "hermezEthereumAddress": "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
                   };
                   var request2 = AccountsRequest.fromJson(params2);
                   await apiClient.getAccounts(request2);
