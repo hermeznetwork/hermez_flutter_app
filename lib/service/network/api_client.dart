@@ -7,12 +7,16 @@ import 'package:hermez/service/network/api_client_exceptions.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/accounts_response.dart';
 import 'package:hermez/service/network/model/exits_request.dart';
+import 'package:hermez/service/network/model/forged_transactions_request.dart';
+import 'package:hermez/service/network/model/forged_transactions_response.dart';
 import 'package:hermez/service/network/model/register_request.dart';
 import 'package:http/http.dart' as http;
 
 import 'model/accounts_request.dart';
 import 'model/exit.dart';
 import 'model/exits_response.dart';
+import 'model/forged_transaction.dart';
+import 'model/transaction.dart';
 
 class ApiClient {
   final String _baseAddress;
@@ -21,7 +25,12 @@ class ApiClient {
   final String ACCOUNTS_URL = "/accounts/";
   final String EXITS_URL = "/exits/";
 
+  final String TRANSACTIONS_POOL_URL = "/transactions-pool";
+  final String TRANSACTIONS_HISTORY_URL = "/transactions-history";
+
   ApiClient(this._baseAddress);
+
+  // ACCOUNT
 
   Future<bool> authorizeAccountCreation(RegisterRequest request) async {
     final response = await _post(REGISTER_AUTH_URL, request.toJson());
@@ -45,6 +54,46 @@ class ApiClient {
     return exitsResponse.exits;
   }
 
+  // TRANSACTION
+
+  Future<bool> sendL2Transaction(Transaction transaction) async {
+    final response = await _post(TRANSACTIONS_POOL_URL, transaction.toJson());
+    return response.statusCode == 200;
+  }
+
+  // Get historical transactions. This endpoint will return all the different types
+  // of transactions except for:
+
+  // Transactions that are still in the transaction pool of any coordinator.
+  // This transactions can be fetched using GET /transactions-pool/{id}.
+
+  // L1 transactions that have not been forged yet. This transactions can be fetched
+  // using GET /transactions-history/{id}.
+
+  Future<List<ForgedTransaction>> getForgedTransactions(ForgedTransactionsRequest request) async {
+    final response = await _get(TRANSACTIONS_HISTORY_URL , request.toJson());
+    final ForgedTransactionsResponse forgedTransactionsResponse = ForgedTransactionsResponse.fromJson(json.decode(response.body));
+    return forgedTransactionsResponse.transactions;
+  }
+
+  Future<ForgedTransaction> getTransactionById(String transactionId) async {
+    final response = await _get(TRANSACTIONS_HISTORY_URL + '/' + transactionId, null);
+    final ForgedTransaction forgedtransaction = ForgedTransaction.fromJson(json.decode(response.body));
+    return forgedtransaction;
+  }
+
+  // Get transaction by id. This endpoint is specially useful for tracking the status of
+  // a transaction that may not be forged yet. Only transactions from the pool will be
+  // returned. Note that the transaction pool is different for each coordinator and
+  // therefore only a coordinator that has received a specific transaction will be able
+  // to provide information about that transaction.
+
+  Future<Transaction> getPoolTransactionById(String transactionId) async {
+    final response = await _get(TRANSACTIONS_POOL_URL + '/' + transactionId, null);
+    final Transaction transaction = Transaction.fromJson(json.decode(response.body));
+    return transaction;
+  }
+
 
   /*Future<List<Task>> getAllTasks() async {
     final response = await _get('/todos');
@@ -52,28 +101,6 @@ class ApiClient {
     final decodedTasks = json.decode(response.body) as List;
 
     return decodedTasks.map((jsonTask) => Task.fromJson(jsonTask)).toList();
-  }
-
-  Future<Task> getTasksById(String id) async {
-    final response = await _get('/todos/$id');
-
-    return Task.fromJson(json.decode(response.body));
-  }
-
-  Future<Task> addTask(Task task) async {
-    final response = await _post(task);
-
-    return Task.fromJson(json.decode(response.body));
-  }
-
-  Future<Task> updateTask(Task task) async {
-    final response = await _put(task);
-
-    return Task.fromJson(json.decode(response.body));
-  }
-
-  Future<void> deleteTaskById(String id) async {
-    await _delete(id);
   }*/
 
   Future<http.Response> _get(String endpoint, Map<String, String> queryParameters) async {
