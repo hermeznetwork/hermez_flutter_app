@@ -1,5 +1,3 @@
-
-
 class Exit {
   final int batchNum;
   final String accountIndex;

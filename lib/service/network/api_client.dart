@@ -6,16 +6,23 @@ import 'dart:io';
 import 'package:hermez/service/network/api_client_exceptions.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/accounts_response.dart';
+import 'package:hermez/service/network/model/coordinators_response.dart';
 import 'package:hermez/service/network/model/exits_request.dart';
 import 'package:hermez/service/network/model/forged_transactions_request.dart';
 import 'package:hermez/service/network/model/forged_transactions_response.dart';
 import 'package:hermez/service/network/model/register_request.dart';
+import 'package:hermez/service/network/model/tokens_request.dart';
+import 'package:hermez/service/network/model/tokens_response.dart';
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/status.dart';
 
 import 'model/accounts_request.dart';
+import 'model/coordinator.dart';
+import 'model/coordinators_request.dart';
 import 'model/exit.dart';
 import 'model/exits_response.dart';
 import 'model/forged_transaction.dart';
+import 'model/token.dart';
 import 'model/transaction.dart';
 
 class ApiClient {
@@ -27,6 +34,9 @@ class ApiClient {
 
   final String TRANSACTIONS_POOL_URL = "/transactions-pool";
   final String TRANSACTIONS_HISTORY_URL = "/transactions-history";
+
+  final String TOKENS_URL = "/tokens";
+  final String COORDINATORS_URL = "/coordinators";
 
   ApiClient(this._baseAddress);
 
@@ -71,7 +81,7 @@ class ApiClient {
   // using GET /transactions-history/{id}.
 
   Future<List<ForgedTransaction>> getForgedTransactions(ForgedTransactionsRequest request) async {
-    final response = await _get(TRANSACTIONS_HISTORY_URL , request.toJson());
+    final response = await _get(TRANSACTIONS_HISTORY_URL, request.toJson());
     final ForgedTransactionsResponse forgedTransactionsResponse = ForgedTransactionsResponse.fromJson(json.decode(response.body));
     return forgedTransactionsResponse.transactions;
   }
@@ -94,6 +104,31 @@ class ApiClient {
     return transaction;
   }
 
+  // HERMEZ
+
+  Future<List<Token>> getSupportedTokens(TokensRequest request) async {
+      final response = await _get(TOKENS_URL, request.toJson());
+      final TokensResponse tokensResponse = TokensResponse.fromJson(json.decode(response.body));
+      return tokensResponse.tokens;
+  }
+  
+  Future<Token> getSupportedTokenById(String tokenId) async {
+    final response = await _get(TOKENS_URL + '/' + tokenId, null);
+    final tokenResponse = Token.fromJson(json.decode(response.body));
+    return tokenResponse;
+  }
+
+  Future<List<Coordinator>> getCoordinators(CoordinatorsRequest request) async {
+    final response = await _get(COORDINATORS_URL, request.toJson());
+    final coordinatorsResponse = CoordinatorsResponse.fromJson(json.decode(response.body));
+    return coordinatorsResponse.coordinators;
+  }
+
+  Future<Coordinator> getCoordinatorByAddr(String forgerAddr) async {
+    final response = await _get(COORDINATORS_URL + '/' + forgerAddr, null);
+    final coordinatorResponse = Coordinator.fromJson(json.decode(response.body));
+    return coordinatorResponse;
+  }
 
   /*Future<List<Task>> getAllTasks() async {
     final response = await _get('/todos');
