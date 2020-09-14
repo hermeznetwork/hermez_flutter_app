@@ -22,6 +22,7 @@ import 'model/coordinators_request.dart';
 import 'model/exit.dart';
 import 'model/exits_response.dart';
 import 'model/forged_transaction.dart';
+import 'model/recommended_fees.dart';
 import 'model/token.dart';
 import 'model/transaction.dart';
 
@@ -36,6 +37,7 @@ class ApiClient {
   final String TRANSACTIONS_HISTORY_URL = "/transactions-history";
 
   final String TOKENS_URL = "/tokens";
+  final String RECOMMENDED_FEES_URL = "/recommendedFee";
   final String COORDINATORS_URL = "/coordinators";
 
   ApiClient(this._baseAddress);
@@ -116,6 +118,12 @@ class ApiClient {
     final response = await _get(TOKENS_URL + '/' + tokenId, null);
     final tokenResponse = Token.fromJson(json.decode(response.body));
     return tokenResponse;
+  }
+
+  Future<RecommendedFees> getRecommendedFees() async {
+      final response = await _get(RECOMMENDED_FEES_URL, null);
+      final recommendedFees = RecommendedFees.fromJson(json.decode(response.body));
+      return recommendedFees;
   }
 
   Future<List<Coordinator>> getCoordinators(CoordinatorsRequest request) async {
