@@ -73,11 +73,13 @@ flutter:
     - wallet.png
     - search.png
     - send.png
+    - send2.png
     - label.png
     - home.png
     - transfer.png
     - list.png
     - deposit.png
+    - deposit2.png
     - add.png
     - warning.png
     - pending.png
@@ -88,6 +90,7 @@ flutter:
     - settings.png
     - scan.png
     - withdraw.png
+    - withdraw2.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

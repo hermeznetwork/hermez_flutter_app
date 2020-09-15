@@ -1,17 +1,15 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hermez/components/copyButton/copy_button.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/network/api_client.dart';
 import 'package:hermez/service/network/model/accounts_request.dart';
-import 'package:hermez/service/network/model/accounts_response.dart';
 import 'package:hermez/service/network/model/register_request.dart';
-import 'package:hermez/utils/eth_amount_formatter.dart';
+import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
-import 'package:flutter/material.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'dart:math';
 
 class HomeBalanceArguments {
   final String address;
@@ -22,11 +20,18 @@ class HomeBalanceArguments {
   final List cryptoList;
   final scaffoldKey;
 
-  HomeBalanceArguments(this.controller, this.address, this.ethBalance, this.tokenBalance, this.defaultCurrency, this.cryptoList, this.scaffoldKey);
+  HomeBalanceArguments(
+      this.controller,
+      this.address,
+      this.ethBalance,
+      this.tokenBalance,
+      this.defaultCurrency,
+      this.cryptoList,
+      this.scaffoldKey);
 }
 
 class HomeBalance extends StatefulWidget {
-  HomeBalance({Key key, this.arguments}) : super(key : key);
+  HomeBalance({Key key, this.arguments}) : super(key: key);
 
   final HomeBalanceArguments arguments;
 
@@ -35,20 +40,27 @@ class HomeBalance extends StatefulWidget {
 }
 
 class _HomeBalanceState extends State<HomeBalance> {
-
   final bool _loading = false;
-  final List<Color> _colors = [
-    //to show different colors for different cryptos
-    Color.fromRGBO(47, 128, 237, 1.0), // blue
-    Color.fromRGBO(33, 150, 83, 1.0), // green
-    Color.fromRGBO(152, 81, 224, 1.0), // purple
-  ];
 
   List _elements = [
-
-    {'symbol': 'USDT', 'name' : 'Tether', 'value': 100.345646, 'price': '€998.45' },
-    {'symbol': 'ETH', 'name' : 'Ethereum', 'value': 4.345646, 'price': '€684.14' },
-    {'symbol': 'DAI', 'name' : 'DAI', 'value': 200.00, 'price': '€156.22' },
+    {
+      'symbol': 'USDT',
+      'name': 'Tether',
+      'value': 100.345646,
+      'price': '€998.45',
+    },
+    {
+      'symbol': 'ETH',
+      'name': 'Ethereum',
+      'value': 4.345646,
+      'price': '€684.14',
+    },
+    {
+      'symbol': 'DAI',
+      'name': 'DAI',
+      'value': 200.00,
+      'price': '€156.22',
+    },
   ];
 
   List<bool> _selections = [false, true];
@@ -69,8 +81,8 @@ class _HomeBalanceState extends State<HomeBalance> {
     } else {
       //return _buildCryptoList();
       return Container(
-          color: Color.fromRGBO(249, 244, 235, 1.0),
-          child: Column(
+        color: Color.fromRGBO(249, 244, 235, 1.0),
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             SizedBox(height: 30),
@@ -90,41 +102,63 @@ class _HomeBalanceState extends State<HomeBalance> {
                     //Navigator.of(context).pushNamed("/settings");
                   },
                 ),
-                Expanded(child:
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    ToggleButtons(
-                      children: <Widget>[
-                        Text(
-                          "L1",
-                          style: TextStyle(fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20)
-                          ,
-                        ),
-                        Text(
-                          "L2",
-                          style: TextStyle(fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20)
-                          ,
-                        ),
-                      ],
-                      fillColor: Color.fromRGBO(51, 51, 51, 1.0),
-                      selectedColor: Color.fromRGBO(249, 244, 235, 1.0),
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderColor: Color.fromRGBO(51, 51, 51, 1.0),
-                      selectedBorderColor: Color.fromRGBO(51, 51, 51, 1.0),
-                      borderWidth: 2,
-                      isSelected: _selections,
-                      onPressed: (int index) {
-                        setState(() {
-                          _selections = [false, false];
-                          _selections[index] = true;
-                        });
-                      },
-                    )
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      ToggleButtons(
+                        children: <Widget>[
+                          Text(
+                            "L1",
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20),
+                          ),
+                          Text(
+                            "L2",
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20),
+                          ),
+                        ],
+                        fillColor: Color.fromRGBO(51, 51, 51, 1.0),
+                        selectedColor: Color.fromRGBO(249, 244, 235, 1.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderColor: Color.fromRGBO(51, 51, 51, 1.0),
+                        selectedBorderColor: Color.fromRGBO(51, 51, 51, 1.0),
+                        borderWidth: 2,
+                        isSelected: _selections,
+                        onPressed: (int index) {
+                          setState(() {
+                            _selections = [false, false];
+                            _selections[index] = true;
+                            _selections[1] == true
+                                ? _elements = []
+                                : _elements = [
+                                    {
+                                      'symbol': 'USDT',
+                                      'name': 'Tether',
+                                      'value': 100.345646,
+                                      'price': '€998.45'
+                                    },
+                                    {
+                                      'symbol': 'ETH',
+                                      'name': 'Ethereum',
+                                      'value': 4.345646,
+                                      'price': '€684.14'
+                                    },
+                                    {
+                                      'symbol': 'DAI',
+                                      'name': 'DAI',
+                                      'value': 200.00,
+                                      'price': '€156.22'
+                                    },
+                                  ];
+                          });
+                        },
+                      )
                     ],
                   ),
                 ),
@@ -146,64 +180,60 @@ class _HomeBalanceState extends State<HomeBalance> {
             SizedBox(height: 30),
             Container(
               margin: EdgeInsets.only(left: 40, right: 40),
-              child:
-                FlatButton(
-                  shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(40.0),
-                  side: BorderSide(color: Color.fromRGBO(51, 51, 51, 0.05))),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: _selections[0] == true ? widget.arguments.address : "hez:" + widget.arguments.address));
-                    widget.arguments.scaffoldKey.currentState.showSnackBar(SnackBar(
-                      content: Text("Copied"),
-                    ));
-                  },
-                  padding: EdgeInsets.all(20.0),
-                  color: Color.fromRGBO(51, 51, 51, 0.05),
-                  textColor: Color.fromRGBO(51, 51, 51, 0.60),
-                  child: Text(_selections[0] == true ? widget.arguments.address : "hez:" + widget.arguments.address,
-                  maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Color.fromRGBO(51, 51, 51, 0.60),
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w600,
-
-                  )),
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40.0),
+                    side: BorderSide(color: Color(0xfff6e9d3))),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(
+                      text: _selections[0] == true
+                          ? widget.arguments.address
+                          : "hez:" + widget.arguments.address));
+                  widget.arguments.scaffoldKey.currentState
+                      .showSnackBar(SnackBar(
+                    content: Text("Copied"),
+                  ));
+                },
+                padding: EdgeInsets.all(20.0),
+                color: Color(0xfff6e9d3),
+                textColor: Color(0xff7a7c89),
+                child: Text(
+                    _selections[0] == true
+                        ? widget.arguments.address
+                        : "hez:" + widget.arguments.address,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Color(0xff7a7c89),
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w500,
+                    )),
               ),
             ),
             SizedBox(height: 30),
             SizedBox(
                 width: double.infinity,
-                child:
-                Row(mainAxisAlignment: MainAxisAlignment.center,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                  Text(_selections[0] == true ? "€184.50" : "€67.02",//"\$${EthAmountFormatter(tokenBalance).format()}",
-                      style: TextStyle(fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w800,
-                          fontSize: 40)),
-                ])
-            ),
-            SizedBox(height: 20),
+                      Text(_selections[0] == true ? "€184.50" : "€0",
+                          //"\$${EthAmountFormatter(tokenBalance).format()}",
+                          style: TextStyle(
+                            color: HermezColors.black,
+                            fontSize: 32,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w800,
+                          )),
+                    ])),
+            SizedBox(height: 16),
             buildButtonsRow(context),
             SizedBox(height: 20),
-            Container(
+            Expanded(
+                child: Container(
               color: Colors.white,
-              child:
-            Padding(
-              padding: const EdgeInsets.only(left: 30.0, bottom: 20.0, top: 20.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: Text(
-                    "Accounts",
-                    style: TextStyle(fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18)
-                    ,textAlign: TextAlign.left,
-                  ),
-                ),
-              ),
-            ),
-            buildAccountsList(),
+              child: buildAccountsList(),
+            ))
           ],
         ),
       );
@@ -214,93 +244,90 @@ class _HomeBalanceState extends State<HomeBalance> {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          SizedBox(width: 20.0),
-          Expanded(
-            child:
-            // takes in an object and color and returns a circle avatar with first letter and required color
-            FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),),
-                onPressed: () async {
-                  var apiClient = new ApiClient("http://10.0.2.2:4010");
-                  var params = {
-                    "timestamp": "2020-09-08T14:19:19.128Z",
-                    "ethereumAddress": "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
-                    "bjj": "hez:HVrB8xQHAYt9QTpPUsj3RGOzDmrCI4IgrYslTeTqo6Ix",
-                    "signature": "72024a43f546b0e1d9d5d7c4c30c259102a9726363adcc4ec7b6aea686bcb5116f485c5542d27c4092ae0ceaf38e3bb44417639bd2070a58ba1aa1aab9d92c03"
-                  };
-                  var request = RegisterRequest.fromJson(params);
-                  bool result = await apiClient.authorizeAccountCreation(request);
+          _elements.length > 0 ? SizedBox(width: 20.0) : Container(),
+          _elements.length > 0
+              ? Expanded(
+                  child:
+                      // takes in an object and color and returns a circle avatar with first letter and required color
+                      FlatButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          onPressed: () async {
+                            var apiClient =
+                                new ApiClient("http://10.0.2.2:4010");
+                            var params = {
+                              "timestamp": "2020-09-08T14:19:19.128Z",
+                              "ethereumAddress":
+                                  "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
+                              "bjj":
+                                  "hez:HVrB8xQHAYt9QTpPUsj3RGOzDmrCI4IgrYslTeTqo6Ix",
+                              "signature":
+                                  "72024a43f546b0e1d9d5d7c4c30c259102a9726363adcc4ec7b6aea686bcb5116f485c5542d27c4092ae0ceaf38e3bb44417639bd2070a58ba1aa1aab9d92c03"
+                            };
+                            var request = RegisterRequest.fromJson(params);
+                            bool result = await apiClient
+                                .authorizeAccountCreation(request);
 
-                  /*if (result) {
+                            /*if (result) {
                     Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.SEND);
                   }*/
-                  var params2 = {
-                    "hermezEthereumAddress": "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
-                  };
-                  var request2 = AccountsRequest.fromJson(params2);
-                  await apiClient.getAccounts(request2);
-                },
-                padding: EdgeInsets.all(20.0),
-                color: Colors.transparent,
-                textColor: Colors.black,
-                child: Column(children: <Widget>[
-                  CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Color.fromRGBO(247, 222, 207, 1.0),
-                      child: Image.asset("assets/send.png",
-                        width: 35,
-                        height: 35,
-                        fit:BoxFit.fill,
-                        color: Color.fromRGBO(231, 90, 43, 1.0),)
-
-                  ),
-                  SizedBox(height: 10,),
-                  Text("Send",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                      )),
-                ],)
-            ),
-          ),
+                            var params2 = {
+                              "hermezEthereumAddress":
+                                  "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
+                            };
+                            var request2 = AccountsRequest.fromJson(params2);
+                            await apiClient.getAccounts(request2);
+                          },
+                          padding: EdgeInsets.all(10.0),
+                          color: Colors.transparent,
+                          textColor: HermezColors.blackTwo,
+                          child: Column(
+                            children: <Widget>[
+                              Image.asset("assets/send2.png"),
+                              Text(
+                                'Send',
+                                style: TextStyle(
+                                  color: HermezColors.blackTwo,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          )),
+                )
+              : Container(),
           SizedBox(width: 20.0),
           Expanded(
             child:
-            // takes in an object and color and returns a circle avatar with first letter and required color
-            FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),),
-                onPressed: () {
-                  Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.DEPOSIT);
-                },
-                padding: EdgeInsets.all(20.0),
-                color: Colors.transparent,
-                textColor: Colors.black,
-                child: Column(children: <Widget>[
-                  CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Color.fromRGBO(247, 222, 207, 1.0),
-                      child: Image.asset("assets/add.png",
-                        width: 25,
-                        height: 25,
-                        fit:BoxFit.fill,
-                        color: Color.fromRGBO(231, 90, 43, 1.0),)
-
-                  ),
-                  SizedBox(height: 10,),
-                  Text("Deposit",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                      )),
-                ],)
-            ),
+                // takes in an object and color and returns a circle avatar with first letter and required color
+                FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed("/token_selector",
+                          arguments: TransactionType.DEPOSIT);
+                    },
+                    padding: EdgeInsets.all(10.0),
+                    color: Colors.transparent,
+                    textColor: HermezColors.blackTwo,
+                    child: Column(
+                      children: <Widget>[
+                        Image.asset("assets/deposit2.png"),
+                        Text(
+                          'Deposit',
+                          style: TextStyle(
+                            color: HermezColors.blackTwo,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    )),
           ),
           SizedBox(width: 20.0),
-          Expanded(
+          /*Expanded(
             child:
             // takes in an object and color and returns a circle avatar with first letter and required color
             FlatButton(
@@ -309,7 +336,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                 onPressed: () {
                   Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.WITHDRAW);
                 },
-                padding: EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(10.0),
                 color: Colors.transparent,
                 textColor: Colors.black,
                 child: Column(children: <Widget>[
@@ -333,41 +360,57 @@ class _HomeBalanceState extends State<HomeBalance> {
                 ],)
             ),
           ),
-          SizedBox(width: 20.0),
-        ]
-    );
+          SizedBox(width: 20.0),*/
+        ]);
   }
 
   //widget that builds the list
   Widget buildAccountsList() {
-    return Expanded(
-        child: Container(
+    return _selections[0] == true
+        ? Container(
             color: Colors.white,
             child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: 3, //set the item count so that index won't be out of range
-        padding:
-        const EdgeInsets.all(16.0), //add some padding to make it look good
-        itemBuilder: (context, i) {
-          //item builder returns a row for each index i=0,1,2,3,4
-          // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+                shrinkWrap: true,
+                itemCount: _elements.length,
+                //set the item count so that index won't be out of range
+                padding: const EdgeInsets.all(16.0),
+                //add some padding to make it look good
+                itemBuilder: (context, i) {
+                  //item builder returns a row for each index i=0,1,2,3,4
+                  // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
-          // final index = i ~/ 2; //get the actual index excluding dividers.
-          final index = i;
-          print(index);
-          final element = _elements[index];
-          //final Color color = _colors[index %
-          //    _colors.length];
-          return AccountRow(element['name'], element['symbol'], element['price'], element['value'], (token, amount) async {
-            Navigator.of(context).pushNamed("/account_details", arguments: WalletAccountDetailsArguments(element));
-          });//iterate through indexes and get the next colour
-          //return _buildRow(context, element, color); //build the row widget
-        })
-    ),
-    );
+                  // final index = i ~/ 2; //get the actual index excluding dividers.
+                  final index = i;
+                  print(index);
+                  final element = _elements[index];
+                  //final Color color = _colors[index %
+                  //    _colors.length];
+                  return AccountRow(
+                      element['name'],
+                      element['symbol'],
+                      element['price'],
+                      element['value'], (token, amount) async {
+                    Navigator.of(context).pushNamed("/account_details",
+                        arguments: WalletAccountDetailsArguments(element));
+                  }); //iterate through indexes and get the next colour
+                  //return _buildRow(context, element, color); //build the row widget
+                }))
+        : Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(34.0),
+            child: Text(
+              'Deposit tokens from your \n\n Ethereum account.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: HermezColors.blueyGrey,
+                fontSize: 16,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w500,
+              ),
+            ));
   }
 
-  /*Widget _buildRow(BuildContext context, dynamic element, Color color) {
+/*Widget _buildRow(BuildContext context, dynamic element, Color color) {
     // returns a row with the desired properties
     return Container(
         padding: EdgeInsets.only(bottom: 15.0),
@@ -440,8 +483,8 @@ class _HomeBalanceState extends State<HomeBalance> {
         ));
   }*/
 
-  //takes in an object and returns the price with 2 decimal places
-  /*String cryptoPrice(Map crypto) {
+//takes in an object and returns the price with 2 decimal places
+/*String cryptoPrice(Map crypto) {
     int decimals = 2;
     int fac = pow(10, decimals);
     double d = crypto['quote']['USD']['price'];
@@ -465,11 +508,4 @@ class _HomeBalanceState extends State<HomeBalance> {
       )
     )
   }*/
-
-  // takes in an object and color and returns a circle avatar with first letter and required color
-  CircleAvatar _getLeadingWidget(String name, Color color) {
-    return new CircleAvatar(
-      backgroundColor: color,
-    );
-  }
 }
