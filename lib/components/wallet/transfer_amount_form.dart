@@ -216,6 +216,7 @@ class TransferAmountForm extends HookWidget {
                   Container(
                     margin: EdgeInsets.only(top: 10.0),
                     child: AmountInput(
+                      onChanged: (value) {},
                       controller: amountController,
                     ),
                   ),
@@ -306,12 +307,6 @@ class TransferAmountForm extends HookWidget {
             ],
           )), //title to be name of the crypto
         ));
-  }
-
-  // takes in an object and color and returns a circle avatar with first letter and required color
-  CircleAvatar _getLeadingWidget(String icon) {
-    return new CircleAvatar(
-        backgroundColor: Colors.white, child: Image.asset(icon));
   }
 
   Future<String> getClipBoardData() async {

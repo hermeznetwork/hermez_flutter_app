@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hermez/utils/regex_input_formatter.dart';
 
 class AmountInput extends StatelessWidget {
   AmountInput({
@@ -18,12 +20,17 @@ class AmountInput extends StatelessWidget {
   final bool obscureText;
   final int maxLines;
   final TextEditingController controller;
+  final _amountValidator = RegExInputFormatter.withRegex(
+      '^\$|^(0|([1-9][0-9]{0,}))(\\.[0-9]{0,})?\$');
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-      keyboardType: TextInputType.numberWithOptions(signed: false, decimal: true),
+      keyboardType:
+          TextInputType.numberWithOptions(signed: false, decimal: true),
       autocorrect: false,
+      textInputAction: TextInputAction.done,
+      inputFormatters: <TextInputFormatter>[_amountValidator],
       textAlign: TextAlign.center,
       maxLines: 1,
       cursorWidth: 0.0,
@@ -35,7 +42,6 @@ class AmountInput extends StatelessWidget {
       obscureText: this.obscureText,
       controller: this.controller,
       onChanged: this.onChanged,
-      //maxLines: this.maxLines,
       decoration: InputDecoration.collapsed(
         hintStyle: TextStyle(
           color: Colors.black,
@@ -44,7 +50,6 @@ class AmountInput extends StatelessWidget {
         ),
         hintText: "0",
         //errorText: this.errorText,
-
       ),
     );
   }
