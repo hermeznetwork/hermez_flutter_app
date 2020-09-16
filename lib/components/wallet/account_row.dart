@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class AccountRow extends StatelessWidget {
-  AccountRow(this.name, this.symbol, this.price, this.amount, this.onPressed);
+  AccountRow(this.name, this.symbol, this.price, this.amount, this.simplified,
+      this.onPressed);
 
   final String name;
   final String symbol;
   final String price;
   final double amount;
+  final bool simplified;
   final void Function(String token, String amount) onPressed;
 
   Widget build(BuildContext context) {
@@ -42,17 +43,19 @@ class AccountRow extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           )),
                     ),
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      padding: EdgeInsets.only(top: 15.0),
-                      child: Text(
-                        this.symbol,
-                        style: TextStyle(
-                          color: HermezColors.blueyGreyTwo,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    )
+                    simplified
+                        ? Container()
+                        : Container(
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.only(top: 15.0),
+                            child: Text(
+                              this.symbol,
+                              style: TextStyle(
+                                color: HermezColors.blueyGreyTwo,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          )
                   ],
                 ),
               ),
@@ -70,17 +73,19 @@ class AccountRow extends StatelessWidget {
                         textAlign: TextAlign.right,
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.only(top: 15.0),
-                      child: Text(
-                        this.amount.toString() + " " + this.symbol,
-                        style: TextStyle(
-                            fontFamily: 'ModernEra',
-                            color: HermezColors.blueyGreyTwo,
-                            fontWeight: FontWeight.w500),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
+                    simplified
+                        ? Container()
+                        : Container(
+                            padding: EdgeInsets.only(top: 15.0),
+                            child: Text(
+                              this.amount.toString() + " " + this.symbol,
+                              style: TextStyle(
+                                  fontFamily: 'ModernEra',
+                                  color: HermezColors.blueyGreyTwo,
+                                  fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
                   ]),
             ],
           ), //title to be name of the crypto
