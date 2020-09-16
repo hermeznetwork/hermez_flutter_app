@@ -15,6 +15,8 @@ class HermezColors {
 
   static const Color blueyGreyTwo = Color(0xff888baa);
 
+  static const Color blueyGreyThree = Color(0xffe1e1f1);
+
   static const Color lightOrange = Color(0xfffaf4ea);
 
   static const Color steel = Color(0xff7a7c89);

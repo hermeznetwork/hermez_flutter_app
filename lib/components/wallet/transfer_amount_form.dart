@@ -5,6 +5,7 @@ import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
+import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 class TransferAmountForm extends HookWidget {
@@ -117,93 +118,22 @@ class TransferAmountForm extends HookWidget {
     );
   }
 
-  /*Widget _buildTokenRow(BuildContext context, dynamic element) {
-    // returns a row with the desired properties
-    return Container(
-        padding: EdgeInsets.only(bottom: 15.0),
-        child:FlatButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                side: BorderSide(color: Color.fromRGBO(245, 245, 245, 1.0))),
-            onPressed: () {
-              //Navigator.of(context).pushNamed("/account_details", arguments: WalletAccountDetailsArguments(element, color));
-            },
-            padding: EdgeInsets.all(20.0),
-            color: Color.fromRGBO(245, 245, 245, 1.0),
-            textColor: Colors.black,
-            child: Row(
-                children: <Widget>[
-                  Expanded(child:
-                  Column(
-                    children: <Widget>[
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child:
-                        Text("Tether"/*element['name']*/,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ),
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.only(top: 15.0),
-                        child: Text("USDT",
-                          style: TextStyle(
-                            color: Color.fromRGBO(130, 130, 130, 1.0),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  ),
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Container(
-                          child: Text("€998.45",
-                            style: TextStyle(fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                                fontSize: 24)
-                            ,textAlign: TextAlign.right,
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(top: 15.0),
-                          child: Text("100.345646 USDT",
-                            style: TextStyle(fontFamily: 'ModernEra',
-                                color: Color.fromRGBO(130, 130, 130, 1.0),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500)
-                            ,textAlign: TextAlign.right,
-                          ),
-                        ),
-                      ]),
-                  //SizedBox(width: 10,),
-                  //_getLeadingWidget("assets/arrow_down.png")
-                ],
-              ), //title to be name of the crypto
-        ));
-  }*/
-
   Widget _buildAmountRow(
       BuildContext context, dynamic element, dynamic amountController) {
     // returns a row with the desired properties
     return Container(
         padding: EdgeInsets.only(bottom: 15.0),
-        child: FlatButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                side: BorderSide(color: Color.fromRGBO(130, 130, 130, 1.0))),
-            padding: EdgeInsets.all(10.0),
-            color: Colors.transparent,
-            textColor: Colors.black,
-            child: ListTile(
-              title: Column(
+        child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: HermezColors.blueyGreyThree,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.only(top: 20.0),
+            child: Container(
+              child: Column(
                 children: <Widget>[
                   Container(
                     child: Text("EUR" /*element['name']*/,
@@ -220,39 +150,76 @@ class TransferAmountForm extends HookWidget {
                       controller: amountController,
                     ),
                   ),
-                  Divider(
-                    color: Colors.grey[150],
-                    height: 40,
-                    thickness: 1,
+                  SizedBox(
+                    height: 16.0,
                   ),
-                  Row(
-                    children: <Widget>[
-                      Container(
-                          alignment: Alignment.centerLeft,
-                          child: Image.asset("assets/arrows_up_down.png")),
-                      Expanded(
-                        child: Text(
-                          "59,658680 USDT",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color.fromRGBO(130, 130, 130, 1.0),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
+                  Divider(
+                    color: HermezColors.blueyGreyThree,
+                    height: 2,
+                    thickness: 2,
+                  ),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                  top: BorderSide.none,
+                                  right: BorderSide(
+                                      color: HermezColors.blueyGreyThree,
+                                      width: 1),
+                                  bottom: BorderSide.none,
+                                  left: BorderSide.none),
+                            ),
+                            child: FlatButton(
+                              child: Text(
+                                "Send All",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: HermezColors.blueyGreyTwo,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              onPressed: () {},
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        child: Text(
-                          "Max",
-                          style: TextStyle(
-                            color: Color.fromRGBO(130, 130, 130, 1.0),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
+                        Expanded(
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                  top: BorderSide.none,
+                                  right: BorderSide.none,
+                                  bottom: BorderSide.none,
+                                  left: BorderSide(
+                                      color: HermezColors.blueyGreyThree,
+                                      width: 1)),
+                            ),
+                            child: FlatButton(
+                              child: //Image.asset("assets/arrows_up_down.png"),
+                                  Text(
+                                "EUR",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: HermezColors.blueyGreyTwo,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              onPressed: () {},
+                            ),
                           ),
                         ),
-                      )
-                    ],
-                  )
+                      ],
+                    ),
+                  ),
                 ],
               ), //title to be name of the crypto
             )));
