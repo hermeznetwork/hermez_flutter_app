@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/regex_input_formatter.dart';
 
 class AmountInput extends StatelessWidget {
@@ -35,18 +36,20 @@ class AmountInput extends StatelessWidget {
       maxLines: 1,
       cursorWidth: 0.0,
       style: TextStyle(
-        color: Colors.black,
-        fontSize: 48.0,
-        fontWeight: FontWeight.w600,
+        color: HermezColors.blackTwo,
+        fontSize: 40,
+        fontFamily: 'ModernEra',
+        fontWeight: FontWeight.w700,
       ),
       obscureText: this.obscureText,
       controller: this.controller,
       onChanged: this.onChanged,
       decoration: InputDecoration.collapsed(
         hintStyle: TextStyle(
-          color: Colors.black,
-          fontSize: 48.0,
-          fontWeight: FontWeight.w600,
+          color: HermezColors.blackTwo,
+          fontSize: 40,
+          fontFamily: 'ModernEra',
+          fontWeight: FontWeight.w700,
         ),
         hintText: "0",
         //errorText: this.errorText,

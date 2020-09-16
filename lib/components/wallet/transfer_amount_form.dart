@@ -136,12 +136,15 @@ class TransferAmountForm extends HookWidget {
               child: Column(
                 children: <Widget>[
                   Container(
-                    child: Text("EUR" /*element['name']*/,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w700,
-                        )),
+                    child: Text(
+                      "EUR" /*element['name']*/,
+                      style: TextStyle(
+                        color: HermezColors.black,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                   Container(
                     margin: EdgeInsets.only(top: 10.0),
@@ -205,7 +208,7 @@ class TransferAmountForm extends HookWidget {
                               onPressed: () {},
                               icon: Image.asset("assets/arrows_up_down.png"),
                               label: Text(
-                                "EUR",
+                                token['symbol'],
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: HermezColors.blueyGreyTwo,
