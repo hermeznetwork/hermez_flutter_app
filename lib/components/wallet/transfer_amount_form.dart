@@ -201,9 +201,10 @@ class TransferAmountForm extends HookWidget {
                                       color: HermezColors.blueyGreyThree,
                                       width: 1)),
                             ),
-                            child: FlatButton(
-                              child: //Image.asset("assets/arrows_up_down.png"),
-                                  Text(
+                            child: FlatButton.icon(
+                              onPressed: () {},
+                              icon: Image.asset("assets/arrows_up_down.png"),
+                              label: Text(
                                 "EUR",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -213,7 +214,6 @@ class TransferAmountForm extends HookWidget {
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              onPressed: () {},
                             ),
                           ),
                         ),
