@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/regex_input_formatter.dart';
 
 class AddressInput extends StatelessWidget {
   AddressInput({
@@ -18,19 +21,21 @@ class AddressInput extends StatelessWidget {
   final bool obscureText;
   final int maxLines;
   final TextEditingController controller;
+  final _addressValidator =
+      RegExInputFormatter.withRegex('^hez:(0[xX])?[0-9a-fA-F]*\$');
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-      keyboardType: TextInputType.numberWithOptions(signed: false, decimal: true),
       autocorrect: false,
+      inputFormatters: <TextInputFormatter>[_addressValidator],
       textAlign: TextAlign.left,
       maxLines: 1,
       cursorWidth: 0.0,
-
       style: TextStyle(
-        color: Colors.black,
+        color: HermezColors.blackTwo,
         fontSize: 16.0,
+        fontFamily: 'ModernEra',
         fontWeight: FontWeight.w500,
       ),
       obscureText: this.obscureText,
@@ -39,13 +44,13 @@ class AddressInput extends StatelessWidget {
       //maxLines: this.maxLines,
       decoration: InputDecoration.collapsed(
         hintStyle: TextStyle(
-          color: Colors.black54,
-          fontSize: 16.0,
+          color: HermezColors.blueyGreyTwo,
+          fontSize: 16,
+          fontFamily: 'ModernEra',
           fontWeight: FontWeight.w500,
         ),
-        hintText: "To hez: 0x address",
+        hintText: "To hez:0xaddress",
         //errorText: this.errorText,
-
       ),
     );
   }

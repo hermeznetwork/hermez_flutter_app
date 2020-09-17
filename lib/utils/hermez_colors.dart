@@ -20,4 +20,6 @@ class HermezColors {
   static const Color lightOrange = Color(0xfffaf4ea);
 
   static const Color steel = Color(0xff7a7c89);
+
+  static const Color redError = Color(0xffff4b40);
 }

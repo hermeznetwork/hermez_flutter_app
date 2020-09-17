@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
@@ -8,13 +7,14 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
-class TransferAmountForm extends HookWidget {
-  TransferAmountForm({
-    this.token,
-    this.amount,
-    this.amountType,
-    @required this.onSubmit,
-  });
+class TransferAmountForm extends StatefulWidget {
+  TransferAmountForm(
+      {Key key,
+      this.token,
+      this.amount,
+      this.amountType,
+      @required this.onSubmit})
+      : super(key: key);
 
   final dynamic token;
   final int amount;
@@ -22,10 +22,34 @@ class TransferAmountForm extends HookWidget {
   final void Function(String token, String amount) onSubmit;
 
   @override
+  _TransferAmountFormState createState() =>
+      _TransferAmountFormState(token, amount, amountType, onSubmit);
+}
+
+class _TransferAmountFormState extends State<TransferAmountForm> {
+  _TransferAmountFormState(
+      this.token, this.amount, this.amountType, this.onSubmit);
+
+  final dynamic token;
+  final int amount;
+  final TransactionType amountType;
+  final void Function(String token, String amount) onSubmit;
+  bool amountIsValid = true;
+  bool addressIsValid = true;
+
+  final amountController = TextEditingController();
+  final addressController = TextEditingController();
+
+  @override
+  void dispose() {
+    amountController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     //final toController = useTextEditingController(text: token);
-    final amountController = useTextEditingController();
-    final addressController = useTextEditingController();
 
     //final transferStore = useWalletTransfer(context);
 
@@ -96,136 +120,285 @@ class TransferAmountForm extends HookWidget {
             _buildAmountRow(context, null, amountController),
             amountType == TransactionType.SEND
                 ? _buildAddressToRow(context, null, addressController)
-                : Container()
-            /*PaperInput(
-                controller: toController,
-                labelText: 'To',
-                hintText: 'Name, Phone, Email, Eth address',
-              ),*/
-            /*PaperInput(
-                controller: toController,
-                labelText: 'For',
-                hintText: 'Add a message',
-              ),
-              PaperInput(
-                controller: amountController,
-                labelText: 'Amount',
-                hintText: 'And amount',
-              ),*/
+                : addressRow()
           ],
         ),
       ),
     );
   }
 
+  Widget addressRow() {
+    return Column(
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: addressIsValid
+                  ? HermezColors.blueyGreyThree
+                  : HermezColors.redError,
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding:
+              EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
+          child: Container(
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: AddressInput(
+                    controller: addressController,
+                    onChanged: (value) {
+                      setState(() {
+                        addressIsValid = value.isNotEmpty;
+                      });
+                    },
+                  ),
+                ),
+                addressController.value.text.isEmpty
+                    ? Row(
+                        children: <Widget>[
+                          Container(
+                            child: FlatButton(
+                              child: Text(
+                                'Paste',
+                                style: TextStyle(
+                                  color: HermezColors.blackTwo,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              onPressed: () {
+                                getClipBoardData().then((String result) {
+                                  setState(() {
+                                    addressController.clear();
+                                    addressController.text = result;
+                                  });
+                                });
+                              },
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: Image.asset(
+                              "assets/scan.png",
+                              color: HermezColors.blackTwo,
+                            ),
+                          ),
+                        ],
+                      )
+                    : IconButton(
+                        icon: new Icon(Icons.close),
+                        onPressed: () => setState(() {
+                          addressController.clear();
+                        }),
+                      ),
+              ],
+            ),
+          ),
+        ),
+        addressIsValid
+            ? SizedBox(
+                height: 40,
+              )
+            : Container(
+                padding: EdgeInsets.only(top: 10, bottom: 15),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(left: 8.0, right: 8.0),
+                      height: 16,
+                      width: 16,
+                      decoration: BoxDecoration(
+                        color: HermezColors.redError,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'Please enter a valid address.',
+                      style: TextStyle(
+                        color: HermezColors.redError,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+      ],
+    );
+  }
+
   Widget _buildAmountRow(
       BuildContext context, dynamic element, dynamic amountController) {
     // returns a row with the desired properties
-    return Container(
-        padding: EdgeInsets.only(bottom: 15.0),
-        child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: HermezColors.blueyGreyThree,
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(12),
+    return Column(
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: amountIsValid
+                  ? HermezColors.blueyGreyThree
+                  : HermezColors.redError,
+              width: 2,
             ),
-            padding: EdgeInsets.only(top: 20.0),
-            child: Container(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    child: Text(
-                      "EUR" /*element['name']*/,
-                      style: TextStyle(
-                        color: HermezColors.black,
-                        fontSize: 16,
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w700,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.only(top: 20.0),
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  child: Text(
+                    "EUR" /*element['name']*/,
+                    style: TextStyle(
+                      color: HermezColors.black,
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 10.0),
+                  child: AmountInput(
+                    onChanged: (value) {
+                      setState(() {
+                        amountIsValid = double.parse(value) < 100;
+                      });
+                    },
+                    controller: amountController,
+                  ),
+                ),
+                SizedBox(
+                  height: 16.0,
+                ),
+                Divider(
+                  color: HermezColors.blueyGreyThree,
+                  height: 2,
+                  thickness: 2,
+                ),
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            border: Border(
+                                top: BorderSide.none,
+                                right: BorderSide(
+                                    color: HermezColors.blueyGreyThree,
+                                    width: 1),
+                                bottom: BorderSide.none,
+                                left: BorderSide.none),
+                          ),
+                          child: FlatButton(
+                            child: Text(
+                              "Send All",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: HermezColors.blueyGreyTwo,
+                                fontSize: 16,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            border: Border(
+                                top: BorderSide.none,
+                                right: BorderSide.none,
+                                bottom: BorderSide.none,
+                                left: BorderSide(
+                                    color: HermezColors.blueyGreyThree,
+                                    width: 1)),
+                          ),
+                          child: FlatButton.icon(
+                            onPressed: () {},
+                            icon: Image.asset(
+                              "assets/arrows_up_down.png",
+                              color: HermezColors.blueyGreyTwo,
+                            ),
+                            label: Text(
+                              token['symbol'],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: HermezColors.blueyGreyTwo,
+                                fontSize: 16,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ), //title to be name of the crypto
+          ),
+        ),
+        amountIsValid
+            ? SizedBox(
+                height: 40,
+              )
+            : Container(
+                padding: EdgeInsets.only(top: 10, bottom: 15),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(left: 8.0, right: 8.0),
+                      height: 16,
+                      width: 16,
+                      decoration: BoxDecoration(
+                        color: HermezColors.redError,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 10.0),
-                    child: AmountInput(
-                      onChanged: (value) {},
-                      controller: amountController,
+                    Text(
+                      'You don’t have enough funds.',
+                      style: TextStyle(
+                        color: HermezColors.redError,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 16.0,
-                  ),
-                  Divider(
-                    color: HermezColors.blueyGreyThree,
-                    height: 2,
-                    thickness: 2,
-                  ),
-                  Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            height: 48,
-                            decoration: BoxDecoration(
-                              border: Border(
-                                  top: BorderSide.none,
-                                  right: BorderSide(
-                                      color: HermezColors.blueyGreyThree,
-                                      width: 1),
-                                  bottom: BorderSide.none,
-                                  left: BorderSide.none),
-                            ),
-                            child: FlatButton(
-                              child: Text(
-                                "Send All",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: HermezColors.blueyGreyTwo,
-                                  fontSize: 16,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              onPressed: () {},
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 48,
-                            decoration: BoxDecoration(
-                              border: Border(
-                                  top: BorderSide.none,
-                                  right: BorderSide.none,
-                                  bottom: BorderSide.none,
-                                  left: BorderSide(
-                                      color: HermezColors.blueyGreyThree,
-                                      width: 1)),
-                            ),
-                            child: FlatButton.icon(
-                              onPressed: () {},
-                              icon: Image.asset("assets/arrows_up_down.png"),
-                              label: Text(
-                                token['symbol'],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: HermezColors.blueyGreyTwo,
-                                  fontSize: 16,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ), //title to be name of the crypto
-            )));
+                  ],
+                ),
+              ),
+      ],
+    );
   }
 
   Widget _buildAddressToRow(

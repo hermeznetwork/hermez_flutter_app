@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/service/network/api_client.dart';
-import 'package:hermez/service/network/model/accounts_request.dart';
-import 'package:hermez/service/network/model/register_request.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -254,7 +251,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           onPressed: () async {
-                            var apiClient =
+                            Navigator.of(context).pushNamed("/token_selector",
+                                arguments: TransactionType.SEND);
+
+                            /*var apiClient =
                                 new ApiClient("http://10.0.2.2:4010");
                             var params = {
                               "timestamp": "2020-09-08T14:19:19.128Z",
@@ -277,7 +277,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                                   "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
                             };
                             var request2 = AccountsRequest.fromJson(params2);
-                            await apiClient.getAccounts(request2);
+                            await apiClient.getAccounts(request2);*/
                           },
                           padding: EdgeInsets.all(10.0),
                           color: Colors.transparent,
