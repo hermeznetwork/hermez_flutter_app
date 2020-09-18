@@ -1,4 +1,4 @@
-name: Test, Build and Release apk
+name: Test, Build # and Release apk
 
 on: push
 jobs:
@@ -17,8 +17,9 @@ jobs:
     - run: flutter test
     - run: flutter build apk --debug --split-per-abi
     - run: flutter build ios --release --no-codesign
-    - name: Create a Release APK
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "build/app/outputs/apk/debug/*.apk"
-        token: ${{ secrets.TOKEN }}
+    # - name: Create a Release APK
+      # uses: ncipollo/release-action@v1
+      # with:
+        # artifacts: "build/app/outputs/apk/debug/*.apk"
+        # token: ${{ secrets.TOKEN }}
+
