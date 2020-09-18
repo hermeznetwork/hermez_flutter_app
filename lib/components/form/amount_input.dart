@@ -30,11 +30,13 @@ class AmountInput extends StatelessWidget {
       keyboardType:
           TextInputType.numberWithOptions(signed: false, decimal: true),
       autocorrect: false,
+      enableSuggestions: false,
       textInputAction: TextInputAction.done,
       inputFormatters: <TextInputFormatter>[_amountValidator],
       textAlign: TextAlign.center,
       maxLines: 1,
-      cursorWidth: 0.0,
+      cursorWidth: 5.0,
+      cursorColor: HermezColors.orange,
       style: TextStyle(
         color: HermezColors.blackTwo,
         fontSize: 40,
@@ -52,7 +54,6 @@ class AmountInput extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
         hintText: "0",
-        //errorText: this.errorText,
       ),
     );
   }

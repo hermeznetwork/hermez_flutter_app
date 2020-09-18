@@ -19,7 +19,7 @@ class TransferAmountForm extends StatefulWidget {
   final dynamic token;
   final int amount;
   final TransactionType amountType;
-  final void Function(String token, String amount) onSubmit;
+  final void Function(String token, String amount, String addressTo) onSubmit;
 
   @override
   _TransferAmountFormState createState() =>
@@ -33,9 +33,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   final dynamic token;
   final int amount;
   final TransactionType amountType;
-  final void Function(String token, String amount) onSubmit;
+  final void Function(String token, String amount, String addressTo) onSubmit;
   bool amountIsValid = true;
   bool addressIsValid = true;
+  bool defaultCurrencySelected = true;
 
   final amountController = TextEditingController();
   final addressController = TextEditingController();
@@ -66,52 +67,67 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
           actionButtons: <Widget>[
             Column(
               children: <Widget>[
-                FlatButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40.0),
-                      side:
-                          BorderSide(color: Color.fromRGBO(211, 87, 46, 1.0))),
-                  onPressed: () {
-                    this.onSubmit(
-                      //toController.value.text,
-                      amountController.value.text,
-                      amountController.value.text,
-                    );
-                  },
-                  padding: EdgeInsets.all(15.0),
-                  color: Color.fromRGBO(211, 87, 46, 1.0),
-                  textColor: Colors.white,
-                  child: Text(
-                      amountType == TransactionType.DEPOSIT
-                          ? "Continue"
-                          : "Next",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600,
-                      )),
+                SizedBox(
+                  height: 52,
+                  width: double.infinity,
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.0),
+                        side: BorderSide(
+                            color: buttonIsEnabled()
+                                ? HermezColors.darkOrange
+                                : HermezColors.blueyGreyTwo)),
+                    onPressed: buttonIsEnabled()
+                        ? () {
+                            this.onSubmit(
+                                amountController.value.text,
+                                amountController.value.text,
+                                addressController.value.text);
+                          }
+                        : null,
+                    disabledColor: HermezColors.blueyGreyTwo,
+                    padding: EdgeInsets.all(18.0),
+                    color: HermezColors.darkOrange,
+                    textColor: Colors.white,
+                    child: Text(
+                        amountType == TransactionType.DEPOSIT
+                            ? "Continue"
+                            : "Next",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w700,
+                        )),
+                  ),
                 ),
                 Container(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   margin: EdgeInsets.only(top: 20.0),
-                  child: Text("Fee: €0.1" /*element['name']*/,
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600,
-                      )),
+                  child: Text(
+                    defaultCurrencySelected
+                        ? "Fee 0.1 EUR"
+                        : "Fee 0.1 " + token['symbol'],
+                    style: TextStyle(
+                      color: HermezColors.blueyGreyTwo,
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
-            )
+            ),
           ],
           children: <Widget>[
-            //PaperValidationSummary(transferStore.state.errors.toList()),
             AccountRow(
               token['name'],
               token['symbol'],
               token['price'],
               token['value'],
               true,
+              defaultCurrencySelected,
               (token, amount) async {
                 Navigator.of(context).pushReplacementNamed("/token_selector",
                     arguments: amountType);
@@ -133,7 +149,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: addressIsValid
+              color: isAddressValid()
                   ? HermezColors.blueyGreyThree
                   : HermezColors.redError,
               width: 2,
@@ -150,7 +166,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     controller: addressController,
                     onChanged: (value) {
                       setState(() {
-                        addressIsValid = value.isNotEmpty;
+                        addressIsValid = isAddressValid();
                       });
                     },
                   ),
@@ -197,7 +213,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             ),
           ),
         ),
-        addressIsValid
+        isAddressValid()
             ? SizedBox(
                 height: 40,
               )
@@ -261,7 +277,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               children: <Widget>[
                 Container(
                   child: Text(
-                    "EUR" /*element['name']*/,
+                    defaultCurrencySelected ? "EUR" : token['symbol'],
                     style: TextStyle(
                       color: HermezColors.black,
                       fontSize: 16,
@@ -275,7 +291,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   child: AmountInput(
                     onChanged: (value) {
                       setState(() {
-                        amountIsValid = double.parse(value) < 100;
+                        amountIsValid = double.parse(value) <=
+                            (defaultCurrencySelected
+                                ? double.parse(token['price']
+                                    .replaceAll(RegExp('[^0-9.,]'), ''))
+                                : token['value']);
                       });
                     },
                     controller: amountController,
@@ -316,7 +336,15 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                amountController.clear();
+                                amountController.text = defaultCurrencySelected
+                                    ? token['price']
+                                        .replaceAll(RegExp('[^0-9.,]'), '')
+                                    : token['value'].toString();
+                              });
+                            },
                           ),
                         ),
                       ),
@@ -333,13 +361,19 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                     width: 1)),
                           ),
                           child: FlatButton.icon(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                amountController.clear();
+                                defaultCurrencySelected =
+                                    !defaultCurrencySelected;
+                              });
+                            },
                             icon: Image.asset(
                               "assets/arrows_up_down.png",
                               color: HermezColors.blueyGreyTwo,
                             ),
                             label: Text(
-                              token['symbol'],
+                              defaultCurrencySelected ? token['symbol'] : "EUR",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: HermezColors.blueyGreyTwo,
@@ -455,5 +489,30 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   Future<String> getClipBoardData() async {
     ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     return data.text;
+  }
+
+  bool buttonIsEnabled() {
+    return amountIsValid &&
+        isAddressValid() &&
+        amountController.value.text.isNotEmpty &&
+        addressController.value.text.isNotEmpty;
+  }
+
+  bool isAddressValid() {
+    final regex = RegExp('^hez:0x[a-fA-F0-9]{40}\$');
+    try {
+      final matches = regex.allMatches(addressController.value.text);
+      for (Match match in matches) {
+        if (match.start == 0 &&
+            match.end == addressController.value.text.length) {
+          return true;
+        }
+      }
+      return addressController.value.text.isEmpty;
+    } catch (e) {
+      // Invalid regex
+      assert(false, e.toString());
+      return true;
+    }
   }
 }

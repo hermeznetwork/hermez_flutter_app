@@ -390,7 +390,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                       element['symbol'],
                       element['price'],
                       element['value'],
-                      false, (token, amount) async {
+                      false,
+                      true, (token, amount) async {
                     Navigator.of(context).pushNamed("/account_details",
                         arguments: WalletAccountDetailsArguments(element));
                   }); //iterate through indexes and get the next colour

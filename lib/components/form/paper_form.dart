@@ -25,8 +25,8 @@ class PaperForm extends StatelessWidget {
 
     return [
       const SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: this.actionButtons,
       )
     ];

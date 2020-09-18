@@ -17,9 +17,13 @@ class HermezColors {
 
   static const Color blueyGreyThree = Color(0xffe1e1f1);
 
-  static const Color lightOrange = Color(0xfffaf4ea);
-
   static const Color steel = Color(0xff7a7c89);
 
   static const Color redError = Color(0xffff4b40);
+
+  static const Color darkOrange = Color(0xffe75a2b);
+
+  static const Color orange = Color(0xffffa600);
+
+  static const Color lightOrange = Color(0xfffaf4ea);
 }

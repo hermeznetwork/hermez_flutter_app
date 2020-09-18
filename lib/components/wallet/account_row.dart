@@ -3,13 +3,14 @@ import 'package:hermez/utils/hermez_colors.dart';
 
 class AccountRow extends StatelessWidget {
   AccountRow(this.name, this.symbol, this.price, this.amount, this.simplified,
-      this.onPressed);
+      this.currencyFirst, this.onPressed);
 
   final String name;
   final String symbol;
   final String price;
   final double amount;
   final bool simplified;
+  final bool currencyFirst;
   final void Function(String token, String amount) onPressed;
 
   Widget build(BuildContext context) {
@@ -64,7 +65,9 @@ class AccountRow extends StatelessWidget {
                   children: <Widget>[
                     Container(
                       child: Text(
-                        this.price,
+                        currencyFirst
+                            ? this.price
+                            : this.amount.toString() + " " + this.symbol,
                         style: TextStyle(
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,
@@ -78,7 +81,9 @@ class AccountRow extends StatelessWidget {
                         : Container(
                             padding: EdgeInsets.only(top: 15.0),
                             child: Text(
-                              this.amount.toString() + " " + this.symbol,
+                              currencyFirst
+                                  ? this.amount.toString() + " " + this.symbol
+                                  : this.price,
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
                                   color: HermezColors.blueyGreyTwo,

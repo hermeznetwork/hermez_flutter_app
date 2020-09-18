@@ -76,6 +76,7 @@ class WalletTokenSelectorPage extends HookWidget {
                   element['price'],
                   element['value'],
                   false,
+                  true,
                   (token, amount) async {
                     Navigator.pushReplacementNamed(context, "/transfer_amount",
                         arguments: AmountArguments(amountType, element));

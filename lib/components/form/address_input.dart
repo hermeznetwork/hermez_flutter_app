@@ -21,17 +21,21 @@ class AddressInput extends StatelessWidget {
   final bool obscureText;
   final int maxLines;
   final TextEditingController controller;
-  final _addressValidator =
-      RegExInputFormatter.withRegex('^hez:(0[xX])?[0-9a-fA-F]*\$');
+  final _addressValidator = RegExInputFormatter.withRegex(
+      '^\$|^([hH]?[eE]?[zZ]?:?0?[xX]?)[a-fA-F0-9]{0,}\$');
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       autocorrect: false,
+      enableSuggestions: false,
+      keyboardType: TextInputType.text,
+      textInputAction: TextInputAction.done,
       inputFormatters: <TextInputFormatter>[_addressValidator],
       textAlign: TextAlign.left,
       maxLines: 1,
-      cursorWidth: 0.0,
+      cursorWidth: 2.0,
+      cursorColor: HermezColors.orange,
       style: TextStyle(
         color: HermezColors.blackTwo,
         fontSize: 16.0,
@@ -41,7 +45,6 @@ class AddressInput extends StatelessWidget {
       obscureText: this.obscureText,
       controller: this.controller,
       onChanged: this.onChanged,
-      //maxLines: this.maxLines,
       decoration: InputDecoration.collapsed(
         hintStyle: TextStyle(
           color: HermezColors.blueyGreyTwo,

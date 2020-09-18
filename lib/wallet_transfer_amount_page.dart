@@ -51,7 +51,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
       body: TransferAmountForm(
         token: widget.arguments.token,
         amountType: widget.arguments.amountType,
-        onSubmit: (address, amount) async {
+        onSubmit: (amount, token, address) async {
           //var success = await transferStore.transfer(address, amount);
           Navigator.pushReplacementNamed(context, "/transaction_details",
               arguments: TransactionDetailsArguments(
