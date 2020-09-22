@@ -14,7 +14,6 @@ import 'package:hermez/service/network/model/register_request.dart';
 import 'package:hermez/service/network/model/tokens_request.dart';
 import 'package:hermez/service/network/model/tokens_response.dart';
 import 'package:http/http.dart' as http;
-import 'package:web_socket_channel/status.dart';
 
 import 'model/accounts_request.dart';
 import 'model/coordinator.dart';
@@ -50,19 +49,24 @@ class ApiClient {
   }
 
   Future<bool> getCreationAuthorization(String hermezEthereumAddress) async {
-    final response = await _get(REGISTER_AUTH_URL + '/' + hermezEthereumAddress, null);
+    final response =
+        await _get(REGISTER_AUTH_URL + '/' + hermezEthereumAddress, null);
     return response.statusCode == 200;
   }
 
   Future<List<Account>> getAccounts(AccountsRequest request) async {
-    final response = await _get(ACCOUNTS_URL + request.hermezEthereumAddress, null);
-    final AccountsResponse accountsResponse = AccountsResponse.fromJson(json.decode(response.body));
+    final response =
+        await _get(ACCOUNTS_URL + request.hermezEthereumAddress, null);
+    final AccountsResponse accountsResponse =
+        AccountsResponse.fromJson(json.decode(response.body));
     return accountsResponse.accounts;
   }
 
   Future<List<Exit>> getExits(ExitsRequest request) async {
-    final response = await _get(EXITS_URL + request.hermezEthereumAddress, request.toQueryParams());
-    final ExitsResponse exitsResponse = ExitsResponse.fromJson(json.decode(response.body));
+    final response = await _get(
+        EXITS_URL + request.hermezEthereumAddress, request.toQueryParams());
+    final ExitsResponse exitsResponse =
+        ExitsResponse.fromJson(json.decode(response.body));
     return exitsResponse.exits;
   }
 
@@ -82,15 +86,19 @@ class ApiClient {
   // L1 transactions that have not been forged yet. This transactions can be fetched
   // using GET /transactions-history/{id}.
 
-  Future<List<ForgedTransaction>> getForgedTransactions(ForgedTransactionsRequest request) async {
+  Future<List<ForgedTransaction>> getForgedTransactions(
+      ForgedTransactionsRequest request) async {
     final response = await _get(TRANSACTIONS_HISTORY_URL, request.toJson());
-    final ForgedTransactionsResponse forgedTransactionsResponse = ForgedTransactionsResponse.fromJson(json.decode(response.body));
+    final ForgedTransactionsResponse forgedTransactionsResponse =
+        ForgedTransactionsResponse.fromJson(json.decode(response.body));
     return forgedTransactionsResponse.transactions;
   }
 
   Future<ForgedTransaction> getTransactionById(String transactionId) async {
-    final response = await _get(TRANSACTIONS_HISTORY_URL + '/' + transactionId, null);
-    final ForgedTransaction forgedtransaction = ForgedTransaction.fromJson(json.decode(response.body));
+    final response =
+        await _get(TRANSACTIONS_HISTORY_URL + '/' + transactionId, null);
+    final ForgedTransaction forgedtransaction =
+        ForgedTransaction.fromJson(json.decode(response.body));
     return forgedtransaction;
   }
 
@@ -101,19 +109,23 @@ class ApiClient {
   // to provide information about that transaction.
 
   Future<Transaction> getPoolTransactionById(String transactionId) async {
-    final response = await _get(TRANSACTIONS_POOL_URL + '/' + transactionId, null);
-    final Transaction transaction = Transaction.fromJson(json.decode(response.body));
+    final response =
+        await _get(TRANSACTIONS_POOL_URL + '/' + transactionId, null);
+    final Transaction transaction =
+        Transaction.fromJson(json.decode(response.body));
     return transaction;
   }
 
   // HERMEZ
 
   Future<List<Token>> getSupportedTokens(TokensRequest request) async {
-      final response = await _get(TOKENS_URL, request.toJson());
-      final TokensResponse tokensResponse = TokensResponse.fromJson(json.decode(response.body));
-      return tokensResponse.tokens;
+    final response =
+        await _get(TOKENS_URL, request != null ? request.toJson() : null);
+    final TokensResponse tokensResponse =
+        TokensResponse.fromJson(json.decode(response.body));
+    return tokensResponse.tokens;
   }
-  
+
   Future<Token> getSupportedTokenById(String tokenId) async {
     final response = await _get(TOKENS_URL + '/' + tokenId, null);
     final tokenResponse = Token.fromJson(json.decode(response.body));
@@ -121,20 +133,23 @@ class ApiClient {
   }
 
   Future<RecommendedFees> getRecommendedFees() async {
-      final response = await _get(RECOMMENDED_FEES_URL, null);
-      final recommendedFees = RecommendedFees.fromJson(json.decode(response.body));
-      return recommendedFees;
+    final response = await _get(RECOMMENDED_FEES_URL, null);
+    final recommendedFees =
+        RecommendedFees.fromJson(json.decode(response.body));
+    return recommendedFees;
   }
 
   Future<List<Coordinator>> getCoordinators(CoordinatorsRequest request) async {
     final response = await _get(COORDINATORS_URL, request.toJson());
-    final coordinatorsResponse = CoordinatorsResponse.fromJson(json.decode(response.body));
+    final coordinatorsResponse =
+        CoordinatorsResponse.fromJson(json.decode(response.body));
     return coordinatorsResponse.coordinators;
   }
 
   Future<Coordinator> getCoordinatorByAddr(String forgerAddr) async {
     final response = await _get(COORDINATORS_URL + '/' + forgerAddr, null);
-    final coordinatorResponse = Coordinator.fromJson(json.decode(response.body));
+    final coordinatorResponse =
+        Coordinator.fromJson(json.decode(response.body));
     return coordinatorResponse;
   }
 
@@ -146,13 +161,14 @@ class ApiClient {
     return decodedTasks.map((jsonTask) => Task.fromJson(jsonTask)).toList();
   }*/
 
-  Future<http.Response> _get(String endpoint, Map<String, String> queryParameters) async {
+  Future<http.Response> _get(
+      String endpoint, Map<String, String> queryParameters) async {
     try {
       var uri;
       if (queryParameters != null) {
-        uri = Uri.http("10.0.2.2:4010", endpoint, queryParameters);
+        uri = Uri.http("167.71.59.190:4010", endpoint, queryParameters);
       } else {
-        uri = Uri.http("10.0.2.2:4010", endpoint);
+        uri = Uri.http("167.71.59.190:4010", endpoint);
       }
       final response = await http.get(
         uri,
@@ -168,11 +184,12 @@ class ApiClient {
     }
   }
 
-  Future<http.Response> _post(String endpoint, Map<String, dynamic> body) async {
+  Future<http.Response> _post(
+      String endpoint, Map<String, dynamic> body) async {
     try {
       final response = await http.post(
         '$_baseAddress$endpoint',
-        body: json.encode(body) ,
+        body: json.encode(body),
         headers: {
           HttpHeaders.acceptHeader: '*/*',
           HttpHeaders.contentTypeHeader: 'application/json',
@@ -189,7 +206,7 @@ class ApiClient {
     try {
       final response = await http.put(
         '$_baseAddress/todos/${task.id}',
-        body: json.encode(task.toJson()) ,
+        body: json.encode(task.toJson()),
         headers: {
           HttpHeaders.acceptHeader: 'application/json',
           HttpHeaders.contentTypeHeader: 'application/json',
@@ -197,7 +214,7 @@ class ApiClient {
       );
 
       return returnResponseOrThrowException(response);
-    } on IOException  {
+    } on IOException {
       throw NetworkException();
     }
   }
@@ -212,13 +229,14 @@ class ApiClient {
       );
 
       return returnResponseOrThrowException(response);
-    } on IOException  {
+    } on IOException {
       throw NetworkException();
     }
   }
 
   http.Response returnResponseOrThrowException(http.Response response) {
-    if (response.statusCode == 404) { // Not found
+    if (response.statusCode == 404) {
+      // Not found
       throw ItemNotFoundException();
     } else if (response.statusCode == 500) {
       throw InternalServerErrorException();

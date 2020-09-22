@@ -16,12 +16,11 @@ class TokensRequest {
         limit: json['limit']);
   }
 
-  Map<String, dynamic> toJson() => {
-    'ids': ids.toString(),
-    'symbols': symbols.toString(),
-    'name': name.toString(),
-    'offset': offset,
-    'limit': limit,
-  };
-
+  Map<String, String> toJson() => {
+        'ids': ids.toString(),
+        'symbols': symbols.toString(),
+        'name': name.toString(),
+        'offset': offset.toString(),
+        'limit': limit.toString(),
+      };
 }
