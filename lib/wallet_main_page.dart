@@ -1,6 +1,7 @@
-import 'package:hermez/components/wallet/balance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/components/wallet/balance.dart';
+
 import 'components/dialog/alert.dart';
 import 'components/menu/main_menu.dart';
 import 'context/wallet/wallet_provider.dart';
@@ -70,7 +71,7 @@ class WalletMainPage extends HookWidget {
       body: Balance(
         address: store.state.address,
         ethBalance: store.state.ethBalance,
-        tokenBalance: store.state.tokenBalance,
+        tokensBalance: store.state.tokensBalance,
         cryptoList: store.state.cryptoList,
       ),
       bottomNavigationBar: BottomNavigationBar(

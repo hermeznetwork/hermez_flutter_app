@@ -1,23 +1,26 @@
-import 'package:hermez/components/copyButton/copy_button.dart';
-import 'package:hermez/model/wallet.dart';
-import 'package:hermez/utils/eth_amount_formatter.dart';
-import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+import 'package:hermez/model/wallet.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
+
 class Balance extends StatelessWidget {
-  Balance({this.address, this.ethBalance, this.tokenBalance, this.defaultCurrency, this.cryptoList});
+  Balance(
+      {this.address,
+      this.ethBalance,
+      this.tokensBalance,
+      this.defaultCurrency,
+      this.cryptoList});
 
   final String address;
   final BigInt ethBalance;
-  final BigInt tokenBalance;
+  final Map<String, BigInt> tokensBalance;
   final WalletDefaultCurrency defaultCurrency;
   final List cryptoList;
 
-
   final _saved = Set<Map>(); //store favourited cryptos
   final _boldStyle =
-  new TextStyle(fontWeight: FontWeight.bold); //bold text style
+      new TextStyle(fontWeight: FontWeight.bold); //bold text style
   final bool _loading = false;
   final List<MaterialColor> _colors = [
     //to show different colors for different cryptos
@@ -44,8 +47,8 @@ class Balance extends StatelessWidget {
     } else {
       //return _buildCryptoList();
       return Container(
-          color: Colors.white,
-          child: Column(
+        color: Colors.white,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             SizedBox(height: 40),
@@ -56,10 +59,11 @@ class Balance extends StatelessWidget {
                 child: Container(
                   child: Text(
                     "Balance",
-                    style: TextStyle(fontFamily: 'ModernEra',
+                    style: TextStyle(
+                        fontFamily: 'ModernEra',
                         fontWeight: FontWeight.w600,
-                        fontSize: 28)
-                    ,textAlign: TextAlign.left,
+                        fontSize: 28),
+                    textAlign: TextAlign.left,
                   ),
                 ),
               ),
@@ -71,12 +75,13 @@ class Balance extends StatelessWidget {
                 width: double.infinity,
                 child: Container(
                   child: Text(
-                      "€650.43",//"\$${EthAmountFormatter(tokenBalance).format()}",
-                      style: TextStyle(fontFamily: 'ModernEra',
+                      "€650.43", //"\$${EthAmountFormatter(tokenBalance).format()}",
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w700,
                           fontSize: 60)
-                    //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
-                  ),
+                      //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
+                      ),
                 ),
               ),
             ),
@@ -87,13 +92,14 @@ class Balance extends StatelessWidget {
                 width: double.infinity,
                 child: Container(
                   child: Text(
-                      "Hide all assets ▲",//"\$${EthAmountFormatter(tokenBalance).format()}",
-                      style: TextStyle(fontFamily: 'ModernEra',
+                      "Hide all assets ▲", //"\$${EthAmountFormatter(tokenBalance).format()}",
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w700,
                           color: Colors.grey,
                           fontSize: 16)
-                    //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
-                  ),
+                      //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
+                      ),
                 ),
               ),
             ),
@@ -130,26 +136,27 @@ class Balance extends StatelessWidget {
   //widget that builds the list
   Widget _buildCryptoList() {
     return Flexible(
-        child: Container(
-            color: Colors.grey[100],
-            child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: cryptoList
-            .length, //set the item count so that index won't be out of range
-        padding:
-        const EdgeInsets.all(16.0), //add some padding to make it look good
-        itemBuilder: (context, i) {
-          //item builder returns a row for each index i=0,1,2,3,4
-          // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+      child: Container(
+          color: Colors.grey[100],
+          child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: cryptoList
+                  .length, //set the item count so that index won't be out of range
+              padding: const EdgeInsets.all(
+                  16.0), //add some padding to make it look good
+              itemBuilder: (context, i) {
+                //item builder returns a row for each index i=0,1,2,3,4
+                // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
-          // final index = i ~/ 2; //get the actual index excluding dividers.
-          final index = i;
-          print(index);
-          final MaterialColor color = _colors[index %
-              _colors.length]; //iterate through indexes and get the next colour
-          return _buildRow(cryptoList[index], color); //build the row widget
-        })
-    ),
+                // final index = i ~/ 2; //get the actual index excluding dividers.
+                final index = i;
+                print(index);
+                final MaterialColor color = _colors[index %
+                    _colors
+                        .length]; //iterate through indexes and get the next colour
+                return _buildRow(
+                    cryptoList[index], color); //build the row widget
+              })),
     );
   }
 
@@ -171,19 +178,18 @@ class Balance extends StatelessWidget {
 
     // returns a row with the desired properties
     return ListTile(
-      leading: _getLeadingWidget(crypto['name'],
-          color), // get the first letter of each crypto with the color
-      title: Text(crypto['name']), //title to be name of the crypto
-      subtitle: Text(
-        //subtitle is below title, get the price in 2 decimal places and set style to bold
-        cryptoPrice(crypto),
-        style: _boldStyle,
-      ),
-      trailing: new Text(
-        "\$${EthAmountFormatter(tokenBalance).format()}",
-        //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
-      )
-    );
+        leading: _getLeadingWidget(crypto['name'],
+            color), // get the first letter of each crypto with the color
+        title: Text(crypto['name']), //title to be name of the crypto
+        subtitle: Text(
+          //subtitle is below title, get the price in 2 decimal places and set style to bold
+          cryptoPrice(crypto),
+          style: _boldStyle,
+        ),
+        trailing: new Text(
+          "\$${EthAmountFormatter(tokensBalance[0]).format()}",
+          //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
+        ));
   }
 
   //takes in an object and returns the price with 2 decimal places

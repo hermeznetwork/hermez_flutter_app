@@ -1,29 +1,23 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
-import 'package:hermez/service/rollup_service.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/network/model/token.dart';
 import 'package:web3dart/web3dart.dart' as web3;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import 'wallet_state.dart';
 
 class WalletHandler {
-  WalletHandler(
-    this._store,
-    this._addressService,
-    this._contractService,
-    this._configurationService,
-    this._rollupService
-  );
+  WalletHandler(this._store, this._addressService, this._contractService,
+      this._configurationService, this._hermezService);
 
   final Store<Wallet, WalletAction> _store;
   final AddressService _addressService;
   final ConfigurationService _configurationService;
   final ContractService _contractService;
-  final RollupService _rollupService;
+  final HermezService _hermezService;
 
   Wallet get state => _store.state;
 
@@ -45,7 +39,8 @@ class WalletHandler {
     final address = await _addressService.getPublicAddress(privateKey);
     final defaultCurrency = await _configurationService.getDefaultCurrency();
 
-    _store.dispatch(InitialiseWallet(address.toString(), privateKey, defaultCurrency));
+    _store.dispatch(
+        InitialiseWallet(address.toString(), privateKey, defaultCurrency));
 
     await _initialise();
   }
@@ -54,7 +49,8 @@ class WalletHandler {
     final address = await _addressService.getPublicAddress(privateKey);
     final defaultCurrency = await _configurationService.getDefaultCurrency();
 
-    _store.dispatch(InitialiseWallet(address.toString(), privateKey, defaultCurrency));
+    _store.dispatch(
+        InitialiseWallet(address.toString(), privateKey, defaultCurrency));
 
     await _initialise();
   }
@@ -62,6 +58,8 @@ class WalletHandler {
   Future<void> _initialise() async {
     await this.fetchOwnBalance();
 
+    /*
+    // TODO uncomment
     _contractService.listenTransfer((from, to, value) async {
       var fromMe = from.toString() == state.address;
       var toMe = to.toString() == state.address;
@@ -72,22 +70,27 @@ class WalletHandler {
 
       print('======= balance updated =======');
 
-      await fetchOwnBalance();
-    });
+      await fetchOwnBalance(supportedTokens);
+    });*/
   }
 
   Future<void> fetchOwnBalance() async {
+    final supportedTokens = await _hermezService.getTokens();
     _store.dispatch(UpdatingBalance());
 
-
-
-    var tokenBalance = await _contractService
-        .getTokenBalance(web3.EthereumAddress.fromHex(state.address));
+    Map<String, BigInt> tokensBalance = Map();
+    for (Token token in supportedTokens) {
+      var tokenBalance = await _contractService.getTokenBalance(
+          web3.EthereumAddress.fromHex(state.address),
+          web3.EthereumAddress.fromHex(token.ethereumAddress),
+          token.name);
+      tokensBalance[token.symbol] = tokenBalance;
+    }
 
     var ethBalance = await _contractService
         .getEthBalance(web3.EthereumAddress.fromHex(state.address));
 
-    var accounts = await _rollupService
+    var accounts = await _hermezService
         .getAccounts(web3.EthereumAddress.fromHex(state.address));
 
     // TEST ENVIRONMENT
@@ -107,7 +110,8 @@ class WalletHandler {
     var cryptoList = result["data"].values.toList();*/
     final cryptoList = List();
 
-    _store.dispatch(BalanceUpdated(ethBalance.getInWei, tokenBalance, cryptoList));
+    _store.dispatch(
+        BalanceUpdated(ethBalance.getInWei, tokensBalance, cryptoList));
   }
 
   void updateDefaultCurrency(WalletDefaultCurrency defaultCurrency) {

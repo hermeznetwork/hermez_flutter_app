@@ -11,7 +11,7 @@ import 'package:hermez/wallet_transfer_amount_page.dart';
 class HomeBalanceArguments {
   final String address;
   final BigInt ethBalance;
-  final BigInt tokenBalance;
+  final Map<String, BigInt> tokensBalance;
   final WalletDefaultCurrency defaultCurrency;
   final PageController controller;
   final List cryptoList;
@@ -21,7 +21,7 @@ class HomeBalanceArguments {
       this.controller,
       this.address,
       this.ethBalance,
-      this.tokenBalance,
+      this.tokensBalance,
       this.defaultCurrency,
       this.cryptoList,
       this.scaffoldKey);
@@ -214,7 +214,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(_selections[0] == true ? "€184.50" : "€0",
+                      Text(
+                          _selections[0] == true
+                              ? "Ξ" + widget.arguments.ethBalance.toString()
+                              : "€0",
                           //"\$${EthAmountFormatter(tokenBalance).format()}",
                           style: TextStyle(
                             color: HermezColors.black,

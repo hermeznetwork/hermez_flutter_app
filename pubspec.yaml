@@ -68,6 +68,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - TargaryenCoin.json
+    - partialERC20ABI.json
     - hermes.png
     - account.png
     - wallet.png

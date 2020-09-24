@@ -12,7 +12,7 @@ class _$Wallet extends Wallet {
   @override
   final String privateKey;
   @override
-  final BigInt tokenBalance;
+  final Map<String, BigInt> tokensBalance;
   @override
   final BigInt ethBalance;
   @override
@@ -30,15 +30,15 @@ class _$Wallet extends Wallet {
   _$Wallet._(
       {this.address,
       this.privateKey,
-      this.tokenBalance,
+      this.tokensBalance,
       this.ethBalance,
       this.defaultCurrency,
       this.cryptoList,
       this.loading,
       this.errors})
       : super._() {
-    if (tokenBalance == null) {
-      throw new BuiltValueNullFieldError('Wallet', 'tokenBalance');
+    if (tokensBalance == null) {
+      throw new BuiltValueNullFieldError('Wallet', 'tokensBalance');
     }
     if (ethBalance == null) {
       throw new BuiltValueNullFieldError('Wallet', 'ethBalance');
@@ -61,7 +61,7 @@ class _$Wallet extends Wallet {
     return other is Wallet &&
         address == other.address &&
         privateKey == other.privateKey &&
-        tokenBalance == other.tokenBalance &&
+        tokensBalance == other.tokensBalance &&
         ethBalance == other.ethBalance &&
         defaultCurrency == other.defaultCurrency &&
         cryptoList == other.cryptoList &&
@@ -72,13 +72,15 @@ class _$Wallet extends Wallet {
   @override
   int get hashCode {
     return $jf($jc(
-        $jc($jc(
+        $jc(
             $jc(
-                $jc($jc($jc($jc(0, address.hashCode), privateKey.hashCode),
-                    tokenBalance.hashCode),
-                ethBalance.hashCode),
-              defaultCurrency.hashCode),
-              cryptoList.hashCode),
+                $jc(
+                    $jc(
+                        $jc($jc($jc(0, address.hashCode), privateKey.hashCode),
+                            tokensBalance.hashCode),
+                        ethBalance.hashCode),
+                    defaultCurrency.hashCode),
+                cryptoList.hashCode),
             loading.hashCode),
         errors.hashCode));
   }
@@ -88,7 +90,7 @@ class _$Wallet extends Wallet {
     return (newBuiltValueToStringHelper('Wallet')
           ..add('address', address)
           ..add('privateKey', privateKey)
-          ..add('tokenBalance', tokenBalance)
+          ..add('tokensBalance', tokensBalance)
           ..add('ethBalance', ethBalance)
           ..add('defaultCurrency', defaultCurrency)
           ..add('cryptoList', cryptoList)
@@ -109,13 +111,15 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   String get privateKey => _$this._privateKey;
   set privateKey(String privateKey) => _$this._privateKey = privateKey;
 
-  BigInt _tokenBalance;
-  BigInt get tokenBalance => _$this._tokenBalance;
-  set tokenBalance(BigInt tokenBalance) => _$this._tokenBalance = tokenBalance;
+  Map<String, BigInt> _tokensBalance;
+  Map<String, BigInt> get tokensBalance => _$this._tokensBalance;
+  set tokensBalance(Map<String, BigInt> tokensBalance) =>
+      _$this._tokensBalance = tokensBalance;
 
   WalletDefaultCurrency _defaultCurrency;
   WalletDefaultCurrency get defaultCurrency => _$this._defaultCurrency;
-  set defaultCurrency(WalletDefaultCurrency defaultCurrency) => _$this._defaultCurrency = defaultCurrency;
+  set defaultCurrency(WalletDefaultCurrency defaultCurrency) =>
+      _$this._defaultCurrency = defaultCurrency;
 
   List _cryptoList;
   List get cryptoList => _$this._cryptoList;
@@ -140,7 +144,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
     if (_$v != null) {
       _address = _$v.address;
       _privateKey = _$v.privateKey;
-      _tokenBalance = _$v.tokenBalance;
+      _tokensBalance = _$v.tokensBalance;
       _ethBalance = _$v.ethBalance;
       _defaultCurrency = _$v.defaultCurrency;
       _cryptoList = _$v.cryptoList;
@@ -172,7 +176,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
           new _$Wallet._(
               address: address,
               privateKey: privateKey,
-              tokenBalance: tokenBalance,
+              tokensBalance: tokensBalance,
               ethBalance: ethBalance,
               defaultCurrency: defaultCurrency,
               cryptoList: cryptoList,

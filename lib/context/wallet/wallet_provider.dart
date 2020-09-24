@@ -1,16 +1,15 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
-import 'package:hermez/service/rollup_service.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-
+import 'package:hermez/service/hermez_service.dart';
 import 'package:provider/provider.dart';
 
 import '../hook_provider.dart';
-import 'wallet_state.dart';
 import 'wallet_handler.dart';
+import 'wallet_state.dart';
 
 class WalletProvider extends ContextProviderWidget<WalletHandler> {
   WalletProvider({Widget child, HookWidgetBuilder<WalletHandler> builder})
@@ -24,14 +23,14 @@ class WalletProvider extends ContextProviderWidget<WalletHandler> {
     final addressService = Provider.of<AddressService>(context);
     final contractService = Provider.of<ContractService>(context);
     final configurationService = Provider.of<ConfigurationService>(context);
-    final rollupService = Provider.of<RollupService>(context);
+    final hermezService = Provider.of<HermezService>(context);
     final handler = useMemoized(
       () => WalletHandler(
         store,
         addressService,
         contractService,
         configurationService,
-        rollupService,
+        hermezService,
       ),
       [addressService, store],
     );

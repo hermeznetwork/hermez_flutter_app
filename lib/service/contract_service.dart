@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:hermez/utils/contract_parser.dart';
 import 'package:web3dart/web3dart.dart';
 
 typedef TransferEvent = void Function(
@@ -9,21 +11,30 @@ abstract class IContractService {
   Future<String> send(
       String privateKey, EthereumAddress receiver, BigInt amount,
       {TransferEvent onTransfer, Function onError});
-  Future<BigInt> getTokenBalance(EthereumAddress from);
+  Future<BigInt> getTokenBalance(EthereumAddress from,
+      EthereumAddress tokenContractAddress, String tokenContractName);
   Future<EtherAmount> getEthBalance(EthereumAddress from);
   Future<void> dispose();
   StreamSubscription listenTransfer(TransferEvent onTransfer);
 }
 
 class ContractService implements IContractService {
-  ContractService(this.client, this.contract);
+  ContractService(
+    this.client,
+    //this.tokenContractsAddress,
+    /*this.contracts*/
+  );
 
   final Web3Client client;
-  final DeployedContract contract;
+  //final List<String> tokenContractsAddress;
+  //final List<DeployedContract> contract;
 
-  ContractEvent _transferEvent() => contract.event('Transfer');
-  ContractFunction _balanceFunction() => contract.function('balanceOf');
-  ContractFunction _sendFunction() => contract.function('transfer');
+  ContractEvent _transferEvent(DeployedContract contract) =>
+      contract.event('Transfer');
+  ContractFunction _balanceFunction(DeployedContract contract) =>
+      contract.function('balanceOf');
+  ContractFunction _sendFunction(DeployedContract contract) =>
+      contract.function('transfer');
 
   Future<Credentials> getCredentials(String privateKey) =>
       client.credentialsFromPrivateKey(privateKey);
@@ -44,7 +55,7 @@ class ContractService implements IContractService {
       }, take: 1);
     }
 
-    try {
+    /*try {
       final transactionId = await client.sendTransaction(
         credentials,
         Transaction.callContract(
@@ -62,17 +73,22 @@ class ContractService implements IContractService {
         onError(ex);
       }
       return null;
-    }
+    }*/
   }
 
   Future<EtherAmount> getEthBalance(EthereumAddress from) async {
     return await client.getBalance(from);
   }
 
-  Future<BigInt> getTokenBalance(EthereumAddress from) async {
+  Future<BigInt> getTokenBalance(EthereumAddress from,
+      EthereumAddress tokenContractAddress, String tokenContractName) async {
+    final address = "0x62fa3cc4927e81fc98c45b9699343aeac15f6685";
+    final contract = await ContractParser.fromAssets('partialERC20ABI.json',
+        address, tokenContractName); //tokenContractAddress.toString());
+
     var response = await client.call(
       contract: contract,
-      function: _balanceFunction(),
+      function: _balanceFunction(contract),
       params: [from],
     );
 
@@ -80,7 +96,7 @@ class ContractService implements IContractService {
   }
 
   StreamSubscription listenTransfer(TransferEvent onTransfer, {int take}) {
-    var events = client.events(FilterOptions.events(
+    /*var events = client.events(FilterOptions.events(
       contract: contract,
       event: _transferEvent(),
     ));
@@ -101,7 +117,7 @@ class ContractService implements IContractService {
       print('$value}');
 
       onTransfer(from, to, value);
-    });
+    });*/
   }
 
   Future<void> dispose() async {

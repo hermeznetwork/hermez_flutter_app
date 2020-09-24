@@ -1,10 +1,11 @@
-import 'package:hermez/components/wallet/home_balance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/components/wallet/home_balance.dart';
 import 'package:hermez/qrcode_reader_page.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_settings_page.dart';
 import 'package:provider/provider.dart';
+
 import 'context/wallet/wallet_handler.dart';
 import 'context/wallet/wallet_provider.dart';
 
@@ -17,15 +18,12 @@ class WalletHomePage extends HookWidget {
 
   ValueNotifier _currentIndex;
 
-  PageController controller = PageController(
-    initialPage: 1
-  );
+  PageController controller = PageController(initialPage: 1);
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-
     store = useWallet(context);
     _currentIndex = useState(0);
 
@@ -41,7 +39,7 @@ class WalletHomePage extends HookWidget {
           controller,
           store.state.address,
           store.state.ethBalance,
-          store.state.tokenBalance,
+          store.state.tokensBalance,
           store.state.defaultCurrency,
           store.state.cryptoList,
           _scaffoldKey,
@@ -57,9 +55,6 @@ class WalletHomePage extends HookWidget {
         cryptoList: store.state.cryptoList,
       ),*/
     ];
-
-
-
 
     return Scaffold(
       key: _scaffoldKey,
@@ -86,17 +81,16 @@ class WalletHomePage extends HookWidget {
         ],*/
       ),*/
       body: PageView(
-          controller: controller,
-          children: _children,
-          onPageChanged: (index) => {
-            print(index)
-          },),
+        controller: controller,
+        children: _children,
+        onPageChanged: (index) => {print(index)},
+      ),
     );
-
   }
+
   void onTabTapped(int index) {
     //setState(() {
-      _currentIndex.value = index;
+    _currentIndex.value = index;
     //});
   }
 

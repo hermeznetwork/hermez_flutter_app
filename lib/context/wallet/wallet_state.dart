@@ -1,4 +1,3 @@
-import 'package:built_collection/built_collection.dart';
 import 'package:hermez/model/wallet.dart';
 
 abstract class WalletAction {}
@@ -11,9 +10,9 @@ class InitialiseWallet extends WalletAction {
 }
 
 class BalanceUpdated extends WalletAction {
-  BalanceUpdated(this.ethBalance, this.tokenBalance, this.cryptoList);
+  BalanceUpdated(this.ethBalance, this.tokensBalance, this.cryptoList);
   final BigInt ethBalance;
-  final BigInt tokenBalance;
+  final Map<String, BigInt> tokensBalance;
   final List cryptoList;
 }
 
@@ -40,13 +39,12 @@ Wallet reducer(Wallet state, WalletAction action) {
     return state.rebuild((b) => b
       ..loading = false
       ..ethBalance = action.ethBalance
-      ..tokenBalance = action.tokenBalance
+      ..tokensBalance = action.tokensBalance
       ..cryptoList = action.cryptoList);
   }
 
   if (action is DefaultCurrencyUpdated) {
-    return state.rebuild((b) => b
-      ..defaultCurrency = action.defaultCurrency);
+    return state.rebuild((b) => b..defaultCurrency = action.defaultCurrency);
   }
 
   return state;

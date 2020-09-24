@@ -1,10 +1,9 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/app_config.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
-import 'package:hermez/service/rollup_service.dart';
-import 'package:hermez/utils/contract_parser.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hermez/service/hermez_service.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,16 +20,23 @@ Future<List<SingleChildCloneableWidget>> createProviders(
   final secureStorage = new FlutterSecureStorage();
   final configurationService = ConfigurationService(sharedPrefs, secureStorage);
   final addressService = AddressService(configurationService);
-  final rollupService = RollupService(configurationService);
-  final contract = await ContractParser.fromAssets(
-      'TargaryenCoin.json', params.contractAddress);
+  final hermezService =
+      HermezService(params.hermezHttpUrl, configurationService);
+  final contractService = ContractService(client);
+  //final tokens = await hermezService.getTokens();
 
-  final contractService = ContractService(client, contract);
+  /*List<ContractService> contractServices = [];
+  for (Token tokenContractAddress in tokens) {
+    final contract = await ContractParser.fromAssets(
+        'partialERC20ABI.json', tokenContractAddress);
+    final contractService = ContractService(client, contract);
+    contractServices.add(contractService);
+  }*/
 
   return [
     Provider.value(value: addressService),
     Provider.value(value: contractService),
     Provider.value(value: configurationService),
-    Provider.value(value: rollupService)
+    Provider.value(value: hermezService)
   ];
 }

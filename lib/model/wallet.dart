@@ -12,7 +12,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
   @nullable
   String get privateKey;
 
-  BigInt get tokenBalance;
+  Map<String, BigInt> get tokensBalance;
 
   BigInt get ethBalance;
 
@@ -27,7 +27,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   Wallet._();
   factory Wallet([void Function(WalletBuilder) updates]) => _$Wallet((b) => b
-    ..tokenBalance = BigInt.from(0)
+    ..tokensBalance = BuiltMap<String, BigInt>().toMap()
     ..ethBalance = BigInt.from(0)
     ..defaultCurrency = WalletDefaultCurrency.EUR
     ..cryptoList = List()

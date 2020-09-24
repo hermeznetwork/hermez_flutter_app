@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/context/wallet/wallet_provider.dart';
 import 'package:hermez/service/network/api_client.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -10,6 +12,8 @@ class WalletTokenSelectorPage extends HookWidget {
   WalletTokenSelectorPage(this.amountType);
 
   final TransactionType amountType;
+
+  WalletHandler store;
 
   List _elements = [
     {
@@ -30,6 +34,19 @@ class WalletTokenSelectorPage extends HookWidget {
   Widget build(BuildContext context) {
     List<Token> supportedTokens;
     final apiClient = useMemoized(() => ApiClient('http://167.71.59.190:4010'));
+
+    store = useWallet(context);
+
+    //final transferStore = useWalletTransfer(context);
+    //transferStore.transfer(to, amount)
+
+    //_currentIndex = useState(0);
+
+    /*useEffect(() {
+      store.initialise();
+      return null;
+    }, []);*/
+
     //useEffect(() {
     //final tokensRequest = TokensRequest();
 
@@ -106,6 +123,10 @@ class WalletTokenSelectorPage extends HookWidget {
     );
   }
 
+  Future<List<Token>> loadData(ApiClient apiClient) async {
+    return apiClient.getSupportedTokens(null);
+  }
+
   /*appBar: AppBar(
         //title: Text(_currentIndex.value == 2 ? "Activity" : title),
         //backgroundColor: _currentIndex.value == 2 ? Colors.white : Color.fromRGBO(249, 244, 235, 1.0),
@@ -136,10 +157,10 @@ class WalletTokenSelectorPage extends HookWidget {
           color: Colors.white,
           child: ListView.builder(
               shrinkWrap: true,
-              itemCount: supportedTokens
-                  .length, //set the item count so that index won't be out of range
-              padding: const EdgeInsets.all(
-                  16.0), //add some padding to make it look good
+              itemCount: supportedTokens.length,
+              //set the item count so that index won't be out of range
+              padding: const EdgeInsets.all(16.0),
+              //add some padding to make it look good
               itemBuilder: (context, i) {
                 //item builder returns a row for each index i=0,1,2,3,4
                 // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
@@ -152,7 +173,8 @@ class WalletTokenSelectorPage extends HookWidget {
                   token.name,
                   token.symbol,
                   token.USD.toString(),
-                  token.decimals.toDouble(), // missing to get balance
+                  token.decimals.toDouble(),
+                  // missing to get balance
                   false,
                   true,
                   (token, amount) async {
