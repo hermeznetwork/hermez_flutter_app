@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -39,7 +40,8 @@ class HomeBalance extends StatefulWidget {
 class _HomeBalanceState extends State<HomeBalance> {
   final bool _loading = false;
 
-  List _elements = [
+  List _elements = [];
+  /*widget.arguments.cryptoList;/*[
     {
       'symbol': 'USDT',
       'name': 'Tether',
@@ -58,7 +60,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       'value': 200.00,
       'price': '€156.22',
     },
-  ];
+  ];*/*/
 
   List<bool> _selections = [false, true];
 
@@ -71,6 +73,7 @@ class _HomeBalanceState extends State<HomeBalance> {
 
   @override
   Widget build(BuildContext context) {
+    _elements = widget.arguments.cryptoList;
     if (_loading) {
       return new Center(
         child: new CircularProgressIndicator(),
@@ -133,7 +136,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                             _selections[index] = true;
                             _selections[1] == true
                                 ? _elements = []
-                                : _elements = [
+                                : _elements = widget.arguments.cryptoList;
+                            /*_elements = [
                                     {
                                       'symbol': 'USDT',
                                       'name': 'Tether',
@@ -152,7 +156,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                                       'value': 200.00,
                                       'price': '€156.22'
                                     },
-                                  ];
+                                  ];*/
                           });
                         },
                       )
@@ -216,7 +220,9 @@ class _HomeBalanceState extends State<HomeBalance> {
                     children: <Widget>[
                       Text(
                           _selections[0] == true
-                              ? "Ξ" + widget.arguments.ethBalance.toString()
+                              ? '€' +
+                                  totalL1Balance(widget.arguments.cryptoList)
+                                      .toStringAsFixed(2)
                               : "€0",
                           //"\$${EthAmountFormatter(tokenBalance).format()}",
                           style: TextStyle(
@@ -385,18 +391,20 @@ class _HomeBalanceState extends State<HomeBalance> {
                   // final index = i ~/ 2; //get the actual index excluding dividers.
                   final index = i;
                   print(index);
-                  final element = _elements[index];
+                  final L1Account account = _elements[index];
                   //final Color color = _colors[index %
                   //    _colors.length];
                   return AccountRow(
-                      element['name'],
-                      element['symbol'],
-                      element['price'],
-                      element['value'],
+                      //account.,
+                      account.publicKey,
+                      account.tokenSymbol,
+                      account.USD,
+                      'USD',
+                      double.parse(account.balance),
                       false,
                       true, (token, amount) async {
                     Navigator.of(context).pushNamed("/account_details",
-                        arguments: WalletAccountDetailsArguments(element));
+                        arguments: WalletAccountDetailsArguments(account));
                   }); //iterate through indexes and get the next colour
                   //return _buildRow(context, element, color); //build the row widget
                 }))
@@ -513,4 +521,13 @@ class _HomeBalanceState extends State<HomeBalance> {
       )
     )
   }*/
+
+  double totalL1Balance(List<L1Account> L1accounts) {
+    double result = 0;
+    for (L1Account account in L1accounts) {
+      double value = account.USD * double.parse(account.balance);
+      result = result + value;
+    }
+    return result;
+  }
 }

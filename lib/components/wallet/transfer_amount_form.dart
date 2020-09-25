@@ -125,6 +125,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               token['name'],
               token['symbol'],
               token['price'],
+              "USD",
               token['value'],
               true,
               defaultCurrencySelected,

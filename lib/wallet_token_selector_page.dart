@@ -172,7 +172,8 @@ class WalletTokenSelectorPage extends HookWidget {
                 return AccountRow(
                   token.name,
                   token.symbol,
-                  token.USD.toString(),
+                  token.USD,
+                  "USD",
                   token.decimals.toDouble(),
                   // missing to get balance
                   false,

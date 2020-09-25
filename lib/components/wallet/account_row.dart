@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class AccountRow extends StatelessWidget {
-  AccountRow(this.name, this.symbol, this.price, this.amount, this.simplified,
-      this.currencyFirst, this.onPressed);
+  AccountRow(this.name, this.symbol, this.price, this.defaultCurrency,
+      this.amount, this.simplified, this.currencyFirst, this.onPressed);
 
   final String name;
   final String symbol;
-  final String price;
+  final double price;
+  final String defaultCurrency;
   final double amount;
   final bool simplified;
   final bool currencyFirst;
@@ -66,7 +67,9 @@ class AccountRow extends StatelessWidget {
                     Container(
                       child: Text(
                         currencyFirst
-                            ? this.price
+                            ? (this.price * this.amount).toStringAsFixed(2) +
+                                " " +
+                                this.defaultCurrency
                             : this.amount.toString() + " " + this.symbol,
                         style: TextStyle(
                             fontFamily: 'ModernEra',

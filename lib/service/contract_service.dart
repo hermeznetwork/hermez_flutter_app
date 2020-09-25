@@ -82,9 +82,8 @@ class ContractService implements IContractService {
 
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName) async {
-    final address = "0x62fa3cc4927e81fc98c45b9699343aeac15f6685";
     final contract = await ContractParser.fromAssets('partialERC20ABI.json',
-        address, tokenContractName); //tokenContractAddress.toString());
+        tokenContractAddress.toString(), tokenContractName);
 
     var response = await client.call(
       contract: contract,
