@@ -4,6 +4,7 @@ import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
+import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
@@ -16,7 +17,7 @@ class TransferAmountForm extends StatefulWidget {
       @required this.onSubmit})
       : super(key: key);
 
-  final dynamic token;
+  final Token token;
   final int amount;
   final TransactionType amountType;
   final void Function(String token, String amount, String addressTo) onSubmit;
@@ -30,7 +31,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   _TransferAmountFormState(
       this.token, this.amount, this.amountType, this.onSubmit);
 
-  final dynamic token;
+  final Token token;
   final int amount;
   final TransactionType amountType;
   final void Function(String token, String amount, String addressTo) onSubmit;
@@ -107,7 +108,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   child: Text(
                     defaultCurrencySelected
                         ? "Fee 0.1 EUR"
-                        : "Fee 0.1 " + token['symbol'],
+                        : "Fee 0.1 " + token.symbol,
                     style: TextStyle(
                       color: HermezColors.blueyGreyTwo,
                       fontSize: 16,
@@ -122,11 +123,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
           ],
           children: <Widget>[
             AccountRow(
-              token['name'],
-              token['symbol'],
-              token['price'],
+              token.name,
+              token.symbol,
+              token.USD,
               "USD",
-              token['value'],
+              token.decimals.toDouble(),
               true,
               defaultCurrencySelected,
               (token, amount) async {
@@ -278,7 +279,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               children: <Widget>[
                 Container(
                   child: Text(
-                    defaultCurrencySelected ? "EUR" : token['symbol'],
+                    defaultCurrencySelected ? "EUR" : token.symbol,
                     style: TextStyle(
                       color: HermezColors.black,
                       fontSize: 16,
@@ -294,9 +295,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                       setState(() {
                         amountIsValid = double.parse(value) <=
                             (defaultCurrencySelected
-                                ? double.parse(token['price']
-                                    .replaceAll(RegExp('[^0-9.,]'), ''))
-                                : token['value']);
+                                ? token.USD
+                                /*.replaceAll(RegExp('[^0-9.,]'), '')*/
+                                : token.decimals);
                       });
                     },
                     controller: amountController,
@@ -341,9 +342,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                               setState(() {
                                 amountController.clear();
                                 amountController.text = defaultCurrencySelected
-                                    ? token['price']
-                                        .replaceAll(RegExp('[^0-9.,]'), '')
-                                    : token['value'].toString();
+                                    ? token.USD.toString()
+                                    //.replaceAll(RegExp('[^0-9.,]'), '')
+                                    : token.decimals;
                               });
                             },
                           ),
@@ -374,7 +375,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                               color: HermezColors.blueyGreyTwo,
                             ),
                             label: Text(
-                              defaultCurrencySelected ? token['symbol'] : "EUR",
+                              defaultCurrencySelected ? token.symbol : "EUR",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: HermezColors.blueyGreyTwo,

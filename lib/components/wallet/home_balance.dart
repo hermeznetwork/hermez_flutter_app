@@ -220,10 +220,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                     children: <Widget>[
                       Text(
                           _selections[0] == true
-                              ? '€' +
+                              ? '\$' +
                                   totalL1Balance(widget.arguments.cryptoList)
                                       .toStringAsFixed(2)
-                              : "€0",
+                              : "\$0",
                           //"\$${EthAmountFormatter(tokenBalance).format()}",
                           style: TextStyle(
                             color: HermezColors.black,

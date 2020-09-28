@@ -168,19 +168,19 @@ class WalletTokenSelectorPage extends HookWidget {
                 // final index = i ~/ 2; //get the actual index excluding dividers.
                 final index = i;
                 print(index);
-                final token = supportedTokens[index];
+                final selectedToken = supportedTokens[index];
                 return AccountRow(
-                  token.name,
-                  token.symbol,
-                  token.USD,
+                  selectedToken.name,
+                  selectedToken.symbol,
+                  selectedToken.USD,
                   "USD",
-                  token.decimals.toDouble(),
+                  selectedToken.decimals.toDouble(),
                   // missing to get balance
                   false,
                   true,
                   (token, amount) async {
                     Navigator.pushReplacementNamed(context, "/transfer_amount",
-                        arguments: AmountArguments(amountType, token));
+                        arguments: AmountArguments(amountType, selectedToken));
                   },
                 ); //build the row widget
               })),

@@ -9,13 +9,19 @@ typedef TransferEvent = void Function(
 abstract class IContractService {
   Future<Credentials> getCredentials(String privateKey);
   Future<String> send(
-      String privateKey, EthereumAddress receiver, BigInt amount,
-      {TransferEvent onTransfer, Function onError});
+      String privateKey,
+      EthereumAddress receiver,
+      BigInt amount,
+      EthereumAddress tokenContractAddress,
+      String tokenContractName,
+      {TransferEvent onTransfer,
+      Function onError});
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName);
   Future<EtherAmount> getEthBalance(EthereumAddress from);
   Future<void> dispose();
-  StreamSubscription listenTransfer(TransferEvent onTransfer);
+  StreamSubscription listenTransfer(
+      TransferEvent onTransfer, DeployedContract contract);
 }
 
 class ContractService implements IContractService {
@@ -33,6 +39,8 @@ class ContractService implements IContractService {
       contract.event('Transfer');
   ContractFunction _balanceFunction(DeployedContract contract) =>
       contract.function('balanceOf');
+  ContractFunction _approve(DeployedContract contract) =>
+      contract.function('approve');
   ContractFunction _sendFunction(DeployedContract contract) =>
       contract.function('transfer');
 
@@ -40,27 +48,39 @@ class ContractService implements IContractService {
       client.credentialsFromPrivateKey(privateKey);
 
   Future<String> send(
-      String privateKey, EthereumAddress receiver, BigInt amount,
-      {TransferEvent onTransfer, Function onError}) async {
+      String privateKey,
+      EthereumAddress receiver,
+      BigInt amount,
+      EthereumAddress tokenContractAddress,
+      String tokenContractName,
+      {TransferEvent onTransfer,
+      Function onError}) async {
     final credentials = await this.getCredentials(privateKey);
     final from = await credentials.extractAddress();
     final networkId = await client.getNetworkId();
 
+    final contract = await ContractParser.fromAssets('partialERC20ABI.json',
+        tokenContractAddress.toString(), tokenContractName);
+
     StreamSubscription event;
     // Workaround once sendTransacton doesn't return a Promise containing confirmation / receipt
     if (onTransfer != null) {
-      event = listenTransfer((from, to, value) async {
-        onTransfer(from, to, value);
-        await event.cancel();
-      }, take: 1);
+      event = listenTransfer(
+        (from, to, value) async {
+          onTransfer(from, to, value);
+          await event.cancel();
+        },
+        contract,
+        take: 1,
+      );
     }
 
-    /*try {
+    try {
       final transactionId = await client.sendTransaction(
         credentials,
         Transaction.callContract(
           contract: contract,
-          function: _sendFunction(),
+          function: _sendFunction(contract),
           parameters: [receiver, amount],
           from: from,
         ),
@@ -73,7 +93,7 @@ class ContractService implements IContractService {
         onError(ex);
       }
       return null;
-    }*/
+    }
   }
 
   Future<EtherAmount> getEthBalance(EthereumAddress from) async {
@@ -94,10 +114,27 @@ class ContractService implements IContractService {
     return response.first as BigInt;
   }
 
-  StreamSubscription listenTransfer(TransferEvent onTransfer, {int take}) {
-    /*var events = client.events(FilterOptions.events(
+  // ERC20 approve the spender account and set the limit of your funds that they are authorized to spend
+  Future<bool> approve(EthereumAddress delegate, BigInt limit,
+      EthereumAddress tokenContractAddress, String tokenContractName) async {
+    final contract = await ContractParser.fromAssets('partialERC20ABI.json',
+        tokenContractAddress.toString(), tokenContractName);
+
+    var response = await client.call(
       contract: contract,
-      event: _transferEvent(),
+      function: _approve(contract),
+      params: [delegate, limit],
+    );
+
+    return response.first as bool;
+  }
+
+  StreamSubscription listenTransfer(
+      TransferEvent onTransfer, DeployedContract contract,
+      {int take}) {
+    var events = client.events(FilterOptions.events(
+      contract: contract,
+      event: _transferEvent(contract),
     ));
 
     if (take != null) {
@@ -105,7 +142,8 @@ class ContractService implements IContractService {
     }
 
     return events.listen((event) {
-      final decoded = _transferEvent().decodeResults(event.topics, event.data);
+      final decoded =
+          _transferEvent(contract).decodeResults(event.topics, event.data);
 
       final from = decoded[0] as EthereumAddress;
       final to = decoded[1] as EthereumAddress;
@@ -116,7 +154,7 @@ class ContractService implements IContractService {
       print('$value}');
 
       onTransfer(from, to, value);
-    });*/
+    });
   }
 
   Future<void> dispose() async {

@@ -1,7 +1,7 @@
-import 'package:hermez/components/wallet/transfer_form.dart';
-import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/components/wallet/transfer_form.dart';
+import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 
 import 'components/wallet/loading.dart';
 
@@ -34,12 +34,14 @@ class WalletTransferPage extends HookWidget {
           ),
         ],
       ),
+      // TODO PASS TOKEN!!
       body: transferStore.state.loading
           ? Loading()
           : TransferForm(
               address: qrcodeAddress.value,
               onSubmit: (address, amount) async {
-                var success = await transferStore.transfer(address, amount);
+                var success =
+                    await transferStore.transfer(address, amount, "", "");
 
                 if (success) {
                   Navigator.popUntil(context, ModalRoute.withName('/'));

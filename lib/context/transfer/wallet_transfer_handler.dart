@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/context/transfer/wallet_transfer_state.dart';
 import 'package:hermez/model/wallet_transfer.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:web3dart/credentials.dart';
 
 class WalletTransferHandler {
@@ -21,7 +21,8 @@ class WalletTransferHandler {
 
   WalletTransfer get state => _store.state;
 
-  Future<bool> transfer(String to, String amount) async {
+  Future<bool> transfer(String to, String amount, String tokenContractAddress,
+      String tokenContractName) async {
     var completer = new Completer<bool>();
     var privateKey = await _configurationService.getPrivateKey();
 
@@ -32,6 +33,8 @@ class WalletTransferHandler {
         privateKey,
         EthereumAddress.fromHex(to),
         BigInt.from(double.parse(amount) * pow(10, 18)),
+        EthereumAddress.fromHex(tokenContractAddress),
+        tokenContractName,
         onTransfer: (from, to, value) {
           completer.complete(true);
         },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
 
@@ -10,7 +11,7 @@ enum TransactionStatus { PENDING, CONFIRMED, INVALID }
 
 class AmountArguments {
   final TransactionType amountType;
-  final dynamic token;
+  final Token token;
 
   AmountArguments(this.amountType, this.token);
 }
