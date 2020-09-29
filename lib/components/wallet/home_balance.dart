@@ -419,7 +419,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                       account.publicKey,
                       account.tokenSymbol,
                       account.USD,
-                      'USD',
+                      widget.arguments.store.state.defaultCurrency
+                          .toString()
+                          .split('.')
+                          .last,
                       double.parse(account.balance),
                       false,
                       true, (token, amount) async {

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'context/wallet/wallet_handler.dart';
-import 'context/wallet/wallet_provider.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // You can pass any object to the arguments parameter.
@@ -11,16 +10,18 @@ import 'context/wallet/wallet_provider.dart';
 // title and message.
 
 class SettingsPage extends HookWidget {
+  SettingsPage(this.store);
+
   WalletHandler store;
 
   @override
   Widget build(BuildContext context) {
     //StateContainer result = useState(0);
-    store = useWallet(context);
+    /*store = useWallet(context);
     useEffect(() {
       store.initialiseReadOnly();
       return null;
-    }, [store]);
+    }, [store]);*/
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(

@@ -78,7 +78,7 @@ class ConfigurationService implements IConfigurationService {
     } else if (defaultCurrencyString == "USD") {
       return WalletDefaultCurrency.USD;
     }
-    return WalletDefaultCurrency.EUR;
+    return null;
   }
 
   @override
@@ -89,7 +89,7 @@ class ConfigurationService implements IConfigurationService {
     } else if (levelSelected == "LEVEL2") {
       return TransactionLevel.LEVEL2;
     }
-    return TransactionLevel.LEVEL2;
+    return null;
   }
 
   @override

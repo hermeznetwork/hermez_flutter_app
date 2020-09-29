@@ -82,6 +82,11 @@ class WalletHandler {
   }
 
   Future<void> _initialise() async {
+    final levelSelected = await _configurationService.getLevelSelected();
+    _store.dispatch(LevelUpdated(levelSelected));
+
+    final defaultCurrency = await _configurationService.getDefaultCurrency();
+    _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
     //await this.fetchOwnBalance();
 
     /*

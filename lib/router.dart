@@ -59,7 +59,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())
         return WalletProvider(builder: (context, store) {
-          return SettingsPage();
+          return SettingsPage(store);
         });
       return IntroPage();
     },
