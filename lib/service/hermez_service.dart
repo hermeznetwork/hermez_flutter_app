@@ -50,6 +50,10 @@ class HermezService implements IHermezService {
     //return BuiltList<Token>().toList();
   }
 
+  Future<Token> getTokenById(int tokenId) {
+    return _apiClient().getSupportedTokenById(tokenId.toString());
+  }
+
   @override
   Future<List<Transaction>> getTransactions(
       web3.EthereumAddress ethereumAddress) async {

@@ -29,8 +29,9 @@ class WalletHomePage extends HookWidget {
 
     useEffect(() {
       store.initialise();
+      store.fetchOwnBalance();
       return null;
-    }, []);
+    }, [store]);
 
     final _children = <Widget>[
       settingsPage(context),
@@ -41,6 +42,7 @@ class WalletHomePage extends HookWidget {
           store.state.ethBalance,
           store.state.tokensBalance,
           store.state.defaultCurrency,
+          store,
           store.state.cryptoList,
           _scaffoldKey,
         ),

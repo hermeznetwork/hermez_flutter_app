@@ -8,31 +8,36 @@ import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
+import '../../wallet_token_selector_page.dart';
+
 class TransferAmountForm extends StatefulWidget {
   TransferAmountForm(
       {Key key,
       this.token,
       this.amount,
+      this.txLevel,
       this.amountType,
       @required this.onSubmit})
       : super(key: key);
 
   final Token token;
   final int amount;
+  final TransactionLevel txLevel;
   final TransactionType amountType;
   final void Function(String token, String amount, String addressTo) onSubmit;
 
   @override
   _TransferAmountFormState createState() =>
-      _TransferAmountFormState(token, amount, amountType, onSubmit);
+      _TransferAmountFormState(token, amount, txLevel, amountType, onSubmit);
 }
 
 class _TransferAmountFormState extends State<TransferAmountForm> {
   _TransferAmountFormState(
-      this.token, this.amount, this.amountType, this.onSubmit);
+      this.token, this.amount, this.txLevel, this.amountType, this.onSubmit);
 
   final Token token;
   final int amount;
+  final TransactionLevel txLevel;
   final TransactionType amountType;
   final void Function(String token, String amount, String addressTo) onSubmit;
   bool amountIsValid = true;
@@ -132,7 +137,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               defaultCurrencySelected,
               (token, amount) async {
                 Navigator.of(context).pushReplacementNamed("/token_selector",
-                    arguments: amountType);
+                    arguments: TokenSelectorArguments(txLevel, amountType));
               },
             ),
             _buildAmountRow(context, null, amountController),

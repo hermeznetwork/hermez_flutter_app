@@ -1,5 +1,6 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 
 part 'wallet.g.dart';
 
@@ -18,6 +19,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   WalletDefaultCurrency get defaultCurrency;
 
+  TransactionLevel get txLevel;
+
   List get cryptoList;
 
   bool get loading;
@@ -30,6 +33,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..tokensBalance = BuiltMap<String, BigInt>().toMap()
     ..ethBalance = BigInt.from(0)
     ..defaultCurrency = WalletDefaultCurrency.EUR
+    ..txLevel = TransactionLevel.LEVEL1
     ..cryptoList = List()
     ..errors = BuiltList<String>().toBuilder()
     ..loading = false

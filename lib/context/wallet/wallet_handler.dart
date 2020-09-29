@@ -6,6 +6,7 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/service/network/model/token.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'wallet_state.dart';
@@ -24,7 +25,28 @@ class WalletHandler {
 
   Future<void> initialise() async {
     final entropyMnemonic = await _configurationService.getMnemonic();
+
+    if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
+      _initialiseFromMnemonic(entropyMnemonic);
+      return;
+    }
+
     final privateKey = await _configurationService.getPrivateKey();
+    _initialiseFromPrivateKey(privateKey);
+  }
+
+  Future<void> initialiseReadOnly() async {
+    final entropyMnemonic = await _configurationService.getMnemonic();
+    final privateKey = await _configurationService.getPrivateKey();
+    final ethereumAddress = await _configurationService.getEthereumAddress();
+
+    if (privateKey != null &&
+        privateKey.isNotEmpty &&
+        ethereumAddress != null &&
+        ethereumAddress.isNotEmpty) {
+      _initialiseFromStoredData(privateKey, ethereumAddress);
+      return;
+    }
 
     if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
       _initialiseFromMnemonic(entropyMnemonic);
@@ -38,26 +60,29 @@ class WalletHandler {
     final mnemonic = _addressService.entropyToMnemonic(entropyMnemonic);
     final privateKey = _addressService.getPrivateKey(mnemonic);
     final address = await _addressService.getPublicAddress(privateKey);
-    final defaultCurrency = await _configurationService.getDefaultCurrency();
 
-    _store.dispatch(
-        InitialiseWallet(address.toString(), privateKey, defaultCurrency));
+    _store.dispatch(InitialiseWallet(address.toString(), privateKey));
 
     await _initialise();
   }
 
   Future<void> _initialiseFromPrivateKey(String privateKey) async {
     final address = await _addressService.getPublicAddress(privateKey);
-    final defaultCurrency = await _configurationService.getDefaultCurrency();
 
-    _store.dispatch(
-        InitialiseWallet(address.toString(), privateKey, defaultCurrency));
+    _store.dispatch(InitialiseWallet(address.toString(), privateKey));
+
+    await _initialise();
+  }
+
+  Future<void> _initialiseFromStoredData(
+      String privateKey, String ethereumAddress) async {
+    _store.dispatch(InitialiseWallet(ethereumAddress, privateKey));
 
     await _initialise();
   }
 
   Future<void> _initialise() async {
-    await this.fetchOwnBalance();
+    //await this.fetchOwnBalance();
 
     /*
     // TODO uncomment
@@ -150,9 +175,24 @@ class WalletHandler {
         BalanceUpdated(ethBalance.getInEther, tokensBalance, L1accounts));
   }
 
+  Future<List<Token>> getTokens() async {
+    final supportedTokens = await _hermezService.getTokens();
+    return supportedTokens;
+  }
+
+  Future<Token> getTokenById(int tokenId) async {
+    final supportedToken = await _hermezService.getTokenById(tokenId);
+    return supportedToken;
+  }
+
   void updateDefaultCurrency(WalletDefaultCurrency defaultCurrency) {
     _configurationService.setDefaultCurrency(defaultCurrency);
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
+  }
+
+  void updateLevel(TransactionLevel txLevel) {
+    _configurationService.setLevelSelected(txLevel);
+    _store.dispatch(LevelUpdated(txLevel));
   }
 
   //this means that the function will be executed sometime in the future (in this case does not return data)
@@ -199,7 +239,7 @@ class WalletHandler {
   }*/
 
   Future<void> resetWallet() async {
-    await _configurationService.setMnemonic(null);
+    await _configurationService.setMnemonic("");
     await _configurationService.setDefaultCurrency(WalletDefaultCurrency.EUR);
     await _configurationService.setupDone(false);
   }

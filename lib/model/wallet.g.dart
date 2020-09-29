@@ -18,6 +18,8 @@ class _$Wallet extends Wallet {
   @override
   final WalletDefaultCurrency defaultCurrency;
   @override
+  final TransactionLevel txLevel;
+  @override
   final List cryptoList;
   @override
   final bool loading;
@@ -33,6 +35,7 @@ class _$Wallet extends Wallet {
       this.tokensBalance,
       this.ethBalance,
       this.defaultCurrency,
+      this.txLevel,
       this.cryptoList,
       this.loading,
       this.errors})
@@ -64,6 +67,7 @@ class _$Wallet extends Wallet {
         tokensBalance == other.tokensBalance &&
         ethBalance == other.ethBalance &&
         defaultCurrency == other.defaultCurrency &&
+        txLevel == other.txLevel &&
         cryptoList == other.cryptoList &&
         loading == other.loading &&
         errors == other.errors;
@@ -76,10 +80,14 @@ class _$Wallet extends Wallet {
             $jc(
                 $jc(
                     $jc(
-                        $jc($jc($jc(0, address.hashCode), privateKey.hashCode),
-                            tokensBalance.hashCode),
-                        ethBalance.hashCode),
-                    defaultCurrency.hashCode),
+                        $jc(
+                            $jc(
+                                $jc($jc(0, address.hashCode),
+                                    privateKey.hashCode),
+                                tokensBalance.hashCode),
+                            ethBalance.hashCode),
+                        defaultCurrency.hashCode),
+                    txLevel.hashCode),
                 cryptoList.hashCode),
             loading.hashCode),
         errors.hashCode));
@@ -93,6 +101,7 @@ class _$Wallet extends Wallet {
           ..add('tokensBalance', tokensBalance)
           ..add('ethBalance', ethBalance)
           ..add('defaultCurrency', defaultCurrency)
+          ..add('txLevel', txLevel)
           ..add('cryptoList', cryptoList)
           ..add('loading', loading)
           ..add('errors', errors))
@@ -121,6 +130,10 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   set defaultCurrency(WalletDefaultCurrency defaultCurrency) =>
       _$this._defaultCurrency = defaultCurrency;
 
+  TransactionLevel _txLevel;
+  TransactionLevel get txLevel => _$this._txLevel;
+  set txLevel(TransactionLevel txLevel) => _$this._txLevel = txLevel;
+
   List _cryptoList;
   List get cryptoList => _$this._cryptoList;
   set cryptoList(List cryptoList) => _$this._cryptoList = cryptoList;
@@ -147,6 +160,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _tokensBalance = _$v.tokensBalance;
       _ethBalance = _$v.ethBalance;
       _defaultCurrency = _$v.defaultCurrency;
+      _txLevel = _$v.txLevel;
       _cryptoList = _$v.cryptoList;
       _loading = _$v.loading;
       _errors = _$v.errors?.toBuilder();
@@ -179,6 +193,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               tokensBalance: tokensBalance,
               ethBalance: ethBalance,
               defaultCurrency: defaultCurrency,
+              txLevel: txLevel,
               cryptoList: cryptoList,
               loading: loading,
               errors: _errors?.build());

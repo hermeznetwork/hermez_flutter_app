@@ -5,15 +5,18 @@ import 'package:hermez/wallet_transaction_details_page.dart';
 
 import 'components/wallet/transfer_amount_form.dart';
 
+enum TransactionLevel { LEVEL1, LEVEL2 }
+
 enum TransactionType { DEPOSIT, SEND, WITHDRAW }
 
 enum TransactionStatus { PENDING, CONFIRMED, INVALID }
 
 class AmountArguments {
+  final TransactionLevel txLevel;
   final TransactionType amountType;
   final Token token;
 
-  AmountArguments(this.amountType, this.token);
+  AmountArguments(this.txLevel, this.amountType, this.token);
 }
 
 class WalletAmountPage extends StatefulWidget {
@@ -51,6 +54,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
       ),
       body: TransferAmountForm(
         token: widget.arguments.token,
+        txLevel: widget.arguments.txLevel,
         amountType: widget.arguments.amountType,
         onSubmit: (amount, token, address) async {
           //var success = await transferStore.transfer(address, amount);

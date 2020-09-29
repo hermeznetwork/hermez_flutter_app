@@ -3,19 +3,26 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/context/wallet/wallet_provider.dart';
-import 'package:hermez/service/network/api_client.dart';
+import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
-class WalletTokenSelectorPage extends HookWidget {
-  WalletTokenSelectorPage(this.amountType);
-
+class TokenSelectorArguments {
+  final TransactionLevel txLevel;
   final TransactionType amountType;
+
+  TokenSelectorArguments(this.txLevel, this.amountType);
+}
+
+class WalletTokenSelectorPage extends HookWidget {
+  WalletTokenSelectorPage(this.arguments);
+
+  final TokenSelectorArguments arguments;
 
   WalletHandler store;
 
-  List _elements = [
+  /*List _elements = [
     {
       'symbol': 'USDT',
       'name': 'Tether',
@@ -28,12 +35,12 @@ class WalletTokenSelectorPage extends HookWidget {
       'value': 4.345646,
       'price': '€684.14'
     },
-  ];
+  ];*/
 
   @override
   Widget build(BuildContext context) {
     List<Token> supportedTokens;
-    final apiClient = useMemoized(() => ApiClient('http://167.71.59.190:4010'));
+    //final apiClient = useMemoized(() => ApiClient('http://167.71.59.190:4010'));
 
     store = useWallet(context);
 
@@ -42,10 +49,11 @@ class WalletTokenSelectorPage extends HookWidget {
 
     //_currentIndex = useState(0);
 
-    /*useEffect(() {
+    useEffect(() {
       store.initialise();
+      store.fetchOwnBalance();
       return null;
-    }, []);*/
+    }, [store]);
 
     //useEffect(() {
     //final tokensRequest = TokensRequest();
@@ -74,7 +82,7 @@ class WalletTokenSelectorPage extends HookWidget {
         leading: new Container(),
       ),
       body: FutureBuilder<List<Token>>(
-        future: apiClient.getSupportedTokens(null),
+        future: store.getTokens() /*apiClient.getSupportedTokens(null)*/,
         builder: (BuildContext context, AsyncSnapshot<List<Token>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
@@ -104,7 +112,7 @@ class WalletTokenSelectorPage extends HookWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      buildAccountsList(supportedTokens),
+                      buildAccountsList(),
                     ],
                   ),
                 );
@@ -121,10 +129,6 @@ class WalletTokenSelectorPage extends HookWidget {
         },
       ),
     );
-  }
-
-  Future<List<Token>> loadData(ApiClient apiClient) async {
-    return apiClient.getSupportedTokens(null);
   }
 
   /*appBar: AppBar(
@@ -150,8 +154,61 @@ class WalletTokenSelectorPage extends HookWidget {
         ],*/
       ),*/
 
+  Widget buildAccountsList() {
+    return store.state.txLevel == TransactionLevel.LEVEL1
+        ? Container(
+            color: Colors.white,
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: store.state.cryptoList.length,
+                //set the item count so that index won't be out of range
+                padding: const EdgeInsets.all(16.0),
+                //add some padding to make it look good
+                itemBuilder: (context, i) {
+                  //item builder returns a row for each index i=0,1,2,3,4
+                  // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+
+                  // final index = i ~/ 2; //get the actual index excluding dividers.
+                  final index = i;
+                  print(index);
+                  final L1Account account = store.state.cryptoList[index];
+
+                  //final Color color = _colors[index %
+                  //    _colors.length];
+                  return AccountRow(
+                      //account.,
+                      account.publicKey,
+                      account.tokenSymbol,
+                      account.USD,
+                      'USD',
+                      double.parse(account.balance),
+                      false,
+                      true, (String token, String amount) async {
+                    final Token supportedToken =
+                        await store.getTokenById(account.tokenId);
+                    Navigator.pushReplacementNamed(context, "/transfer_amount",
+                        arguments: AmountArguments(arguments.txLevel,
+                            arguments.amountType, supportedToken));
+                  }); //iterate through indexes and get the next colour
+                  //return _buildRow(context, element, color); //build the row widget
+                }))
+        : Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(34.0),
+            child: Text(
+              'Deposit tokens from your \n\n Ethereum account.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: HermezColors.blueyGrey,
+                fontSize: 16,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w500,
+              ),
+            ));
+  }
+
   //widget that builds the list
-  Widget buildAccountsList(List<Token> supportedTokens) {
+  /*Widget buildAccountsList(List<Token> supportedTokens) {
     return Expanded(
       child: Container(
           color: Colors.white,
@@ -173,17 +230,18 @@ class WalletTokenSelectorPage extends HookWidget {
                   selectedToken.name,
                   selectedToken.symbol,
                   selectedToken.USD,
-                  "USD",
+                  store.state.defaultCurrency.toString().split('.').last,
                   selectedToken.decimals.toDouble(),
                   // missing to get balance
                   false,
                   true,
                   (token, amount) async {
                     Navigator.pushReplacementNamed(context, "/transfer_amount",
-                        arguments: AmountArguments(amountType, selectedToken));
+                        arguments: AmountArguments(arguments.txLevel,
+                            arguments.amountType, selectedToken));
                   },
                 ); //build the row widget
               })),
     );
-  }
+  }*/
 }

@@ -3,10 +3,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
+import 'package:hermez/wallet_token_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 class HomeBalanceArguments {
@@ -14,8 +16,9 @@ class HomeBalanceArguments {
   final BigInt ethBalance;
   final Map<String, BigInt> tokensBalance;
   final WalletDefaultCurrency defaultCurrency;
+  final WalletHandler store;
   final PageController controller;
-  final List cryptoList;
+  final List<L1Account> cryptoList;
   final scaffoldKey;
 
   HomeBalanceArguments(
@@ -24,6 +27,7 @@ class HomeBalanceArguments {
       this.ethBalance,
       this.tokensBalance,
       this.defaultCurrency,
+      this.store,
       this.cryptoList,
       this.scaffoldKey);
 }
@@ -61,8 +65,6 @@ class _HomeBalanceState extends State<HomeBalance> {
       'price': '€156.22',
     },
   ];*/*/
-
-  List<bool> _selections = [false, true];
 
   /*@override
   void initState() {
@@ -129,12 +131,18 @@ class _HomeBalanceState extends State<HomeBalance> {
                         borderColor: Color.fromRGBO(51, 51, 51, 1.0),
                         selectedBorderColor: Color.fromRGBO(51, 51, 51, 1.0),
                         borderWidth: 2,
-                        isSelected: _selections,
+                        isSelected: [
+                          widget.arguments.store.state.txLevel ==
+                              TransactionLevel.LEVEL1,
+                          widget.arguments.store.state.txLevel ==
+                              TransactionLevel.LEVEL2
+                        ],
                         onPressed: (int index) {
                           setState(() {
-                            _selections = [false, false];
-                            _selections[index] = true;
-                            _selections[1] == true
+                            widget.arguments.store.updateLevel(index == 1
+                                ? TransactionLevel.LEVEL2
+                                : TransactionLevel.LEVEL1);
+                            index == 1
                                 ? _elements = []
                                 : _elements = widget.arguments.cryptoList;
                             /*_elements = [
@@ -187,7 +195,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                     side: BorderSide(color: Color(0xfff6e9d3))),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(
-                      text: _selections[0] == true
+                      text: widget.arguments.store.state.txLevel ==
+                              TransactionLevel.LEVEL1
                           ? widget.arguments.address
                           : "hez:" + widget.arguments.address));
                   widget.arguments.scaffoldKey.currentState
@@ -199,9 +208,14 @@ class _HomeBalanceState extends State<HomeBalance> {
                 color: Color(0xfff6e9d3),
                 textColor: Color(0xff7a7c89),
                 child: Text(
-                    _selections[0] == true
-                        ? widget.arguments.address
-                        : "hez:" + widget.arguments.address,
+                    widget != null &&
+                            widget.arguments != null &&
+                            widget.arguments.address != null
+                        ? (widget.arguments.store.state.txLevel ==
+                                TransactionLevel.LEVEL1
+                            ? widget.arguments.address
+                            : "hez:" + widget.arguments.address)
+                        : "",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -219,7 +233,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                          _selections[0] == true
+                          widget.arguments.store.state.txLevel ==
+                                  TransactionLevel.LEVEL1
                               ? '\$' +
                                   totalL1Balance(widget.arguments.cryptoList)
                                       .toStringAsFixed(2)
@@ -251,7 +266,8 @@ class _HomeBalanceState extends State<HomeBalance> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           _elements.length > 0 ? SizedBox(width: 20.0) : Container(),
-          _elements.length > 0
+          widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
+                  _elements.length > 0
               ? Expanded(
                   child:
                       // takes in an object and color and returns a circle avatar with first letter and required color
@@ -261,7 +277,9 @@ class _HomeBalanceState extends State<HomeBalance> {
                           ),
                           onPressed: () async {
                             Navigator.of(context).pushNamed("/token_selector",
-                                arguments: TransactionType.SEND);
+                                arguments: TokenSelectorArguments(
+                                    widget.arguments.store.state.txLevel,
+                                    TransactionType.SEND));
 
                             /*var apiClient =
                                 new ApiClient("http://10.0.2.2:4010");
@@ -316,7 +334,9 @@ class _HomeBalanceState extends State<HomeBalance> {
                     ),
                     onPressed: () {
                       Navigator.of(context).pushNamed("/token_selector",
-                          arguments: TransactionType.DEPOSIT);
+                          arguments: TokenSelectorArguments(
+                              widget.arguments.store.state.txLevel,
+                              TransactionType.DEPOSIT));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -375,7 +395,7 @@ class _HomeBalanceState extends State<HomeBalance> {
 
   //widget that builds the list
   Widget buildAccountsList() {
-    return _selections[0] == true
+    return widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
         ? Container(
             color: Colors.white,
             child: ListView.builder(

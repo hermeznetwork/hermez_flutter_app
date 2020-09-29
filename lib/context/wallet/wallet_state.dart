@@ -1,12 +1,12 @@
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 
 abstract class WalletAction {}
 
 class InitialiseWallet extends WalletAction {
-  InitialiseWallet(this.address, this.privateKey, this.defaultCurrency);
+  InitialiseWallet(this.address, this.privateKey);
   final String address;
   final String privateKey;
-  final WalletDefaultCurrency defaultCurrency;
 }
 
 class BalanceUpdated extends WalletAction {
@@ -23,12 +23,16 @@ class DefaultCurrencyUpdated extends WalletAction {
   final WalletDefaultCurrency defaultCurrency;
 }
 
+class LevelUpdated extends WalletAction {
+  LevelUpdated(this.txLevel);
+  final TransactionLevel txLevel;
+}
+
 Wallet reducer(Wallet state, WalletAction action) {
   if (action is InitialiseWallet) {
     return state.rebuild((b) => b
       ..address = action.address
-      ..privateKey = action.privateKey
-      ..defaultCurrency = action.defaultCurrency);
+      ..privateKey = action.privateKey);
   }
 
   if (action is UpdatingBalance) {
@@ -45,6 +49,10 @@ Wallet reducer(Wallet state, WalletAction action) {
 
   if (action is DefaultCurrencyUpdated) {
     return state.rebuild((b) => b..defaultCurrency = action.defaultCurrency);
+  }
+
+  if (action is LevelUpdated) {
+    return state.rebuild((b) => b..txLevel = action.txLevel);
   }
 
   return state;
