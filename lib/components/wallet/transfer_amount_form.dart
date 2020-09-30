@@ -137,7 +137,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               defaultCurrencySelected,
               (token, amount) async {
                 Navigator.of(context).pushReplacementNamed("/token_selector",
-                    arguments: TokenSelectorArguments(txLevel, amountType));
+                    arguments:
+                        TokenSelectorArguments(/*txLevel,*/ amountType, null));
               },
             ),
             _buildAmountRow(context, null, amountController),

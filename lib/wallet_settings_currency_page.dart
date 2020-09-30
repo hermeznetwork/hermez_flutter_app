@@ -1,5 +1,6 @@
-import 'package:hermez/model/wallet.dart';
 import 'package:flutter/material.dart';
+import 'package:hermez/model/wallet.dart';
+
 import 'context/wallet/wallet_handler.dart';
 
 // You can pass any object to the arguments parameter.
@@ -7,7 +8,7 @@ import 'context/wallet/wallet_handler.dart';
 // title and message.
 
 class SettingsCurrencyPage extends StatefulWidget {
-  SettingsCurrencyPage({Key key, this.store}) : super(key : key);
+  SettingsCurrencyPage({Key key, this.store}) : super(key: key);
 
   final WalletHandler store;
 
@@ -16,7 +17,6 @@ class SettingsCurrencyPage extends StatefulWidget {
 }
 
 class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
-
 //class SettingsCurrencyPage extends HookWidget {
 
   //WalletHandler store;
@@ -25,7 +25,7 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    widget.store.initialise();
+    //widget.store.initialise();
   }
 
   @override
@@ -40,9 +40,7 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text("Default currency"),
-        elevation: 0),
+      appBar: AppBar(title: Text("Default currency"), elevation: 0),
       body: Column(
         children: <Widget>[
           buildCurrencyList(),
@@ -59,8 +57,8 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
           child: ListView.builder(
               shrinkWrap: true,
               itemCount: WalletDefaultCurrency.values.length,
-              padding:
-              const EdgeInsets.all(16.0), //add some padding to make it look good
+              padding: const EdgeInsets.all(
+                  16.0), //add some padding to make it look good
               itemBuilder: (context, i) {
                 //item builder returns a row for each index i=0,1,2,3,4
                 // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
@@ -76,33 +74,36 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
                     title: Align(
                       alignment: Alignment.centerLeft,
                       child: Container(
-                        padding: EdgeInsets.only(left:5.0, top: 30.0, bottom: 30.0),
-                        child: Text(element.toString().split(".").last,
-                          style: TextStyle(fontFamily: 'ModernEra',
+                        padding:
+                            EdgeInsets.only(left: 5.0, top: 30.0, bottom: 30.0),
+                        child: Text(
+                          element.toString().split(".").last,
+                          style: TextStyle(
+                              fontFamily: 'ModernEra',
                               fontWeight: FontWeight.w800,
-                              fontSize: 16)
-                          ,textAlign: TextAlign.left,
+                              fontSize: 16),
+                          textAlign: TextAlign.left,
                         ),
                       ),
                     ),
-                    trailing: widget.store.state.defaultCurrency == element ? Container(
-                        padding: EdgeInsets.only(right:10.0, top: 10.0,),
-                        child:  Icon(Icons.check)) : null,
-                    onTap: ()  {
+                    trailing: widget.store.state.defaultCurrency == element
+                        ? Container(
+                            padding: EdgeInsets.only(
+                              right: 10.0,
+                              top: 10.0,
+                            ),
+                            child: Icon(Icons.check))
+                        : null,
+                    onTap: () {
                       setState(() {
                         widget.store.updateDefaultCurrency(element);
                       });
                     }
-                  //store.fetchOwnBalance() = Wallet();
-                  //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));,
-                );
+                    //store.fetchOwnBalance() = Wallet();
+                    //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));,
+                    );
                 //return _buildRow(); //build the row widget
-              })
-      ),
+              })),
     );
   }
 }
-
-
-
-

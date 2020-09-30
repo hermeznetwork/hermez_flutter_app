@@ -23,6 +23,11 @@ class DefaultCurrencyUpdated extends WalletAction {
   final WalletDefaultCurrency defaultCurrency;
 }
 
+class ExchangeRatioUpdated extends WalletAction {
+  ExchangeRatioUpdated(this.exchangeRatio);
+  final double exchangeRatio;
+}
+
 class LevelUpdated extends WalletAction {
   LevelUpdated(this.txLevel);
   final TransactionLevel txLevel;
@@ -49,6 +54,10 @@ Wallet reducer(Wallet state, WalletAction action) {
 
   if (action is DefaultCurrencyUpdated) {
     return state.rebuild((b) => b..defaultCurrency = action.defaultCurrency);
+  }
+
+  if (action is ExchangeRatioUpdated) {
+    return state.rebuild((b) => b..exchangeRatio = action.exchangeRatio);
   }
 
   if (action is LevelUpdated) {

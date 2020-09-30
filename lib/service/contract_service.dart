@@ -157,6 +157,26 @@ class ContractService implements IContractService {
     });
   }
 
+  /*void listTransactions() async {
+    int n = await client.getBlockNumber();
+    client.getBlockNumber()
+
+    String hash = "0x74836273a74ec6e3a6c939fe0f361c56eeabee03dbacdc41821a8c4ec6dbdbb4";
+    var transactionInfo = await client.getTransactionByHash(hash);
+    var transacitonReceipt = await client.getTransactionReceipt(hash); -> Exception has occurred.
+    FormatException (FormatException: Invalid radix-10 number (at character 1)
+    10c755
+
+    var txs = [];
+    for (var i = 0; i < n; i++) {
+      var block = client.getTr(transactionHash).getBlock(i, true);
+      for (var j = 0; j < block.transactions; j++) {
+        if (block.transactions[j].to == the_address)
+          txs.push(block.transactions[j]);
+      }
+    }
+  }*/
+
   Future<void> dispose() async {
     await client.dispose();
   }

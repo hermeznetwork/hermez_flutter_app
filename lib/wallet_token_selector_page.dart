@@ -2,25 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/context/wallet/wallet_provider.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 class TokenSelectorArguments {
-  final TransactionLevel txLevel;
+  //final TransactionLevel txLevel;
   final TransactionType amountType;
+  final WalletHandler store;
 
-  TokenSelectorArguments(this.txLevel, this.amountType);
+  TokenSelectorArguments(/*this.txLevel,*/ this.amountType, this.store);
 }
 
 class WalletTokenSelectorPage extends HookWidget {
   WalletTokenSelectorPage(this.arguments);
 
   final TokenSelectorArguments arguments;
-
-  WalletHandler store;
 
   /*List _elements = [
     {
@@ -42,18 +40,18 @@ class WalletTokenSelectorPage extends HookWidget {
     List<Token> supportedTokens;
     //final apiClient = useMemoized(() => ApiClient('http://167.71.59.190:4010'));
 
-    store = useWallet(context);
+    //store = useWallet(context);
 
     //final transferStore = useWalletTransfer(context);
     //transferStore.transfer(to, amount)
 
     //_currentIndex = useState(0);
 
-    useEffect(() {
+    /*useEffect(() {
       store.initialise();
       store.fetchOwnBalance();
       return null;
-    }, [store]);
+    }, [store]);*/
 
     //useEffect(() {
     //final tokensRequest = TokensRequest();
@@ -82,7 +80,8 @@ class WalletTokenSelectorPage extends HookWidget {
         leading: new Container(),
       ),
       body: FutureBuilder<List<Token>>(
-        future: store.getTokens() /*apiClient.getSupportedTokens(null)*/,
+        future:
+            arguments.store.getTokens() /*apiClient.getSupportedTokens(null)*/,
         builder: (BuildContext context, AsyncSnapshot<List<Token>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
@@ -155,12 +154,12 @@ class WalletTokenSelectorPage extends HookWidget {
       ),*/
 
   Widget buildAccountsList() {
-    return store.state.txLevel == TransactionLevel.LEVEL1
+    return arguments.store.state.txLevel == TransactionLevel.LEVEL1
         ? Container(
             color: Colors.white,
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: store.state.cryptoList.length,
+                itemCount: arguments.store.state.cryptoList.length,
                 //set the item count so that index won't be out of range
                 padding: const EdgeInsets.all(16.0),
                 //add some padding to make it look good
@@ -171,7 +170,13 @@ class WalletTokenSelectorPage extends HookWidget {
                   // final index = i ~/ 2; //get the actual index excluding dividers.
                   final index = i;
                   print(index);
-                  final L1Account account = store.state.cryptoList[index];
+                  final L1Account account =
+                      arguments.store.state.cryptoList[index];
+
+                  final String currency = arguments.store.state.defaultCurrency
+                      .toString()
+                      .split('.')
+                      .last;
 
                   //final Color color = _colors[index %
                   //    _colors.length];
@@ -179,16 +184,20 @@ class WalletTokenSelectorPage extends HookWidget {
                       //account.,
                       account.publicKey,
                       account.tokenSymbol,
-                      account.USD,
-                      'USD',
+                      currency == "EUR"
+                          ? account.USD * arguments.store.state.exchangeRatio
+                          : account.USD,
+                      currency,
                       double.parse(account.balance),
                       false,
                       true, (String token, String amount) async {
                     final Token supportedToken =
-                        await store.getTokenById(account.tokenId);
+                        await arguments.store.getTokenById(account.tokenId);
                     Navigator.pushReplacementNamed(context, "/transfer_amount",
-                        arguments: AmountArguments(arguments.txLevel,
-                            arguments.amountType, supportedToken));
+                        arguments: AmountArguments(
+                            arguments.store.state.txLevel,
+                            arguments.amountType,
+                            supportedToken));
                   }); //iterate through indexes and get the next colour
                   //return _buildRow(context, element, color); //build the row widget
                 }))

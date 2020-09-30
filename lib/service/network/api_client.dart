@@ -166,9 +166,9 @@ class ApiClient {
     try {
       var uri;
       if (queryParameters != null) {
-        uri = Uri.http("167.71.59.190:4010", endpoint, queryParameters);
+        uri = Uri.http(_baseAddress, endpoint, queryParameters);
       } else {
-        uri = Uri.http("167.71.59.190:4010", endpoint);
+        uri = Uri.http(_baseAddress, endpoint);
       }
       final response = await http.get(
         uri,
@@ -246,4 +246,29 @@ class ApiClient {
       return response;
     }
   }
+
+/*var apiClient =
+                                new ApiClient("http://10.0.2.2:4010");
+                            var params = {
+                              "timestamp": "2020-09-08T14:19:19.128Z",
+                              "ethereumAddress":
+                                  "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
+                              "bjj":
+                                  "hez:HVrB8xQHAYt9QTpPUsj3RGOzDmrCI4IgrYslTeTqo6Ix",
+                              "signature":
+                                  "72024a43f546b0e1d9d5d7c4c30c259102a9726363adcc4ec7b6aea686bcb5116f485c5542d27c4092ae0ceaf38e3bb44417639bd2070a58ba1aa1aab9d92c03"
+                            };
+                            var request = RegisterRequest.fromJson(params);
+                            bool result = await apiClient
+                                .authorizeAccountCreation(request);
+
+                            /*if (result) {
+                    Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.SEND);
+                  }*/
+                            var params2 = {
+                              "hermezEthereumAddress":
+                                  "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
+                            };
+                            var request2 = AccountsRequest.fromJson(params2);
+                            await apiClient.getAccounts(request2);*/
 }

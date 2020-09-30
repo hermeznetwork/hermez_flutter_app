@@ -235,9 +235,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                       Text(
                           widget.arguments.store.state.txLevel ==
                                   TransactionLevel.LEVEL1
-                              ? '\$' +
-                                  totalL1Balance(widget.arguments.cryptoList)
-                                      .toStringAsFixed(2)
+                              ? totalL1Balance(widget.arguments.cryptoList)
                               : "\$0",
                           //"\$${EthAmountFormatter(tokenBalance).format()}",
                           style: TextStyle(
@@ -278,33 +276,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                           onPressed: () async {
                             Navigator.of(context).pushNamed("/token_selector",
                                 arguments: TokenSelectorArguments(
-                                    widget.arguments.store.state.txLevel,
-                                    TransactionType.SEND));
-
-                            /*var apiClient =
-                                new ApiClient("http://10.0.2.2:4010");
-                            var params = {
-                              "timestamp": "2020-09-08T14:19:19.128Z",
-                              "ethereumAddress":
-                                  "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
-                              "bjj":
-                                  "hez:HVrB8xQHAYt9QTpPUsj3RGOzDmrCI4IgrYslTeTqo6Ix",
-                              "signature":
-                                  "72024a43f546b0e1d9d5d7c4c30c259102a9726363adcc4ec7b6aea686bcb5116f485c5542d27c4092ae0ceaf38e3bb44417639bd2070a58ba1aa1aab9d92c03"
-                            };
-                            var request = RegisterRequest.fromJson(params);
-                            bool result = await apiClient
-                                .authorizeAccountCreation(request);
-
-                            /*if (result) {
-                    Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.SEND);
-                  }*/
-                            var params2 = {
-                              "hermezEthereumAddress":
-                                  "hez:0xaa942cfcd25ad4d90a62358b0dd84f33b398262a",
-                            };
-                            var request2 = AccountsRequest.fromJson(params2);
-                            await apiClient.getAccounts(request2);*/
+                                  //widget.arguments.store.state.txLevel,
+                                  TransactionType.SEND,
+                                  widget.arguments.store,
+                                ));
                           },
                           padding: EdgeInsets.all(10.0),
                           color: Colors.transparent,
@@ -335,8 +310,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                     onPressed: () {
                       Navigator.of(context).pushNamed("/token_selector",
                           arguments: TokenSelectorArguments(
-                              widget.arguments.store.state.txLevel,
-                              TransactionType.DEPOSIT));
+                            //widget.arguments.store.state.txLevel,
+                            TransactionType.DEPOSIT,
+                            widget.arguments.store,
+                          ));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -412,17 +389,23 @@ class _HomeBalanceState extends State<HomeBalance> {
                   final index = i;
                   print(index);
                   final L1Account account = _elements[index];
+
+                  final String currency = widget
+                      .arguments.store.state.defaultCurrency
+                      .toString()
+                      .split('.')
+                      .last;
                   //final Color color = _colors[index %
                   //    _colors.length];
                   return AccountRow(
                       //account.,
                       account.publicKey,
                       account.tokenSymbol,
-                      account.USD,
-                      widget.arguments.store.state.defaultCurrency
-                          .toString()
-                          .split('.')
-                          .last,
+                      currency == "EUR"
+                          ? account.USD *
+                              widget.arguments.store.state.exchangeRatio
+                          : account.USD,
+                      currency,
                       double.parse(account.balance),
                       false,
                       true, (token, amount) async {
@@ -545,12 +528,24 @@ class _HomeBalanceState extends State<HomeBalance> {
     )
   }*/
 
-  double totalL1Balance(List<L1Account> L1accounts) {
-    double result = 0;
+  String totalL1Balance(List<L1Account> L1accounts) {
+    double resultValue = 0;
+    String result = "";
+    final String currency =
+        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
+    if (currency == "EUR") {
+      result += '€';
+    } else if (currency == "USD") {
+      result += '\$';
+    }
     for (L1Account account in L1accounts) {
       double value = account.USD * double.parse(account.balance);
-      result = result + value;
+      if (currency == "EUR") {
+        value *= widget.arguments.store.state.exchangeRatio;
+      }
+      resultValue = resultValue + value;
     }
+    result += resultValue.toStringAsFixed(2);
     return result;
   }
 }

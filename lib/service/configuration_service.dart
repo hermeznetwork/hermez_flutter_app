@@ -42,6 +42,10 @@ class ConfigurationService implements IConfigurationService {
         key: "defaultCurrency", value: value.toString().split(".").last);
   }
 
+  Future<void> setExchangeRatio(double value) async {
+    await _preferences.setDouble("exchangeRatio", value);
+  }
+
   @override
   Future<void> setLevelSelected(TransactionLevel value) async {
     await _secureStorage.write(
@@ -79,6 +83,11 @@ class ConfigurationService implements IConfigurationService {
       return WalletDefaultCurrency.USD;
     }
     return null;
+  }
+
+  @override
+  double getExchangeRatio() {
+    return _preferences.getDouble("exchangeRatio") ?? 0.0;
   }
 
   @override

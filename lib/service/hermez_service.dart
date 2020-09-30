@@ -4,6 +4,8 @@ import 'package:built_collection/built_collection.dart';
 import 'package:hermez/model/account.dart';
 import 'package:hermez/model/transaction.dart';
 import 'package:hermez/service/network/api_client.dart';
+import 'package:hermez/service/network/api_exchange_rate_client.dart';
+import 'package:hermez/service/network/model/rates_request.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'configuration_service.dart';
@@ -19,10 +21,13 @@ abstract class IHermezService {
 
 class HermezService implements IHermezService {
   String _baseUrl;
+  String _exchangeUrl;
   IConfigurationService _configService;
-  HermezService(this._baseUrl, this._configService);
+  HermezService(this._baseUrl, this._exchangeUrl, this._configService);
 
   ApiClient _apiClient() => ApiClient(this._baseUrl);
+  ApiExchangeRateClient _apiExchangeRateClient() =>
+      ApiExchangeRateClient(_exchangeUrl);
 
   //final String mockedEthereumAddress =
   //    '0xaa942cfcd25ad4d90a62358b0dd84f33b398262a';
@@ -59,5 +64,15 @@ class HermezService implements IHermezService {
       web3.EthereumAddress ethereumAddress) async {
     // TODO: implement getTransactions
     return BuiltList<Transaction>().toList();
+  }
+
+  @override
+  Future<double> getEURUSDExchangeRatio() async {
+    final request = RatesRequest.fromJson({
+      "base": "USD",
+      "symbols": {"EUR"},
+    });
+    double response = await _apiExchangeRateClient().getExchangeRates(request);
+    return response;
   }
 }
