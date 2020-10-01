@@ -157,6 +157,24 @@ class ContractService implements IContractService {
     });
   }
 
+  /*Future<DeployedContract> _contract(
+      String contractName, String contractAddress) async {
+    String abi = ABI.get(contractName);
+    DeployedContract contract = DeployedContract(
+        ContractAbi.fromJson(abi, contractName),
+        EthereumAddress.fromHex(contractAddress));
+    return contract;
+  }
+
+  Future<List<dynamic>> _readFromContract(String contractName,
+      String contractAddress, String functionName, List<dynamic> params) async {
+    DeployedContract contract = await _contract(contractName, contractAddress);
+    return await client.call(
+        contract: contract,
+        function: contract.function(functionName),
+        params: params);
+  }*/
+
   /*void listTransactions() async {
     int n = await client.getBlockNumber();
     client.getBlockNumber()

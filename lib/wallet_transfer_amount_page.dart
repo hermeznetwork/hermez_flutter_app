@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hermez/service/network/model/token.dart';
+import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
 
 import 'components/wallet/transfer_amount_form.dart';
+import 'context/wallet/wallet_handler.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
@@ -12,11 +13,17 @@ enum TransactionType { DEPOSIT, SEND, WITHDRAW }
 enum TransactionStatus { PENDING, CONFIRMED, INVALID }
 
 class AmountArguments {
-  final TransactionLevel txLevel;
+  final WalletHandler store;
   final TransactionType amountType;
-  final Token token;
+  final L1Account account;
+  //final Token token;
 
-  AmountArguments(this.txLevel, this.amountType, this.token);
+  AmountArguments(
+    this.store,
+    this.amountType,
+    this.account,
+    //this.token,
+  );
 }
 
 class WalletAmountPage extends StatefulWidget {
@@ -53,14 +60,16 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
         ],
       ),
       body: TransferAmountForm(
-        token: widget.arguments.token,
-        txLevel: widget.arguments.txLevel,
+        account: widget.arguments.account,
+        store: widget.arguments.store,
         amountType: widget.arguments.amountType,
         onSubmit: (amount, token, address) async {
           //var success = await transferStore.transfer(address, amount);
           Navigator.pushReplacementNamed(context, "/transaction_details",
               arguments: TransactionDetailsArguments(
-                  widget.arguments.amountType, widget.arguments.token, amount));
+                  widget.arguments.amountType,
+                  widget.arguments.account,
+                  amount));
           //if (success) {
           //Navigator.popUntil(context, ModalRoute.withName('/'));
           //}

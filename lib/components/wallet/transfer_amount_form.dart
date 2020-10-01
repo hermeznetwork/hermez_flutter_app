@@ -4,7 +4,8 @@ import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
-import 'package:hermez/service/network/model/token.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
@@ -13,31 +14,31 @@ import '../../wallet_token_selector_page.dart';
 class TransferAmountForm extends StatefulWidget {
   TransferAmountForm(
       {Key key,
-      this.token,
+      this.account,
       this.amount,
-      this.txLevel,
+      this.store,
       this.amountType,
       @required this.onSubmit})
       : super(key: key);
 
-  final Token token;
+  final L1Account account;
   final int amount;
-  final TransactionLevel txLevel;
+  final WalletHandler store;
   final TransactionType amountType;
   final void Function(String token, String amount, String addressTo) onSubmit;
 
   @override
   _TransferAmountFormState createState() =>
-      _TransferAmountFormState(token, amount, txLevel, amountType, onSubmit);
+      _TransferAmountFormState(account, amount, store, amountType, onSubmit);
 }
 
 class _TransferAmountFormState extends State<TransferAmountForm> {
   _TransferAmountFormState(
-      this.token, this.amount, this.txLevel, this.amountType, this.onSubmit);
+      this.account, this.amount, this.store, this.amountType, this.onSubmit);
 
-  final Token token;
+  final L1Account account;
   final int amount;
-  final TransactionLevel txLevel;
+  final WalletHandler store;
   final TransactionType amountType;
   final void Function(String token, String amount, String addressTo) onSubmit;
   bool amountIsValid = true;
@@ -64,6 +65,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       if (token != null) toController.value = TextEditingValue(text: token);
       return null;
     }, [token]);*/
+
+    final String currency =
+        widget.store.state.defaultCurrency.toString().split('.').last;
 
     return Container(
       padding: EdgeInsets.all(10),
@@ -112,8 +116,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   margin: EdgeInsets.only(top: 20.0),
                   child: Text(
                     defaultCurrencySelected
-                        ? "Fee 0.1 EUR"
-                        : "Fee 0.1 " + token.symbol,
+                        ? "Fee 0.1 " + currency
+                        : "Fee 0.1 " + account.tokenSymbol,
                     style: TextStyle(
                       color: HermezColors.blueyGreyTwo,
                       fontSize: 16,
@@ -128,17 +132,20 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
           ],
           children: <Widget>[
             AccountRow(
-              token.name,
-              token.symbol,
-              token.USD,
-              "USD",
-              token.decimals.toDouble(),
+              account.publicKey,
+              account.tokenSymbol,
+              currency == "EUR"
+                  ? account.USD * widget.store.state.exchangeRatio
+                  : account.USD,
+              currency,
+              double.parse(account.balance),
               true,
               defaultCurrencySelected,
               (token, amount) async {
                 Navigator.of(context).pushReplacementNamed("/token_selector",
-                    arguments:
-                        TokenSelectorArguments(/*txLevel,*/ amountType, null));
+                    arguments: TokenSelectorArguments(
+                        /*txLevel,*/ amountType,
+                        widget.store));
               },
             ),
             _buildAmountRow(context, null, amountController),
@@ -266,6 +273,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
 
   Widget _buildAmountRow(
       BuildContext context, dynamic element, dynamic amountController) {
+    final String currency =
+        widget.store.state.defaultCurrency.toString().split('.').last;
     // returns a row with the desired properties
     return Column(
       children: <Widget>[
@@ -285,7 +294,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               children: <Widget>[
                 Container(
                   child: Text(
-                    defaultCurrencySelected ? "EUR" : token.symbol,
+                    defaultCurrencySelected ? currency : account.tokenSymbol,
                     style: TextStyle(
                       color: HermezColors.black,
                       fontSize: 16,
@@ -301,9 +310,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                       setState(() {
                         amountIsValid = double.parse(value) <=
                             (defaultCurrencySelected
-                                ? token.USD
+                                ? currency == "EUR"
+                                    ? account.USD *
+                                        double.parse(account.balance) *
+                                        widget.store.state.exchangeRatio
+                                    : account.USD *
+                                        double.parse(account.balance)
                                 /*.replaceAll(RegExp('[^0-9.,]'), '')*/
-                                : token.decimals);
+                                : double.parse(account.balance));
                       });
                     },
                     controller: amountController,
@@ -348,9 +362,28 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                               setState(() {
                                 amountController.clear();
                                 amountController.text = defaultCurrencySelected
-                                    ? token.USD.toString()
+                                    ? currency == "EUR"
+                                        ? (account.USD *
+                                                double.parse(account.balance) *
+                                                widget
+                                                    .store.state.exchangeRatio)
+                                            .toStringAsFixed(2)
+                                        : (account.USD *
+                                                double.parse(account.balance))
+                                            .toStringAsFixed(2)
                                     //.replaceAll(RegExp('[^0-9.,]'), '')
-                                    : token.decimals;
+                                    : double.parse(account.balance)
+                                        .toStringAsFixed(2);
+                                amountIsValid = (defaultCurrencySelected
+                                        ? currency == "EUR"
+                                            ? account.USD *
+                                                double.parse(account.balance) *
+                                                widget.store.state.exchangeRatio
+                                            : account.USD *
+                                                double.parse(account.balance)
+                                        /*.replaceAll(RegExp('[^0-9.,]'), '')*/
+                                        : double.parse(account.balance)) !=
+                                    0;
                               });
                             },
                           ),
@@ -381,7 +414,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                               color: HermezColors.blueyGreyTwo,
                             ),
                             label: Text(
-                              defaultCurrencySelected ? token.symbol : "EUR",
+                              defaultCurrencySelected
+                                  ? account.tokenSymbol
+                                  : currency,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: HermezColors.blueyGreyTwo,

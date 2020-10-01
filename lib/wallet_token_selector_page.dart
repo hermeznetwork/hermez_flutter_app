@@ -195,9 +195,7 @@ class WalletTokenSelectorPage extends HookWidget {
                         await arguments.store.getTokenById(account.tokenId);
                     Navigator.pushReplacementNamed(context, "/transfer_amount",
                         arguments: AmountArguments(
-                            arguments.store.state.txLevel,
-                            arguments.amountType,
-                            supportedToken));
+                            arguments.store, arguments.amountType, account));
                   }); //iterate through indexes and get the next colour
                   //return _buildRow(context, element, color); //build the row widget
                 }))
