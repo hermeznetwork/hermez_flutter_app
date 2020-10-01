@@ -11,6 +11,7 @@ class AddressInput extends StatelessWidget {
     this.onChanged,
     this.controller,
     this.maxLines,
+    this.layerOne = false,
     this.obscureText = false,
   });
 
@@ -18,11 +19,14 @@ class AddressInput extends StatelessWidget {
   final String errorText;
   final String labelText;
   final String hintText;
+  final bool layerOne;
   final bool obscureText;
   final int maxLines;
   final TextEditingController controller;
-  final _addressValidator = RegExInputFormatter.withRegex(
+  final _hezAddressValidator = RegExInputFormatter.withRegex(
       '^\$|^([hH]?[eE]?[zZ]?:?0?[xX]?)[a-fA-F0-9]{0,}\$');
+  final _ethAddressValidator =
+      RegExInputFormatter.withRegex('^\$|^(0?[xX]?)[a-fA-F0-9]{0,}\$');
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +35,9 @@ class AddressInput extends StatelessWidget {
       enableSuggestions: false,
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.done,
-      inputFormatters: <TextInputFormatter>[_addressValidator],
+      /*inputFormatters: <TextInputFormatter>[
+        layerOne ? _ethAddressValidator : _hezAddressValidator
+      ],*/
       textAlign: TextAlign.left,
       maxLines: 1,
       cursorWidth: 2.0,
@@ -52,7 +58,7 @@ class AddressInput extends StatelessWidget {
           fontFamily: 'ModernEra',
           fontWeight: FontWeight.w500,
         ),
-        hintText: "To hez:0xaddress",
+        hintText: layerOne ? "To 0xaddress" : "To hez:0xaddress",
         //errorText: this.errorText,
       ),
     );

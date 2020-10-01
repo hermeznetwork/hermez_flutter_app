@@ -28,7 +28,7 @@ dependencies:
   qr_flutter: ^3.2.0
   bip39: ^1.0.3
   tweetnacl: ^0.3.1
-  pointycastle: ^1.0.0
+  pointycastle: ^1.0.2
   hex: ^0.1.2
   flutter_secure_storage: ^3.3.3
   shared_preferences: ^0.5.6+1

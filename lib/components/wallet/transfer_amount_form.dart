@@ -6,6 +6,7 @@ import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
@@ -149,9 +150,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               },
             ),
             _buildAmountRow(context, null, amountController),
-            amountType == TransactionType.SEND
-                ? _buildAddressToRow(context, null, addressController)
-                : addressRow()
+            amountType == TransactionType.SEND ? addressRow() : Container()
           ],
         ),
       ),
@@ -164,7 +163,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: isAddressValid()
+              color: addressIsValid
                   ? HermezColors.blueyGreyThree
                   : HermezColors.redError,
               width: 2,
@@ -179,6 +178,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                 Expanded(
                   child: AddressInput(
                     controller: addressController,
+                    layerOne: store.state.txLevel == TransactionLevel.LEVEL1,
                     onChanged: (value) {
                       setState(() {
                         addressIsValid = isAddressValid();
@@ -204,6 +204,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                   setState(() {
                                     addressController.clear();
                                     addressController.text = result;
+                                    addressIsValid = isAddressValid();
                                   });
                                 });
                               },
@@ -222,13 +223,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                         icon: new Icon(Icons.close),
                         onPressed: () => setState(() {
                           addressController.clear();
+                          addressIsValid = isAddressValid();
                         }),
                       ),
               ],
             ),
           ),
         ),
-        isAddressValid()
+        addressIsValid
             ? SizedBox(
                 height: 40,
               )
@@ -478,57 +480,6 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
     );
   }
 
-  Widget _buildAddressToRow(
-      BuildContext context, dynamic element, dynamic addressController) {
-    // returns a row with the desired properties
-    return Container(
-        padding: EdgeInsets.only(bottom: 15.0),
-        child: FlatButton(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              side: BorderSide(color: Color.fromRGBO(130, 130, 130, 1.0))),
-          padding: EdgeInsets.all(10.0),
-          color: Colors.transparent,
-          textColor: Colors.black,
-          child: ListTile(
-              title: Row(
-            children: <Widget>[
-              Expanded(
-                  child: AddressInput(
-                controller: addressController,
-              )),
-              Container(
-                child: FlatButton(
-                  child: Text(
-                    "Paste",
-                    style: TextStyle(
-                      color: Color.fromRGBO(130, 130, 130, 1.0),
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  onPressed: () {
-                    getClipBoardData().then((String result) {
-                      addressController.clear();
-                      addressController.text = result;
-                    });
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              Container(
-                  alignment: Alignment.centerLeft,
-                  child: Image.asset(
-                    "assets/scan.png",
-                    color: Color.fromRGBO(130, 130, 130, 1.0),
-                  )),
-            ],
-          )), //title to be name of the crypto
-        ));
-  }
-
   Future<String> getClipBoardData() async {
     ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     return data.text;
@@ -536,13 +487,17 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
 
   bool buttonIsEnabled() {
     return amountIsValid &&
-        isAddressValid() &&
+        addressIsValid &&
         amountController.value.text.isNotEmpty &&
         addressController.value.text.isNotEmpty;
   }
 
   bool isAddressValid() {
-    final regex = RegExp('^hez:0x[a-fA-F0-9]{40}\$');
+    return addressController.value.text.isEmpty ||
+        AddressUtils.isValidEthereumAddress(addressController.value.text);
+    /*final regex = RegExp(store.state.txLevel == TransactionLevel.LEVEL1
+        ? '^(0?[xX]?)[a-fA-F0-9]{0,}\$' /*'^0x[a-fA-F0-9]{40}\$'*/
+        : '^([hH]?[eE]?[zZ]?:?0?[xX]?)[a-fA-F0-9]{0,}\$' /*'^hez:0x[a-fA-F0-9]{40}\$'*/);
     try {
       final matches = regex.allMatches(addressController.value.text);
       for (Match match in matches) {
@@ -551,11 +506,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
           return true;
         }
       }
-      return addressController.value.text.isEmpty;
+      return false;
     } catch (e) {
       // Invalid regex
       assert(false, e.toString());
       return true;
-    }
+    }*/
   }
 }
