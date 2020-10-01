@@ -23,10 +23,10 @@ class TransferAmountForm extends StatefulWidget {
       : super(key: key);
 
   final L1Account account;
-  final int amount;
+  final double amount;
   final WalletHandler store;
   final TransactionType amountType;
-  final void Function(String token, String amount, String addressTo) onSubmit;
+  final void Function(double amount, String token, String addressTo) onSubmit;
 
   @override
   _TransferAmountFormState createState() =>
@@ -38,10 +38,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       this.account, this.amount, this.store, this.amountType, this.onSubmit);
 
   final L1Account account;
-  final int amount;
+  final double amount;
   final WalletHandler store;
   final TransactionType amountType;
-  final void Function(String token, String amount, String addressTo) onSubmit;
+  final void Function(double amount, String token, String addressTo) onSubmit;
   bool amountIsValid = true;
   bool addressIsValid = true;
   bool defaultCurrencySelected = true;
@@ -91,7 +91,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     onPressed: buttonIsEnabled()
                         ? () {
                             this.onSubmit(
-                                amountController.value.text,
+                                !defaultCurrencySelected
+                                    ? double.parse(amountController.value.text)
+                                    : double.parse(
+                                            amountController.value.text) /
+                                        (currency == "EUR"
+                                            ? account.USD *
+                                                widget.store.state.exchangeRatio
+                                            : account.USD),
                                 amountController.value.text,
                                 addressController.value.text);
                           }

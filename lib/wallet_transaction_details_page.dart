@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 import 'components/wallet/transaction_details_form.dart';
 
 class TransactionDetailsArguments {
+  final WalletHandler store;
   final TransactionType amountType;
-  final dynamic token;
-  final String amount;
+  final L1Account account;
+  final double amount;
+  final String addressTo;
 
-  TransactionDetailsArguments(this.amountType, this.token, this.amount);
+  TransactionDetailsArguments(
+      this.store, this.amountType, this.account, this.amount, this.addressTo);
 }
 
 class TransactionDetailsPage extends StatefulWidget {
@@ -54,8 +59,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           _buildAmountRow(),
           Expanded(
             child: TransferSummaryForm(
-              token: widget.arguments.token,
+              store: widget.arguments.store,
+              account: widget.arguments.account,
               transactionType: widget.arguments.amountType,
+              addressTo: widget.arguments.addressTo,
               onSubmit: (address, amount) async {
                 //var success = await transferStore.transfer(address, amount);
                 //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
@@ -106,6 +113,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   Widget _buildAmountRow() {
+    final String currency =
+        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
     // returns a row with the desired properties
     return Container(
         color: HermezColors.lightOrange,
@@ -116,7 +125,17 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                   margin: EdgeInsets.only(top: 20.0),
                   child: Text(
-                    "€26.31",
+                    currency == "EUR"
+                        ? "€" +
+                            (widget.arguments.amount *
+                                    (widget.arguments.account.USD *
+                                        widget.arguments.store.state
+                                            .exchangeRatio))
+                                .toStringAsFixed(2)
+                        : '\$' +
+                            (widget.arguments.amount *
+                                    widget.arguments.account.USD)
+                                .toStringAsFixed(2),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: HermezColors.blackTwo,
@@ -128,7 +147,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                 margin: EdgeInsets.only(top: 15.0, bottom: 30.0),
                 child: Text(
-                  "24.56 USDT",
+                  (widget.arguments.amount).toStringAsFixed(2) +
+                      " " +
+                      widget.arguments.account.tokenSymbol,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: HermezColors.steel,

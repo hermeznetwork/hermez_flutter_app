@@ -67,9 +67,11 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
           //var success = await transferStore.transfer(address, amount);
           Navigator.pushReplacementNamed(context, "/transaction_details",
               arguments: TransactionDetailsArguments(
+                  widget.arguments.store,
                   widget.arguments.amountType,
                   widget.arguments.account,
-                  amount));
+                  amount,
+                  address));
           //if (success) {
           //Navigator.popUntil(context, ModalRoute.withName('/'));
           //}

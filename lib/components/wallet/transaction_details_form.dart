@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 class TransferSummaryForm extends HookWidget {
   TransferSummaryForm({
-    this.token,
+    this.store,
+    this.account,
     this.amount,
     this.transactionType,
     this.transactionDate,
+    this.addressTo,
     @required this.onSubmit,
   });
 
-  final dynamic token;
+  final WalletHandler store;
+  final L1Account account;
   final int amount;
   final TransactionType transactionType;
   final DateTime transactionDate;
+  final String addressTo;
   final void Function(String token, String amount) onSubmit;
 
   @override
@@ -35,7 +42,7 @@ class TransferSummaryForm extends HookWidget {
             context: context,
             color: HermezColors.blueyGreyThree,
             tiles: [
-          transactionType == TransactionType.DEPOSIT
+          transactionDate == null
               ? Container()
               : ListTile(
                   title: Text('Status',
@@ -68,23 +75,35 @@ class TransferSummaryForm extends HookWidget {
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
                         )),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text('My Ethereum address',
-                          style: TextStyle(
-                            color: HermezColors.black,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
-                          )),
-                    )
+                    transactionType == TransactionType.SEND
+                        ? Align(
+                            alignment: Alignment.centerRight,
+                            child: Text('My Ethereum address',
+                                style: TextStyle(
+                                  color: HermezColors.black,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                          )
+                        : Container()
                   ],
                 ),
                 SizedBox(height: 7),
                 Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      '0x8D70...461B5',
+                      transactionType == TransactionType.SEND
+                          ? "0x" +
+                              AddressUtils.strip0x(
+                                      store.state.address.substring(0, 6))
+                                  .toUpperCase() +
+                              " ･･･ " +
+                              store.state.address
+                                  .substring(store.state.address.length - 5,
+                                      store.state.address.length)
+                                  .toUpperCase()
+                          : '0x8D70...461B5',
                       style: TextStyle(
                         color: HermezColors.blueyGreyTwo,
                         fontSize: 16,
@@ -110,30 +129,55 @@ class TransferSummaryForm extends HookWidget {
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
                         )),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text('My Hermez address',
-                          style: TextStyle(
-                            color: HermezColors.black,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
-                          )),
-                    )
+                    transactionType == TransactionType.SEND
+                        ? Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              "0x" +
+                                  AddressUtils.strip0x(
+                                          addressTo.substring(0, 6))
+                                      .toUpperCase() +
+                                  " ･･･ " +
+                                  addressTo
+                                      .substring(addressTo.length - 5,
+                                          addressTo.length)
+                                      .toUpperCase(),
+                              style: TextStyle(
+                                color: HermezColors.black,
+                                fontSize: 16,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ))
+                        : Align(
+                            alignment: Alignment.centerRight,
+                            child: Text('My Hermez address',
+                                style: TextStyle(
+                                  color: HermezColors.black,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                          )
                   ],
                 ),
                 SizedBox(height: 7),
-                Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'hez:0x8D70...461B5',
-                      style: TextStyle(
-                        color: HermezColors.blueyGreyTwo,
-                        fontSize: 16,
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ))
+                transactionType == TransactionType.SEND
+                    ? Container()
+                    : Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          addressTo.substring(0, 6) +
+                              " ･･･ " +
+                              addressTo.substring(
+                                  addressTo.length - 5, addressTo.length),
+                          style: TextStyle(
+                            color: HermezColors.blueyGreyTwo,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ))
               ],
             ),
           ),
