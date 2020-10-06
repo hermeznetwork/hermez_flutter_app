@@ -16,6 +16,8 @@ class _$Wallet extends Wallet {
   @override
   final BigInt ethBalance;
   @override
+  final double ethUSDPrice;
+  @override
   final WalletDefaultCurrency defaultCurrency;
   @override
   final double exchangeRatio;
@@ -36,6 +38,7 @@ class _$Wallet extends Wallet {
       this.privateKey,
       this.tokensBalance,
       this.ethBalance,
+      this.ethUSDPrice,
       this.defaultCurrency,
       this.exchangeRatio,
       this.txLevel,
@@ -69,6 +72,7 @@ class _$Wallet extends Wallet {
         privateKey == other.privateKey &&
         tokensBalance == other.tokensBalance &&
         ethBalance == other.ethBalance &&
+        ethUSDPrice == other.ethUSDPrice &&
         defaultCurrency == other.defaultCurrency &&
         exchangeRatio == other.exchangeRatio &&
         txLevel == other.txLevel &&
@@ -87,10 +91,12 @@ class _$Wallet extends Wallet {
                         $jc(
                             $jc(
                                 $jc(
-                                    $jc($jc(0, address.hashCode),
-                                        privateKey.hashCode),
-                                    tokensBalance.hashCode),
-                                ethBalance.hashCode),
+                                    $jc(
+                                        $jc($jc(0, address.hashCode),
+                                            privateKey.hashCode),
+                                        tokensBalance.hashCode),
+                                    ethBalance.hashCode),
+                                ethUSDPrice.hashCode),
                             defaultCurrency.hashCode),
                         exchangeRatio.hashCode),
                     txLevel.hashCode),
@@ -106,6 +112,7 @@ class _$Wallet extends Wallet {
           ..add('privateKey', privateKey)
           ..add('tokensBalance', tokensBalance)
           ..add('ethBalance', ethBalance)
+          ..add('ethUSDPrice', ethUSDPrice)
           ..add('defaultCurrency', defaultCurrency)
           ..add('exchangeRatio', exchangeRatio)
           ..add('txLevel', txLevel)
@@ -154,6 +161,10 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   BigInt get ethBalance => _$this._ethBalance;
   set ethBalance(BigInt ethBalance) => _$this._ethBalance = ethBalance;
 
+  double _ethUSDPrice;
+  double get ethUSDPrice => _$this._ethUSDPrice;
+  set ethUSDPrice(double ethUSDPrice) => _$this._ethUSDPrice = ethUSDPrice;
+
   bool _loading;
   bool get loading => _$this._loading;
   set loading(bool loading) => _$this._loading = loading;
@@ -171,6 +182,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _privateKey = _$v.privateKey;
       _tokensBalance = _$v.tokensBalance;
       _ethBalance = _$v.ethBalance;
+      _ethUSDPrice = _$v.ethUSDPrice;
       _defaultCurrency = _$v.defaultCurrency;
       _exchangeRatio = _$v.exchangeRatio;
       _txLevel = _$v.txLevel;
@@ -205,6 +217,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               privateKey: privateKey,
               tokensBalance: tokensBalance,
               ethBalance: ethBalance,
+              ethUSDPrice: ethUSDPrice,
               defaultCurrency: defaultCurrency,
               exchangeRatio: exchangeRatio,
               txLevel: txLevel,

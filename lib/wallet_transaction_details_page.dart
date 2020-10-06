@@ -5,6 +5,7 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 import 'components/wallet/transaction_details_form.dart';
+import 'context/transfer/wallet_transfer_provider.dart';
 
 class TransactionDetailsArguments {
   final WalletHandler store;
@@ -30,7 +31,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   @override
   Widget build(BuildContext context) {
     // final amountController = useTextEditingController();
-    //var transferStore = useWalletTransfer(context);
+    var transferStore = useWalletTransfer(context);
     //var qrcodeAddress = useState();
 
     return Scaffold(
@@ -64,12 +65,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               transactionType: widget.arguments.amountType,
               addressTo: widget.arguments.addressTo,
               onSubmit: (address, amount) async {
-                //var success = await transferStore.transfer(address, amount);
+                var success = await transferStore.transferEth(
+                    widget.arguments.store.state.address, address, amount);
                 //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
-                Navigator.of(context).pushReplacementNamed("/transaction_info");
-                //if (success) {
-                //Navigator.popUntil(context, ModalRoute.withName('/'));
-                //}
+                if (success) {
+                  Navigator.of(context)
+                      .pushReplacementNamed("/transaction_info");
+                }
               },
             ),
           ),
@@ -84,9 +86,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14.0),
                     side: BorderSide(color: HermezColors.darkOrange)),
-                onPressed: () {
-                  Navigator.of(context)
-                      .pushReplacementNamed("/transaction_info");
+                onPressed: () async {
+                  var success = await transferStore.transferEth(
+                      widget.arguments.store.state.address,
+                      widget.arguments.addressTo,
+                      widget.arguments.amount.toString());
+                  //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
+                  if (success) {
+                    Navigator.of(context)
+                        .pushReplacementNamed("/transaction_info");
+                  }
                   //this.onSubmit(
                   //amountController.value.text,
                   //amountController.value.text,

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
@@ -194,6 +196,29 @@ class WalletHandler {
     return supportedToken;
   }
 
+  Future<BigInt> getEstimatedFee(String from, String to, BigInt amount) async {
+    web3.EthereumAddress fromAddress;
+    web3.EthereumAddress toAddress;
+    web3.EtherAmount gasPrice = await _contractService.getGasPrice();
+    if (from != null && from.isNotEmpty) {
+      fromAddress = web3.EthereumAddress.fromHex(from);
+    }
+    if (to != null && to.isNotEmpty) {
+      toAddress = web3.EthereumAddress.fromHex(to);
+    }
+    web3.EtherAmount estimatedGas = web3.EtherAmount.fromUnitAndValue(
+        web3.EtherUnit.wei,
+        await _contractService.getEstimatedGas(
+            fromAddress,
+            toAddress,
+            web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei,
+                BigInt.from(amount.toDouble() * pow(10, 18)))));
+
+    BigInt estimatedFee = gasPrice.getInWei * estimatedGas.getInWei;
+
+    return estimatedFee;
+  }
+
   void updateDefaultCurrency(WalletDefaultCurrency defaultCurrency) {
     _configurationService.setDefaultCurrency(defaultCurrency);
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
@@ -249,7 +274,10 @@ class WalletHandler {
 
   Future<void> resetWallet() async {
     await _configurationService.setMnemonic("");
+    await _configurationService.setPrivateKey("");
+    await _configurationService.setEthereumAddress("");
     await _configurationService.setDefaultCurrency(WalletDefaultCurrency.EUR);
+    await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
     await _configurationService.setupDone(false);
   }
 }

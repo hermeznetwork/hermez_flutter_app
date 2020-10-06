@@ -114,8 +114,12 @@ Map<String, WidgetBuilder> getRoutes(context) {
         ),
     '/transfer_amount': (BuildContext context) =>
         WalletAmountPage(arguments: ModalRoute.of(context).settings.arguments),
-    '/transaction_details': (BuildContext context) => TransactionDetailsPage(
-        arguments: ModalRoute.of(context).settings.arguments),
+    '/transaction_details': (BuildContext context) => WalletTransferProvider(
+          builder: (context, store) {
+            return TransactionDetailsPage(
+                arguments: ModalRoute.of(context).settings.arguments);
+          },
+        ),
     '/transaction_info': (BuildContext context) => TransactionInfoPage(),
     '/qrcode_reader': (BuildContext context) => QRCodeReaderPage(
           title: "Scan QRCode",

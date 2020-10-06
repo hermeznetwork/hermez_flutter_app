@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/components/form/address_input.dart';
@@ -9,6 +11,7 @@ import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:web3dart/web3dart.dart';
 
 import '../../wallet_token_selector_page.dart';
 
@@ -46,8 +49,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   bool addressIsValid = true;
   bool defaultCurrencySelected = true;
 
-  final amountController = TextEditingController();
-  final addressController = TextEditingController();
+  final TextEditingController amountController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
 
   @override
   void dispose() {
@@ -57,112 +60,141 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    //final toController = useTextEditingController(text: token);
+  Widget build(BuildContext context) => FutureBuilder(
+        future: getEstimatedFee(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            BigInt estimatedFee = snapshot.data;
+            EtherAmount fee =
+                EtherAmount.fromUnitAndValue(EtherUnit.wei, estimatedFee);
+            final String currency =
+                widget.store.state.defaultCurrency.toString().split('.').last;
 
-    //final transferStore = useWalletTransfer(context);
+            return Container(
+              padding: EdgeInsets.all(10),
+              color: Colors.white,
+              child: SingleChildScrollView(
+                child: PaperForm(
+                  actionButtons: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 52,
+                          width: double.infinity,
+                          child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14.0),
+                                side: BorderSide(
+                                    color: buttonIsEnabled()
+                                        ? HermezColors.darkOrange
+                                        : HermezColors.blueyGreyTwo)),
+                            onPressed: buttonIsEnabled()
+                                ? () {
+                                    this.onSubmit(
+                                        !defaultCurrencySelected
+                                            ? double.parse(
+                                                amountController.value.text)
+                                            : double.parse(amountController
+                                                    .value.text) /
+                                                (currency == "EUR"
+                                                    ? account.USD *
+                                                        widget.store.state
+                                                            .exchangeRatio
+                                                    : account.USD),
+                                        amountController.value.text,
+                                        addressController.value.text);
+                                  }
+                                : null,
+                            disabledColor: HermezColors.blueyGreyTwo,
+                            padding: EdgeInsets.all(18.0),
+                            color: HermezColors.darkOrange,
+                            textColor: Colors.white,
+                            child: Text(
+                                amountType == TransactionType.DEPOSIT
+                                    ? "Continue"
+                                    : "Next",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(top: 20.0),
+                          child: Text(
+                            defaultCurrencySelected
+                                ? "Fee " +
+                                    ((currency == "EUR"
+                                                ? account.USD *
+                                                    widget.store.state
+                                                        .exchangeRatio
+                                                : account.USD) *
+                                            (estimatedFee.toDouble() /
+                                                pow(10, 18)))
+                                        .toString() +
+                                    " " +
+                                    currency
+                                : "Fee " +
+                                    (estimatedFee.toDouble() / pow(10, 18))
+                                        .toString() +
+                                    " ETH",
+                            style: TextStyle(
+                              color: HermezColors.blueyGreyTwo,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  children: <Widget>[
+                    AccountRow(
+                      account.publicKey,
+                      account.tokenSymbol,
+                      currency == "EUR"
+                          ? account.USD * widget.store.state.exchangeRatio
+                          : account.USD,
+                      currency,
+                      double.parse(account.balance),
+                      true,
+                      defaultCurrencySelected,
+                      (token, amount) async {
+                        Navigator.of(context)
+                            .pushReplacementNamed("/token_selector",
+                                arguments: TokenSelectorArguments(
+                                    /*txLevel,*/ amountType,
+                                    widget.store));
+                      },
+                    ),
+                    _buildAmountRow(context, null, amountController),
+                    amountType == TransactionType.SEND
+                        ? addressRow()
+                        : Container()
+                  ],
+                ),
+              ),
+            );
+          } else {
+            // We can show the loading view until the data comes back.
+            debugPrint('Step 1, build loading widget');
+            return CircularProgressIndicator();
+          }
+        },
+      );
+  //final toController = useTextEditingController(text: token);
 
-    /*useEffect(() {
+  //final transferStore = useWalletTransfer(context);
+
+  /*useEffect(() {
       if (token != null) toController.value = TextEditingValue(text: token);
       return null;
     }, [token]);*/
-
-    final String currency =
-        widget.store.state.defaultCurrency.toString().split('.').last;
-
-    return Container(
-      padding: EdgeInsets.all(10),
-      color: Colors.white,
-      child: SingleChildScrollView(
-        child: PaperForm(
-          actionButtons: <Widget>[
-            Column(
-              children: <Widget>[
-                SizedBox(
-                  height: 52,
-                  width: double.infinity,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.0),
-                        side: BorderSide(
-                            color: buttonIsEnabled()
-                                ? HermezColors.darkOrange
-                                : HermezColors.blueyGreyTwo)),
-                    onPressed: buttonIsEnabled()
-                        ? () {
-                            this.onSubmit(
-                                !defaultCurrencySelected
-                                    ? double.parse(amountController.value.text)
-                                    : double.parse(
-                                            amountController.value.text) /
-                                        (currency == "EUR"
-                                            ? account.USD *
-                                                widget.store.state.exchangeRatio
-                                            : account.USD),
-                                amountController.value.text,
-                                addressController.value.text);
-                          }
-                        : null,
-                    disabledColor: HermezColors.blueyGreyTwo,
-                    padding: EdgeInsets.all(18.0),
-                    color: HermezColors.darkOrange,
-                    textColor: Colors.white,
-                    child: Text(
-                        amountType == TransactionType.DEPOSIT
-                            ? "Continue"
-                            : "Next",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
-                        )),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.only(top: 20.0),
-                  child: Text(
-                    defaultCurrencySelected
-                        ? "Fee 0.1 " + currency
-                        : "Fee 0.1 " + account.tokenSymbol,
-                    style: TextStyle(
-                      color: HermezColors.blueyGreyTwo,
-                      fontSize: 16,
-                      fontFamily: 'ModernEra',
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ],
-          children: <Widget>[
-            AccountRow(
-              account.publicKey,
-              account.tokenSymbol,
-              currency == "EUR"
-                  ? account.USD * widget.store.state.exchangeRatio
-                  : account.USD,
-              currency,
-              double.parse(account.balance),
-              true,
-              defaultCurrencySelected,
-              (token, amount) async {
-                Navigator.of(context).pushReplacementNamed("/token_selector",
-                    arguments: TokenSelectorArguments(
-                        /*txLevel,*/ amountType,
-                        widget.store));
-              },
-            ),
-            _buildAmountRow(context, null, amountController),
-            amountType == TransactionType.SEND ? addressRow() : Container()
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget addressRow() {
     return Column(
@@ -490,6 +522,35 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   Future<String> getClipBoardData() async {
     ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     return data.text;
+  }
+
+  Future<BigInt> getEstimatedFee() async {
+    double amount = 0;
+    if (amountController.value.text.isNotEmpty) {
+      amount = !defaultCurrencySelected
+          ? double.parse(amountController.value.text)
+          : double.parse(amountController.value.text) /
+              /*(currency == "EUR"
+                ? account.USD * widget.store.state.exchangeRatio*
+                :*/
+              account.USD /*)*/;
+    }
+    String addressFrom;
+    String addressTo;
+    if (store.state.ethBalance.toDouble() > 0) {
+      if (AddressUtils.isValidEthereumAddress(store.state.address)) {
+        addressFrom = store.state.address;
+      }
+      if (AddressUtils.isValidEthereumAddress(addressController.value.text)) {
+        addressTo = addressController.value.text;
+      }
+      BigInt estimatedFee = await store.getEstimatedFee(
+          addressFrom, addressTo, BigInt.from(amount));
+      return estimatedFee;
+    } else {
+      return BigInt.zero;
+      // TODO handle showing error
+    }
   }
 
   bool buttonIsEnabled() {

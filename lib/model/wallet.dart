@@ -18,6 +18,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   BigInt get ethBalance;
 
+  double get ethUSDPrice;
+
   WalletDefaultCurrency get defaultCurrency;
 
   double get exchangeRatio;

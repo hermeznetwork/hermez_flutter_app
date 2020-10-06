@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -30,7 +31,7 @@ class TransferSummaryForm extends HookWidget {
     //final toController = useTextEditingController(text: token);
     final addressController = useTextEditingController();
     final amountController = useTextEditingController();
-    //final transferStore = useWalletTransfer(context);
+    final transferStore = useWalletTransfer(context);
 
     /*useEffect(() {
       if (token != null) toController.value = TextEditingValue(text: token);

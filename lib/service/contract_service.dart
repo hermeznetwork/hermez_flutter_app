@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:web3dart/web3dart.dart';
 
+import 'configuration_service.dart';
+
 typedef TransferEvent = void Function(
     EthereumAddress from, EthereumAddress to, BigInt value);
 
@@ -27,11 +29,14 @@ abstract class IContractService {
 class ContractService implements IContractService {
   ContractService(
     this.client,
+    this._configService,
     //this.tokenContractsAddress,
     /*this.contracts*/
   );
 
   final Web3Client client;
+  IConfigurationService _configService;
+  //Credentials credentials;
   //final List<String> tokenContractsAddress;
   //final List<DeployedContract> contract;
 
@@ -47,6 +52,85 @@ class ContractService implements IContractService {
   Future<Credentials> getCredentials(String privateKey) =>
       client.credentialsFromPrivateKey(privateKey);
 
+  Future<String> transfer(String privateKey, EthereumAddress senderAddress,
+      EthereumAddress receiverAddress, BigInt amountInWei,
+      {TransferEvent onTransfer, Function onError}) async {
+    print(
+        'transfer --> privateKey: $privateKey, sender: $senderAddress, receiver: $receiverAddress, amountInWei: $amountInWei');
+
+    /*bool isApproved = await _approveCb;
+    if (!isApproved) {
+      throw 'transaction not approved';
+    }*/
+
+    /*StreamSubscription event;
+    // Workaround once sendTransacton doesn't return a Promise containing confirmation / receipt
+    if (onTransfer != null) {
+      event = listenTransfer(
+            (from, to, value) async {
+          onTransfer(from, to, value);
+          await event.cancel();
+        },
+        contract,
+        take: 1,
+      );
+    }*/
+
+    EtherAmount amount =
+        EtherAmount.fromUnitAndValue(EtherUnit.wei, amountInWei);
+
+    try {
+      String txHash = await _sendTransactionAndWaitForReceipt(
+          privateKey, senderAddress, receiverAddress, amount);
+      print('transaction $txHash successful');
+      return txHash;
+    } catch (ex) {
+      if (onError != null) {
+        onError(ex);
+      }
+      return null;
+    }
+  }
+
+  Future<String> _sendTransactionAndWaitForReceipt(
+      String privateKey,
+      EthereumAddress senderAddress,
+      EthereumAddress receiverAddress,
+      EtherAmount amount) async {
+    print('sendTransactionAndWaitForReceipt');
+    Transaction transaction =
+        Transaction(from: senderAddress, to: receiverAddress, value: amount);
+
+    final credentials = await this.getCredentials(privateKey);
+    final networkId = await client.getNetworkId();
+
+    String txHash = await client.sendTransaction(credentials, transaction,
+        chainId: networkId);
+    TransactionReceipt receipt;
+    try {
+      receipt = await client.getTransactionReceipt(txHash);
+    } catch (err) {
+      print('could not get $txHash receipt, try again');
+    }
+    int delay = 1;
+    int retries = 10;
+    while (receipt == null) {
+      print('waiting for receipt');
+      await Future.delayed(new Duration(seconds: delay));
+      delay *= 2;
+      retries--;
+      if (retries == 0) {
+        throw 'transaction $txHash not mined yet...';
+      }
+      try {
+        receipt = await client.getTransactionReceipt(txHash);
+      } catch (err) {
+        print('could not get $txHash receipt, try again');
+      }
+    }
+    return txHash;
+  }
+
   Future<String> send(
       String privateKey,
       EthereumAddress receiver,
@@ -58,6 +142,8 @@ class ContractService implements IContractService {
     final credentials = await this.getCredentials(privateKey);
     final from = await credentials.extractAddress();
     final networkId = await client.getNetworkId();
+
+    EtherAmount etherAmount = await client.getGasPrice();
 
     final contract = await ContractParser.fromAssets('partialERC20ABI.json',
         tokenContractAddress.toString(), tokenContractName);
@@ -112,6 +198,23 @@ class ContractService implements IContractService {
     );
 
     return response.first as BigInt;
+  }
+
+  Future<BigInt> getEstimatedGas(
+    EthereumAddress from,
+    EthereumAddress to,
+    EtherAmount amount,
+  ) async {
+    return client.estimateGas(
+      sender: from,
+      to: to,
+      value: amount,
+      /*gasPrice: await client.getGasPrice()*/
+    );
+  }
+
+  Future<EtherAmount> getGasPrice() {
+    return client.getGasPrice();
   }
 
   // ERC20 approve the spender account and set the limit of your funds that they are authorized to spend

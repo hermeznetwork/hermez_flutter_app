@@ -82,6 +82,8 @@ class AddressService implements IAddressService {
     await _configService.setPrivateKey(privateKey);
     await _configService.setEthereumAddress(address.toString());
     await _configService.setupDone(true);
+
+    print("Config: $_configService.getEthereumAddress()");
     return true;
   }
 

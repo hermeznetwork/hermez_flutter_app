@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
+
 import 'wallet_receiver_page.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -8,7 +9,7 @@ import 'wallet_receiver_page.dart';
 // title and message.
 
 class AmountPage extends StatefulWidget {
-  AmountPage({Key key}) : super(key : key);
+  AmountPage({Key key}) : super(key: key);
 
   @override
   _AmountPageState createState() => _AmountPageState();
@@ -19,25 +20,27 @@ class _AmountPageState extends State<AmountPage> {
   String currentAmount = "0.0";
 
   var outlineInputBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10.0),
-    borderSide: BorderSide(color: Colors.transparent)
-  );
+      borderRadius: BorderRadius.circular(10.0),
+      borderSide: BorderSide(color: Colors.transparent));
 
   int pinIndex = 0;
   int pinPosition = 1;
 
   bool isConfirming = false;
 
+  BigInt estimatedFee = BigInt.zero;
+
   String currentFeeText = "€0.09 fee";
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: SafeArea(
-      child: Column(
-        children: <Widget>[
-          buildExitButton(),
-          Expanded(
-            child: Container(
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            buildExitButton(),
+            Expanded(
+                child: Container(
               alignment: Alignment.center,
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -48,14 +51,13 @@ class _AmountPageState extends State<AmountPage> {
                   buildFeeText(currentFeeText),
                 ],
               ),
-            )
-          ),
-          buildNumberPad(),
-          buildButtonsRow(),
-          SizedBox(height: 20.0),
-        ],
+            )),
+            buildNumberPad(),
+            buildButtonsRow(),
+            SizedBox(height: 20.0),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -66,26 +68,26 @@ class _AmountPageState extends State<AmountPage> {
         child: Padding(
           padding: const EdgeInsets.only(bottom: 32),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly ,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   KeyboardNumber(
                     n: "1",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("1");
                     },
                   ),
                   KeyboardNumber(
                     n: "2",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("2");
                     },
                   ),
                   KeyboardNumber(
                     n: "3",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("3");
                     },
                   ),
@@ -96,19 +98,19 @@ class _AmountPageState extends State<AmountPage> {
                 children: <Widget>[
                   KeyboardNumber(
                     n: "4",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("4");
                     },
                   ),
                   KeyboardNumber(
                     n: "5",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("5");
                     },
                   ),
                   KeyboardNumber(
                     n: "6",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("6");
                     },
                   ),
@@ -119,19 +121,19 @@ class _AmountPageState extends State<AmountPage> {
                 children: <Widget>[
                   KeyboardNumber(
                     n: "7",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("7");
                     },
                   ),
                   KeyboardNumber(
                     n: "8",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("8");
                     },
                   ),
                   KeyboardNumber(
                     n: "9",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("9");
                     },
                   ),
@@ -142,19 +144,19 @@ class _AmountPageState extends State<AmountPage> {
                 children: <Widget>[
                   KeyboardNumber(
                     n: ".",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup(".");
                     },
                   ),
                   KeyboardNumber(
                     n: "0",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("0");
                     },
                   ),
                   KeyboardNumber(
                     n: "<",
-                    onPressed:() {
+                    onPressed: () {
                       pinIndexSetup("<");
                     },
                   ),
@@ -173,56 +175,56 @@ class _AmountPageState extends State<AmountPage> {
         children: <Widget>[
           SizedBox(width: 20.0),
           Expanded(
-          child:
-          RaisedButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-                side: BorderSide(color: Colors.black)),
-            onPressed: () {
-              Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
-            },
-            padding: EdgeInsets.all(16.0),
-            color: Colors.black,
-            textColor: Colors.white,
-            child: Text("Request",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                )),
-          ),
+            child: RaisedButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  side: BorderSide(color: Colors.black)),
+              onPressed: () {
+                Navigator.of(context).pushNamed("/receiver",
+                    arguments: ReceiverArguments(ReceiverType.REQUEST));
+              },
+              padding: EdgeInsets.all(16.0),
+              color: Colors.black,
+              textColor: Colors.white,
+              child: Text("Request",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  )),
+            ),
           ),
           SizedBox(width: 20.0),
           Expanded(
-          child:
-          RaisedButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-                side: BorderSide(color: Colors.black)),
-            onPressed: () {
-              Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.SEND));
-            },
-            color: Colors.black,
-            textColor: Colors.white,
-            padding: EdgeInsets.all(16.0),
-            child: Text("Send",
+            child: RaisedButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  side: BorderSide(color: Colors.black)),
+              onPressed: () {
+                Navigator.of(context).pushNamed("/receiver",
+                    arguments: ReceiverArguments(ReceiverType.SEND));
+              },
+              color: Colors.black,
+              textColor: Colors.white,
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                "Send",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
-                ),),
-          ),
+                ),
+              ),
+            ),
           ),
           SizedBox(width: 20.0),
-          ]
-    );
+        ]);
   }
 
   pinIndexSetup(String text) {
     setState(() {
       if (text == "<") {
         if (currentAmount == "0.0") {
-
         } else {
           currentAmount = currentAmount.substring(0, currentAmount.length - 1);
           if (currentAmount == "") {
@@ -234,7 +236,6 @@ class _AmountPageState extends State<AmountPage> {
         }
       } else if (text == ".") {
         if (currentAmount.contains(".")) {
-
         } else {
           currentAmount = currentAmount + text;
         }
@@ -255,26 +256,28 @@ class _AmountPageState extends State<AmountPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-    Expanded( // Constrains AutoSizeText to the width of the Row
-    child:
-        AutoSizeText(
-          currentCurrency + currentAmount,
-          maxLines: 1,
-          group: myGroup,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'ModernEra',
-            fontWeight: FontWeight.w700,
-            fontSize: 60),
+        Expanded(
+          // Constrains AutoSizeText to the width of the Row
+          child: AutoSizeText(
+            currentCurrency + currentAmount,
+            maxLines: 1,
+            group: myGroup,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w700,
+                fontSize: 60),
+          ),
         ),
-    ),
       ],
     );
   }
 
   buildFeeText(String text) {
     return Text(
-      currentCurrency + ((double.parse(currentAmount).toDouble()/100) * 2).toString() + " fee",
+      currentCurrency +
+          ((double.parse(currentAmount).toDouble() / 100) * 2).toString() +
+          " fee",
       style: TextStyle(
         color: Colors.grey,
         fontSize: 18.0,
@@ -288,21 +291,20 @@ class _AmountPageState extends State<AmountPage> {
       children: <Widget>[
         Container(
           padding: EdgeInsets.all(16.0),
-              alignment: Alignment.center,
-              child:
-                  Text(
-                      "Show amount in EUR ▼",//"\$${EthAmountFormatter(tokenBalance).format()}",
-                      style: TextStyle(
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black54,
-                          fontSize: 16)
-                    //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
-                  ),
+          alignment: Alignment.center,
+          child: Text(
+              "Show amount in EUR ▼", //"\$${EthAmountFormatter(tokenBalance).format()}",
+              style: TextStyle(
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black54,
+                  fontSize: 16)
+              //style: Theme.of(context).textTheme.body2.apply(fontSizeDelta: 6),
+              ),
         ),
-    new Align(alignment: Alignment.centerRight,
-    child:
-         MaterialButton(
+        new Align(
+          alignment: Alignment.centerRight,
+          child: MaterialButton(
             onPressed: () {
               if (Navigator.canPop(context)) {
                 Navigator.pop(context, false);
@@ -346,7 +348,7 @@ class KeyboardNumber extends StatelessWidget {
           "$n",
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 24*MediaQuery.of(context).textScaleFactor,
+            fontSize: 24 * MediaQuery.of(context).textScaleFactor,
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
@@ -355,7 +357,3 @@ class KeyboardNumber extends StatelessWidget {
     );
   }
 }
-
-
-
-
