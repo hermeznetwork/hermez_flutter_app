@@ -65,8 +65,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               transactionType: widget.arguments.amountType,
               addressTo: widget.arguments.addressTo,
               onSubmit: (address, amount) async {
-                var success = await transferStore.transferEth(
-                    widget.arguments.store.state.address, address, amount);
+                var success = await transferStore.transferEth(widget.arguments.store.state.privateKey, address, amount);
                 //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
                 if (success) {
                   Navigator.of(context)
@@ -88,7 +87,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     side: BorderSide(color: HermezColors.darkOrange)),
                 onPressed: () async {
                   var success = await transferStore.transferEth(
-                      widget.arguments.store.state.address,
+                      widget.arguments.store.state.privateKey,
                       widget.arguments.addressTo,
                       widget.arguments.amount.toString());
                   //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);

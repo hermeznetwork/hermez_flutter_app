@@ -52,36 +52,23 @@ class ContractService implements IContractService {
   Future<Credentials> getCredentials(String privateKey) =>
       client.credentialsFromPrivateKey(privateKey);
 
-  Future<String> transfer(String privateKey, EthereumAddress senderAddress,
-      EthereumAddress receiverAddress, BigInt amountInWei,
+  Future<String> sendEth(
+      String privateKey, EthereumAddress receiverAddress, BigInt amountInWei,
       {TransferEvent onTransfer, Function onError}) async {
-    print(
-        'transfer --> privateKey: $privateKey, sender: $senderAddress, receiver: $receiverAddress, amountInWei: $amountInWei');
+    /*final credentials = await this.getCredentials(privateKey);
+    final from = await credentials.extractAddress();*/
 
     /*bool isApproved = await _approveCb;
     if (!isApproved) {
       throw 'transaction not approved';
     }*/
 
-    /*StreamSubscription event;
-    // Workaround once sendTransacton doesn't return a Promise containing confirmation / receipt
-    if (onTransfer != null) {
-      event = listenTransfer(
-            (from, to, value) async {
-          onTransfer(from, to, value);
-          await event.cancel();
-        },
-        contract,
-        take: 1,
-      );
-    }*/
-
     EtherAmount amount =
         EtherAmount.fromUnitAndValue(EtherUnit.wei, amountInWei);
 
     try {
-      String txHash = await _sendTransactionAndWaitForReceipt(
-          privateKey, senderAddress, receiverAddress, amount);
+      String txHash =
+          await _sendTransaction(privateKey, receiverAddress, amount);
       print('transaction $txHash successful');
       return txHash;
     } catch (ex) {
@@ -92,17 +79,65 @@ class ContractService implements IContractService {
     }
   }
 
-  Future<String> _sendTransactionAndWaitForReceipt(
-      String privateKey,
-      EthereumAddress senderAddress,
-      EthereumAddress receiverAddress,
-      EtherAmount amount) async {
-    print('sendTransactionAndWaitForReceipt');
-    Transaction transaction =
-        Transaction(from: senderAddress, to: receiverAddress, value: amount);
+  Future<String> _sendTransaction(String privateKey,
+      EthereumAddress receiverAddress, EtherAmount amount) async {
+    print('sendTransaction');
 
     final credentials = await this.getCredentials(privateKey);
+    final from = await credentials.extractAddress();
     final networkId = await client.getNetworkId();
+
+    Transaction transaction =
+        Transaction(from: from, to: receiverAddress, value: amount);
+
+    print(
+        'transfer --> privateKey: $privateKey, sender: $from, receiver: $receiverAddress, amountInWei: $amount');
+
+    String txHash = await client.sendTransaction(credentials, transaction,
+        chainId: networkId);
+
+    return txHash;
+  }
+
+  Future<TransactionReceipt> getTransactionReceipt(String txHash) async {
+    TransactionReceipt receipt;
+    try {
+      receipt = await client.getTransactionReceipt(txHash);
+    } catch (err) {
+      print('could not get $txHash receipt, try again');
+    }
+    int delay = 1;
+    int retries = 10;
+    while (receipt == null) {
+      print('waiting for receipt');
+      await Future.delayed(new Duration(seconds: delay));
+      delay *= 2;
+      retries--;
+      if (retries == 0) {
+        throw 'transaction $txHash not mined yet...';
+      }
+      try {
+        receipt = await client.getTransactionReceipt(txHash);
+      } catch (err) {
+        print('could not get $txHash receipt, try again');
+      }
+    }
+    return receipt;
+  }
+
+  Future<String> _sendTransactionAndWaitForReceipt(String privateKey,
+      EthereumAddress receiverAddress, EtherAmount amount) async {
+    print('sendTransactionAndWaitForReceipt');
+
+    final credentials = await this.getCredentials(privateKey);
+    final from = await credentials.extractAddress();
+    final networkId = await client.getNetworkId();
+
+    Transaction transaction =
+        Transaction(from: from, to: receiverAddress, value: amount);
+
+    print(
+        'transfer --> privateKey: $privateKey, sender: $from, receiver: $receiverAddress, amountInWei: $amount');
 
     String txHash = await client.sendTransaction(credentials, transaction,
         chainId: networkId);
@@ -231,6 +266,32 @@ class ContractService implements IContractService {
 
     return response.first as bool;
   }
+
+  /*StreamSubscription listenEthTransfer(TransferEvent onTransfer, {int take}) {
+    var events = client.events(FilterOptions.events(
+      contract: contract,
+      event: _transferEvent(contract),
+    ));
+
+    if (take != null) {
+      events = events.take(take);
+    }
+
+    return events.listen((event) {
+      final decoded =
+          _transferEvent(contract).decodeResults(event.topics, event.data);
+
+      final from = decoded[0] as EthereumAddress;
+      final to = decoded[1] as EthereumAddress;
+      final value = decoded[2] as BigInt;
+
+      print('$from}');
+      print('$to}');
+      print('$value}');
+
+      onTransfer(from, to, value);
+    });
+  }*/
 
   StreamSubscription listenTransfer(
       TransferEvent onTransfer, DeployedContract contract,

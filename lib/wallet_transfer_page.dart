@@ -41,7 +41,9 @@ class WalletTransferPage extends HookWidget {
               address: qrcodeAddress.value,
               onSubmit: (address, amount) async {
                 var success =
-                    await transferStore.transfer(address, amount, "", "");
+                    await transferStore.transferEth("", address, amount);
+                //var success =
+                //    await transferStore.transfer(address, amount, "", "");
 
                 if (success) {
                   Navigator.popUntil(context, ModalRoute.withName('/'));

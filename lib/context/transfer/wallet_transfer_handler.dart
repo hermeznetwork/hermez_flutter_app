@@ -46,14 +46,14 @@ class WalletTransferHandler {
     return completer.future;
   }
 
-  Future<bool> transferEth(String from, String to, String amount) async {
+  Future<bool> transferEth(String privateKey, String to, String amount) async {
     var completer = new Completer<bool>();
-    var privateKey = await _configurationService.getPrivateKey();
+    //var privateKey = await _configurationService.getPrivateKey();
 
     _store.dispatch(WalletTransferStarted());
 
     try {
-      BigInt estimatedGas = await _contractService.getEstimatedGas(
+      /*BigInt estimatedGas = await _contractService.getEstimatedGas(
           EthereumAddress.fromHex(from),
           EthereumAddress.fromHex(to),
           EtherAmount.fromUnitAndValue(
@@ -63,11 +63,10 @@ class WalletTransferHandler {
 
       print("Estimated Gas: " + estimatedGas.toString());
       print("Gas Price in Wei: " + gasPrice.getInWei.toString());
-      print("Gas Price in Eth: " + gasPrice.getInEther.toString());
+      print("Gas Price in Eth: " + gasPrice.getInEther.toString());*/
 
-      String txHash = await _contractService.transfer(
+      String txHash = await _contractService.sendEth(
         privateKey,
-        EthereumAddress.fromHex(from),
         EthereumAddress.fromHex(to),
         BigInt.from(double.parse(amount) * pow(10, 18)),
         onTransfer: (from, to, value) {
@@ -95,7 +94,7 @@ class WalletTransferHandler {
     _store.dispatch(WalletTransferStarted());
 
     try {
-      await _contractService.send(
+      String txHash = await _contractService.send(
         privateKey,
         EthereumAddress.fromHex(to),
         BigInt.from(double.parse(amount) * pow(10, 18)),
@@ -109,6 +108,7 @@ class WalletTransferHandler {
           completer.complete(false);
         },
       );
+      completer.complete(txHash.isNotEmpty);
     } catch (ex) {
       _store.dispatch(WalletTransferError(ex.toString()));
       completer.complete(false);
