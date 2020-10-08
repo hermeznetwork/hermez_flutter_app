@@ -6,7 +6,6 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 import 'context/wallet/wallet_handler.dart';
-import 'context/wallet/wallet_provider.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable
@@ -14,25 +13,18 @@ import 'context/wallet/wallet_provider.dart';
 
 class WalletAccountDetailsArguments {
   final L1Account element;
+  WalletHandler store;
   //final Color color;
 
-  WalletAccountDetailsArguments(this.element /*this.color*/);
+  WalletAccountDetailsArguments(this.element, this.store /*this.color*/);
 }
 
 class WalletAccountDetailsPage extends HookWidget {
   WalletAccountDetailsPage(this.arguments);
   final WalletAccountDetailsArguments arguments;
 
-  WalletHandler store;
-
   @override
   Widget build(BuildContext context) {
-    store = useWallet(context);
-    useEffect(() {
-      store.initialise();
-      return null;
-    }, []);
-
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
@@ -74,63 +66,104 @@ class WalletAccountDetailsPage extends HookWidget {
             ),
             backgroundColor: HermezColors.lightOrange,
             elevation: 0),
-        body: Container(
-          color: HermezColors.lightOrange,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(height: 40),
-              SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                            "€50", //"\$${EthAmountFormatter(tokenBalance).format()}",
-                            style: TextStyle(
-                                color: HermezColors.blackTwo,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 32)),
-                      ])),
-              SizedBox(height: 10),
-              Text(
-                  "59,658680 USDT", //"\$${EthAmountFormatter(tokenBalance).format()}",
-                  style: TextStyle(
-                      fontFamily: 'ModernEra',
-                      fontWeight: FontWeight.w500,
-                      color: HermezColors.steel,
-                      fontSize: 18)),
-              SizedBox(height: 20),
-              buildButtonsRow(context),
-              SizedBox(height: 20),
-              Container(
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 30.0, top: 20.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      "Activity",
-                      style: TextStyle(
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18),
-                      textAlign: TextAlign.left,
+        body: FutureBuilder<List<dynamic>>(
+            future: getTransferEvents() /*apiClient.getSupportedTokens(null)*/,
+            builder:
+                (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  color: Colors.white,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: HermezColors.orange,
                     ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: Activity(
-                  address: store.state.address,
-                  defaultCurrency: store.state.defaultCurrency,
-                  cryptoList: store.state.cryptoList,
-                ),
-              )
-            ],
-          ),
-        ));
+                );
+              } else {
+                if (snapshot.hasError) {
+                  // while data is loading:
+                  return Container(
+                    color: Colors.white,
+                    child: Center(
+                      child: Text(
+                          'There was an error:' + snapshot.error.toString()),
+                    ),
+                  );
+                } else {
+                  if (snapshot.hasData) {
+                    // data loaded:
+                    //supportedTokens = snapshot.data;
+
+                    return Container(
+                      color: HermezColors.lightOrange,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          SizedBox(height: 40),
+                          SizedBox(
+                              width: double.infinity,
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                        "€50", //"\$${EthAmountFormatter(tokenBalance).format()}",
+                                        style: TextStyle(
+                                            color: HermezColors.blackTwo,
+                                            fontFamily: 'ModernEra',
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 32)),
+                                  ])),
+                          SizedBox(height: 10),
+                          Text(
+                              "59,658680 USDT", //"\$${EthAmountFormatter(tokenBalance).format()}",
+                              style: TextStyle(
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                  color: HermezColors.steel,
+                                  fontSize: 18)),
+                          SizedBox(height: 20),
+                          buildButtonsRow(context),
+                          SizedBox(height: 20),
+                          /*Container(
+                            color: Colors.white,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 30.0, top: 20.0),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  "Activity",
+                                  style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 18),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                            ),
+                          ),*/
+                          Expanded(
+                            child: Activity(
+                              address: arguments.store.state.address,
+                              defaultCurrency:
+                                  arguments.store.state.defaultCurrency,
+                              cryptoList: snapshot.data,
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      color: Colors.white,
+                      child: Center(
+                        child: Text('There is no data'),
+                      ),
+                    );
+                  }
+                }
+              }
+            }));
   }
 
   buildButtonsRow(BuildContext context) {
@@ -224,5 +257,10 @@ class WalletAccountDetailsPage extends HookWidget {
           ),
           SizedBox(width: 20.0),
         ]);
+  }
+
+  Future<List<dynamic>> getTransferEvents() async {
+    return await arguments.store
+        .getTransferEventsByAddress(arguments.store.state.address);
   }
 }

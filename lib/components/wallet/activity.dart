@@ -1,6 +1,7 @@
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:grouped_list/grouped_list.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:intl/intl.dart';
 
@@ -13,7 +14,7 @@ class Activity extends StatelessWidget {
 
   final bool _loading = false;
 
-  List _elements = [
+  /*List _elements = [
     {
       'to': '04526063',
       'value': '-40',
@@ -62,7 +63,7 @@ class Activity extends StatelessWidget {
       'type': 'send',
       'status': 'done'
     },
-  ];
+  ];*/
 
   /*@override
   void initState() {
@@ -78,16 +79,152 @@ class Activity extends StatelessWidget {
         child: new CircularProgressIndicator(),
       );
     } else {
-      return buildGroupedList();
+      //return buildGroupedList();
+      return buildActivityList();
     }
   }
 
-  Widget buildGroupedList() {
+  //widget that builds the list
+  Widget buildActivityList() {
+    return Container(
+        color: Colors.white,
+        child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: cryptoList.length,
+            //set the item count so that index won't be out of range
+            padding: const EdgeInsets.all(16.0),
+            //add some padding to make it look good
+            itemBuilder: (context, i) {
+              var title = "";
+              var subtitle = "";
+              LinkedHashMap event = cryptoList.elementAt(i);
+              var type = event['type'];
+              var status = event['status'];
+              var timestamp = event['timestamp'];
+              var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
+              var format = DateFormat('dd MMM');
+              var icon = "";
+              if (type == "RECEIVE") {
+                title = "Deposited";
+                subtitle = format.format(date);
+                icon = "assets/add.png";
+              }
+              /* else if (type == "send") {
+                if (status == "done") {
+                  title = "Sent";
+                  icon = "assets/upload.png";
+                } else if (status == "pending") {
+                  title = "Sending is in progress";
+                  icon = "assets/pending.png";
+                } else if (status == "invalid") {
+                  title = "Sending failed";
+                  icon = "assets/warning.png";
+                }
+                subtitle = "To account " + element['to'];
+              } else if (type == "withdraw") {
+                if (status == "done") {
+                  title = "Withdrawn";
+                  icon = "assets/upload.png";
+                } else if (status == "pending") {
+                  title = "Withdrawing is in progress";
+                  icon = "assets/pending.png";
+                } else if (status == "invalid") {
+                  title = "Withdraw failed";
+                  icon = "assets/warning.png";
+                }
+                subtitle = "To your " + element['to'] + " address";
+              } else if (type == "receive") {
+                if (status == "done") {
+                  title = "Received";
+                  icon = "assets/deposit.png";
+                } else if (status == "pending") {
+                  title = "Receiving is in progress";
+                  icon = "assets/pending.png";
+                } else if (status == "invalid") {
+                  title = "Receiving failed";
+                  icon = "assets/warning.png";
+                }
+                subtitle = "From account " + element['to'];
+              }*/
+
+              //String title = "Receiving failed";
+              //String icon = "assets/warning.png";
+              //String subtitle = "From account ";
+              return Container(
+                child: ListTile(
+                  leading: _getLeadingWidget(
+                      icon,
+                      //element['status'] == 'invalid'
+                      /*? Color.fromRGBO(255, 239, 241, 1.0)
+                          :*/
+                      Colors.grey[100]),
+                  title: Container(
+                    padding: EdgeInsets.only(bottom: 10.0),
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  subtitle: Container(
+                    child: Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  trailing: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Container(
+                          //color: double.parse(element['value']) < 0 ? Colors.transparent : Color.fromRGBO(228, 244, 235, 1.0),
+                          padding: EdgeInsets.all(5.0),
+                          child: Text(
+                            "€36.45",
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w800,
+                                color:
+                                    /*double.parse(element['value']) < 0
+                                    ? Colors.black
+                                    :*/
+                                    Colors.green,
+                                fontSize: 16),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(5.0),
+                          child: Text(
+                            "",
+                            /*element['value'] + " " + element['symbol'],*/
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black54,
+                                fontSize: 16),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ]),
+                ),
+              );
+            }));
+  }
+
+  /*Widget buildGroupedList() {
     return Container(
       color: Colors.white,
       child: GroupedListView<dynamic, DateTime>(
           groupBy: (element) => element['date'],
-          elements: _elements,
+          elements: cryptoList,
           order: GroupedListOrder.DESC,
           useStickyGroupSeparators: true,
           groupSeparatorBuilder: (DateTime value) => Container(
@@ -215,10 +352,11 @@ class Activity extends StatelessWidget {
             );
           }),
     );
-  }
+  }*/
 
   // takes in an object and color and returns a circle avatar with first letter and required color
   CircleAvatar _getLeadingWidget(String icon, Color color) {
-    return new CircleAvatar(backgroundColor: color, child: Image.asset(icon));
+    return new CircleAvatar(
+        radius: 23, backgroundColor: color, child: Image.asset(icon));
   }
 }

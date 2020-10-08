@@ -3,6 +3,7 @@ import 'package:hermez/app_config.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,8 @@ Future<List<SingleChildCloneableWidget>> createProviders(
   final hermezService = HermezService(
       params.hermezHttpUrl, params.exchangeHttpUrl, configurationService);
   final contractService = ContractService(client, configurationService);
+  final explorerService =
+      ExplorerService(params.etherscanHttpUrl, params.etherscanApiKey);
   //final tokens = await hermezService.getTokens();
 
   /*List<ContractService> contractServices = [];
@@ -36,6 +39,7 @@ Future<List<SingleChildCloneableWidget>> createProviders(
   return [
     Provider.value(value: addressService),
     Provider.value(value: contractService),
+    Provider.value(value: explorerService),
     Provider.value(value: configurationService),
     Provider.value(value: hermezService)
   ];
