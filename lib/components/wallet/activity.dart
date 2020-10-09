@@ -3,74 +3,25 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/utils/hermez_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:web3dart/web3dart.dart';
 
 class Activity extends StatelessWidget {
-  Activity({this.address, this.defaultCurrency, this.cryptoList});
+  Activity(
+      {this.address,
+      this.symbol,
+      this.exchangeRate,
+      this.defaultCurrency,
+      this.cryptoList});
 
   final String address;
+  final String symbol;
+  final double exchangeRate;
   final WalletDefaultCurrency defaultCurrency;
   final List cryptoList;
 
   final bool _loading = false;
-
-  /*List _elements = [
-    {
-      'to': '04526063',
-      'value': '-40',
-      'symbol': 'DAI',
-      'date': DateTime.now(),
-      'type': 'send',
-      'status': 'pending'
-    },
-    {
-      'to': '05430444',
-      'value': '-80',
-      'symbol': 'DAI',
-      'date': DateTime.parse('2020-06-30'),
-      'type': 'send',
-      'status': 'invalid'
-    },
-    {
-      'to': '',
-      'value': '200',
-      'symbol': 'USDT',
-      'date': DateTime.parse('2020-06-30'),
-      'type': 'deposit',
-      'status': 'done'
-    },
-    {
-      'to': '0x4356...7634',
-      'value': '-400',
-      'symbol': 'USDT',
-      'date': DateTime.parse('2019-12-20'),
-      'type': 'withdraw',
-      'status': 'done'
-    },
-    {
-      'to': '07884543',
-      'value': '120',
-      'symbol': 'DAI',
-      'date': DateTime.parse('2019-12-20'),
-      'type': 'receive',
-      'status': 'done'
-    },
-    {
-      'to': '05430444',
-      'value': '-0.005646',
-      'symbol': 'WETH',
-      'date': DateTime.parse('2019-12-20'),
-      'type': 'send',
-      'status': 'done'
-    },
-  ];*/
-
-  /*@override
-  void initState() {
-    //override creation of state so that we can call our function
-    super.initState();
-    getCryptoPrices(); //this function is called which then sets the state of our app
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -101,55 +52,40 @@ class Activity extends StatelessWidget {
               var type = event['type'];
               var status = event['status'];
               var timestamp = event['timestamp'];
+              final String currency =
+                  defaultCurrency.toString().split('.').last;
+
+              var value = event['value'];
+              var amount = EtherAmount.fromUnitAndValue(
+                      EtherUnit.wei, BigInt.from(double.parse(value)))
+                  .getInEther;
               var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
               var format = DateFormat('dd MMM');
               var icon = "";
-              if (type == "RECEIVE") {
-                title = "Deposited";
-                subtitle = format.format(date);
-                icon = "assets/add.png";
-              }
-              /* else if (type == "send") {
-                if (status == "done") {
-                  title = "Sent";
-                  icon = "assets/upload.png";
-                } else if (status == "pending") {
-                  title = "Sending is in progress";
-                  icon = "assets/pending.png";
-                } else if (status == "invalid") {
-                  title = "Sending failed";
-                  icon = "assets/warning.png";
-                }
-                subtitle = "To account " + element['to'];
-              } else if (type == "withdraw") {
-                if (status == "done") {
-                  title = "Withdrawn";
-                  icon = "assets/upload.png";
-                } else if (status == "pending") {
-                  title = "Withdrawing is in progress";
-                  icon = "assets/pending.png";
-                } else if (status == "invalid") {
-                  title = "Withdraw failed";
-                  icon = "assets/warning.png";
-                }
-                subtitle = "To your " + element['to'] + " address";
-              } else if (type == "receive") {
-                if (status == "done") {
-                  title = "Received";
-                  icon = "assets/deposit.png";
-                } else if (status == "pending") {
-                  title = "Receiving is in progress";
-                  icon = "assets/pending.png";
-                } else if (status == "invalid") {
-                  title = "Receiving failed";
-                  icon = "assets/warning.png";
-                }
-                subtitle = "From account " + element['to'];
-              }*/
+              var isNegative = false;
 
-              //String title = "Receiving failed";
-              //String icon = "assets/warning.png";
-              //String subtitle = "From account ";
+              if (type == "RECEIVE") {
+                title = "Received";
+                icon = "assets/tx_receive.png";
+                isNegative = false;
+              } else if (type == "SEND") {
+                title = "Sent";
+                icon = "assets/tx_send.png";
+                isNegative = true;
+              } else if (type == "WITHDRAW") {
+                title = "Withdrawn";
+                icon = "assets/tx_withdraw.png";
+                isNegative = true;
+              } else if (type == "RECEIVE") {
+                title = "Received";
+                icon = "assets/tx_receive.png";
+                isNegative = false;
+              }
+
+              if (status == "CONFIRMED") {
+                subtitle = format.format(date);
+              }
+
               return Container(
                 child: ListTile(
                   leading: _getLeadingWidget(
@@ -157,16 +93,18 @@ class Activity extends StatelessWidget {
                       //element['status'] == 'invalid'
                       /*? Color.fromRGBO(255, 239, 241, 1.0)
                           :*/
-                      Colors.grey[100]),
+                      /*Colors.grey[100]*/ null),
                   title: Container(
                     padding: EdgeInsets.only(bottom: 10.0),
                     child: Text(
                       title,
                       maxLines: 1,
                       style: TextStyle(
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16),
+                        color: HermezColors.black,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w700,
+                      ),
                       textAlign: TextAlign.left,
                     ),
                   ),
@@ -175,8 +113,12 @@ class Activity extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      style: TextStyle(
+                        color: HermezColors.blueyGreyTwo,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w500,
+                      ),
                       textAlign: TextAlign.left,
                     ),
                   ),
@@ -187,29 +129,31 @@ class Activity extends StatelessWidget {
                           //color: double.parse(element['value']) < 0 ? Colors.transparent : Color.fromRGBO(228, 244, 235, 1.0),
                           padding: EdgeInsets.all(5.0),
                           child: Text(
-                            "€36.45",
+                            (isNegative ? "- " : "") +
+                                (currency == "USD" ? "\$" : "€") +
+                                (exchangeRate * amount.toDouble())
+                                    .toStringAsFixed(2),
                             style: TextStyle(
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w800,
-                                color:
-                                    /*double.parse(element['value']) < 0
-                                    ? Colors.black
-                                    :*/
-                                    Colors.green,
-                                fontSize: 16),
+                              color: isNegative
+                                  ? HermezColors.black
+                                  : HermezColors.green,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w700,
+                            ),
                             textAlign: TextAlign.right,
                           ),
                         ),
                         Container(
                           padding: EdgeInsets.all(5.0),
                           child: Text(
-                            "",
-                            /*element['value'] + " " + element['symbol'],*/
+                            amount.toString() + " " + symbol,
                             style: TextStyle(
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black54,
-                                fontSize: 16),
+                              color: HermezColors.blueyGreyTwo,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            ),
                             textAlign: TextAlign.right,
                           ),
                         ),

@@ -68,6 +68,43 @@ class ExplorerService implements IExplorerService {
     }
   }
 
+  Future<List<dynamic>> getTransactionsByAccountAddress(String address,
+      {String sort = 'desc', int startblock = 0}) async {
+    try {
+      Map<String, dynamic> resp = await _get(
+          '?module=account&action=txlist&address=$address&startblock=$startblock&sort=$sort');
+      if (resp['message'] == 'OK' && resp['status'] == '1') {
+        List transfers = [];
+        for (dynamic transferEvent in resp['result']) {
+          transfers.add({
+            'blockNumber': num.parse(transferEvent['blockNumber']),
+            'txHash': transferEvent['hash'],
+            'to': transferEvent['to'],
+            'from': transferEvent["from"],
+            'status': "CONFIRMED",
+            'timestamp': DateTime.fromMillisecondsSinceEpoch(
+                    DateTime.fromMillisecondsSinceEpoch(
+                                int.parse(transferEvent['timeStamp']))
+                            .millisecondsSinceEpoch *
+                        1000)
+                .millisecondsSinceEpoch,
+            'value': transferEvent['value'],
+            'tokenAddress': transferEvent['contractAddress'],
+            'type': transferEvent["from"].toString().toLowerCase() ==
+                    address.toLowerCase()
+                ? 'SEND'
+                : 'RECEIVE',
+          });
+        }
+        return transfers;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      throw 'Error! Get transactions failed for - address: $address --- $e';
+    }
+  }
+
   Future<List<dynamic>> getTransferEventsByAccountAddress(String address,
       {String sort = 'desc', int startblock = 0}) async {
     try {

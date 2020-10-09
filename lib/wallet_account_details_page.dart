@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
@@ -27,6 +29,9 @@ class WalletAccountDetailsPage extends HookWidget {
   Widget build(BuildContext context) {
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+    final String currency =
+        arguments.store.state.defaultCurrency.toString().split('.').last;
+
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -54,7 +59,10 @@ class WalletAccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.all(Radius.circular(5))),
                   padding:
                       EdgeInsets.only(left: 10, right: 10, top: 7, bottom: 5),
-                  child: Text("L2",
+                  child: Text(
+                      arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                          ? "L1"
+                          : "L2",
                       style: TextStyle(
                           fontFamily: 'ModernEra',
                           color: HermezColors.lightOrange,
@@ -67,7 +75,7 @@ class WalletAccountDetailsPage extends HookWidget {
             backgroundColor: HermezColors.lightOrange,
             elevation: 0),
         body: FutureBuilder<List<dynamic>>(
-            future: getTransferEvents() /*apiClient.getSupportedTokens(null)*/,
+            future: getTransactions(),
             builder:
                 (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -106,7 +114,19 @@ class WalletAccountDetailsPage extends HookWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     Text(
-                                        "€50", //"\$${EthAmountFormatter(tokenBalance).format()}",
+                                        (currency == "USD" ? "\$" : "€") +
+                                            ((currency == "USD"
+                                                        ? arguments.element.USD
+                                                        : arguments
+                                                                .element.USD *
+                                                            arguments
+                                                                .store
+                                                                .state
+                                                                .exchangeRatio) *
+                                                    (double.parse(arguments
+                                                            .element.balance) /
+                                                        pow(10, 18)))
+                                                .toStringAsFixed(2),
                                         style: TextStyle(
                                             color: HermezColors.blackTwo,
                                             fontFamily: 'ModernEra',
@@ -115,7 +135,11 @@ class WalletAccountDetailsPage extends HookWidget {
                                   ])),
                           SizedBox(height: 10),
                           Text(
-                              "59,658680 USDT", //"\$${EthAmountFormatter(tokenBalance).format()}",
+                              (double.parse(arguments.element.balance) /
+                                          pow(10, 18))
+                                      .toString() +
+                                  " " +
+                                  arguments.element.tokenSymbol,
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w500,
@@ -145,6 +169,11 @@ class WalletAccountDetailsPage extends HookWidget {
                           Expanded(
                             child: Activity(
                               address: arguments.store.state.address,
+                              symbol: arguments.element.tokenSymbol,
+                              exchangeRate: currency == "USD"
+                                  ? arguments.element.USD
+                                  : arguments.element.USD *
+                                      arguments.store.state.exchangeRatio,
                               defaultCurrency:
                                   arguments.store.state.defaultCurrency,
                               cryptoList: snapshot.data,
@@ -259,8 +288,13 @@ class WalletAccountDetailsPage extends HookWidget {
         ]);
   }
 
-  Future<List<dynamic>> getTransferEvents() async {
-    return await arguments.store
-        .getTransferEventsByAddress(arguments.store.state.address);
+  Future<List<dynamic>> getTransactions() async {
+    if (arguments.element.tokenSymbol == "ETH") {
+      return await arguments.store
+          .getTransactionsByAddress(arguments.store.state.address);
+    } else {
+      return await arguments.store
+          .getTransferEventsByAddress(arguments.store.state.address);
+    }
   }
 }

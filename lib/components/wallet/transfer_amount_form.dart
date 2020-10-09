@@ -161,7 +161,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                           ? account.USD * widget.store.state.exchangeRatio
                           : account.USD,
                       currency,
-                      double.parse(account.balance),
+                      double.parse(account.balance) / pow(10, 18),
                       true,
                       defaultCurrencySelected,
                       (token, amount) async {
@@ -353,12 +353,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             (defaultCurrencySelected
                                 ? currency == "EUR"
                                     ? account.USD *
-                                        double.parse(account.balance) *
+                                        double.parse(account.balance) /
+                                        pow(10, 18) *
                                         widget.store.state.exchangeRatio
                                     : account.USD *
-                                        double.parse(account.balance)
+                                        double.parse(account.balance) /
+                                        pow(10, 18)
                                 /*.replaceAll(RegExp('[^0-9.,]'), '')*/
-                                : double.parse(account.balance));
+                                : double.parse(account.balance) / pow(10, 18));
                       });
                     },
                     controller: amountController,
@@ -405,25 +407,34 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 amountController.text = defaultCurrencySelected
                                     ? currency == "EUR"
                                         ? (account.USD *
-                                                double.parse(account.balance) *
+                                                double.parse(account.balance) /
+                                                pow(10, 18) *
                                                 widget
                                                     .store.state.exchangeRatio)
                                             .toStringAsFixed(2)
                                         : (account.USD *
-                                                double.parse(account.balance))
+                                                double.parse(account.balance) /
+                                                pow(10, 18))
                                             .toStringAsFixed(2)
                                     //.replaceAll(RegExp('[^0-9.,]'), '')
-                                    : double.parse(account.balance)
+                                    : (double.parse(account.balance) /
+                                            pow(10, 18))
                                         .toStringAsFixed(2);
                                 amountIsValid = (defaultCurrencySelected
-                                        ? currency == "EUR"
-                                            ? account.USD *
-                                                double.parse(account.balance) *
-                                                widget.store.state.exchangeRatio
-                                            : account.USD *
-                                                double.parse(account.balance)
-                                        /*.replaceAll(RegExp('[^0-9.,]'), '')*/
-                                        : double.parse(account.balance)) !=
+                                            ? currency == "EUR"
+                                                ? account.USD *
+                                                    double.parse(
+                                                        account.balance) /
+                                                    pow(10, 18) *
+                                                    widget.store.state
+                                                        .exchangeRatio
+                                                : account.USD *
+                                                    double.parse(
+                                                        account.balance) /
+                                                    pow(10, 18)
+                                            /*.replaceAll(RegExp('[^0-9.,]'), '')*/
+                                            : double.parse(account.balance)) /
+                                        pow(10, 18) !=
                                     0;
                               });
                             },

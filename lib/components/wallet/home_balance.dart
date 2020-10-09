@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -406,7 +407,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                               widget.arguments.store.state.exchangeRatio
                           : account.USD,
                       currency,
-                      double.parse(account.balance),
+                      double.parse(account.balance) / pow(10, 18),
                       false,
                       true, (token, amount) async {
                     Navigator.of(context).pushNamed("/account_details",
@@ -546,7 +547,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       }
       resultValue = resultValue + value;
     }
-    result += resultValue.toStringAsFixed(2);
+    result += (resultValue / pow(10, 18)).toStringAsFixed(2);
     return result;
   }
 }

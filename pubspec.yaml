@@ -92,6 +92,10 @@ flutter:
     - scan.png
     - withdraw.png
     - withdraw2.png
+    - tx_send.png
+    - tx_receive.png
+    - tx_withdraw.png
+    - tx_deposit.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see
@@ -108,20 +112,10 @@ flutter:
   # fonts:
     - family: ModernEra
       fonts:
-        - asset: fonts/ModernEra-Black.otf
-        - asset: fonts/ModernEra-BlackItalic.otf
-        - asset: fonts/ModernEra-Bold.otf
-        - asset: fonts/ModernEra-ExtraBold.otf
-        - asset: fonts/ModernEra-ExtraBoldItalic.otf
-        - asset: fonts/ModernEra-Italic.otf
-        - asset: fonts/ModernEra-Light.otf
-        - asset: fonts/ModernEra-LightItalic.otf
-        - asset: fonts/ModernEra-Medium.otf
-        - asset: fonts/ModernEra-Regular.otf
-        - asset: fonts/ModernEraMono-Bold.otf
-        - asset: fonts/ModernEraMono-ExtraBold.otf
-        - asset: fonts/ModernEraMono-Medium.otf
-        - asset: fonts/ModernEraMono-Regular.otf
+        - asset: fonts/ModernEra-Bold.ttf
+        - asset: fonts/ModernEra-ExtraBold.ttf
+        - asset: fonts/ModernEra-Medium.ttf
+        - asset: fonts/ModernEra-Regular.ttf
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:

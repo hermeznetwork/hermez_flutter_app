@@ -129,7 +129,7 @@ class WalletHandler {
           tokenId: 0,
           tokenSymbol: "ETH",
           nonce: 0,
-          balance: ethBalance.getInEther.toString(),
+          balance: ethBalance.getInWei.toString(),
           publicKey: "Ethereum",
           ethereumAddress: state.address,
           USD: 346.67);
@@ -155,7 +155,7 @@ class WalletHandler {
             tokenId: token.id,
             tokenSymbol: token.symbol,
             nonce: 0,
-            balance: tokenAmount.getInEther.toString(),
+            balance: tokenAmount.getInWei.toString(),
             publicKey: token.name,
             ethereumAddress: state.address,
             USD: token.USD);
@@ -233,6 +233,10 @@ class WalletHandler {
 
   Future<List<dynamic>> getTransferEventsByAddress(String address) {
     return _explorerService.getTransferEventsByAccountAddress(address);
+  }
+
+  Future<List<dynamic>> getTransactionsByAddress(String address) {
+    return _explorerService.getTransactionsByAccountAddress(address);
   }
 
   Future<void> resetWallet() async {

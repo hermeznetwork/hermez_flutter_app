@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
@@ -188,7 +190,7 @@ class WalletTokenSelectorPage extends HookWidget {
                           ? account.USD * arguments.store.state.exchangeRatio
                           : account.USD,
                       currency,
-                      double.parse(account.balance),
+                      double.parse(account.balance) / pow(10, 18),
                       false,
                       true, (String token, String amount) async {
                     final Token supportedToken =
