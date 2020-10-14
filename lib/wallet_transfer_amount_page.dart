@@ -72,6 +72,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
                   TransactionStatus.DRAFT,
                   widget.arguments.account,
                   amount,
+                  null,
                   widget.arguments.account.ethereumAddress,
                   address,
                   null));

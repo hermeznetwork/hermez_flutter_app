@@ -13,6 +13,7 @@ class TransactionDetailsArguments {
   final TransactionStatus status;
   final L1Account account;
   final double amount;
+  final String transactionHash;
   final String addressFrom;
   final String addressTo;
   final DateTime transactionDate;
@@ -23,6 +24,7 @@ class TransactionDetailsArguments {
       this.status,
       this.account,
       this.amount,
+      this.transactionHash,
       this.addressFrom,
       this.addressTo,
       this.transactionDate);
@@ -85,6 +87,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             child: TransferSummaryForm(
               store: widget.arguments.store,
               account: widget.arguments.account,
+              transactionHash: widget.arguments.transactionHash,
               transactionType: widget.arguments.amountType,
               status: widget.arguments.status,
               addressFrom: widget.arguments.addressFrom,

@@ -62,6 +62,7 @@ class Activity extends StatelessWidget {
               var txType;
               var status = event['status'];
               var timestamp = event['timestamp'];
+              var txHash = event['txHash'];
               var addressFrom = event['from'];
               var addressTo = event['to'];
               final String currency =
@@ -190,6 +191,7 @@ class Activity extends StatelessWidget {
                             widget.arguments.amountType,
                             widget.arguments.account,*/
                             amount.toDouble(),
+                            txHash,
                             addressFrom,
                             addressTo,
                             date));

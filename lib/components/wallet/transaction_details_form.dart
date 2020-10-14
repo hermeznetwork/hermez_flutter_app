@@ -7,6 +7,7 @@ import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TransferSummaryForm extends HookWidget {
   TransferSummaryForm({
@@ -14,6 +15,7 @@ class TransferSummaryForm extends HookWidget {
     this.account,
     this.amount,
     this.status,
+    this.transactionHash,
     this.transactionType,
     this.transactionDate,
     this.addressFrom,
@@ -24,6 +26,7 @@ class TransferSummaryForm extends HookWidget {
   final WalletHandler store;
   final L1Account account;
   final int amount;
+  final String transactionHash;
   final TransactionType transactionType;
   final TransactionStatus status;
   final DateTime transactionDate;
@@ -65,11 +68,13 @@ class TransferSummaryForm extends HookWidget {
       return null;
     }, [token]);*/
 
-    return Column(
-        children: ListTile.divideTiles(
-            context: context,
-            color: HermezColors.blueyGreyThree,
-            tiles: [
+    return new Container(
+        child: new SingleChildScrollView(
+            child: Column(
+                children: ListTile.divideTiles(
+                    context: context,
+                    color: HermezColors.blueyGreyThree,
+                    tiles: [
           status == TransactionStatus.DRAFT
               ? Container()
               : ListTile(
@@ -302,6 +307,46 @@ class TransferSummaryForm extends HookWidget {
                       )),
                 )
               : Container(),
-        ]).toList());
+          status != TransactionStatus.DRAFT
+              ? ListTile(
+                  contentPadding:
+                      EdgeInsets.only(top: 20, bottom: 20, left: 15, right: 15),
+                  onTap: () async {
+                    var url =
+                        "https://ropsten.etherscan.io/tx/" + transactionHash;
+                    if (await canLaunch(url))
+                      await launch(url);
+                    else
+                      // can't launch url, there is some error
+                      throw "Could not launch $url";
+                  },
+                  title: Container(
+                    alignment: Alignment.center,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          height: 20,
+                          child: Image.asset("assets/show_explorer.png"),
+                        ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        Text(
+                          'View in explorer',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: HermezColors.blueyGreyTwo,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Container(),
+        ]).toList())));
   }
 }
