@@ -141,10 +141,9 @@ class WalletAccountDetailsPage extends HookWidget {
                           );
                         } else {
                           if (snapshot.hasData) {
-                            // data loaded:
-                            //supportedTokens = snapshot.data;
-
                             return Activity(
+                              store: arguments.store,
+                              account: arguments.element,
                               address: arguments.store.state.address,
                               symbol: arguments.element.tokenSymbol,
                               exchangeRate: currency == "USD"

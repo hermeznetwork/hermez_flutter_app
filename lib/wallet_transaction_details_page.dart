@@ -10,12 +10,22 @@ import 'context/transfer/wallet_transfer_provider.dart';
 class TransactionDetailsArguments {
   final WalletHandler store;
   final TransactionType amountType;
+  final TransactionStatus status;
   final L1Account account;
   final double amount;
+  final String addressFrom;
   final String addressTo;
+  final DateTime transactionDate;
 
   TransactionDetailsArguments(
-      this.store, this.amountType, this.account, this.amount, this.addressTo);
+      this.store,
+      this.amountType,
+      this.status,
+      this.account,
+      this.amount,
+      this.addressFrom,
+      this.addressTo,
+      this.transactionDate);
 }
 
 class TransactionDetailsPage extends StatefulWidget {
@@ -32,14 +42,27 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Widget build(BuildContext context) {
     // final amountController = useTextEditingController();
     var transferStore = useWalletTransfer(context);
+    var title = "";
+    switch (widget.arguments.amountType) {
+      case TransactionType.SEND:
+        title = "Send";
+        break;
+      case TransactionType.DEPOSIT:
+        title = "Deposit";
+        break;
+      case TransactionType.WITHDRAW:
+        title = "Withdraw";
+        break;
+      case TransactionType.RECEIVE:
+        title = "Receive";
+        break;
+    }
+
     //var qrcodeAddress = useState();
 
     return Scaffold(
       appBar: new AppBar(
-        title: new Text(
-            widget.arguments.amountType == TransactionType.DEPOSIT
-                ? "Deposit"
-                : "Send",
+        title: new Text(title,
             style: TextStyle(
                 fontFamily: 'ModernEra',
                 color: HermezColors.blackTwo,
@@ -63,9 +86,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               store: widget.arguments.store,
               account: widget.arguments.account,
               transactionType: widget.arguments.amountType,
+              status: widget.arguments.status,
+              addressFrom: widget.arguments.addressFrom,
               addressTo: widget.arguments.addressTo,
+              transactionDate: widget.arguments.transactionDate,
               onSubmit: (address, amount) async {
-                var success = await transferStore.transferEth(widget.arguments.store.state.privateKey, address, amount);
+                var success = await transferStore.transferEth(
+                    widget.arguments.store.state.privateKey, address, amount);
                 //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
                 if (success) {
                   Navigator.of(context)
@@ -74,47 +101,47 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               },
             ),
           ),
-          //transactionDate == null
-          /* ? */ Column(children: <Widget>[
-            Container(
-              height: 52,
-              margin: EdgeInsets.only(
-                  left: 16.0, right: 16.0, top: 20.0, bottom: 20.0),
-              width: double.infinity,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.0),
-                    side: BorderSide(color: HermezColors.darkOrange)),
-                onPressed: () async {
-                  var success = await transferStore.transferEth(
-                      widget.arguments.store.state.privateKey,
-                      widget.arguments.addressTo,
-                      widget.arguments.amount.toString());
-                  //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
-                  if (success) {
-                    Navigator.of(context)
-                        .pushReplacementNamed("/transaction_info");
-                  }
-                  //this.onSubmit(
-                  //amountController.value.text,
-                  //amountController.value.text,
-                  //addressController.value.text);
-                },
-                disabledColor: HermezColors.blueyGreyTwo,
-                padding: EdgeInsets.all(18.0),
-                color: HermezColors.darkOrange,
-                textColor: Colors.white,
-                child: Text("Send",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'ModernEra',
-                      fontWeight: FontWeight.w700,
-                    )),
-              ),
-            ),
-          ])
-          // : Container()
+          widget.arguments.status == TransactionStatus.DRAFT
+              ? Column(children: <Widget>[
+                  Container(
+                    height: 52,
+                    margin: EdgeInsets.only(
+                        left: 16.0, right: 16.0, top: 20.0, bottom: 20.0),
+                    width: double.infinity,
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.0),
+                          side: BorderSide(color: HermezColors.darkOrange)),
+                      onPressed: () async {
+                        var success = await transferStore.transferEth(
+                            widget.arguments.store.state.privateKey,
+                            widget.arguments.addressTo,
+                            widget.arguments.amount.toString());
+                        //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
+                        if (success) {
+                          Navigator.of(context)
+                              .pushReplacementNamed("/transaction_info");
+                        }
+                        //this.onSubmit(
+                        //amountController.value.text,
+                        //amountController.value.text,
+                        //addressController.value.text);
+                      },
+                      disabledColor: HermezColors.blueyGreyTwo,
+                      padding: EdgeInsets.all(18.0),
+                      color: HermezColors.darkOrange,
+                      textColor: Colors.white,
+                      child: Text("Send",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
+                          )),
+                    ),
+                  ),
+                ])
+              : Container()
         ],
       ),
     );

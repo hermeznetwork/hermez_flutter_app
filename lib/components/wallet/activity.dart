@@ -2,19 +2,28 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:intl/intl.dart';
 import 'package:web3dart/web3dart.dart';
 
+import '../../wallet_transaction_details_page.dart';
+
 class Activity extends StatelessWidget {
   Activity(
-      {this.address,
+      {this.store,
+      this.account,
+      this.address,
       this.symbol,
       this.exchangeRate,
       this.defaultCurrency,
       this.cryptoList});
 
+  final WalletHandler store;
+  final L1Account account;
   final String address;
   final String symbol;
   final double exchangeRate;
@@ -50,8 +59,11 @@ class Activity extends StatelessWidget {
               var subtitle = "";
               LinkedHashMap event = cryptoList.elementAt(i);
               var type = event['type'];
+              var txType;
               var status = event['status'];
               var timestamp = event['timestamp'];
+              var addressFrom = event['from'];
+              var addressTo = event['to'];
               final String currency =
                   defaultCurrency.toString().split('.').last;
 
@@ -64,22 +76,31 @@ class Activity extends StatelessWidget {
               var icon = "";
               var isNegative = false;
 
-              if (type == "RECEIVE") {
-                title = "Received";
-                icon = "assets/tx_receive.png";
-                isNegative = false;
-              } else if (type == "SEND") {
-                title = "Sent";
-                icon = "assets/tx_send.png";
-                isNegative = true;
-              } else if (type == "WITHDRAW") {
-                title = "Withdrawn";
-                icon = "assets/tx_withdraw.png";
-                isNegative = true;
-              } else if (type == "RECEIVE") {
-                title = "Received";
-                icon = "assets/tx_receive.png";
-                isNegative = false;
+              switch (type) {
+                case "RECEIVE":
+                  txType = TransactionType.RECEIVE;
+                  title = "Received";
+                  icon = "assets/tx_receive.png";
+                  isNegative = false;
+                  break;
+                case "SEND":
+                  txType = TransactionType.SEND;
+                  title = "Sent";
+                  icon = "assets/tx_send.png";
+                  isNegative = true;
+                  break;
+                case "WITHDRAW":
+                  txType = TransactionType.WITHDRAW;
+                  title = "Withdrawn";
+                  icon = "assets/tx_withdraw.png";
+                  isNegative = true;
+                  break;
+                case "DEPOSIT":
+                  txType = TransactionType.DEPOSIT;
+                  title = "Deposited";
+                  icon = "assets/tx_deposit.png";
+                  isNegative = false;
+                  break;
               }
 
               if (status == "CONFIRMED") {
@@ -158,6 +179,21 @@ class Activity extends StatelessWidget {
                           ),
                         ),
                       ]),
+                  onTap: () async {
+                    Navigator.pushNamed(context, "/transaction_details",
+                        arguments: TransactionDetailsArguments(
+                            store,
+                            txType,
+                            TransactionStatus.CONFIRMED,
+                            account,
+                            /*widget.arguments.store,
+                            widget.arguments.amountType,
+                            widget.arguments.account,*/
+                            amount.toDouble(),
+                            addressFrom,
+                            addressTo,
+                            date));
+                  },
                 ),
               );
             }));

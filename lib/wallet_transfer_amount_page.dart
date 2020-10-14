@@ -8,9 +8,9 @@ import 'context/wallet/wallet_handler.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
-enum TransactionType { DEPOSIT, SEND, WITHDRAW }
+enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW }
 
-enum TransactionStatus { PENDING, CONFIRMED, INVALID }
+enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 
 class AmountArguments {
   final WalletHandler store;
@@ -69,9 +69,12 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
               arguments: TransactionDetailsArguments(
                   widget.arguments.store,
                   widget.arguments.amountType,
+                  TransactionStatus.DRAFT,
                   widget.arguments.account,
                   amount,
-                  address));
+                  widget.arguments.account.ethereumAddress,
+                  address,
+                  null));
           //if (success) {
           //Navigator.popUntil(context, ModalRoute.withName('/'));
           //}
