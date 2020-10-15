@@ -43,6 +43,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   @override
   Widget build(BuildContext context) {
     // final amountController = useTextEditingController();
+    final _scaffoldKey = GlobalKey<ScaffoldState>();
+
     var transferStore = useWalletTransfer(context);
     var title = "";
     switch (widget.arguments.amountType) {
@@ -63,6 +65,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     //var qrcodeAddress = useState();
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text(title,
             style: TextStyle(
@@ -100,6 +103,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 if (success) {
                   Navigator.of(context)
                       .pushReplacementNamed("/transaction_info");
+                } else {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text(transferStore.state.errors.first),
+                  ));
                 }
               },
             ),
@@ -124,6 +131,31 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         if (success) {
                           Navigator.of(context)
                               .pushReplacementNamed("/transaction_info");
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              // return object of type Dialog
+                              return AlertDialog(
+                                title: new Text("Transfer Error"),
+                                content:
+                                    new Text(transferStore.state.errors.first),
+                                actions: <Widget>[
+                                  // usually buttons at the bottom of the dialog
+                                  new FlatButton(
+                                    textColor: HermezColors.orange,
+                                    child: new Text("Close"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          /*_scaffoldKey.currentState.showSnackBar(SnackBar(
+                            content: Text(transferStore.state.errors.first),
+                          ));*/
                         }
                         //this.onSubmit(
                         //amountController.value.text,
@@ -185,7 +217,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                 margin: EdgeInsets.only(top: 15.0, bottom: 30.0),
                 child: Text(
-                  (widget.arguments.amount).toStringAsFixed(2) +
+                  (widget.arguments.amount).toString() +
                       " " +
                       widget.arguments.account.tokenSymbol,
                   textAlign: TextAlign.center,

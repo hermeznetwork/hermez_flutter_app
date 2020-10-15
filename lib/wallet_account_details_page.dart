@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/wallet_token_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 import 'context/wallet/wallet_handler.dart';
@@ -185,7 +186,11 @@ class WalletAccountDetailsPage extends HookWidget {
                     ),
                     onPressed: () {
                       Navigator.of(context).pushNamed("/token_selector",
-                          arguments: TransactionType.SEND);
+                          arguments: TokenSelectorArguments(
+                            //widget.arguments.store.state.txLevel,
+                            TransactionType.SEND,
+                            arguments.store,
+                          ));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,

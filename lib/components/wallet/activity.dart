@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:intl/intl.dart';
-import 'package:web3dart/web3dart.dart';
 
 import '../../wallet_transaction_details_page.dart';
 
@@ -69,9 +69,9 @@ class Activity extends StatelessWidget {
                   defaultCurrency.toString().split('.').last;
 
               var value = event['value'];
-              var amount = EtherAmount.fromUnitAndValue(
-                      EtherUnit.wei, BigInt.from(double.parse(value)))
-                  .getInEther;
+              var amount = double.parse(value) / pow(10, 18);
+              /*EtherAmount.fromUnitAndValue(
+                  EtherUnit.wei, ));*/
               var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
               var format = DateFormat('dd MMM');
               var icon = "";
@@ -153,8 +153,7 @@ class Activity extends StatelessWidget {
                           child: Text(
                             (isNegative ? "- " : "") +
                                 (currency == "USD" ? "\$" : "€") +
-                                (exchangeRate * amount.toDouble())
-                                    .toStringAsFixed(2),
+                                (exchangeRate * amount).toStringAsFixed(2),
                             style: TextStyle(
                               color: isNegative
                                   ? HermezColors.black
@@ -190,7 +189,7 @@ class Activity extends StatelessWidget {
                             /*widget.arguments.store,
                             widget.arguments.amountType,
                             widget.arguments.account,*/
-                            amount.toDouble(),
+                            amount,
                             txHash,
                             addressFrom,
                             addressTo,

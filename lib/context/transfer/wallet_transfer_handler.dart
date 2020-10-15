@@ -69,15 +69,12 @@ class WalletTransferHandler {
         privateKey,
         EthereumAddress.fromHex(to),
         BigInt.from(double.parse(amount) * pow(10, 18)),
-        onTransfer: (from, to, value) {
-          completer.complete(true);
-        },
         onError: (ex) {
           _store.dispatch(WalletTransferError(ex.toString()));
           completer.complete(false);
         },
       );
-      completer.complete(txHash.isNotEmpty);
+      completer.complete(txHash != null && txHash.isNotEmpty);
     } catch (ex) {
       _store.dispatch(WalletTransferError(ex.toString()));
       completer.complete(false);
@@ -108,7 +105,6 @@ class WalletTransferHandler {
           completer.complete(false);
         },
       );
-      completer.complete(txHash.isNotEmpty);
     } catch (ex) {
       _store.dispatch(WalletTransferError(ex.toString()));
       completer.complete(false);

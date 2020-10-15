@@ -43,9 +43,10 @@ class MainApp extends StatelessWidget {
               // Notice that the counter didn't reset back to zero; the application
               // is not restarted.
               primarySwatch: primaryWhite,
+              accentColor: primaryOrange,
               buttonTheme: ButtonThemeData(
-                buttonColor: Colors.grey,
-                textTheme: ButtonTextTheme.primary,
+                buttonColor: primaryOrange,
+                textTheme: ButtonTextTheme.accent,
               ),
               fontFamily: 'ModernEra'),
         ));
@@ -68,3 +69,20 @@ const MaterialColor primaryWhite = MaterialColor(
   },
 );
 const int _whitePrimaryValue = 0xFFFFFFFF;
+
+const MaterialColor primaryOrange = MaterialColor(
+  _orangePrimaryValue,
+  <int, Color>{
+    50: Color(0xffffa600),
+    100: Color(0xffffa600),
+    200: Color(0xffffa600),
+    300: Color(0xffffa600),
+    400: Color(0xffffa600),
+    500: Color(_orangePrimaryValue),
+    600: Color(0xffffa600),
+    700: Color(0xffffa600),
+    800: Color(0xffffa600),
+    900: Color(0xffffa600),
+  },
+);
+const int _orangePrimaryValue = 0xffffa600;

@@ -183,18 +183,12 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
           } else {
             // We can show the loading view until the data comes back.
             debugPrint('Step 1, build loading widget');
-            return CircularProgressIndicator();
+            return new Center(
+              child: new CircularProgressIndicator(),
+            );
           }
         },
       );
-  //final toController = useTextEditingController(text: token);
-
-  //final transferStore = useWalletTransfer(context);
-
-  /*useEffect(() {
-      if (token != null) toController.value = TextEditingValue(text: token);
-      return null;
-    }, [token]);*/
 
   Widget addressRow() {
     return Column(
@@ -419,7 +413,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                     //.replaceAll(RegExp('[^0-9.,]'), '')
                                     : (double.parse(account.balance) /
                                             pow(10, 18))
-                                        .toStringAsFixed(2);
+                                        .toString();
                                 amountIsValid = (defaultCurrencySelected
                                             ? currency == "EUR"
                                                 ? account.USD *
