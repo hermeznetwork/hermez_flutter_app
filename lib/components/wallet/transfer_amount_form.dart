@@ -245,9 +245,24 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                           ),
                           Container(
                             alignment: Alignment.centerLeft,
-                            child: Image.asset(
-                              "assets/scan.png",
-                              color: HermezColors.blackTwo,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  "/qrcode_reader",
+                                  arguments: (scannedAddress) async {
+                                    setState(() {
+                                      addressController.clear();
+                                      addressController.text =
+                                          scannedAddress.toString();
+                                      addressIsValid = isAddressValid();
+                                    });
+                                  },
+                                );
+                              }, // handle your image tap here
+                              child: Image.asset(
+                                "assets/scan.png",
+                                color: HermezColors.blackTwo,
+                              ),
                             ),
                           ),
                         ],
