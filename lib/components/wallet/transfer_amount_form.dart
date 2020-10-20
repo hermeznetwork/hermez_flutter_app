@@ -172,7 +172,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                     widget.store));
                       },
                     ),
-                    _buildAmountRow(context, null, amountController),
+                    _buildAmountRow(
+                        context, null, amountController, estimatedFee),
                     amountType == TransactionType.SEND
                         ? addressRow()
                         : Container()
@@ -321,8 +322,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
     );
   }
 
-  Widget _buildAmountRow(
-      BuildContext context, dynamic element, dynamic amountController) {
+  Widget _buildAmountRow(BuildContext context, dynamic element,
+      dynamic amountController, BigInt estimatedFee) {
     final String currency =
         widget.store.state.defaultCurrency.toString().split('.').last;
     // returns a row with the desired properties
@@ -416,34 +417,51 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 amountController.text = defaultCurrencySelected
                                     ? currency == "EUR"
                                         ? (account.USD *
-                                                double.parse(account.balance) /
-                                                pow(10, 18) *
-                                                widget
-                                                    .store.state.exchangeRatio)
-                                            .toStringAsFixed(2)
-                                        : (account.USD *
-                                                double.parse(account.balance) /
-                                                pow(10, 18))
-                                            .toStringAsFixed(2)
-                                    //.replaceAll(RegExp('[^0-9.,]'), '')
-                                    : (double.parse(account.balance) /
-                                            pow(10, 18))
-                                        .toString();
-                                amountIsValid = (defaultCurrencySelected
-                                            ? currency == "EUR"
-                                                ? account.USD *
                                                     double.parse(
                                                         account.balance) /
                                                     pow(10, 18) *
                                                     widget.store.state
-                                                        .exchangeRatio
-                                                : account.USD *
+                                                        .exchangeRatio -
+                                                (estimatedFee.toDouble() /
+                                                    pow(10, 18)))
+                                            .toStringAsFixed(2)
+                                        : (account.USD *
                                                     double.parse(
                                                         account.balance) /
-                                                    pow(10, 18)
-                                            /*.replaceAll(RegExp('[^0-9.,]'), '')*/
-                                            : double.parse(account.balance)) /
-                                        pow(10, 18) !=
+                                                    pow(10, 18) -
+                                                (estimatedFee.toDouble() /
+                                                    pow(10, 18)))
+                                            .toStringAsFixed(2)
+                                    //.replaceAll(RegExp('[^0-9.,]'), '')
+                                    : (double.parse(account.balance) /
+                                                pow(10, 18) -
+                                            (estimatedFee.toDouble() /
+                                                pow(10, 18)))
+                                        .toString();
+                                amountIsValid = (defaultCurrencySelected
+                                                ? currency == "EUR"
+                                                    ? account.USD *
+                                                            double.parse(account
+                                                                .balance) /
+                                                            pow(10, 18) *
+                                                            widget.store.state
+                                                                .exchangeRatio -
+                                                        (estimatedFee
+                                                                .toDouble() /
+                                                            pow(10, 18))
+                                                    : account.USD *
+                                                            double.parse(account
+                                                                .balance) /
+                                                            pow(10, 18) -
+                                                        (estimatedFee
+                                                                .toDouble() /
+                                                            pow(10, 18))
+                                                /*.replaceAll(RegExp('[^0-9.,]'), '')*/
+                                                : double.parse(
+                                                    account.balance)) /
+                                            pow(10, 18) -
+                                        (estimatedFee.toDouble() /
+                                            pow(10, 18)) !=
                                     0;
                               });
                             },

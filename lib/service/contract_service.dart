@@ -197,6 +197,7 @@ class ContractService implements IContractService {
     }
 
     try {
+      //client.getBlockNumber()
       final transactionId = await client.sendTransaction(
         credentials,
         Transaction.callContract(

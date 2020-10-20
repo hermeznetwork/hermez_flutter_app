@@ -63,14 +63,16 @@ Map<String, WidgetBuilder> getRoutes(context) {
         });
       return IntroPage();
     },
-    '/qrcode': (BuildContext context) {
+    '/qrcode': (BuildContext context) =>
+        SettingsQRCodePage(ModalRoute.of(context).settings.arguments),
+    /*(BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())
         return WalletProvider(builder: (context, store) {
-          return SettingsQRCodePage();
+          return SettingsQRCodePage(store);
         });
       return IntroPage();
-    },
+    },*/
     '/currency_selector': (BuildContext context) =>
         SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
     //(BuildContext context) {

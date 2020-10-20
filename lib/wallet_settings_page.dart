@@ -91,7 +91,7 @@ class SettingsPage extends HookWidget {
                   ),
                   child: Icon(Icons.arrow_forward_ios)),
               onTap: () {
-                Navigator.of(context).pushNamed("/qrcode");
+                Navigator.of(context).pushNamed("/qrcode", arguments: store);
               },
             ),
             Container(

@@ -309,12 +309,18 @@ class _HomeBalanceState extends State<HomeBalance> {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pushNamed("/token_selector",
-                          arguments: TokenSelectorArguments(
-                            //widget.arguments.store.state.txLevel,
-                            TransactionType.DEPOSIT,
-                            widget.arguments.store,
-                          ));
+                      if (widget.arguments.store.state.txLevel ==
+                          TransactionLevel.LEVEL1) {
+                        Navigator.of(context).pushNamed("/qrcode",
+                            arguments: widget.arguments.store);
+                      } else {
+                        Navigator.of(context).pushNamed("/token_selector",
+                            arguments: TokenSelectorArguments(
+                              //widget.arguments.store.state.txLevel,
+                              TransactionType.DEPOSIT,
+                              widget.arguments.store,
+                            ));
+                      }
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
