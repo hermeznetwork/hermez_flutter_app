@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'context/wallet/wallet_handler.dart';
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -216,6 +217,41 @@ class SettingsPage extends HookWidget {
               ),
               onTap: () {
                 //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
+              },
+            ),
+            ListTile(
+              title: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: EdgeInsets.only(left: 5.0, top: 25.0, bottom: 25.0),
+                  child: Text(
+                    "View in explorer",
+                    style: TextStyle(
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+              ),
+              leading: Container(
+                padding: EdgeInsets.only(
+                  top: 12.0,
+                ),
+                child: Image.asset(
+                  "assets/explorer.png",
+                  width: 20,
+                  height: 20,
+                ),
+              ),
+              onTap: () async {
+                var url = "https://ropsten.etherscan.io/address/" +
+                    store.state.address;
+                if (await canLaunch(url))
+                  await launch(url);
+                else
+                  // can't launch url, there is some error
+                  throw "Could not launch $url";
               },
             ),
             ListTile(
