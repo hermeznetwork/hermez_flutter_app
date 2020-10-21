@@ -206,7 +206,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                   ));
                 },
                 padding: EdgeInsets.all(20.0),
-                color: Color(0xfff6e9d3),
+                color: HermezColors.mediumOrange,
                 textColor: Color(0xff7a7c89),
                 child: Text(
                     widget != null &&
