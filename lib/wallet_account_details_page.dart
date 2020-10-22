@@ -217,8 +217,15 @@ class WalletAccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pushNamed("/token_selector",
-                          arguments: TransactionType.DEPOSIT);
+                      arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                          ? Navigator.of(context)
+                              .pushNamed("/qrcode", arguments: arguments.store)
+                          : Navigator.of(context).pushNamed("/token_selector",
+                              arguments: TokenSelectorArguments(
+                                //widget.arguments.store.state.txLevel,
+                                TransactionType.DEPOSIT,
+                                arguments.store,
+                              ));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -237,34 +244,36 @@ class WalletAccountDetailsPage extends HookWidget {
                       ],
                     )),
           ),
-          Expanded(
-            child:
-                // takes in an object and color and returns a circle avatar with first letter and required color
-                FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pushNamed("/token_selector",
-                          arguments: TransactionType.WITHDRAW);
-                    },
-                    padding: EdgeInsets.all(10.0),
-                    color: Colors.transparent,
-                    textColor: HermezColors.blackTwo,
-                    child: Column(
-                      children: <Widget>[
-                        Image.asset("assets/withdraw2.png"),
-                        Text(
-                          'Withdraw',
-                          style: TextStyle(
-                            color: HermezColors.blackTwo,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
+          arguments.store.state.txLevel == TransactionLevel.LEVEL1
+              ? Container()
+              : Expanded(
+                  child:
+                      // takes in an object and color and returns a circle avatar with first letter and required color
+                      FlatButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
-                        ),
-                      ],
-                    )),
-          ),
+                          onPressed: () {
+                            Navigator.of(context).pushNamed("/token_selector",
+                                arguments: TransactionType.WITHDRAW);
+                          },
+                          padding: EdgeInsets.all(10.0),
+                          color: Colors.transparent,
+                          textColor: HermezColors.blackTwo,
+                          child: Column(
+                            children: <Widget>[
+                              Image.asset("assets/withdraw2.png"),
+                              Text(
+                                'Withdraw',
+                                style: TextStyle(
+                                  color: HermezColors.blackTwo,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          )),
+                ),
           SizedBox(width: 20.0),
         ]);
   }

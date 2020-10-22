@@ -23,7 +23,8 @@ Future<List<SingleChildCloneableWidget>> createProviders(
   final addressService = AddressService(configurationService);
   final hermezService = HermezService(
       params.hermezHttpUrl, params.exchangeHttpUrl, configurationService);
-  final contractService = ContractService(client, configurationService);
+  final contractService =
+      ContractService(client, configurationService, params.ethGasPriceHttpUrl);
   final explorerService =
       ExplorerService(params.etherscanHttpUrl, params.etherscanApiKey);
   //final tokens = await hermezService.getTokens();

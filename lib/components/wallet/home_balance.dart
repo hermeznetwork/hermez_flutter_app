@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
@@ -11,6 +12,7 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_token_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeBalanceArguments {
   final String address;
@@ -46,6 +48,8 @@ class _HomeBalanceState extends State<HomeBalance> {
   final bool _loading = false;
 
   List _elements = [];
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
   /*widget.arguments.cryptoList;/*[
     {
       'symbol': 'USDT',
@@ -73,6 +77,22 @@ class _HomeBalanceState extends State<HomeBalance> {
     super.initState();
     getCryptoPrices(); //this function is called which then sets the state of our app
   }*/
+
+  void _onRefresh() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use refreshFailed()
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    //items.add((items.length + 1).toString());
+    if (mounted) setState(() {});
+    _refreshController.loadComplete();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,10 +270,39 @@ class _HomeBalanceState extends State<HomeBalance> {
             buildButtonsRow(context),
             SizedBox(height: 20),
             Expanded(
-                child: Container(
-              color: Colors.white,
-              child: buildAccountsList(),
-            ))
+              child: Container(
+                color: Colors.white,
+                child: SmartRefresher(
+                  enablePullDown: true,
+                  enablePullUp: false,
+                  header: WaterDropHeader(),
+                  footer: CustomFooter(
+                    builder: (BuildContext context, LoadStatus mode) {
+                      Widget body;
+                      if (mode == LoadStatus.idle) {
+                        body = Text("pull up load");
+                      } else if (mode == LoadStatus.loading) {
+                        body = CupertinoActivityIndicator();
+                      } else if (mode == LoadStatus.failed) {
+                        body = Text("Load Failed!Click retry!");
+                      } else if (mode == LoadStatus.canLoading) {
+                        body = Text("release to load more");
+                      } else {
+                        body = Text("No more Data");
+                      }
+                      return Container(
+                        height: 55.0,
+                        child: Center(child: body),
+                      );
+                    },
+                  ),
+                  controller: _refreshController,
+                  onRefresh: _onRefresh,
+                  onLoading: _onLoading,
+                  child: buildAccountsList(),
+                ),
+              ),
+            ),
           ],
         ),
       );
@@ -383,8 +432,9 @@ class _HomeBalanceState extends State<HomeBalance> {
         ? Container(
             color: Colors.white,
             child: ListView.builder(
-                shrinkWrap: true,
+                //shrinkWrap: true,
                 itemCount: _elements.length,
+                itemExtent: 100.0,
                 //set the item count so that index won't be out of range
                 padding: const EdgeInsets.all(16.0),
                 //add some padding to make it look good

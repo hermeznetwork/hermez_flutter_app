@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:hermez/service/network/api_eth_gas_station_client.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -27,18 +28,20 @@ abstract class IContractService {
 }
 
 class ContractService implements IContractService {
-  ContractService(
-    this.client,
-    this._configService,
-    //this.tokenContractsAddress,
-    /*this.contracts*/
-  );
+  ContractService(this.client, this._configService, this._estimateGasPriceUrl
+      //this.tokenContractsAddress,
+      /*this.contracts*/
+      );
 
   final Web3Client client;
+  String _estimateGasPriceUrl;
   IConfigurationService _configService;
   //Credentials credentials;
   //final List<String> tokenContractsAddress;
   //final List<DeployedContract> contract;
+
+  ApiEthGasStationClient _apiEthGasStationClient() =>
+      ApiEthGasStationClient(this._estimateGasPriceUrl);
 
   ContractEvent _transferEvent(DeployedContract contract) =>
       contract.event('Transfer');
@@ -178,6 +181,8 @@ class ContractService implements IContractService {
     final from = await credentials.extractAddress();
     final networkId = await client.getNetworkId();
 
+    double gasPrice = await _apiEthGasStationClient().getGasPrice();
+
     EtherAmount etherAmount = await client.getGasPrice();
 
     final contract = await ContractParser.fromAssets('partialERC20ABI.json',
@@ -244,13 +249,15 @@ class ContractService implements IContractService {
     return client.estimateGas(
       sender: from,
       to: to,
-      value: amount,
-      /*gasPrice: await client.getGasPrice()*/
+      value: amount, /* gasPrice: await getGasPrice()*/
     );
   }
 
-  Future<EtherAmount> getGasPrice() {
-    return client.getGasPrice();
+  Future<EtherAmount> getGasPrice() async {
+    double gasPrice = await _apiEthGasStationClient().getGasPrice();
+    return EtherAmount.fromUnitAndValue(
+        EtherUnit.gwei, BigInt.from(gasPrice / 10));
+    //return client.getGasPrice();
   }
 
   // ERC20 approve the spender account and set the limit of your funds that they are authorized to spend
