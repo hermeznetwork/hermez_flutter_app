@@ -90,8 +90,16 @@ class ContractService implements IContractService {
     final from = await credentials.extractAddress();
     final networkId = await client.getNetworkId();
 
-    Transaction transaction =
-        Transaction(from: from, to: receiverAddress, value: amount);
+    final gasPrice = await client.getGasPrice();
+    final maxGas = await client.estimateGas(
+        sender: from, to: receiverAddress, value: amount);
+
+    Transaction transaction = Transaction(
+        from: from,
+        to: receiverAddress,
+        maxGas: maxGas.toInt(),
+        gasPrice: gasPrice,
+        value: amount);
 
     print(
         'transfer --> privateKey: $privateKey, sender: $from, receiver: $receiverAddress, amountInWei: $amount');
@@ -254,10 +262,10 @@ class ContractService implements IContractService {
   }
 
   Future<EtherAmount> getGasPrice() async {
-    double gasPrice = await _apiEthGasStationClient().getGasPrice();
-    return EtherAmount.fromUnitAndValue(
-        EtherUnit.gwei, BigInt.from(gasPrice / 10));
-    //return client.getGasPrice();
+    //double gasPrice = await _apiEthGasStationClient().getGasPrice();
+    //return EtherAmount.fromUnitAndValue(
+    //    EtherUnit.gwei, BigInt.from(gasPrice / 10));
+    return client.getGasPrice();
   }
 
   // ERC20 approve the spender account and set the limit of your funds that they are authorized to spend

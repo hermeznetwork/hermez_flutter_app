@@ -185,7 +185,7 @@ class WalletHandler {
     //final cryptoList = List();
 
     _store.dispatch(
-        BalanceUpdated(ethBalance.getInEther, tokensBalance, L1accounts));
+        BalanceUpdated(ethBalance.getInWei, tokensBalance, L1accounts));
   }
 
   Future<List<Token>> getTokens() async {
@@ -208,15 +208,18 @@ class WalletHandler {
     if (to != null && to.isNotEmpty) {
       toAddress = web3.EthereumAddress.fromHex(to);
     }
-    web3.EtherAmount estimatedGas = web3.EtherAmount.fromUnitAndValue(
+    BigInt estimatedGas = await _contractService.getEstimatedGas(
+      fromAddress,
+      toAddress,
+      web3.EtherAmount.fromUnitAndValue(
         web3.EtherUnit.wei,
-        await _contractService.getEstimatedGas(
-            fromAddress,
-            toAddress,
-            web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei,
-                BigInt.from(amount.toDouble() * pow(10, 18)))));
+        BigInt.from(
+          amount.toDouble() * pow(10, 18),
+        ),
+      ),
+    );
 
-    BigInt estimatedFee = gasPrice.getInWei * estimatedGas.getInWei;
+    BigInt estimatedFee = gasPrice.getInWei * estimatedGas;
 
     return estimatedFee;
   }
