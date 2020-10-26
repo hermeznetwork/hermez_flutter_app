@@ -363,14 +363,22 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             (defaultCurrencySelected
                                 ? currency == "EUR"
                                     ? account.USD *
-                                        double.parse(account.balance) /
-                                        pow(10, 18) *
-                                        widget.store.state.exchangeRatio
+                                            double.parse(account.balance) /
+                                            pow(10, 18) *
+                                            widget.store.state.exchangeRatio -
+                                        (account.USD *
+                                                widget.store.state
+                                                    .exchangeRatio) *
+                                            (estimatedFee.toDouble() /
+                                                pow(10, 18))
                                     : account.USD *
-                                        double.parse(account.balance) /
-                                        pow(10, 18)
-                                /*.replaceAll(RegExp('[^0-9.,]'), '')*/
-                                : double.parse(account.balance) / pow(10, 18));
+                                            double.parse(account.balance) /
+                                            pow(10, 18) -
+                                        (account.USD *
+                                            estimatedFee.toDouble() /
+                                            pow(10, 18))
+                                : double.parse(account.balance) / pow(10, 18) -
+                                    (estimatedFee.toDouble() / pow(10, 18)));
                       });
                     },
                     controller: amountController,
@@ -414,30 +422,6 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             onPressed: () {
                               setState(() {
                                 amountController.clear();
-                                amountController.text = defaultCurrencySelected
-                                    ? currency == "EUR"
-                                        ? (account.USD *
-                                                    double.parse(
-                                                        account.balance) /
-                                                    pow(10, 18) *
-                                                    widget.store.state
-                                                        .exchangeRatio -
-                                                (estimatedFee.toDouble() /
-                                                    pow(10, 18)))
-                                            .toStringAsFixed(2)
-                                        : (account.USD *
-                                                    double.parse(
-                                                        account.balance) /
-                                                    pow(10, 18) -
-                                                (estimatedFee.toDouble() /
-                                                    pow(10, 18)))
-                                            .toStringAsFixed(2)
-                                    //.replaceAll(RegExp('[^0-9.,]'), '')
-                                    : (double.parse(account.balance) /
-                                                pow(10, 18) -
-                                            (estimatedFee.toDouble() /
-                                                pow(10, 18)))
-                                        .toString();
                                 amountIsValid = (defaultCurrencySelected
                                                 ? currency == "EUR"
                                                     ? account.USD *
@@ -446,23 +430,58 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                             pow(10, 18) *
                                                             widget.store.state
                                                                 .exchangeRatio -
-                                                        (estimatedFee
+                                                        (account.USD *
+                                                            widget.store.state
+                                                                .exchangeRatio *
+                                                            estimatedFee
                                                                 .toDouble() /
                                                             pow(10, 18))
                                                     : account.USD *
                                                             double.parse(account
                                                                 .balance) /
                                                             pow(10, 18) -
-                                                        (estimatedFee
+                                                        (account.USD *
+                                                            estimatedFee
                                                                 .toDouble() /
                                                             pow(10, 18))
-                                                /*.replaceAll(RegExp('[^0-9.,]'), '')*/
                                                 : double.parse(
                                                     account.balance)) /
                                             pow(10, 18) -
                                         (estimatedFee.toDouble() /
-                                            pow(10, 18)) !=
+                                            pow(10, 18)) >
                                     0;
+                                if (amountIsValid) {
+                                  amountController.text =
+                                      defaultCurrencySelected
+                                          ? currency == "EUR"
+                                              ? (account.USD *
+                                                          double.parse(
+                                                              account.balance) /
+                                                          pow(10, 18) *
+                                                          widget.store.state
+                                                              .exchangeRatio -
+                                                      (account.USD *
+                                                          widget.store.state
+                                                              .exchangeRatio *
+                                                          estimatedFee
+                                                              .toDouble() /
+                                                          pow(10, 18)))
+                                                  .toStringAsFixed(2)
+                                              : (account.USD *
+                                                          double.parse(
+                                                              account.balance) /
+                                                          pow(10, 18) -
+                                                      (account.USD *
+                                                          estimatedFee
+                                                              .toDouble() /
+                                                          pow(10, 18)))
+                                                  .toStringAsFixed(2)
+                                          : (double.parse(account.balance) /
+                                                      pow(10, 18) -
+                                                  (estimatedFee.toDouble() /
+                                                      pow(10, 18)))
+                                              .toString();
+                                }
                               });
                             },
                           ),
