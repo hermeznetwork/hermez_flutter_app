@@ -117,55 +117,20 @@ class WalletAccountDetailsPage extends HookWidget {
             buildButtonsRow(context),
             SizedBox(height: 20),
             Expanded(
-                child: FutureBuilder<List<dynamic>>(
-                    future: getTransactions(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<List<dynamic>> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Container(
-                          color: Colors.white,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              backgroundColor: HermezColors.orange,
-                            ),
-                          ),
-                        );
-                      } else {
-                        if (snapshot.hasError) {
-                          // while data is loading:
-                          return Container(
-                            color: Colors.white,
-                            child: Center(
-                              child: Text('There was an error:' +
-                                  snapshot.error.toString()),
-                            ),
-                          );
-                        } else {
-                          if (snapshot.hasData) {
-                            return Activity(
-                              store: arguments.store,
-                              account: arguments.element,
-                              address: arguments.store.state.address,
-                              symbol: arguments.element.tokenSymbol,
-                              exchangeRate: currency == "USD"
-                                  ? arguments.element.USD
-                                  : arguments.element.USD *
-                                      arguments.store.state.exchangeRatio,
-                              defaultCurrency:
-                                  arguments.store.state.defaultCurrency,
-                              cryptoList: snapshot.data,
-                            );
-                          } else {
-                            return Container(
-                              color: Colors.white,
-                              child: Center(
-                                child: Text('There is no data'),
-                              ),
-                            );
-                          }
-                        }
-                      }
-                    })),
+              child: Activity(
+                arguments: ActivityArguments(
+                  arguments.store,
+                  arguments.element,
+                  arguments.store.state.address,
+                  arguments.element.tokenSymbol,
+                  currency == "USD"
+                      ? arguments.element.USD
+                      : arguments.element.USD *
+                          arguments.store.state.exchangeRatio,
+                  arguments.store.state.defaultCurrency,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -276,15 +241,5 @@ class WalletAccountDetailsPage extends HookWidget {
                 ),
           SizedBox(width: 20.0),
         ]);
-  }
-
-  Future<List<dynamic>> getTransactions() async {
-    if (arguments.element.tokenSymbol == "ETH") {
-      return await arguments.store
-          .getTransactionsByAddress(arguments.store.state.address);
-    } else {
-      return await arguments.store
-          .getTransferEventsByAddress(arguments.store.state.address);
-    }
   }
 }

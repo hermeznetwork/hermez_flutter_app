@@ -12,280 +12,152 @@ import 'package:intl/intl.dart';
 
 import '../../wallet_transaction_details_page.dart';
 
-class Activity extends StatelessWidget {
-  Activity(
-      {this.store,
-      this.account,
-      this.address,
-      this.symbol,
-      this.exchangeRate,
-      this.defaultCurrency,
-      this.cryptoList});
-
+class ActivityArguments {
   final WalletHandler store;
   final L1Account account;
   final String address;
   final String symbol;
   final double exchangeRate;
   final WalletDefaultCurrency defaultCurrency;
-  final List cryptoList;
 
-  final bool _loading = false;
+  ActivityArguments(this.store, this.account, this.address, this.symbol,
+      this.exchangeRate, this.defaultCurrency);
+}
+
+class Activity extends StatefulWidget {
+  Activity({Key key, this.arguments}) : super(key: key);
+
+  final ActivityArguments arguments;
 
   @override
+  _ActivityState createState() => _ActivityState();
+}
+
+class _ActivityState extends State<Activity> {
+  @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return new Center(
-        child: new CircularProgressIndicator(),
-      );
-    } else {
-      //return buildGroupedList();
-      return buildActivityList();
-    }
+    return FutureBuilder<List<dynamic>>(
+      future: fetchTransactions(),
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            color: Colors.white,
+            child: Center(
+              child: CircularProgressIndicator(
+                backgroundColor: HermezColors.orange,
+              ),
+            ),
+          );
+        } else {
+          if (snapshot.hasError) {
+            // while data is loading:
+            return Container(
+              color: Colors.white,
+              child: Center(
+                child: Text('There was an error:' + snapshot.error.toString()),
+              ),
+            );
+          } else {
+            if (snapshot.hasData) {
+              return buildActivityList(snapshot.data);
+            } else {
+              return Container(
+                color: Colors.white,
+                child: Center(
+                  child: Text('There is no data'),
+                ),
+              );
+            }
+          }
+        }
+      },
+    );
   }
 
   //widget that builds the list
-  Widget buildActivityList() {
-    return Container(
-        color: Colors.white,
-        child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: cryptoList.length,
-            //set the item count so that index won't be out of range
-            padding: const EdgeInsets.all(16.0),
-            //add some padding to make it look good
-            itemBuilder: (context, i) {
-              var title = "";
-              var subtitle = "";
-              LinkedHashMap event = cryptoList.elementAt(i);
-              var type = event['type'];
-              var txType;
-              var status = event['status'];
-              var timestamp = event['timestamp'];
-              var txHash = event['txHash'];
-              var addressFrom = event['from'];
-              var addressTo = event['to'];
-              final String currency =
-                  defaultCurrency.toString().split('.').last;
-
-              var value = event['value'];
-              var amount = double.parse(value) / pow(10, 18);
-              /*EtherAmount.fromUnitAndValue(
-                  EtherUnit.wei, ));*/
-              var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
-              var format = DateFormat('dd MMM');
-              var icon = "";
-              var isNegative = false;
-
-              switch (type) {
-                case "RECEIVE":
-                  txType = TransactionType.RECEIVE;
-                  title = "Received";
-                  icon = "assets/tx_receive.png";
-                  isNegative = false;
-                  break;
-                case "SEND":
-                  txType = TransactionType.SEND;
-                  title = "Sent";
-                  icon = "assets/tx_send.png";
-                  isNegative = true;
-                  break;
-                case "WITHDRAW":
-                  txType = TransactionType.WITHDRAW;
-                  title = "Withdrawn";
-                  icon = "assets/tx_withdraw.png";
-                  isNegative = true;
-                  break;
-                case "DEPOSIT":
-                  txType = TransactionType.DEPOSIT;
-                  title = "Deposited";
-                  icon = "assets/tx_deposit.png";
-                  isNegative = false;
-                  break;
-              }
-
-              if (status == "CONFIRMED") {
-                subtitle = format.format(date);
-              }
-
-              return Container(
-                child: ListTile(
-                  leading: _getLeadingWidget(
-                      icon,
-                      //element['status'] == 'invalid'
-                      /*? Color.fromRGBO(255, 239, 241, 1.0)
-                          :*/
-                      /*Colors.grey[100]*/ null),
-                  title: Container(
-                    padding: EdgeInsets.only(bottom: 10.0),
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: HermezColors.black,
-                        fontSize: 16,
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                  subtitle: Container(
-                    child: Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: HermezColors.blueyGreyTwo,
-                        fontSize: 16,
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                  trailing: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Container(
-                          //color: double.parse(element['value']) < 0 ? Colors.transparent : Color.fromRGBO(228, 244, 235, 1.0),
-                          padding: EdgeInsets.all(5.0),
-                          child: Text(
-                            (isNegative ? "- " : "") +
-                                (currency == "USD" ? "\$" : "€") +
-                                (exchangeRate * amount).toStringAsFixed(2),
-                            style: TextStyle(
-                              color: isNegative
-                                  ? HermezColors.black
-                                  : HermezColors.green,
-                              fontSize: 16,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w700,
-                            ),
-                            textAlign: TextAlign.right,
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(5.0),
-                          child: Text(
-                            amount.toString() + " " + symbol,
-                            style: TextStyle(
-                              color: HermezColors.blueyGreyTwo,
-                              fontSize: 16,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.right,
-                          ),
-                        ),
-                      ]),
-                  onTap: () async {
-                    Navigator.pushNamed(context, "/transaction_details",
-                        arguments: TransactionDetailsArguments(
-                            store,
-                            txType,
-                            TransactionStatus.CONFIRMED,
-                            account,
-                            /*widget.arguments.store,
-                            widget.arguments.amountType,
-                            widget.arguments.account,*/
-                            amount,
-                            txHash,
-                            addressFrom,
-                            addressTo,
-                            date));
-                  },
-                ),
-              );
-            }));
-  }
-
-  /*Widget buildGroupedList() {
+  Widget buildActivityList(List<dynamic> dataList) {
     return Container(
       color: Colors.white,
-      child: GroupedListView<dynamic, DateTime>(
-          groupBy: (element) => element['date'],
-          elements: cryptoList,
-          order: GroupedListOrder.DESC,
-          useStickyGroupSeparators: true,
-          groupSeparatorBuilder: (DateTime value) => Container(
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      top: 30.0, bottom: 30.0, left: 20.0),
-                  child: Text(
-                    DateFormat('dd MMM yyyy').format(value),
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
-                  ),
-                ),
-              ),
-          itemBuilder: (c, element) {
+      child: RefreshIndicator(
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: dataList.length,
+          //set the item count so that index won't be out of range
+          padding: const EdgeInsets.all(16.0),
+          //add some padding to make it look good
+          itemBuilder: (context, i) {
             var title = "";
             var subtitle = "";
-            var type = element['type'];
-            var status = element['status'];
+            LinkedHashMap event = dataList.elementAt(i);
+            var type = event['type'];
+            var txType;
+            var status = event['status'];
+            var timestamp = event['timestamp'];
+            var txHash = event['txHash'];
+            var addressFrom = event['from'];
+            var addressTo = event['to'];
+            final String currency =
+                widget.arguments.defaultCurrency.toString().split('.').last;
+
+            var value = event['value'];
+            var amount = double.parse(value) / pow(10, 18);
+            /*EtherAmount.fromUnitAndValue(
+                  EtherUnit.wei, ));*/
+            var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
+            var format = DateFormat('dd MMM');
             var icon = "";
-            if (type == "deposit") {
-              title = "Added";
-              subtitle = "To your " + element['symbol'] + " account";
-              icon = "assets/add.png";
-            } else if (type == "send") {
-              if (status == "done") {
-                title = "Sent";
-                icon = "assets/upload.png";
-              } else if (status == "pending") {
-                title = "Sending is in progress";
-                icon = "assets/pending.png";
-              } else if (status == "invalid") {
-                title = "Sending failed";
-                icon = "assets/warning.png";
-              }
-              subtitle = "To account " + element['to'];
-            } else if (type == "withdraw") {
-              if (status == "done") {
-                title = "Withdrawn";
-                icon = "assets/upload.png";
-              } else if (status == "pending") {
-                title = "Withdrawing is in progress";
-                icon = "assets/pending.png";
-              } else if (status == "invalid") {
-                title = "Withdraw failed";
-                icon = "assets/warning.png";
-              }
-              subtitle = "To your " + element['to'] + " address";
-            } else if (type == "receive") {
-              if (status == "done") {
+            var isNegative = false;
+
+            switch (type) {
+              case "RECEIVE":
+                txType = TransactionType.RECEIVE;
                 title = "Received";
-                icon = "assets/deposit.png";
-              } else if (status == "pending") {
-                title = "Receiving is in progress";
-                icon = "assets/pending.png";
-              } else if (status == "invalid") {
-                title = "Receiving failed";
-                icon = "assets/warning.png";
-              }
-              subtitle = "From account " + element['to'];
+                icon = "assets/tx_receive.png";
+                isNegative = false;
+                break;
+              case "SEND":
+                txType = TransactionType.SEND;
+                title = "Sent";
+                icon = "assets/tx_send.png";
+                isNegative = true;
+                break;
+              case "WITHDRAW":
+                txType = TransactionType.WITHDRAW;
+                title = "Withdrawn";
+                icon = "assets/tx_withdraw.png";
+                isNegative = true;
+                break;
+              case "DEPOSIT":
+                txType = TransactionType.DEPOSIT;
+                title = "Deposited";
+                icon = "assets/tx_deposit.png";
+                isNegative = false;
+                break;
             }
+
+            if (status == "CONFIRMED") {
+              subtitle = format.format(date);
+            }
+
             return Container(
               child: ListTile(
                 leading: _getLeadingWidget(
                     icon,
-                    element['status'] == 'invalid'
-                        ? Color.fromRGBO(255, 239, 241, 1.0)
-                        : Colors.grey[100]),
+                    //element['status'] == 'invalid'
+                    /*? Color.fromRGBO(255, 239, 241, 1.0)
+                          :*/
+                    /*Colors.grey[100]*/ null),
                 title: Container(
                   padding: EdgeInsets.only(bottom: 10.0),
                   child: Text(
                     title,
                     maxLines: 1,
                     style: TextStyle(
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16),
+                      color: HermezColors.black,
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w700,
+                    ),
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -294,7 +166,12 @@ class Activity extends StatelessWidget {
                     subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    style: TextStyle(
+                      color: HermezColors.blueyGreyTwo,
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w500,
+                    ),
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -305,35 +182,81 @@ class Activity extends StatelessWidget {
                         //color: double.parse(element['value']) < 0 ? Colors.transparent : Color.fromRGBO(228, 244, 235, 1.0),
                         padding: EdgeInsets.all(5.0),
                         child: Text(
-                          "€36.45",
+                          (isNegative ? "- " : "") +
+                              (currency == "USD" ? "\$" : "€") +
+                              (widget.arguments.exchangeRate * amount)
+                                  .toStringAsFixed(2),
                           style: TextStyle(
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w800,
-                              color: double.parse(element['value']) < 0
-                                  ? Colors.black
-                                  : Colors.green,
-                              fontSize: 16),
+                            color: isNegative
+                                ? HermezColors.black
+                                : HermezColors.green,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
+                          ),
                           textAlign: TextAlign.right,
                         ),
                       ),
                       Container(
                         padding: EdgeInsets.all(5.0),
                         child: Text(
-                          element['value'] + " " + element['symbol'],
+                          amount.toString() + " " + widget.arguments.symbol,
                           style: TextStyle(
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black54,
-                              fontSize: 16),
+                            color: HermezColors.blueyGreyTwo,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          ),
                           textAlign: TextAlign.right,
                         ),
                       ),
                     ]),
+                onTap: () async {
+                  Navigator.pushNamed(context, "/transaction_details",
+                      arguments: TransactionDetailsArguments(
+                          widget.arguments.store,
+                          txType,
+                          TransactionStatus.CONFIRMED,
+                          widget.arguments.account,
+                          /*widget.arguments.store,
+                            widget.arguments.amountType,
+                            widget.arguments.account,*/
+                          amount,
+                          txHash,
+                          addressFrom,
+                          addressTo,
+                          date));
+                },
               ),
             );
-          }),
+          },
+        ),
+        onRefresh: _onRefresh,
+      ),
     );
-  }*/
+  }
+
+  Future<void> _onRefresh() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+
+    setState(() {
+      fetchTransactions();
+    });
+    // if failed,use refreshFailed()
+    //_elements = widget.arguments.cryptoList;
+    //_refreshController.refreshCompleted();
+  }
+
+  Future<List<dynamic>> fetchTransactions() async {
+    if (widget.arguments.account.tokenSymbol == "ETH") {
+      return await widget.arguments.store
+          .getTransactionsByAddress(widget.arguments.store.state.address);
+    } else {
+      return await widget.arguments.store
+          .getTransferEventsByAddress(widget.arguments.store.state.address);
+    }
+  }
 
   // takes in an object and color and returns a circle avatar with first letter and required color
   CircleAvatar _getLeadingWidget(String icon, Color color) {

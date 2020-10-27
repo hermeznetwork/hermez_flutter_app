@@ -12,7 +12,6 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_token_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeBalanceArguments {
   final String address;
@@ -48,8 +47,8 @@ class _HomeBalanceState extends State<HomeBalance> {
   final bool _loading = false;
 
   List _elements = [];
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  /*RefreshController _refreshController =
+      RefreshController(initialRefresh: false);*/
   /*widget.arguments.cryptoList;/*[
     {
       'symbol': 'USDT',
@@ -78,21 +77,26 @@ class _HomeBalanceState extends State<HomeBalance> {
     getCryptoPrices(); //this function is called which then sets the state of our app
   }*/
 
-  void _onRefresh() async {
+  Future<void> _onRefresh() async {
+    /*setState(() {
+      fetchUsers();
+    });*/
+
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use refreshFailed()
-    _refreshController.refreshCompleted();
+    //_elements = widget.arguments.cryptoList;
+    //_refreshController.refreshCompleted();
   }
 
-  void _onLoading() async {
+  /* void _onLoading() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use loadFailed(),if no data return,use LoadNodata()
     //items.add((items.length + 1).toString());
     if (mounted) setState(() {});
     _refreshController.loadComplete();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +276,8 @@ class _HomeBalanceState extends State<HomeBalance> {
             Expanded(
               child: Container(
                 color: Colors.white,
-                child: SmartRefresher(
+                child:
+                    /*SmartRefresher(
                   enablePullDown: true,
                   enablePullUp: false,
                   header: WaterDropHeader(),
@@ -299,10 +304,11 @@ class _HomeBalanceState extends State<HomeBalance> {
                   controller: _refreshController,
                   onRefresh: _onRefresh,
                   onLoading: _onLoading,
-                  child: buildAccountsList(),
-                ),
+                  child:*/
+                    buildAccountsList(),
               ),
             ),
+            //),
           ],
         ),
       );
@@ -431,7 +437,8 @@ class _HomeBalanceState extends State<HomeBalance> {
     return widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
         ? Container(
             color: Colors.white,
-            child: ListView.builder(
+            child: RefreshIndicator(
+              child: ListView.builder(
                 //shrinkWrap: true,
                 itemCount: _elements.length,
                 itemExtent: 100.0,
@@ -471,7 +478,11 @@ class _HomeBalanceState extends State<HomeBalance> {
                             account, widget.arguments.store));
                   }); //iterate through indexes and get the next colour
                   //return _buildRow(context, element, color); //build the row widget
-                }))
+                },
+              ),
+              onRefresh: _onRefresh,
+            ),
+          )
         : Container(
             width: double.infinity,
             padding: const EdgeInsets.all(34.0),
