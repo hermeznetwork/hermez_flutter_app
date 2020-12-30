@@ -13,6 +13,7 @@ import 'package:hermez/service/network/model/forged_transactions_response.dart';
 import 'package:hermez/service/network/model/register_request.dart';
 import 'package:hermez/service/network/model/tokens_request.dart';
 import 'package:hermez/service/network/model/tokens_response.dart';
+import 'package:hermez_plugin/api.dart' as api;
 import 'package:http/http.dart' as http;
 
 import 'model/accounts_request.dart';
@@ -120,15 +121,15 @@ class ApiClient {
 
   Future<List<Token>> getSupportedTokens(TokensRequest request) async {
     final response =
-        await _get(TOKENS_URL, request != null ? request.toJson() : null);
+        await api.getTokens(request != null ? request.ids : List());
     final TokensResponse tokensResponse =
-        TokensResponse.fromJson(json.decode(response.body));
+        TokensResponse.fromJson(json.decode(response));
     return tokensResponse.tokens;
   }
 
   Future<Token> getSupportedTokenById(String tokenId) async {
-    final response = await _get(TOKENS_URL + '/' + tokenId, null);
-    final tokenResponse = Token.fromJson(json.decode(response.body));
+    final response = await api.getToken(int.parse(tokenId));
+    final tokenResponse = Token.fromJson(json.decode(response));
     return tokenResponse;
   }
 

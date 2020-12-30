@@ -77,19 +77,19 @@ class WalletMainPage extends HookWidget {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            title: Text(''),
+            label: '',
             icon: ImageIcon(
               AssetImage('assets/wallet.png'),
             ),
           ),
           BottomNavigationBarItem(
-            title: Text(''),
+            label: '',
             icon: ImageIcon(
               AssetImage('assets/search.png'),
             ),
           ),
           BottomNavigationBarItem(
-            title: Text(''),
+            label: '',
             icon: ImageIcon(
               AssetImage('assets/account.png'),
             ),

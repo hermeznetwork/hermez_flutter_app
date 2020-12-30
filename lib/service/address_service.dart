@@ -76,7 +76,7 @@ class AddressService implements IAddressService {
     final address = await getPublicAddress(privateKey);
 
     // TODO
-    //final rollupPrivateKey = this.method(cryptMnemonic);
+    final rollupPrivateKey = this.method(cryptMnemonic);
 
     await _configService.setMnemonic(cryptMnemonic);
     await _configService.setPrivateKey(privateKey);

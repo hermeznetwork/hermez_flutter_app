@@ -30,9 +30,9 @@ class ApiExchangeRateClient {
     try {
       var uri;
       if (queryParameters != null) {
-        uri = Uri.http(_baseAddress, endpoint, queryParameters);
+        uri = Uri.https(_baseAddress, endpoint, queryParameters);
       } else {
-        uri = Uri.http(_baseAddress, endpoint);
+        uri = Uri.https(_baseAddress, endpoint);
       }
       final response = await http2.get(
         uri,

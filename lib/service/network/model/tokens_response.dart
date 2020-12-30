@@ -1,20 +1,19 @@
-import 'package:hermez/service/network/model/pagination.dart';
-
 import 'token.dart';
 
 class TokensResponse {
   final List<Token> tokens;
-  final Pagination pagination;
+  final int pendingItems;
 
-  TokensResponse({this.tokens, this.pagination});
+  TokensResponse({this.tokens, this.pendingItems});
 
   factory TokensResponse.fromJson(Map<String, dynamic> parsedJson) {
     var tokensFromJson = parsedJson['tokens'] as List;
     List<Token> tokensList =
         tokensFromJson.map((i) => Token.fromJson(i)).toList();
-    final pagination = Pagination.fromJson(parsedJson['pagination']);
-    return TokensResponse(tokens: tokensList, pagination: pagination);
+    final pendingItems = parsedJson['pendingItems'] as int;
+    return TokensResponse(tokens: tokensList, pendingItems: pendingItems);
   }
 
-  Map<String, dynamic> toJson() => {'tokens': tokens, 'pagination': pagination};
+  Map<String, dynamic> toJson() =>
+      {'tokens': tokens, 'pendingItems': pendingItems};
 }

@@ -1,6 +1,7 @@
 class Token {
   final int id;
   final String ethereumAddress;
+  final int itemId;
   final String name;
   final String symbol;
   final int decimals;
@@ -11,6 +12,7 @@ class Token {
   Token(
       {this.id,
       this.ethereumAddress,
+      this.itemId,
       this.name,
       this.symbol,
       this.decimals,
@@ -22,6 +24,7 @@ class Token {
     return Token(
         id: json['id'],
         ethereumAddress: json['ethereumAddress'],
+        itemId: json['itemId'],
         name: json['name'],
         symbol: json['symbol'],
         decimals: json['decimals'],
@@ -33,6 +36,7 @@ class Token {
   Map<String, dynamic> toJson() => {
         'id': id,
         'ethereumAddress': ethereumAddress,
+        'itemId': itemId,
         'name': name,
         'symbol': symbol,
         'decimals': decimals,
