@@ -30,13 +30,13 @@ class ApiClient {
   final String _baseAddress;
 
   final String REGISTER_AUTH_URL = "/account-creation-authorization";
-  final String ACCOUNTS_URL = "/accounts/";
+  /*final String ACCOUNTS_URL = "/accounts/";
   final String EXITS_URL = "/exits/";
 
   final String TRANSACTIONS_POOL_URL = "/transactions-pool";
   final String TRANSACTIONS_HISTORY_URL = "/transactions-history";
 
-  final String TOKENS_URL = "/tokens";
+  final String TOKENS_URL = "/tokens";*/
   final String RECOMMENDED_FEES_URL = "/recommendedFee";
   final String COORDINATORS_URL = "/coordinators";
 
@@ -57,25 +57,25 @@ class ApiClient {
 
   Future<List<Account>> getAccounts(AccountsRequest request) async {
     final response =
-        await _get(ACCOUNTS_URL + request.hermezEthereumAddress, null);
+        await api.getAccounts(request.hermezEthereumAddress, request.tokenIds);
     final AccountsResponse accountsResponse =
-        AccountsResponse.fromJson(json.decode(response.body));
+        AccountsResponse.fromJson(json.decode(response));
     return accountsResponse.accounts;
   }
 
   Future<List<Exit>> getExits(ExitsRequest request) async {
-    final response = await _get(
-        EXITS_URL + request.hermezEthereumAddress, request.toQueryParams());
+    final response = await api.getExits(
+        request.hermezEthereumAddress, request.onlyPendingWithdraws);
     final ExitsResponse exitsResponse =
-        ExitsResponse.fromJson(json.decode(response.body));
+        ExitsResponse.fromJson(json.decode(response));
     return exitsResponse.exits;
   }
 
   // TRANSACTION
 
   Future<bool> sendL2Transaction(Transaction transaction) async {
-    final response = await _post(TRANSACTIONS_POOL_URL, transaction.toJson());
-    return response.statusCode == 200;
+    final response = await api.postPoolTransaction(transaction.toJson());
+    return response.isNotEmpty;
   }
 
   // Get historical transactions. This endpoint will return all the different types
@@ -89,18 +89,22 @@ class ApiClient {
 
   Future<List<ForgedTransaction>> getForgedTransactions(
       ForgedTransactionsRequest request) async {
-    final response = await _get(TRANSACTIONS_HISTORY_URL, request.toJson());
+    final response = await api.getTransactions(
+        request.ethereumAddress,
+        [request.tokenId],
+        request.batchNum,
+        request.accountIndex,
+        request.fromItem);
     final ForgedTransactionsResponse forgedTransactionsResponse =
-        ForgedTransactionsResponse.fromJson(json.decode(response.body));
+        ForgedTransactionsResponse.fromJson(json.decode(response));
     return forgedTransactionsResponse.transactions;
   }
 
   Future<ForgedTransaction> getTransactionById(String transactionId) async {
-    final response =
-        await _get(TRANSACTIONS_HISTORY_URL + '/' + transactionId, null);
-    final ForgedTransaction forgedtransaction =
-        ForgedTransaction.fromJson(json.decode(response.body));
-    return forgedtransaction;
+    final response = await api.getHistoryTransaction(transactionId);
+    final ForgedTransaction forgedTransaction =
+        ForgedTransaction.fromJson(json.decode(response));
+    return forgedTransaction;
   }
 
   // Get transaction by id. This endpoint is specially useful for tracking the status of
@@ -110,10 +114,8 @@ class ApiClient {
   // to provide information about that transaction.
 
   Future<Transaction> getPoolTransactionById(String transactionId) async {
-    final response =
-        await _get(TRANSACTIONS_POOL_URL + '/' + transactionId, null);
-    final Transaction transaction =
-        Transaction.fromJson(json.decode(response.body));
+    final response = await api.getPoolTransaction(transactionId);
+    final Transaction transaction = Transaction.fromJson(json.decode(response));
     return transaction;
   }
 

@@ -1,32 +1,32 @@
-
 class ForgedTransactionsRequest {
   final int tokenId;
   final String ethereumAddress;
   final String accountIndex;
-  final String batchNum;
-  final int offset;
-  final int limit;
+  final int batchNum;
+  final int fromItem;
 
-  ForgedTransactionsRequest({this.tokenId, this.ethereumAddress, this.accountIndex, this.batchNum, this.offset, this.limit});
+  ForgedTransactionsRequest(
+      {this.tokenId,
+      this.ethereumAddress,
+      this.accountIndex,
+      this.batchNum,
+      this.fromItem});
 
   factory ForgedTransactionsRequest.fromJson(Map<String, dynamic> json) {
     return ForgedTransactionsRequest(
-        tokenId: json['tokenId'],
-        ethereumAddress: json['ethereumAddress'],
-        accountIndex: json['accountIndex'],
-        batchNum: json['batchNum'],
-        offset: json['offset'],
-        limit: json['limit']
+      tokenId: json['tokenId'],
+      ethereumAddress: json['ethereumAddress'],
+      accountIndex: json['accountIndex'],
+      batchNum: json['batchNum'],
+      fromItem: json['fromItem'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'tokenId': tokenId,
-    'ethereumAddress': ethereumAddress,
-    'accountIndex': accountIndex,
-    'batchNum': batchNum,
-    'offset': offset,
-    'limit': limit,
-  };
-
+        'tokenId': tokenId,
+        'ethereumAddress': ethereumAddress,
+        'accountIndex': accountIndex,
+        'batchNum': batchNum,
+        'fromItem': fromItem,
+      };
 }
