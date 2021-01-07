@@ -261,7 +261,13 @@ class _HomeBalanceState extends State<HomeBalance> {
                           widget.arguments.store.state.txLevel ==
                                   TransactionLevel.LEVEL1
                               ? totalL1Balance(widget.arguments.cryptoList)
-                              : "\$0",
+                              : widget.arguments.store.state.defaultCurrency
+                                          .toString()
+                                          .split('.')
+                                          .last ==
+                                      "EUR"
+                                  ? "€0.00"
+                                  : "\$0.00",
                           //"\$${EthAmountFormatter(tokenBalance).format()}",
                           style: TextStyle(
                             color: HermezColors.black,
@@ -435,54 +441,68 @@ class _HomeBalanceState extends State<HomeBalance> {
   //widget that builds the list
   Widget buildAccountsList() {
     return widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
-        ? Container(
-            color: Colors.white,
-            child: RefreshIndicator(
-              child: ListView.builder(
-                //shrinkWrap: true,
-                itemCount: _elements.length,
-                itemExtent: 100.0,
-                //set the item count so that index won't be out of range
-                padding: const EdgeInsets.all(16.0),
-                //add some padding to make it look good
-                itemBuilder: (context, i) {
-                  //item builder returns a row for each index i=0,1,2,3,4
-                  // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+        ? widget.arguments.cryptoList.length == 0
+            ? Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(34.0),
+                child: Text(
+                  'There are no tokens in this account. \n\n Please make a deposit.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: HermezColors.blueyGrey,
+                    fontSize: 16,
+                    fontFamily: 'ModernEra',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ))
+            : Container(
+                color: Colors.white,
+                child: RefreshIndicator(
+                  child: ListView.builder(
+                    //shrinkWrap: true,
+                    itemCount: _elements.length,
+                    itemExtent: 100.0,
+                    //set the item count so that index won't be out of range
+                    padding: const EdgeInsets.all(16.0),
+                    //add some padding to make it look good
+                    itemBuilder: (context, i) {
+                      //item builder returns a row for each index i=0,1,2,3,4
+                      // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
-                  // final index = i ~/ 2; //get the actual index excluding dividers.
-                  final index = i;
-                  print(index);
-                  final L1Account account = _elements[index];
+                      // final index = i ~/ 2; //get the actual index excluding dividers.
+                      final index = i;
+                      print(index);
+                      final L1Account account = _elements[index];
 
-                  final String currency = widget
-                      .arguments.store.state.defaultCurrency
-                      .toString()
-                      .split('.')
-                      .last;
-                  //final Color color = _colors[index %
-                  //    _colors.length];
-                  return AccountRow(
-                      //account.,
-                      account.publicKey,
-                      account.tokenSymbol,
-                      currency == "EUR"
-                          ? account.USD *
-                              widget.arguments.store.state.exchangeRatio
-                          : account.USD,
-                      currency,
-                      double.parse(account.balance) / pow(10, 18),
-                      false,
-                      true, (token, amount) async {
-                    Navigator.of(context).pushNamed("/account_details",
-                        arguments: WalletAccountDetailsArguments(
-                            account, widget.arguments.store));
-                  }); //iterate through indexes and get the next colour
-                  //return _buildRow(context, element, color); //build the row widget
-                },
-              ),
-              onRefresh: _onRefresh,
-            ),
-          )
+                      final String currency = widget
+                          .arguments.store.state.defaultCurrency
+                          .toString()
+                          .split('.')
+                          .last;
+                      //final Color color = _colors[index %
+                      //    _colors.length];
+                      return AccountRow(
+                          //account.,
+                          account.publicKey,
+                          account.tokenSymbol,
+                          currency == "EUR"
+                              ? account.USD *
+                                  widget.arguments.store.state.exchangeRatio
+                              : account.USD,
+                          currency,
+                          double.parse(account.balance) / pow(10, 18),
+                          false,
+                          true, (token, amount) async {
+                        Navigator.of(context).pushNamed("/account_details",
+                            arguments: WalletAccountDetailsArguments(
+                                account, widget.arguments.store));
+                      }); //iterate through indexes and get the next colour
+                      //return _buildRow(context, element, color); //build the row widget
+                    },
+                  ),
+                  onRefresh: _onRefresh,
+                ),
+              )
         : Container(
             width: double.infinity,
             padding: const EdgeInsets.all(34.0),
