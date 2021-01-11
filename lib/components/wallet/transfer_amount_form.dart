@@ -13,7 +13,7 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:web3dart/web3dart.dart';
 
-import '../../wallet_token_selector_page.dart';
+import '../../wallet_account_selector_page.dart';
 
 class TransferAmountForm extends StatefulWidget {
   TransferAmountForm(
@@ -166,8 +166,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                       defaultCurrencySelected,
                       (token, amount) async {
                         Navigator.of(context)
-                            .pushReplacementNamed("/token_selector",
-                                arguments: TokenSelectorArguments(
+                            .pushReplacementNamed("/account_selector",
+                                arguments: AccountSelectorArguments(
                                     /*txLevel,*/ amountType,
                                     widget.store));
                       },

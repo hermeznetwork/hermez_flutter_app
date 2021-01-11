@@ -5,6 +5,7 @@ import 'package:hermez/model/account.dart';
 import 'package:hermez/model/transaction.dart';
 import 'package:hermez/service/network/api_client.dart';
 import 'package:hermez/service/network/api_exchange_rate_client.dart';
+import 'package:hermez/service/network/model/accounts_request.dart';
 import 'package:hermez/service/network/model/rates_request.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -37,6 +38,9 @@ class HermezService implements IHermezService {
   @override
   Future<List<Account>> getAccounts(
       web3.EthereumAddress ethereumAddress) async {
+    AccountsRequest accountsRequest = new AccountsRequest();
+    accountsRequest.hermezEthereumAddress = HermezethereumAddress
+    return _apiClient().getAccounts(request)
     // TODO: implement getAccounts
     return BuiltList<Account>().toList(); // List.of(Account());
   }

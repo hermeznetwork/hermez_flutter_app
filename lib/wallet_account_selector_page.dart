@@ -9,18 +9,18 @@ import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
-class TokenSelectorArguments {
+class AccountSelectorArguments {
   //final TransactionLevel txLevel;
-  final TransactionType amountType;
+  final TransactionType transactionType;
   final WalletHandler store;
 
-  TokenSelectorArguments(/*this.txLevel,*/ this.amountType, this.store);
+  AccountSelectorArguments(/*this.txLevel,*/ this.transactionType, this.store);
 }
 
-class WalletTokenSelectorPage extends HookWidget {
-  WalletTokenSelectorPage(this.arguments);
+class WalletAccountSelectorPage extends HookWidget {
+  WalletAccountSelectorPage(this.arguments);
 
-  final TokenSelectorArguments arguments;
+  final AccountSelectorArguments arguments;
 
   /*List _elements = [
     {
@@ -196,8 +196,8 @@ class WalletTokenSelectorPage extends HookWidget {
                     final Token supportedToken =
                         await arguments.store.getTokenById(account.tokenId);
                     Navigator.pushReplacementNamed(context, "/transfer_amount",
-                        arguments: AmountArguments(
-                            arguments.store, arguments.amountType, account));
+                        arguments: AmountArguments(arguments.store,
+                            arguments.transactionType, account));
                   }); //iterate through indexes and get the next colour
                   //return _buildRow(context, element, color); //build the row widget
                 }))

@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_token_selector_page.dart';
+import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 import 'context/wallet/wallet_handler.dart';
@@ -150,8 +150,8 @@ class WalletAccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pushNamed("/token_selector",
-                          arguments: TokenSelectorArguments(
+                      Navigator.of(context).pushNamed("/account_selector",
+                          arguments: AccountSelectorArguments(
                             //widget.arguments.store.state.txLevel,
                             TransactionType.SEND,
                             arguments.store,
@@ -185,8 +185,8 @@ class WalletAccountDetailsPage extends HookWidget {
                       arguments.store.state.txLevel == TransactionLevel.LEVEL1
                           ? Navigator.of(context)
                               .pushNamed("/qrcode", arguments: arguments.store)
-                          : Navigator.of(context).pushNamed("/token_selector",
-                              arguments: TokenSelectorArguments(
+                          : Navigator.of(context).pushNamed("/account_selector",
+                              arguments: AccountSelectorArguments(
                                 //widget.arguments.store.state.txLevel,
                                 TransactionType.DEPOSIT,
                                 arguments.store,
@@ -219,7 +219,7 @@ class WalletAccountDetailsPage extends HookWidget {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           onPressed: () {
-                            Navigator.of(context).pushNamed("/token_selector",
+                            Navigator.of(context).pushNamed("/account_selector",
                                 arguments: TransactionType.WITHDRAW);
                           },
                           padding: EdgeInsets.all(10.0),

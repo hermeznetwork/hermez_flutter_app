@@ -266,7 +266,7 @@ class ApiClient {
                                 .authorizeAccountCreation(request);
 
                             /*if (result) {
-                    Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.SEND);
+                    Navigator.of(context).pushNamed("/account_selector", arguments: TransactionType.SEND);
                   }*/
                             var params2 = {
                               "hermezEthereumAddress":

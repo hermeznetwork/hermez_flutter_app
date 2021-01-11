@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/qrcode_reader_page.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_account_details_page.dart';
+import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_activity_page.dart';
 import 'package:hermez/wallet_amount_page.dart';
 import 'package:hermez/wallet_create_page.dart';
@@ -11,7 +12,6 @@ import 'package:hermez/wallet_import_page.dart';
 import 'package:hermez/wallet_settings_currency_page.dart';
 import 'package:hermez/wallet_settings_page.dart';
 import 'package:hermez/wallet_settings_qrcode_page.dart';
-import 'package:hermez/wallet_token_selector_page.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
 import 'package:hermez/wallet_transaction_info_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -100,11 +100,11 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/amount': (BuildContext context) => AmountPage(),
     '/receiver': (BuildContext context) =>
         ReceiverPage(arguments: ModalRoute.of(context).settings.arguments),
-    '/token_selector': (BuildContext context) {
+    '/account_selector': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())
         return WalletProvider(builder: (context, store) {
-          return WalletTokenSelectorPage(
+          return WalletAccountSelectorPage(
               ModalRoute.of(context).settings.arguments);
         });
       return IntroPage();

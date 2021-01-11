@@ -10,7 +10,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
-import 'package:hermez/wallet_token_selector_page.dart';
+import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 class HomeBalanceArguments {
@@ -336,8 +336,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           onPressed: () async {
-                            Navigator.of(context).pushNamed("/token_selector",
-                                arguments: TokenSelectorArguments(
+                            Navigator.of(context).pushNamed("/account_selector",
+                                arguments: AccountSelectorArguments(
                                   //widget.arguments.store.state.txLevel,
                                   TransactionType.SEND,
                                   widget.arguments.store,
@@ -375,8 +375,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                         Navigator.of(context).pushNamed("/qrcode",
                             arguments: widget.arguments.store);
                       } else {
-                        Navigator.of(context).pushNamed("/token_selector",
-                            arguments: TokenSelectorArguments(
+                        Navigator.of(context).pushNamed("/account_selector",
+                            arguments: AccountSelectorArguments(
                               //widget.arguments.store.state.txLevel,
                               TransactionType.DEPOSIT,
                               widget.arguments.store,
@@ -408,7 +408,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),),
                 onPressed: () {
-                  Navigator.of(context).pushNamed("/token_selector", arguments: TransactionType.WITHDRAW);
+                  Navigator.of(context).pushNamed("/account_selector", arguments: TransactionType.WITHDRAW);
                 },
                 padding: EdgeInsets.all(10.0),
                 color: Colors.transparent,
