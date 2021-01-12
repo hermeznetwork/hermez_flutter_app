@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -39,7 +40,7 @@ class WalletAccountSelectorPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Token> supportedTokens;
+    List<Account> accounts;
     //final apiClient = useMemoized(() => ApiClient('http://167.71.59.190:4010'));
 
     //store = useWallet(context);
@@ -81,10 +82,9 @@ class WalletAccountSelectorPage extends HookWidget {
         ],
         leading: new Container(),
       ),
-      body: FutureBuilder<List<Token>>(
-        future:
-            arguments.store.getTokens() /*apiClient.getSupportedTokens(null)*/,
-        builder: (BuildContext context, AsyncSnapshot<List<Token>> snapshot) {
+      body: FutureBuilder<List<Account>>(
+        future: arguments.store.getAccounts(),
+        builder: (BuildContext context, AsyncSnapshot<List<Account>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
               color: Colors.white,
@@ -107,7 +107,7 @@ class WalletAccountSelectorPage extends HookWidget {
             } else {
               if (snapshot.hasData) {
                 // data loaded:
-                supportedTokens = snapshot.data;
+                accounts = snapshot.data;
                 return Container(
                   color: Colors.white,
                   child: Column(

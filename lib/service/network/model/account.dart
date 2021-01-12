@@ -1,35 +1,42 @@
-
+import 'package:hermez/service/network/model/token.dart';
 
 class Account {
-  final int accountIndex;
-  final int tokenId;
-  final String tokenSymbol;
-  final int nonce;
+  final String accountIndex;
   final String balance;
-  final String publicKey;
-  final String ethereumAddress;
+  final String bjj;
+  final String hezEthereumAddress;
+  final int itemId;
+  final int nonce;
+  final Token token;
 
-  Account({this.accountIndex, this.tokenId, this.tokenSymbol, this.nonce, this.balance, this.publicKey, this.ethereumAddress});
+  Account(
+      {this.accountIndex,
+      this.balance,
+      this.bjj,
+      this.hezEthereumAddress,
+      this.itemId,
+      this.nonce,
+      this.token});
 
   factory Account.fromJson(Map<String, dynamic> json) {
+    Token token = Token.fromJson(json['token']);
     return Account(
         accountIndex: json['accountIndex'],
-        tokenId: json['tokenId'],
-        tokenSymbol: json['tokenSymbol'],
-        nonce: json['nonce'],
         balance: json['balance'],
-        publicKey: json['publicKey'],
-        ethereumAddress: json['ethereumAddress']);
+        bjj: json['bjj'],
+        hezEthereumAddress: json['hezEthereumAddress'],
+        itemId: json['itemId'],
+        nonce: json['nonce'],
+        token: token);
   }
 
   Map<String, dynamic> toJson() => {
-    'accountIndex': accountIndex,
-    'tokenId': tokenId,
-    'tokenSymbol': tokenSymbol,
-    'nonce': nonce,
-    'balance': balance,
-    'publicKey': publicKey,
-    'ethereumAddress': ethereumAddress,
-  };
-
+        'accountIndex': accountIndex,
+        'balance': balance,
+        'bjj': bjj,
+        'hezEthereumAddress': hezEthereumAddress,
+        'itemId': itemId,
+        'nonce': nonce,
+        'token': token.toJson(),
+      };
 }

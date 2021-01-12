@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:built_collection/built_collection.dart';
-import 'package:hermez/model/account.dart';
 import 'package:hermez/model/transaction.dart';
 import 'package:hermez/service/network/api_client.dart';
 import 'package:hermez/service/network/api_exchange_rate_client.dart';
+import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez/service/network/model/account_request.dart';
 import 'package:hermez/service/network/model/accounts_request.dart';
 import 'package:hermez/service/network/model/rates_request.dart';
+import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'configuration_service.dart';
@@ -14,7 +16,7 @@ import 'network/model/token.dart';
 
 abstract class IHermezService {
   Future<List<Account>> getAccounts(web3.EthereumAddress ethereumAddress);
-  Future<Account> getAccount(web3.EthereumAddress ethereumAddress, int tokenId);
+  Future<Account> getAccount(String accountIndex);
   Future<List<Transaction>> getTransactions(
       web3.EthereumAddress ethereumAddress);
   Future<List<Token>> getTokens();
@@ -38,18 +40,17 @@ class HermezService implements IHermezService {
   @override
   Future<List<Account>> getAccounts(
       web3.EthereumAddress ethereumAddress) async {
-    AccountsRequest accountsRequest = new AccountsRequest();
-    accountsRequest.hermezEthereumAddress = HermezethereumAddress
-    return _apiClient().getAccounts(request)
-    // TODO: implement getAccounts
-    return BuiltList<Account>().toList(); // List.of(Account());
+    AccountsRequest accountsRequest = new AccountsRequest(
+        hezEthereumAddress: addresses.getHermezAddress(ethereumAddress.hex),
+        tokenIds: [3, 87, 91]);
+    return _apiClient().getAccounts(accountsRequest);
   }
 
   @override
-  Future<Account> getAccount(
-      web3.EthereumAddress ethereumAddress, int tokenId) async {
-    // TODO: implement getAccount
-    return Account();
+  Future<Account> getAccount(String accountIndex) async {
+    AccountRequest accountRequest =
+        new AccountRequest(accountIndex: accountIndex);
+    return _apiClient().getAccount(accountRequest);
   }
 
   @override

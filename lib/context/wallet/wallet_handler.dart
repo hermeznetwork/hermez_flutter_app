@@ -8,6 +8,7 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:web3dart/web3dart.dart' as web3;
@@ -158,7 +159,7 @@ class WalletHandler {
             balance: tokenAmount.getInWei.toString(),
             publicKey: token.name,
             ethereumAddress: state.address,
-            USD: token.USD);
+            USD: token.USD.toDouble());
         L1accounts.add(account);
       }
       tokensBalance[token.symbol] = tokenBalance;
@@ -186,6 +187,12 @@ class WalletHandler {
 
     _store.dispatch(
         BalanceUpdated(ethBalance.getInWei, tokensBalance, L1accounts));
+  }
+
+  Future<List<Account>> getAccounts() async {
+    final accounts = await _hermezService
+        .getAccounts(web3.EthereumAddress.fromHex(state.address));
+    return accounts;
   }
 
   Future<List<Token>> getTokens() async {

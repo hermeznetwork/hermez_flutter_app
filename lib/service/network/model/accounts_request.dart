@@ -1,32 +1,42 @@
-
 class AccountsRequest {
-  final String hermezEthereumAddress;
+  final String hezEthereumAddress;
+  final String BJJ;
   final List<int> tokenIds;
-  final int offset;
+  final int fromItem;
+  final OrderType order;
   final int limit;
 
-  AccountsRequest({this.hermezEthereumAddress, this.tokenIds, this.offset, this.limit});
+  AccountsRequest(
+      {this.hezEthereumAddress,
+      this.BJJ,
+      this.tokenIds,
+      this.fromItem,
+      this.order,
+      this.limit});
 
   factory AccountsRequest.fromJson(Map<String, dynamic> json) {
     return AccountsRequest(
-        hermezEthereumAddress: json['hermezEthereumAddress'],
+        hezEthereumAddress: json['hezEthereumAddress'],
+        BJJ: json['BJJ'],
         tokenIds: json['tokenIds'],
-        offset: json['offset'],
-        limit: json['limit']
-    );
+        fromItem: json['fromItem'],
+        order: json['order'],
+        limit: json['limit']);
   }
 
   Map<String, dynamic> toJson() => {
-    'hermezEthereumAddress': hermezEthereumAddress,
-    'tokenIds': tokenIds,
-    'offset': offset,
-    'limit': limit,
-  };
+        'hezEthereumAddress': hezEthereumAddress,
+        'BJJ': BJJ,
+        'tokenIds': tokenIds,
+        'fromItem': fromItem,
+        'order': _enumToString(order),
+        'limit': limit,
+      };
+}
 
-  Map<String, String> toQueryParams() => {
-    'tokenIds': tokenIds.toString(),
-    'offset': offset.toString(),
-    'limit': limit.toString(),
-  };
+enum OrderType { ASC, DESC }
 
+String _enumToString(dynamic enumValue) {
+  final String enumString = enumValue.toString();
+  return enumString.substring(enumString.indexOf('.') + 1);
 }

@@ -1,47 +1,48 @@
 class Token {
-  final int id;
+  final int USD;
+  final int decimals;
   final String ethereumAddress;
+  final int ethereumBlockNum;
+  final String fiatUpdate;
+  final int id;
   final int itemId;
   final String name;
   final String symbol;
-  final int decimals;
-  final int ethereumBlockNum;
-  final double USD;
-  final String fiatUpdate;
 
-  Token(
-      {this.id,
-      this.ethereumAddress,
-      this.itemId,
-      this.name,
-      this.symbol,
-      this.decimals,
-      this.ethereumBlockNum,
-      this.USD,
-      this.fiatUpdate});
+  Token({
+    this.USD,
+    this.decimals,
+    this.ethereumAddress,
+    this.ethereumBlockNum,
+    this.fiatUpdate,
+    this.id,
+    this.itemId,
+    this.name,
+    this.symbol,
+  });
 
   factory Token.fromJson(Map<String, dynamic> json) {
     return Token(
-        id: json['id'],
+        USD: json['USD'],
+        decimals: json['decimals'],
         ethereumAddress: json['ethereumAddress'],
+        ethereumBlockNum: json['ethereumBlockNum'],
+        fiatUpdate: json['fiatUpdate'],
+        id: json['id'],
         itemId: json['itemId'],
         name: json['name'],
-        symbol: json['symbol'],
-        decimals: json['decimals'],
-        ethereumBlockNum: json['ethereumBlockNum'],
-        USD: json['USD'],
-        fiatUpdate: json['fiatUpdate']);
+        symbol: json['symbol']);
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
+        'USD': USD,
+        'decimals': decimals,
         'ethereumAddress': ethereumAddress,
+        'ethereumBlockNum': ethereumBlockNum,
+        'fiatUpdate': fiatUpdate,
+        'id': id,
         'itemId': itemId,
         'name': name,
         'symbol': symbol,
-        'decimals': decimals,
-        'ethereumBlockNum': ethereumBlockNum,
-        'USD': USD,
-        'fiatUpdate': fiatUpdate
       };
 }

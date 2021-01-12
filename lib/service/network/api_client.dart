@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:hermez/service/network/api_client_exceptions.dart';
 import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez/service/network/model/account_request.dart';
 import 'package:hermez/service/network/model/accounts_response.dart';
 import 'package:hermez/service/network/model/coordinators_response.dart';
 import 'package:hermez/service/network/model/exits_request.dart';
@@ -57,10 +58,16 @@ class ApiClient {
 
   Future<List<Account>> getAccounts(AccountsRequest request) async {
     final response =
-        await api.getAccounts(request.hermezEthereumAddress, request.tokenIds);
+        await api.getAccounts(request.hezEthereumAddress, request.tokenIds);
     final AccountsResponse accountsResponse =
         AccountsResponse.fromJson(json.decode(response));
     return accountsResponse.accounts;
+  }
+
+  Future<Account> getAccount(AccountRequest request) async {
+    final response = await api.getAccount(request.accountIndex);
+    final Account accountResponse = Account.fromJson(json.decode(response));
+    return accountResponse;
   }
 
   Future<List<Exit>> getExits(ExitsRequest request) async {
