@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +14,7 @@ import '../../wallet_transaction_details_page.dart';
 
 class ActivityArguments {
   final WalletHandler store;
-  final L1Account account;
+  final Account account;
   final String address;
   final String symbol;
   final double exchangeRate;
@@ -249,7 +249,7 @@ class _ActivityState extends State<Activity> {
   }
 
   Future<List<dynamic>> fetchTransactions() async {
-    if (widget.arguments.account.tokenSymbol == "ETH") {
+    if (widget.arguments.account.token.symbol == "ETH") {
       return await widget.arguments.store
           .getTransactionsByAddress(widget.arguments.store.state.address);
     } else {

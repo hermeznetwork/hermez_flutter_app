@@ -5,6 +5,7 @@ import 'package:hermez/components/wallet/balance.dart';
 import 'components/dialog/alert.dart';
 import 'components/menu/main_menu.dart';
 import 'context/wallet/wallet_provider.dart';
+import 'wallet_transfer_amount_page.dart';
 
 class WalletMainPage extends HookWidget {
   WalletMainPage(this.title);
@@ -51,7 +52,11 @@ class WalletMainPage extends HookWidget {
               icon: Icon(Icons.refresh),
               onPressed: !store.state.loading
                   ? () async {
-                      await store.fetchOwnBalance();
+                      if (store.state.txLevel == TransactionLevel.LEVEL1) {
+                        await store.fetchOwnL1Balance();
+                      } else {
+                        await store.fetchOwnL2Balance();
+                      }
                       Scaffold.of(context).showSnackBar(SnackBar(
                         content: Text("Balance updated"),
                         duration: Duration(milliseconds: 800),

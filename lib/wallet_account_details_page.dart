@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -15,7 +15,7 @@ import 'context/wallet/wallet_handler.dart';
 // title and message.
 
 class WalletAccountDetailsArguments {
-  final L1Account element;
+  final Account element;
   WalletHandler store;
   //final Color color;
 
@@ -43,7 +43,7 @@ class WalletAccountDetailsPage extends HookWidget {
                   child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(arguments.element.publicKey, // name
+                  Text(arguments.element.bjj, // name
                       style: TextStyle(
                           fontFamily: 'ModernEra',
                           color: HermezColors.blackTwo,
@@ -89,8 +89,8 @@ class WalletAccountDetailsPage extends HookWidget {
                       Text(
                           (currency == "USD" ? "\$" : "€") +
                               ((currency == "USD"
-                                          ? arguments.element.USD
-                                          : arguments.element.USD *
+                                          ? arguments.element.token.USD
+                                          : arguments.element.token.USD *
                                               arguments
                                                   .store.state.exchangeRatio) *
                                       (double.parse(arguments.element.balance) /
@@ -107,7 +107,7 @@ class WalletAccountDetailsPage extends HookWidget {
                 (double.parse(arguments.element.balance) / pow(10, 18))
                         .toString() +
                     " " +
-                    arguments.element.tokenSymbol,
+                    arguments.element.token.symbol,
                 style: TextStyle(
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w500,
@@ -122,10 +122,10 @@ class WalletAccountDetailsPage extends HookWidget {
                   arguments.store,
                   arguments.element,
                   arguments.store.state.address,
-                  arguments.element.tokenSymbol,
+                  arguments.element.token.symbol,
                   currency == "USD"
-                      ? arguments.element.USD
-                      : arguments.element.USD *
+                      ? arguments.element.token.USD
+                      : arguments.element.token.USD *
                           arguments.store.state.exchangeRatio,
                   arguments.store.state.defaultCurrency,
                 ),

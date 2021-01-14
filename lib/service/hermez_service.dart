@@ -56,8 +56,6 @@ class HermezService implements IHermezService {
   @override
   Future<List<Token>> getTokens() async {
     return _apiClient().getSupportedTokens(null);
-    // TODO: implement getTokens. Store in cache?
-    //return BuiltList<Token>().toList();
   }
 
   Future<Token> getTokenById(int tokenId) {

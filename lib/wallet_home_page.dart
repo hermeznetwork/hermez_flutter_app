@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/home_balance.dart';
 import 'package:hermez/qrcode_reader_page.dart';
 import 'package:hermez/wallet_settings_page.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 
 import 'context/wallet/wallet_handler.dart';
 import 'context/wallet/wallet_provider.dart';
@@ -27,7 +28,11 @@ class WalletHomePage extends HookWidget {
 
     useEffect(() {
       store.initialise();
-      store.fetchOwnBalance();
+      if (store.state.txLevel == TransactionLevel.LEVEL1) {
+        store.fetchOwnL1Balance();
+      } else {
+        store.fetchOwnL2Balance();
+      }
       return null;
     }, [store]);
 

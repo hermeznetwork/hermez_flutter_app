@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -24,7 +24,7 @@ class TransferSummaryForm extends HookWidget {
   });
 
   final WalletHandler store;
-  final L1Account account;
+  final Account account;
   final int amount;
   final String transactionHash;
   final TransactionType transactionType;

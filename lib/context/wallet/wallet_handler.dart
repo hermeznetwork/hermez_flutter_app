@@ -7,7 +7,6 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -114,26 +113,35 @@ class WalletHandler {
     });*/
   }
 
-  Future<void> fetchOwnBalance() async {
+  Future<void> fetchOwnL1Balance() async {
     final supportedTokens = await _hermezService.getTokens();
     _store.dispatch(UpdatingBalance());
 
-    List<L1Account> L1accounts = List();
+    List<Account> L1accounts = List();
 
     // GET L1 ETH Balance
     web3.EtherAmount ethBalance = await _contractService
         .getEthBalance(web3.EthereumAddress.fromHex(state.address));
 
     if (ethBalance.getInWei > BigInt.zero) {
-      final account = L1Account(
-          accountIndex: 0,
-          tokenId: 0,
-          tokenSymbol: "ETH",
-          nonce: 0,
-          balance: ethBalance.getInWei.toString(),
-          publicKey: "Ethereum",
-          ethereumAddress: state.address,
-          USD: 346.67);
+      final account = Account(
+        accountIndex: "0",
+        balance: ethBalance.getInWei.toString(),
+        bjj: "",
+        hezEthereumAddress: state.address,
+        itemId: 0,
+        nonce: 0,
+        token: Token(
+            USD: 346,
+            decimals: 18,
+            ethereumAddress: "0x0000000000000000000000000000000000000000",
+            ethereumBlockNum: 0,
+            fiatUpdate: "2020-11-26T09:53:47.444444Z",
+            id: 0,
+            itemId: 1,
+            name: "Ether",
+            symbol: "ETH"),
+      );
       L1accounts.add(account);
     }
 
@@ -151,15 +159,14 @@ class WalletHandler {
       if (tokenBalance > BigInt.zero) {
         var tokenAmount =
             web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei, tokenBalance);
-        final account = L1Account(
-            accountIndex: 0,
-            tokenId: token.id,
-            tokenSymbol: token.symbol,
-            nonce: 0,
+        final account = Account(
+            accountIndex: "0",
             balance: tokenAmount.getInWei.toString(),
-            publicKey: token.name,
-            ethereumAddress: state.address,
-            USD: token.USD.toDouble());
+            bjj: "",
+            hezEthereumAddress: state.address,
+            itemId: 0,
+            nonce: 0,
+            token: token);
         L1accounts.add(account);
       }
       tokensBalance[token.symbol] = tokenBalance;
@@ -187,6 +194,51 @@ class WalletHandler {
 
     _store.dispatch(
         BalanceUpdated(ethBalance.getInWei, tokensBalance, L1accounts));
+  }
+
+  Future<void> fetchOwnL2Balance() async {
+    final accounts = await _hermezService
+        .getAccounts(web3.EthereumAddress.fromHex(state.address));
+    _store.dispatch(UpdatingBalance());
+
+    List<Account> L2accounts = List();
+    var ethBalance = web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei, 0);
+
+    Map<String, BigInt> tokensBalance = Map();
+
+    for (Account account in accounts) {
+      var balance = BigInt.parse(account.balance);
+      // if tokenId == 0 -> ETH
+      if (account.token.symbol == "ETH") {
+        ethBalance =
+            web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei, balance);
+      } else {
+        tokensBalance[account.token.symbol] = balance;
+      }
+    }
+
+    //var accounts = await _hermezService
+    //    .getAccounts(web3.EthereumAddress.fromHex(state.address));
+
+    // TEST ENVIRONMENT
+    /*Map<String, String> headers = {
+      'X-CMC_PRO_API_KEY': '87529169-9e17-4393-939e-39c4737dbd80',
+      'Content-Type': 'application/json; charset=UTF-8',
+      "Accept": "application/json",
+    };
+    String _apiURL =
+        "https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=100&convert=USD";
+    String symbols = "ETH,USDT,BNB,LINK,LEO,USDC,HT,VEST,COMP,MKR,HEDG,BAT,INO,CRO,ZRX,OKB,KNC,SNX,LEND";//,HT,VEST,COMP,MKR,HEDG,cUSDC,BAT,INO,CRO,ZRX,OKB,KNC,SNX,LEND";
+    String _apiURL2 =
+        "https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=$symbols&convert=USD";
+    var response = await http.get(_apiURL2, headers: headers); //waits for response
+    String body = response.body;
+    Map result = jsonDecode(body);
+    var cryptoList = result["data"].values.toList();*/
+    //final cryptoList = List();
+
+    _store.dispatch(
+        BalanceUpdated(ethBalance.getInWei, tokensBalance, L2accounts));
   }
 
   Future<List<Account>> getAccounts() async {

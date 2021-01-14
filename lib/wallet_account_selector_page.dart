@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -113,7 +112,7 @@ class WalletAccountSelectorPage extends HookWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      buildAccountsList(),
+                      buildAccountsList(accounts),
                     ],
                   ),
                 );
@@ -155,13 +154,13 @@ class WalletAccountSelectorPage extends HookWidget {
         ],*/
       ),*/
 
-  Widget buildAccountsList() {
+  Widget buildAccountsList(List<Account> accounts) {
     return arguments.store.state.txLevel == TransactionLevel.LEVEL1
         ? Container(
             color: Colors.white,
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: arguments.store.state.cryptoList.length,
+                itemCount: accounts.length,
                 //set the item count so that index won't be out of range
                 padding: const EdgeInsets.all(16.0),
                 //add some padding to make it look good
@@ -172,8 +171,7 @@ class WalletAccountSelectorPage extends HookWidget {
                   // final index = i ~/ 2; //get the actual index excluding dividers.
                   final index = i;
                   print(index);
-                  final L1Account account =
-                      arguments.store.state.cryptoList[index];
+                  final Account account = accounts[index];
 
                   final String currency = arguments.store.state.defaultCurrency
                       .toString()
@@ -184,17 +182,18 @@ class WalletAccountSelectorPage extends HookWidget {
                   //    _colors.length];
                   return AccountRow(
                       //account.,
-                      account.publicKey,
-                      account.tokenSymbol,
+                      account.bjj,
+                      account.token.symbol,
                       currency == "EUR"
-                          ? account.USD * arguments.store.state.exchangeRatio
-                          : account.USD,
+                          ? account.token.USD *
+                              arguments.store.state.exchangeRatio
+                          : account.token.USD,
                       currency,
                       double.parse(account.balance) / pow(10, 18),
                       false,
                       true, (String token, String amount) async {
                     final Token supportedToken =
-                        await arguments.store.getTokenById(account.tokenId);
+                        await arguments.store.getTokenById(account.token.id);
                     Navigator.pushReplacementNamed(context, "/transfer_amount",
                         arguments: AmountArguments(arguments.store,
                             arguments.transactionType, account));
@@ -202,18 +201,49 @@ class WalletAccountSelectorPage extends HookWidget {
                   //return _buildRow(context, element, color); //build the row widget
                 }))
         : Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(34.0),
-            child: Text(
-              'Deposit tokens from your \n\n Ethereum account.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: HermezColors.blueyGrey,
-                fontSize: 16,
-                fontFamily: 'ModernEra',
-                fontWeight: FontWeight.w500,
-              ),
-            ));
+            color: Colors.white,
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: accounts.length,
+                //set the item count so that index won't be out of range
+                padding: const EdgeInsets.all(16.0),
+                //add some padding to make it look good
+                itemBuilder: (context, i) {
+                  //item builder returns a row for each index i=0,1,2,3,4
+                  // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+
+                  // final index = i ~/ 2; //get the actual index excluding dividers.
+                  final index = i;
+                  print(index);
+                  final Account account = accounts[index];
+
+                  final String currency = arguments.store.state.defaultCurrency
+                      .toString()
+                      .split('.')
+                      .last;
+
+                  //final Color color = _colors[index %
+                  //    _colors.length];
+                  return AccountRow(
+                      //account.,
+                      account.bjj,
+                      account.token.symbol,
+                      currency == "EUR"
+                          ? account.token.USD *
+                              arguments.store.state.exchangeRatio
+                          : account.token.USD,
+                      currency,
+                      double.parse(account.balance) / pow(10, 18),
+                      false,
+                      true, (String token, String amount) async {
+                    final Token supportedToken =
+                        await arguments.store.getTokenById(account.token.id);
+                    Navigator.pushReplacementNamed(context, "/transfer_amount",
+                        arguments: AmountArguments(arguments.store,
+                            arguments.transactionType, account));
+                  }); //iterate through indexes and get the next colour
+                  //return _buildRow(context, element, color); //build the row widget
+                }));
   }
 
   //widget that builds the list

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
 
@@ -15,7 +15,7 @@ enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 class AmountArguments {
   final WalletHandler store;
   final TransactionType amountType;
-  final L1Account account;
+  final Account account;
   //final Token token;
 
   AmountArguments(
@@ -73,7 +73,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
                   widget.arguments.account,
                   amount,
                   null,
-                  widget.arguments.account.ethereumAddress,
+                  widget.arguments.account.hezEthereumAddress,
                   address,
                   null));
           //if (success) {

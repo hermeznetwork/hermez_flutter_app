@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
@@ -11,7 +11,7 @@ class TransactionDetailsArguments {
   final WalletHandler store;
   final TransactionType amountType;
   final TransactionStatus status;
-  final L1Account account;
+  final Account account;
   final double amount;
   final String transactionHash;
   final String addressFrom;
@@ -198,13 +198,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     currency == "EUR"
                         ? "€" +
                             (widget.arguments.amount *
-                                    (widget.arguments.account.USD *
+                                    (widget.arguments.account.token.USD *
                                         widget.arguments.store.state
                                             .exchangeRatio))
                                 .toStringAsFixed(2)
                         : '\$' +
                             (widget.arguments.amount *
-                                    widget.arguments.account.USD)
+                                    widget.arguments.account.token.USD)
                                 .toStringAsFixed(2),
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -219,7 +219,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 child: Text(
                   (widget.arguments.amount).toString() +
                       " " +
-                      widget.arguments.account.tokenSymbol,
+                      widget.arguments.account.token.symbol,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: HermezColors.steel,

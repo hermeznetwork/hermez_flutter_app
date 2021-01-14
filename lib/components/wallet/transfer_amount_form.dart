@@ -7,7 +7,7 @@ import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -25,7 +25,7 @@ class TransferAmountForm extends StatefulWidget {
       @required this.onSubmit})
       : super(key: key);
 
-  final L1Account account;
+  final Account account;
   final double amount;
   final WalletHandler store;
   final TransactionType amountType;
@@ -40,7 +40,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   _TransferAmountFormState(
       this.account, this.amount, this.store, this.amountType, this.onSubmit);
 
-  final L1Account account;
+  final Account account;
   final double amount;
   final WalletHandler store;
   final TransactionType amountType;
@@ -97,10 +97,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                             : double.parse(amountController
                                                     .value.text) /
                                                 (currency == "EUR"
-                                                    ? account.USD *
+                                                    ? account.token.USD *
                                                         widget.store.state
                                                             .exchangeRatio
-                                                    : account.USD),
+                                                    : account.token.USD),
                                         amountController.value.text,
                                         addressController.value.text);
                                   }
@@ -128,10 +128,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             defaultCurrencySelected
                                 ? "Fee " +
                                     ((currency == "EUR"
-                                                ? account.USD *
+                                                ? account.token.USD *
                                                     widget.store.state
                                                         .exchangeRatio
-                                                : account.USD) *
+                                                : account.token.USD) *
                                             (estimatedFee.toDouble() /
                                                 pow(10, 18)))
                                         .toString() +
@@ -155,11 +155,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   ],
                   children: <Widget>[
                     AccountRow(
-                      account.publicKey,
-                      account.tokenSymbol,
+                      account.bjj,
+                      account.token.symbol,
                       currency == "EUR"
-                          ? account.USD * widget.store.state.exchangeRatio
-                          : account.USD,
+                          ? account.token.USD * widget.store.state.exchangeRatio
+                          : account.token.USD,
                       currency,
                       double.parse(account.balance) / pow(10, 18),
                       true,
@@ -345,7 +345,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               children: <Widget>[
                 Container(
                   child: Text(
-                    defaultCurrencySelected ? currency : account.tokenSymbol,
+                    defaultCurrencySelected ? currency : account.token.symbol,
                     style: TextStyle(
                       color: HermezColors.black,
                       fontSize: 16,
@@ -362,19 +362,19 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                         amountIsValid = double.parse(value) <=
                             (defaultCurrencySelected
                                 ? currency == "EUR"
-                                    ? account.USD *
+                                    ? account.token.USD *
                                             double.parse(account.balance) /
                                             pow(10, 18) *
                                             widget.store.state.exchangeRatio -
-                                        (account.USD *
+                                        (account.token.USD *
                                                 widget.store.state
                                                     .exchangeRatio) *
                                             (estimatedFee.toDouble() /
                                                 pow(10, 18))
-                                    : account.USD *
+                                    : account.token.USD *
                                             double.parse(account.balance) /
                                             pow(10, 18) -
-                                        (account.USD *
+                                        (account.token.USD *
                                             estimatedFee.toDouble() /
                                             pow(10, 18))
                                 : double.parse(account.balance) / pow(10, 18) -
@@ -424,23 +424,23 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 amountController.clear();
                                 amountIsValid = (defaultCurrencySelected
                                                 ? currency == "EUR"
-                                                    ? account.USD *
+                                                    ? account.token.USD *
                                                             double.parse(account
                                                                 .balance) /
                                                             pow(10, 18) *
                                                             widget.store.state
                                                                 .exchangeRatio -
-                                                        (account.USD *
+                                                        (account.token.USD *
                                                             widget.store.state
                                                                 .exchangeRatio *
                                                             estimatedFee
                                                                 .toDouble() /
                                                             pow(10, 18))
-                                                    : account.USD *
+                                                    : account.token.USD *
                                                             double.parse(account
                                                                 .balance) /
                                                             pow(10, 18) -
-                                                        (account.USD *
+                                                        (account.token.USD *
                                                             estimatedFee
                                                                 .toDouble() /
                                                             pow(10, 18))
@@ -454,24 +454,24 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                   amountController.text =
                                       defaultCurrencySelected
                                           ? currency == "EUR"
-                                              ? (account.USD *
+                                              ? (account.token.USD *
                                                           double.parse(
                                                               account.balance) /
                                                           pow(10, 18) *
                                                           widget.store.state
                                                               .exchangeRatio -
-                                                      (account.USD *
+                                                      (account.token.USD *
                                                           widget.store.state
                                                               .exchangeRatio *
                                                           estimatedFee
                                                               .toDouble() /
                                                           pow(10, 18)))
                                                   .toStringAsFixed(2)
-                                              : (account.USD *
+                                              : (account.token.USD *
                                                           double.parse(
                                                               account.balance) /
                                                           pow(10, 18) -
-                                                      (account.USD *
+                                                      (account.token.USD *
                                                           estimatedFee
                                                               .toDouble() /
                                                           pow(10, 18)))
@@ -513,7 +513,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             ),
                             label: Text(
                               defaultCurrencySelected
-                                  ? account.tokenSymbol
+                                  ? account.token.symbol
                                   : currency,
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -590,7 +590,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               /*(currency == "EUR"
                 ? account.USD * widget.store.state.exchangeRatio*
                 :*/
-              account.USD /*)*/;
+              account.token.USD /*)*/;
     }
     String addressFrom;
     String addressTo;
