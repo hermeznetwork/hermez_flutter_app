@@ -1,5 +1,5 @@
 class Token {
-  final int USD;
+  final double USD;
   final int decimals;
   final String ethereumAddress;
   final int ethereumBlockNum;
@@ -23,7 +23,7 @@ class Token {
 
   factory Token.fromJson(Map<String, dynamic> json) {
     return Token(
-        USD: json['USD'],
+        USD: json['USD'].toDouble(),
         decimals: json['decimals'],
         ethereumAddress: json['ethereumAddress'],
         ethereumBlockNum: json['ethereumBlockNum'],
