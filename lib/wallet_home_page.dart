@@ -46,7 +46,7 @@ class WalletHomePage extends HookWidget {
           store.state.tokensBalance,
           store.state.defaultCurrency,
           store,
-          store.state.cryptoList,
+          null,
           _scaffoldKey,
         ),
       ),

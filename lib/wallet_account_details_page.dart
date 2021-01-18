@@ -43,7 +43,7 @@ class WalletAccountDetailsPage extends HookWidget {
                   child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(arguments.element.bjj, // name
+                  Text(arguments.element.token.name, // name
                       style: TextStyle(
                           fontFamily: 'ModernEra',
                           color: HermezColors.blackTwo,

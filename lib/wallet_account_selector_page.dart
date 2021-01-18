@@ -181,8 +181,7 @@ class WalletAccountSelectorPage extends HookWidget {
                   //final Color color = _colors[index %
                   //    _colors.length];
                   return AccountRow(
-                      //account.,
-                      account.bjj,
+                      account.token.name,
                       account.token.symbol,
                       currency == "EUR"
                           ? account.token.USD *
@@ -225,8 +224,7 @@ class WalletAccountSelectorPage extends HookWidget {
                   //final Color color = _colors[index %
                   //    _colors.length];
                   return AccountRow(
-                      //account.,
-                      account.bjj,
+                      account.token.name,
                       account.token.symbol,
                       currency == "EUR"
                           ? account.token.USD *

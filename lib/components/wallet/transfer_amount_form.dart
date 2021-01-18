@@ -155,7 +155,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   ],
                   children: <Widget>[
                     AccountRow(
-                      account.bjj,
+                      account.token.name,
                       account.token.symbol,
                       currency == "EUR"
                           ? account.token.USD * widget.store.state.exchangeRatio

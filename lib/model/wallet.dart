@@ -1,6 +1,6 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
+import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
 part 'wallet.g.dart';
@@ -26,7 +26,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   TransactionLevel get txLevel;
 
-  List<L1Account> get cryptoList;
+  List<Account> get cryptoList;
 
   bool get loading;
 

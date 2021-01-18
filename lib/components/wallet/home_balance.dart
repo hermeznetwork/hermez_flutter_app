@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/service/network/model/L1_account.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
@@ -22,7 +21,7 @@ class HomeBalanceArguments {
   final WalletDefaultCurrency defaultCurrency;
   final WalletHandler store;
   final PageController controller;
-  final List<L1Account> cryptoList;
+  final List<Account> cryptoList;
   final scaffoldKey;
 
   HomeBalanceArguments(
@@ -61,7 +60,7 @@ class _HomeBalanceState extends State<HomeBalance> {
   Future fetchAccounts() async {
     return widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2
         ? widget.arguments.store.getAccounts()
-        : _elements = null;
+        : widget.arguments.store.getL1Accounts();
   }
 
   @override
@@ -200,8 +199,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                         Text(
                             widget.arguments.store.state.txLevel ==
                                     TransactionLevel.LEVEL1
-                                ? totalL1Balance(widget.arguments.cryptoList)
-                                : totalL2Balance(snapshot),
+                                ? totalBalance(snapshot)
+                                : totalBalance(snapshot),
                             //"\$${EthAmountFormatter(tokenBalance).format()}",
                             style: TextStyle(
                               color: HermezColors.black,
@@ -420,8 +419,7 @@ class _HomeBalanceState extends State<HomeBalance> {
             //final Color color = _colors[index %
             //    _colors.length];
             return AccountRow(
-                //account.,
-                account.bjj,
+                account.token.name,
                 account.token.symbol,
                 currency == "EUR"
                     ? account.token.USD *
@@ -491,7 +489,11 @@ class _HomeBalanceState extends State<HomeBalance> {
               );*/
   }
 
-  String totalL1Balance(List<L1Account> L1accounts) {
+  /*String totalL1Balance(AsyncSnapshot snapshot) {
+    if (snapshot.hasData) {
+      // data loaded:
+      _elements = snapshot.data;
+    }
     double resultValue = 0;
     String result = "";
     final String currency =
@@ -501,8 +503,8 @@ class _HomeBalanceState extends State<HomeBalance> {
     } else if (currency == "USD") {
       result += '\$';
     }
-    for (L1Account account in L1accounts) {
-      double value = account.USD * double.parse(account.balance);
+    for (Account account in _elements) {
+      double value = account.token.USD * double.parse(account.balance);
       if (currency == "EUR") {
         value *= widget.arguments.store.state.exchangeRatio;
       }
@@ -510,9 +512,9 @@ class _HomeBalanceState extends State<HomeBalance> {
     }
     result += (resultValue / pow(10, 18)).toStringAsFixed(2);
     return result;
-  }
+  }*/
 
-  String totalL2Balance(AsyncSnapshot snapshot) {
+  String totalBalance(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
       _elements = snapshot.data;

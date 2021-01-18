@@ -24,7 +24,7 @@ class _$Wallet extends Wallet {
   @override
   final TransactionLevel txLevel;
   @override
-  final List<L1Account> cryptoList;
+  final List<Account> cryptoList;
   @override
   final bool loading;
   @override
@@ -153,9 +153,9 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   TransactionLevel get txLevel => _$this._txLevel;
   set txLevel(TransactionLevel txLevel) => _$this._txLevel = txLevel;
 
-  List<L1Account> _cryptoList;
-  List<L1Account> get cryptoList => _$this._cryptoList;
-  set cryptoList(List<L1Account> cryptoList) => _$this._cryptoList = cryptoList;
+  List<Account> _cryptoList;
+  List<Account> get cryptoList => _$this._cryptoList;
+  set cryptoList(List<Account> cryptoList) => _$this._cryptoList = cryptoList;
 
   BigInt _ethBalance;
   BigInt get ethBalance => _$this._ethBalance;
