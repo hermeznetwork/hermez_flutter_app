@@ -37,32 +37,18 @@ class WalletAccountSelectorPage extends HookWidget {
     },
   ];*/
 
+  Future<List<Account>> getAccounts() {
+    if (arguments.store.state.txLevel == TransactionLevel.LEVEL1 ||
+        arguments.transactionType == TransactionType.DEPOSIT) {
+      return arguments.store.getL1Accounts();
+    } else {
+      return arguments.store.getAccounts();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Account> accounts;
-    //final apiClient = useMemoized(() => ApiClient('http://167.71.59.190:4010'));
-
-    //store = useWallet(context);
-
-    //final transferStore = useWalletTransfer(context);
-    //transferStore.transfer(to, amount)
-
-    //_currentIndex = useState(0);
-
-    /*useEffect(() {
-      store.initialise();
-      store.fetchOwnBalance();
-      return null;
-    }, [store]);*/
-
-    //useEffect(() {
-    //final tokensRequest = TokensRequest();
-
-    //return null;
-    //},
-    // when the apiClient change, useEffect will call the callback again.
-    //[apiClient]);
-
     return Scaffold(
       appBar: new AppBar(
         title: new Text('Token',
@@ -82,7 +68,7 @@ class WalletAccountSelectorPage extends HookWidget {
         leading: new Container(),
       ),
       body: FutureBuilder<List<Account>>(
-        future: arguments.store.getAccounts(),
+        future: getAccounts(),
         builder: (BuildContext context, AsyncSnapshot<List<Account>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(

@@ -359,26 +359,30 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   child: AmountInput(
                     onChanged: (value) {
                       setState(() {
-                        amountIsValid = double.parse(value) <=
-                            (defaultCurrencySelected
-                                ? currency == "EUR"
-                                    ? account.token.USD *
-                                            double.parse(account.balance) /
-                                            pow(10, 18) *
-                                            widget.store.state.exchangeRatio -
-                                        (account.token.USD *
-                                                widget.store.state
-                                                    .exchangeRatio) *
-                                            (estimatedFee.toDouble() /
+                        amountIsValid = value.isEmpty ||
+                            double.parse(value) <=
+                                (defaultCurrencySelected
+                                    ? currency == "EUR"
+                                        ? account.token.USD *
+                                                double.parse(account.balance) /
+                                                pow(10, 18) *
+                                                widget
+                                                    .store.state.exchangeRatio -
+                                            (account.token.USD *
+                                                    widget.store.state
+                                                        .exchangeRatio) *
+                                                (estimatedFee.toDouble() /
+                                                    pow(10, 18))
+                                        : account.token.USD *
+                                                double.parse(account.balance) /
+                                                pow(10, 18) -
+                                            (account.token.USD *
+                                                estimatedFee.toDouble() /
                                                 pow(10, 18))
-                                    : account.token.USD *
-                                            double.parse(account.balance) /
+                                    : double.parse(account.balance) /
                                             pow(10, 18) -
-                                        (account.token.USD *
-                                            estimatedFee.toDouble() /
-                                            pow(10, 18))
-                                : double.parse(account.balance) / pow(10, 18) -
-                                    (estimatedFee.toDouble() / pow(10, 18)));
+                                        (estimatedFee.toDouble() /
+                                            pow(10, 18)));
                       });
                     },
                     controller: amountController,
@@ -611,10 +615,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   bool buttonIsEnabled() {
-    return amountIsValid &&
-        addressIsValid &&
-        amountController.value.text.isNotEmpty &&
-        addressController.value.text.isNotEmpty;
+    if (amountType == TransactionType.SEND) {
+      return amountIsValid &&
+          amountController.value.text.isNotEmpty &&
+          addressIsValid &&
+          addressController.value.text.isNotEmpty;
+    } else {
+      return amountIsValid && amountController.value.text.isNotEmpty;
+    }
   }
 
   bool isAddressValid() {
