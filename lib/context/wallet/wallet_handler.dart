@@ -8,7 +8,9 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez/service/network/model/exit.dart';
 import 'package:hermez/service/network/model/token.dart';
+import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -323,6 +325,17 @@ class WalletHandler {
   Future<Token> getTokenById(int tokenId) async {
     final supportedToken = await _hermezService.getTokenById(tokenId);
     return supportedToken;
+  }
+
+  Future<bool> sendL2Transaction(Transaction transaction) async {
+    final result = await _hermezService.sendL2Transaction(transaction);
+    return result;
+  }
+
+  Future<List<Exit>> getExits() async {
+    final exits = await _hermezService
+        .getExits(web3.EthereumAddress.fromHex(state.address));
+    return exits;
   }
 
   Future<BigInt> getEstimatedFee(String from, String to, BigInt amount) async {

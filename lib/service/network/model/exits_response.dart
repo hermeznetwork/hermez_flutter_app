@@ -9,14 +9,10 @@ class ExitsResponse {
   ExitsResponse({this.exits, this.pagination});
 
   factory ExitsResponse.fromJson(Map<String, dynamic> json) {
-    return ExitsResponse(
-        exits: json['exits'],
-        pagination: json['pagination']);
+    List<Exit> exits =
+        (json['exits'] as List)?.map((item) => Exit.fromJson(item))?.toList();
+    return ExitsResponse(exits: exits, pagination: json['pagination']);
   }
 
-  Map<String, dynamic> toJson() => {
-    'exits': exits,
-    'pagination': pagination
-  };
-
+  Map<String, dynamic> toJson() => {'exits': exits, 'pagination': pagination};
 }

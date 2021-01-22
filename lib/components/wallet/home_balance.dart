@@ -9,6 +9,7 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez/service/network/model/exit.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
@@ -45,7 +46,8 @@ class HomeBalance extends StatefulWidget {
 }
 
 class _HomeBalanceState extends State<HomeBalance> {
-  List<Account> _elements;
+  List<Account> _accounts;
+  List<Exit> _exits;
 
   @override
   void initState() {
@@ -57,10 +59,17 @@ class _HomeBalanceState extends State<HomeBalance> {
     setState(() {});
   }
 
-  Future fetchAccounts() async {
-    return widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2
-        ? widget.arguments.store.getAccounts()
-        : widget.arguments.store.getL1Accounts();
+  Future<List<Account>> fetchAccounts() async {
+    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
+      _exits = await fetchExits();
+      return widget.arguments.store.getAccounts();
+    } else {
+      return widget.arguments.store.getL1Accounts();
+    }
+  }
+
+  Future<List<Exit>> fetchExits() {
+    return widget.arguments.store.getExits();
   }
 
   @override
@@ -128,7 +137,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                               widget.arguments.store.updateLevel(index == 1
                                   ? TransactionLevel.LEVEL2
                                   : TransactionLevel.LEVEL1);
-                              //index == 1 ? _elements = [] : fetchAccounts();
+                              //index == 1 ? _accounts = [] : fetchAccounts();
                             });
                           },
                         )
@@ -228,15 +237,15 @@ class _HomeBalanceState extends State<HomeBalance> {
   buildButtonsRow(BuildContext context, AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
-      _elements = snapshot.data;
+      _accounts = snapshot.data;
     }
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          _elements != null && _elements.length > 0
+          _accounts != null && _accounts.length > 0
               ? SizedBox(width: 20.0)
               : Container(),
-          _elements != null && _elements.length > 0
+          _accounts != null && _accounts.length > 0
               ? Expanded(
                   child:
                       // takes in an object and color and returns a circle avatar with first letter and required color
@@ -310,7 +319,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                     )),
           ),
           SizedBox(width: 20.0),
-          _elements != null && _elements.length > 0
+          _accounts != null && _accounts.length > 0
               ? Expanded(
                   child:
                       // takes in an object and color and returns a circle avatar with first letter and required color
@@ -344,7 +353,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                           )),
                 )
               : Container(),
-          _elements != null && _elements.length > 0
+          _accounts != null && _accounts.length > 0
               ? SizedBox(width: 20.0)
               : Container(),
         ]);
@@ -367,7 +376,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       } else {
         if (snapshot.hasData) {
           // data loaded:
-          _elements = snapshot.data;
+          _accounts = snapshot.data;
           buildAccountsList();
         } else {
           return Container(
@@ -399,7 +408,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       child: RefreshIndicator(
         child: ListView.builder(
           shrinkWrap: true,
-          itemCount: _elements.length,
+          itemCount: _accounts.length,
           //set the item count so that index won't be out of range
           padding: const EdgeInsets.all(16.0),
           //add some padding to make it look good
@@ -410,7 +419,7 @@ class _HomeBalanceState extends State<HomeBalance> {
             // final index = i ~/ 2; //get the actual index excluding dividers.
             final index = i;
             print(index);
-            final Account account = _elements[index];
+            final Account account = _accounts[index];
 
             final String currency = widget.arguments.store.state.defaultCurrency
                 .toString()
@@ -444,7 +453,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                 child: RefreshIndicator(
                   child: ListView.builder(
                     //shrinkWrap: true,
-                    itemCount: _elements.length,
+                    itemCount: _accounts.length,
                     itemExtent: 100.0,
                     //set the item count so that index won't be out of range
                     padding: const EdgeInsets.all(16.0),
@@ -456,7 +465,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                       // final index = i ~/ 2; //get the actual index excluding dividers.
                       final index = i;
                       print(index);
-                      final Account account = _elements[index];
+                      final Account account = _accounts[index];
 
                       final String currency = widget
                           .arguments.store.state.defaultCurrency
@@ -492,7 +501,7 @@ class _HomeBalanceState extends State<HomeBalance> {
   /*String totalL1Balance(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
-      _elements = snapshot.data;
+      _accounts = snapshot.data;
     }
     double resultValue = 0;
     String result = "";
@@ -503,7 +512,7 @@ class _HomeBalanceState extends State<HomeBalance> {
     } else if (currency == "USD") {
       result += '\$';
     }
-    for (Account account in _elements) {
+    for (Account account in _accounts) {
       double value = account.token.USD * double.parse(account.balance);
       if (currency == "EUR") {
         value *= widget.arguments.store.state.exchangeRatio;
@@ -517,7 +526,7 @@ class _HomeBalanceState extends State<HomeBalance> {
   String totalBalance(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
-      _elements = snapshot.data;
+      _accounts = snapshot.data;
     }
     double resultValue = 0;
     String result = "";
@@ -528,8 +537,8 @@ class _HomeBalanceState extends State<HomeBalance> {
     } else if (currency == "USD") {
       result += '\$';
     }
-    if (_elements != null && _elements.length > 0) {
-      for (Account account in _elements) {
+    if (_accounts != null && _accounts.length > 0) {
+      for (Account account in _accounts) {
         double value = account.token.USD * double.parse(account.balance);
         if (currency == "EUR") {
           value *= widget.arguments.store.state.exchangeRatio;

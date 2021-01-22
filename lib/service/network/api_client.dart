@@ -72,7 +72,7 @@ class ApiClient {
 
   Future<List<Exit>> getExits(ExitsRequest request) async {
     final response = await api.getExits(
-        request.hermezEthereumAddress, request.onlyPendingWithdraws);
+        request.hezEthereumAddress, request.onlyPendingWithdraws);
     final ExitsResponse exitsResponse =
         ExitsResponse.fromJson(json.decode(response));
     return exitsResponse.exits;

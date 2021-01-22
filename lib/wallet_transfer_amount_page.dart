@@ -8,7 +8,7 @@ import 'context/wallet/wallet_handler.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
-enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW }
+enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT }
 
 enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 

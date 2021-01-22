@@ -1,18 +1,18 @@
 class ExitsRequest {
-  final String hermezEthereumAddress;
+  final String hezEthereumAddress;
   final bool onlyPendingWithdraws;
 
-  ExitsRequest({this.hermezEthereumAddress, this.onlyPendingWithdraws});
+  ExitsRequest({this.hezEthereumAddress, this.onlyPendingWithdraws});
 
   factory ExitsRequest.fromJson(Map<String, dynamic> json) {
     return ExitsRequest(
-      hermezEthereumAddress: json['hermezEthereumAddress'],
+      hezEthereumAddress: json['hezEthereumAddress'],
       onlyPendingWithdraws: json['onlyPendingWithdraws'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'hermezEthereumAddress': hermezEthereumAddress,
+        'hezEthereumAddress': hezEthereumAddress,
         'onlyPendingWithdraws': onlyPendingWithdraws,
       };
 }

@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:built_collection/built_collection.dart';
-import 'package:hermez/model/transaction.dart';
 import 'package:hermez/service/network/api_client.dart';
 import 'package:hermez/service/network/api_exchange_rate_client.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/account_request.dart';
 import 'package:hermez/service/network/model/accounts_request.dart';
+import 'package:hermez/service/network/model/exit.dart';
+import 'package:hermez/service/network/model/exits_request.dart';
 import 'package:hermez/service/network/model/rates_request.dart';
+import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -19,6 +21,8 @@ abstract class IHermezService {
   Future<Account> getAccount(String accountIndex);
   Future<List<Transaction>> getTransactions(
       web3.EthereumAddress ethereumAddress);
+  Future<bool> sendL2Transaction(Transaction transaction);
+  Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress);
   Future<List<Token>> getTokens();
 }
 
@@ -67,6 +71,19 @@ class HermezService implements IHermezService {
       web3.EthereumAddress ethereumAddress) async {
     // TODO: implement getTransactions
     return BuiltList<Transaction>().toList();
+  }
+
+  @override
+  Future<bool> sendL2Transaction(Transaction transaction) {
+    return _apiClient().sendL2Transaction(transaction);
+  }
+
+  @override
+  Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress) {
+    ExitsRequest exitsRequest = new ExitsRequest(
+        hezEthereumAddress: addresses.getHermezAddress(ethereumAddress.hex),
+        onlyPendingWithdraws: true);
+    return _apiClient().getExits(exitsRequest);
   }
 
   @override

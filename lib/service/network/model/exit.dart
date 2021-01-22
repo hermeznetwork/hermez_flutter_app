@@ -1,37 +1,52 @@
+import 'package:hermez/service/network/model/merkle_proof.dart';
+import 'package:hermez/service/network/model/token.dart';
+
 class Exit {
   final int batchNum;
   final String accountIndex;
-  final String merkleProof;
+  final int itemId;
+  final MerkleProof merkleProof;
   final String balance;
-  final String nullifier;
   final int instantWithdrawn;
   final String delayedWithdrawRequest;
   final int delayedWithdrawn;
+  final Token token;
 
-  Exit({this.batchNum, this.accountIndex, this.merkleProof, this.balance, this.nullifier, this.instantWithdrawn, this.delayedWithdrawRequest, this.delayedWithdrawn});
+  Exit(
+      {this.batchNum,
+      this.accountIndex,
+      this.itemId,
+      this.merkleProof,
+      this.balance,
+      this.instantWithdrawn,
+      this.delayedWithdrawRequest,
+      this.delayedWithdrawn,
+      this.token});
 
   factory Exit.fromJson(Map<String, dynamic> json) {
+    Token token = Token.fromJson(json['token']);
+    MerkleProof merkleProof = MerkleProof.fromJson(json['merkleProof']);
     return Exit(
         batchNum: json['batchNum'],
         accountIndex: json['accountIndex'],
-        merkleProof: json['merkleProof'],
+        itemId: json['itemId'],
+        merkleProof: merkleProof,
         balance: json['balance'],
-        nullifier: json['nullifier'],
         instantWithdrawn: json['instantWithdrawn'],
         delayedWithdrawRequest: json['delayedWithdrawRequest'],
-        delayedWithdrawn: json['delayedWithdrawn']
-    );
+        delayedWithdrawn: json['delayedWithdrawn'],
+        token: token);
   }
 
   Map<String, dynamic> toJson() => {
-    'batchNum': batchNum,
-    'accountIndex': accountIndex,
-    'merkleProof': merkleProof,
-    'balance': balance,
-    'nullifier': nullifier,
-    'instantWithdrawn': instantWithdrawn,
-    'delayedWithdrawRequest': delayedWithdrawRequest,
-    'delayedWithdrawn': delayedWithdrawn
-  };
-
+        'batchNum': batchNum,
+        'accountIndex': accountIndex,
+        'itemId': itemId,
+        'merkleProof': merkleProof.toJson(),
+        'balance': balance,
+        'instantWithdrawn': instantWithdrawn,
+        'delayedWithdrawRequest': delayedWithdrawRequest,
+        'delayedWithdrawn': delayedWithdrawn,
+        'token': token.toJson()
+      };
 }

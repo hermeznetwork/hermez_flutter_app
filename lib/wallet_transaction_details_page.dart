@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 
@@ -46,28 +47,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     var transferStore = useWalletTransfer(context);
-    var title = "";
-    switch (widget.arguments.amountType) {
-      case TransactionType.SEND:
-        title = "Send";
-        break;
-      case TransactionType.DEPOSIT:
-        title = "Deposit";
-        break;
-      case TransactionType.WITHDRAW:
-        title = "Withdraw";
-        break;
-      case TransactionType.RECEIVE:
-        title = "Receive";
-        break;
-    }
 
     //var qrcodeAddress = useState();
 
     return Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text(title,
+        title: new Text(getTitleLabel(),
             style: TextStyle(
                 fontFamily: 'ModernEra',
                 color: HermezColors.blackTwo,
@@ -123,10 +109,27 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                           borderRadius: BorderRadius.circular(14.0),
                           side: BorderSide(color: HermezColors.darkOrange)),
                       onPressed: () async {
-                        var success = await transferStore.transferEth(
-                            widget.arguments.store.state.privateKey,
-                            widget.arguments.addressTo,
-                            widget.arguments.amount.toString());
+                        var success = false;
+                        if (widget.arguments.store.state.txLevel ==
+                            TransactionLevel.LEVEL1) {
+                          success = await transferStore.transferEth(
+                              widget.arguments.store.state.privateKey,
+                              widget.arguments.addressTo,
+                              widget.arguments.amount.toString());
+                        } else {
+                          if (widget.arguments.amountType ==
+                              TransactionType.DEPOSIT) {
+                            Transaction transaction = Transaction();
+                            widget.arguments.store
+                                .sendL2Transaction(transaction);
+                          } else if (widget.arguments.amountType ==
+                              TransactionType.SEND) {
+                            Transaction transaction = Transaction();
+                            widget.arguments.store
+                                .sendL2Transaction(transaction);
+                          }
+                        }
+
                         //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
                         if (success) {
                           Navigator.of(context)
@@ -166,7 +169,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       padding: EdgeInsets.all(18.0),
                       color: HermezColors.darkOrange,
                       textColor: Colors.white,
-                      child: Text("Send",
+                      child: Text(getButtonLabel(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -232,5 +235,53 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             ],
           ), //title to be name of the crypto
         ));
+  }
+
+  /// Converts the transaction type to a readable title label
+  ///
+  /// @returns {string} - Button label
+  String getTitleLabel() {
+    var title = "";
+    switch (widget.arguments.amountType) {
+      case TransactionType.SEND:
+        title = "Send";
+        break;
+      case TransactionType.DEPOSIT:
+        title = "Deposit";
+        break;
+      case TransactionType.WITHDRAW:
+        title = "Withdraw";
+        break;
+      case TransactionType.EXIT:
+        title = 'Withdraw';
+        break;
+      case TransactionType.FORCEEXIT:
+        title = 'Withdraw';
+        break;
+      case TransactionType.RECEIVE:
+        title = "Receive";
+        break;
+    }
+    return title;
+  }
+
+  /// Converts the transaction type to a readable button label
+  ///
+  /// @returns {string} - Button label
+  String getButtonLabel() {
+    switch (widget.arguments.amountType) {
+      case TransactionType.DEPOSIT:
+        return 'Deposit';
+      case TransactionType.SEND:
+        return 'Send';
+      case TransactionType.EXIT:
+        return 'Withdraw';
+      case TransactionType.WITHDRAW:
+        return 'Withdraw';
+      case TransactionType.FORCEEXIT:
+        return 'Force Withdrawal';
+      default:
+        return '';
+    }
   }
 }
