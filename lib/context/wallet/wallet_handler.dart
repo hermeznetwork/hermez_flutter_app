@@ -338,6 +338,28 @@ class WalletHandler {
     return exits;
   }
 
+  Future<bool> deposit(BigInt amount, Account account) {
+    /*web3.EthereumAddress fromAddress;
+    if (from != null && from.isNotEmpty) {
+      fromAddress = web3.EthereumAddress.fromHex(from);
+    }*/
+
+    /*_hermezService.deposit(
+        amount, account, web3.EthereumAddress.fromHex(state.address));*/
+
+    final tokenContractAddress =
+        '0x10465b16615ae36F350268eb951d7B0187141D3B'; // Hermez contract address
+
+    _contractService.deposit(amount, state.address, account.token, null
+        /*state.publicKeyCompressedHex*/);
+
+    /*return _contractService.approve(
+        amount,
+        web3.EthereumAddress.fromHex(state.address),
+        web3.EthereumAddress.fromHex(tokenContractAddress),
+        "Hermez");*/
+  }
+
   Future<BigInt> getEstimatedFee(String from, String to, BigInt amount) async {
     web3.EthereumAddress fromAddress;
     web3.EthereumAddress toAddress;

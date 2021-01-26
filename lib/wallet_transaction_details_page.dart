@@ -4,6 +4,7 @@ import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:web3dart/web3dart.dart' as web3;
 
 import 'components/wallet/transaction_details_form.dart';
 import 'context/transfer/wallet_transfer_provider.dart';
@@ -119,9 +120,19 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         } else {
                           if (widget.arguments.amountType ==
                               TransactionType.DEPOSIT) {
-                            Transaction transaction = Transaction();
-                            widget.arguments.store
-                                .sendL2Transaction(transaction);
+                            //Transaction transaction = Transaction();
+                            widget.arguments.store.deposit(
+                                web3.EtherAmount.fromUnitAndValue(
+                                        web3.EtherUnit.wei,
+                                        (widget.arguments.amount *
+                                                BigInt.from(10)
+                                                    .pow(18)
+                                                    .toDouble())
+                                            .toInt())
+                                    .getInWei,
+                                widget.arguments.account);
+                            //widget.arguments.store
+                            //    .sendL2Transaction(transaction);
                           } else if (widget.arguments.amountType ==
                               TransactionType.SEND) {
                             Transaction transaction = Transaction();

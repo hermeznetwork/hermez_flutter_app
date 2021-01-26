@@ -72,6 +72,8 @@ flutter:
   assets:
     - TargaryenCoin.json
     - partialERC20ABI.json
+    - ERC20ABI.json
+    - HermezABI.json
     - hermes.png
     - account.png
     - wallet.png

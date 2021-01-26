@@ -24,6 +24,8 @@ abstract class IHermezService {
   Future<bool> sendL2Transaction(Transaction transaction);
   Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress);
   Future<List<Token>> getTokens();
+  Future<void> deposit(BigInt amount, String hezEthereumAddress, Token token,
+      String babyjubjub, int gasLimit, int gasMultiplier);
 }
 
 class HermezService implements IHermezService {
@@ -84,6 +86,27 @@ class HermezService implements IHermezService {
         hezEthereumAddress: addresses.getHermezAddress(ethereumAddress.hex),
         onlyPendingWithdraws: true);
     return _apiClient().getExits(exitsRequest);
+  }
+
+  /// Makes a deposit.
+  /// It detects if it's a 'createAccountDeposit' or a 'deposit' and prepares the parameters accodingly.
+  /// Detects if it's an Ether, ERC 20 or ERC 777 token and sends the transaction accordingly.
+  /// @param {BigInt} amount - The amount to be deposited
+  /// @param {String} hezEthereumAddress - The Hermez address of the transaction sender
+  /// @param {Object} token - The token information object as returned from the API
+  /// @param {String} babyJubJub - The compressed BabyJubJub in hexadecimal format of the transaction sender.
+  /// @param {String} providerUrl - Network url (i.e, http://localhost:8545). Optional
+  /// @param {Object} signerData - Signer data used to build a Signer to send the transaction
+  /// @param {Number} gasLimit - Optional gas limit
+  /// @param {Number} gasMultiplier - Optional gas multiplier
+  /// @returns {Promise} transaction parameters
+  @override
+  Future<void> deposit(BigInt amount, String hezEthereumAddress, Token token,
+      String babyjubjub, int gasLimit, int gasMultiplier) {
+    /*tx.deposit(amount, addresses.getHermezAddress(ethereumAddress.hex),
+        account.token, /*babyJubJub*/, null, null);*/
+
+    final ethereumAddress = addresses.getEthereumAddress(hezEthereumAddress);
   }
 
   @override

@@ -1,7 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:hermez/service/network/api_eth_gas_station_client.dart';
+import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez/service/network/model/accounts_response.dart';
+import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/contract_parser.dart';
+import 'package:hermez_plugin/addresses.dart' as addresses;
+import 'package:hermez_plugin/api.dart' as api;
+import 'package:hermez_plugin/constants.dart';
 import 'package:web3dart/web3dart.dart';
 
 import 'configuration_service.dart';
@@ -49,8 +57,13 @@ class ContractService implements IContractService {
       contract.function('balanceOf');
   ContractFunction _approve(DeployedContract contract) =>
       contract.function('approve');
+  ContractFunction _allowance(DeployedContract contract) =>
+      contract.function('allowance');
   ContractFunction _sendFunction(DeployedContract contract) =>
       contract.function('transfer');
+
+  ContractFunction _addL1Transaction(DeployedContract contract) =>
+      contract.function('addL1Transaction');
 
   Future<Credentials> getCredentials(String privateKey) =>
       client.credentialsFromPrivateKey(privateKey);
@@ -193,8 +206,8 @@ class ContractService implements IContractService {
 
     EtherAmount etherAmount = await client.getGasPrice();
 
-    final contract = await ContractParser.fromAssets('partialERC20ABI.json',
-        tokenContractAddress.toString(), tokenContractName);
+    final contract = await ContractParser.fromAssets(
+        'ERC20ABI.json', tokenContractAddress.toString(), tokenContractName);
 
     StreamSubscription event;
     // Workaround once sendTransacton doesn't return a Promise containing confirmation / receipt
@@ -237,8 +250,8 @@ class ContractService implements IContractService {
 
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName) async {
-    final contract = await ContractParser.fromAssets('partialERC20ABI.json',
-        tokenContractAddress.toString(), tokenContractName);
+    final contract = await ContractParser.fromAssets(
+        'ERC20ABI.json', tokenContractAddress.toString(), tokenContractName);
 
     var response = await client.call(
       contract: contract,
@@ -266,18 +279,119 @@ class ContractService implements IContractService {
     //return EtherAmount.fromUnitAndValue(
     //    EtherUnit.gwei, BigInt.from(gasPrice / 10));
     return client.getGasPrice();
+    /*const strAvgGas = await client.getGasPrice()
+    const avgGas = Scalar.e(strAvgGas)
+    const res = (avgGas * Scalar.e(multiplier))
+    const retValue = res.toString()*/
   }
 
-  // ERC20 approve the spender account and set the limit of your funds that they are authorized to spend
-  Future<bool> approve(EthereumAddress delegate, BigInt limit,
-      EthereumAddress tokenContractAddress, String tokenContractName) async {
-    final contract = await ContractParser.fromAssets('partialERC20ABI.json',
-        tokenContractAddress.toString(), tokenContractName);
+  /// Makes a deposit.
+  /// It detects if it's a 'createAccountDeposit' or a 'deposit' and prepares the parameters accordingly.
+  /// Detects if it's an Ether, ERC 20 or ERC 777 token and sends the transaction accordingly.
+  /// @param {BigInt} amount - The amount to be deposited
+  /// @param {String} hezEthereumAddress - The Hermez address of the transaction sender
+  /// @param {Object} token - The token information object as returned from the API
+  /// @param {String} babyJubJub - The compressed BabyJubJub in hexadecimal format of the transaction sender.
+  /// @param {String} providerUrl - Network url (i.e, http://localhost:8545). Optional
+  /// @param {Object} signerData - Signer data used to build a Signer to send the transaction
+  /// @param {Number} gasLimit - Optional gas limit
+  /// @param {Number} gasMultiplier - Optional gas multiplier
+  /// @returns {Promise} transaction parameters
+  @override
+  Future<void> deposit(
+      BigInt amount, String hezEthereumAddress, Token token, String babyJubJub,
+      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
+    /*tx.deposit(amount, addresses.getHermezAddress(ethereumAddress.hex),
+        account.token, /*babyJubJub*/, null, null);*/
+
+    final ethereumAddress = addresses.getEthereumAddress(hezEthereumAddress);
+
+    final accountsResponse =
+        await api.getAccounts(hezEthereumAddress, [token.id]);
+
+    final AccountsResponse accounts =
+        AccountsResponse.fromJson(json.decode(accountsResponse));
+    final Account account = accounts != null ? accounts.accounts[0] : null;
+
+    final hermezContract = await ContractParser.fromAssets(
+        'HermezABI.json', contractAddresses['Hermez'], "Hermez");
+
+    dynamic overrides = {gasLimit, await getGasPriceStr(gasMultiplier, client)};
+
+    final transactionParameters = [
+      account != null ? BigInt.zero : '0x' + babyJubJub,
+      account != null
+          ? BigInt.from(addresses.getAccountIndex(account.accountIndex))
+          : BigInt.zero,
+      BigInt.from(1),
+      BigInt.zero,
+      BigInt.from(token.id),
+      BigInt.zero
+    ];
+
+    print([...transactionParameters, overrides]);
+
+    if (token.id == 0) {
+      overrides = Uint8List.fromList([2]);
+      print([...transactionParameters, overrides]);
+      /*return hermezContract.addL1Transaction(...transactionParameters, overrides)
+          .then(() => {
+          return transactionParameters
+      })*/
+      final addL1TransactionCall = await client.call(
+          contract: hermezContract,
+          function: _addL1Transaction(hermezContract),
+          params: [...transactionParameters, overrides]);
+    }
+
+    /*final addL1TransactionCall = await client.call(
+        contract: hermezContract,
+        function: _addL1Transaction(hermezContract),
+        params: null);*/
+  }
+
+  // ERC20 approve the spender account and set the limit of your funds that they are authorized to spend // EtherAmount
+  Future<bool> approve(BigInt amount, EthereumAddress accountAddress,
+      EthereumAddress contractAddress, String tokenContractName) async {
+    final contract = await ContractParser.fromAssets(
+        'ERC20ABI.json', contractAddress.toString(), tokenContractName);
+
+    /*final allowanceCall = await client.call(
+        contract: contract,
+        function: _allowance(contract),
+        params: [
+          accountAddress,
+          EthereumAddress.fromHex(contractAddresses['Hermez'])
+        ]);
+
+    final allowance = allowanceCall.first as double;
+
+    //final amountBigInt = utils.getTokenAmountBigInt(amount, 2);
+
+    if (allowance < amount) {
+      var response = await client.call(
+        contract: contract,
+        function: _approve(contract),
+        params: [contractAddresses['Hermez'], amount],
+      );
+
+      return response.first as bool;
+    }
+
+    if (!(allowance.sign == 0)) {
+      var response = await client.call(
+        contract: contract,
+        function: _approve(contract),
+        params: [contractAddresses['Hermez'], 0],
+      );
+      return response.first as bool;
+    }*/
 
     var response = await client.call(
+      sender: accountAddress,
       contract: contract,
       function: _approve(contract),
-      params: [delegate, limit],
+      params: [accountAddress, amount],
     );
 
     return response.first as bool;
@@ -374,6 +488,18 @@ class ContractService implements IContractService {
       }
     }
   }*/
+
+  /// Get current average gas price from the last ethereum blocks and multiply it
+  /// @param {Number} multiplier - multiply the average gas price by this parameter
+  /// @param {String} providerUrl - Network url (i.e, http://localhost:8545). Optional
+  /// @returns {Future<String>} - will return the gas price obtained.
+  Future<String> getGasPriceStr(num multiplier, Web3Client provider) async {
+    EtherAmount strAvgGas = await provider.getGasPrice();
+    BigInt avgGas = strAvgGas.getInEther;
+    BigInt res = avgGas * BigInt.from(multiplier);
+    String retValue = res.toString();
+    return retValue;
+  }
 
   Future<void> dispose() async {
     await client.dispose();
