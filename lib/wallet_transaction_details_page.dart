@@ -120,8 +120,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         } else {
                           if (widget.arguments.amountType ==
                               TransactionType.DEPOSIT) {
-                            //Transaction transaction = Transaction();
-                            widget.arguments.store.deposit(
+                            success = await widget.arguments.store.deposit(
                                 web3.EtherAmount.fromUnitAndValue(
                                         web3.EtherUnit.wei,
                                         (widget.arguments.amount *

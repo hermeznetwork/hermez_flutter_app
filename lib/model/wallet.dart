@@ -37,6 +37,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
   factory Wallet([void Function(WalletBuilder) updates]) => _$Wallet((b) => b
     ..tokensBalance = BuiltMap<String, BigInt>().toMap()
     ..ethBalance = BigInt.from(0)
+    ..ethUSDPrice = 0
     ..defaultCurrency = WalletDefaultCurrency.EUR
     ..exchangeRatio = 0.0
     ..txLevel = TransactionLevel.LEVEL1

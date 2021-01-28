@@ -1,12 +1,20 @@
+import 'dart:typed_data';
+
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:hermez/constants.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hd_key.dart';
+import 'package:hermez_plugin/addresses.dart' as addresses;
+import 'package:hermez_plugin/hermez_wallet.dart';
+import 'package:hermez_plugin/utils/uint8_list_utils.dart';
 import "package:hex/hex.dart";
 import 'package:web3dart/credentials.dart';
 
 abstract class IAddressService {
   String generateMnemonic();
   String getPrivateKey(String mnemonic);
+  //String getHermezPrivateKey(String mnemonic);
+  //String getBabyJubJub(String privateKey);
   Future<EthereumAddress> getPublicAddress(String privateKey);
   Future<bool> setupFromMnemonic(String mnemonic);
   Future<bool> setupFromPrivateKey(String privateKey);
@@ -33,7 +41,6 @@ class AddressService implements IAddressService {
     final privateKey = HEX.encode(master.key);
     print("ethereum private key: $privateKey");
 
-    // TODO
     /*KeyData rollup = HDKey.derivePath("m/44'/60'/0'/0'", seed);
     final rollupPrivateKey = HEX.encode(rollup.key);
     print("rollup private key: $rollupPrivateKey");*/
@@ -41,7 +48,7 @@ class AddressService implements IAddressService {
     return privateKey;
   }
 
-  void method(String mnemonic) {
+  /*void method(String mnemonic) {
     String seed = bip39.mnemonicToSeedHex(mnemonic);
     KeyData master = HDKey.getMasterKeyFromSeed(seed);
     print(HEX.encode(master
@@ -58,7 +65,7 @@ class AddressService implements IAddressService {
         .chainCode)); // 138f0b2551bcafeca6ff2aa88ba8ed0ed8de070841f0c4ef0165df8181eaad7f
     print(HEX.encode(
         pb)); // 005ba3b9ac6e90e83effcd25ac4e58a1365a9e35a3d3ae5eb07b9e4d90bcf7506d
-  }
+  }*/
 
   @override
   Future<EthereumAddress> getPublicAddress(String privateKey) async {
@@ -73,14 +80,63 @@ class AddressService implements IAddressService {
   Future<bool> setupFromMnemonic(String mnemonic) async {
     final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
     final privateKey = this.getPrivateKey(cryptMnemonic);
-    final address = await getPublicAddress(privateKey);
+    final ethereumAddress = await getPublicAddress(privateKey);
+    final private = EthPrivateKey.fromHex(privateKey);
+    final signature =
+        await private.sign(Uint8ArrayUtils.uint8ListfromString(AUTH_MESSAGE));
+    final hermezAddress = addresses.getHermezAddress(ethereumAddress.hex);
+    //final hashedSignatureBuffer = keccak256(signature);
+
+    final hermezEthereumAddress =
+        'hez:0x4294cE558F2Eb6ca4C3191AeD502cF0c625AE995';
+    //const hermezEthereumAddressError = '0x4294cE558F2Eb6ca4C3191AeD502cF0c625AE995'
+    final hashedSignatureBuffer = Uint8List.fromList([
+      10,
+      147,
+      192,
+      202,
+      232,
+      207,
+      65,
+      134,
+      114,
+      147,
+      167,
+      10,
+      140,
+      18,
+      111,
+      145,
+      163,
+      133,
+      85,
+      250,
+      191,
+      58,
+      146,
+      129,
+      0,
+      79,
+      4,
+      238,
+      153,
+      79,
+      151,
+      219
+    ]);
+    //const privateKeyError = Buffer.from([10, 147, 192, 202, 232, 207, 65, 134, 114, 147, 167, 10, 140, 18, 111, 145, 163, 133, 85, 250, 191, 58, 146, 129, 0, 79, 4, 238, 153, 79, 151])
+    //const wallet = new HermezWallet(privateKey, hermezEthereumAddress)
+
+    final hermezWallet =
+        HermezWallet(hashedSignatureBuffer, hermezEthereumAddress);
 
     // TODO
-    final rollupPrivateKey = this.method(cryptMnemonic);
+    //final babyJubJub = this.method(cryptMnemonic);
 
     await _configService.setMnemonic(cryptMnemonic);
     await _configService.setPrivateKey(privateKey);
-    await _configService.setEthereumAddress(address.toString());
+    //await _configService.setBabyJubJub();
+    await _configService.setEthereumAddress(ethereumAddress.toString());
     await _configService.setupDone(true);
 
     print("Config: $_configService.getEthereumAddress()");

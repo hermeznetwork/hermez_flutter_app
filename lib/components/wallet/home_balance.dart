@@ -539,11 +539,13 @@ class _HomeBalanceState extends State<HomeBalance> {
     }
     if (_accounts != null && _accounts.length > 0) {
       for (Account account in _accounts) {
-        double value = account.token.USD * double.parse(account.balance);
-        if (currency == "EUR") {
-          value *= widget.arguments.store.state.exchangeRatio;
+        if (account.token.USD != null) {
+          double value = account.token.USD * double.parse(account.balance);
+          if (currency == "EUR") {
+            value *= widget.arguments.store.state.exchangeRatio;
+          }
+          resultValue = resultValue + value;
         }
-        resultValue = resultValue + value;
       }
     }
     result += (resultValue / pow(10, 18)).toStringAsFixed(2);

@@ -120,84 +120,55 @@ class WalletHandler {
       final supportedTokens = await _hermezService.getTokens();
       _store.dispatch(UpdatingBalance());
 
-      List<Account> L1accounts = List();
-
-      // GET L1 ETH Balance
-      web3.EtherAmount ethBalance = await _contractService
-          .getEthBalance(web3.EthereumAddress.fromHex(state.address));
-
-      if (ethBalance.getInWei > BigInt.zero) {
-        final account = Account(
-          accountIndex: "0",
-          balance: ethBalance.getInWei.toString(),
-          bjj: "",
-          hezEthereumAddress: state.address,
-          itemId: 0,
-          nonce: 0,
-          token: Token(
-              USD: 346,
-              decimals: 18,
-              ethereumAddress: "0x0000000000000000000000000000000000000000",
-              ethereumBlockNum: 0,
-              fiatUpdate: "2020-11-26T09:53:47.444444Z",
-              id: 0,
-              itemId: 1,
-              name: "Ether",
-              symbol: "ETH"),
-        );
-        L1accounts.add(account);
-      }
-
+      web3.EtherAmount ethBalance = web3.EtherAmount.zero();
       Map<String, BigInt> tokensBalance = Map();
+      List<Account> accounts = List();
 
       for (Token token in supportedTokens) {
-        // if tokenId == 0 -> ETH
-        final contractAddress =
-            "0x5060b60cb8bd1c94b7adef4134555cda7b45c461"; // TGE Contract Address
-        var tokenBalance = await _contractService.getTokenBalance(
-            web3.EthereumAddress.fromHex(state.address),
-            web3.EthereumAddress.fromHex(contractAddress
-                /*token.ethereumAddress*/),
-            token.name);
-        if (tokenBalance > BigInt.zero) {
-          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
-              web3.EtherUnit.wei, tokenBalance);
-          final account = Account(
-              accountIndex: "0",
-              balance: tokenAmount.getInWei.toString(),
-              bjj: "",
-              hezEthereumAddress: state.address,
-              itemId: 0,
-              nonce: 0,
-              token: token);
-          L1accounts.add(account);
+        if (token.id == 0) {
+          // GET L1 ETH Balance
+          ethBalance = await _contractService
+              .getEthBalance(web3.EthereumAddress.fromHex(state.address));
+
+          if (ethBalance.getInWei > BigInt.zero) {
+            final account = Account(
+                accountIndex: "0",
+                balance: ethBalance.getInWei.toString(),
+                bjj: "",
+                hezEthereumAddress: state.address,
+                itemId: 0,
+                nonce: 0,
+                token: token);
+            accounts.add(account);
+          }
+        } else {
+          var tokenBalance = BigInt.zero;
+          try {
+            tokenBalance = await _contractService.getTokenBalance(
+                web3.EthereumAddress.fromHex(state.address),
+                web3.EthereumAddress.fromHex(token.ethereumAddress),
+                token.name);
+          } catch (error) {}
+          if (tokenBalance > BigInt.zero) {
+            var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+                web3.EtherUnit.wei, tokenBalance);
+            final account = Account(
+                accountIndex: "0",
+                balance: tokenAmount.getInWei.toString(),
+                bjj: "",
+                hezEthereumAddress: state.address,
+                itemId: 0,
+                nonce: 0,
+                token: token);
+            accounts.add(account);
+            tokensBalance[token.symbol] = tokenBalance;
+          }
         }
-        tokensBalance[token.symbol] = tokenBalance;
       }
 
       _store.dispatch(
-          BalanceUpdated(ethBalance.getInWei, tokensBalance, L1accounts));
+          BalanceUpdated(ethBalance.getInWei, tokensBalance, accounts));
     }
-
-    //var accounts = await _hermezService
-    //    .getAccounts(web3.EthereumAddress.fromHex(state.address));
-
-    // TEST ENVIRONMENT
-    /*Map<String, String> headers = {
-      'X-CMC_PRO_API_KEY': '87529169-9e17-4393-939e-39c4737dbd80',
-      'Content-Type': 'application/json; charset=UTF-8',
-      "Accept": "application/json",
-    };
-    String _apiURL =
-        "https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=100&convert=USD";
-    String symbols = "ETH,USDT,BNB,LINK,LEO,USDC,HT,VEST,COMP,MKR,HEDG,BAT,INO,CRO,ZRX,OKB,KNC,SNX,LEND";//,HT,VEST,COMP,MKR,HEDG,cUSDC,BAT,INO,CRO,ZRX,OKB,KNC,SNX,LEND";
-    String _apiURL2 =
-        "https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=$symbols&convert=USD";
-    var response = await http.get(_apiURL2, headers: headers); //waits for response
-    String body = response.body;
-    Map result = jsonDecode(body);
-    var cryptoList = result["data"].values.toList();*/
-    //final cryptoList = List();
   }
 
   Future<void> fetchOwnL2Balance() async {
@@ -252,61 +223,51 @@ class WalletHandler {
 
       //_store.dispatch(UpdatingBalance());
 
-      // GET L1 ETH Balance
-      web3.EtherAmount ethBalance = await _contractService
-          .getEthBalance(web3.EthereumAddress.fromHex(state.address));
-
-      if (ethBalance.getInWei > BigInt.zero) {
-        final account = Account(
-          accountIndex: "0",
-          balance: ethBalance.getInWei.toString(),
-          bjj: "",
-          hezEthereumAddress: state.address,
-          itemId: 0,
-          nonce: 0,
-          token: Token(
-              USD: 346,
-              decimals: 18,
-              ethereumAddress: "0x0000000000000000000000000000000000000000",
-              ethereumBlockNum: 0,
-              fiatUpdate: "2020-11-26T09:53:47.444444Z",
-              id: 0,
-              itemId: 1,
-              name: "Ether",
-              symbol: "ETH"),
-        );
-        accounts.add(account);
-      }
-
-      Map<String, BigInt> tokensBalance = Map();
-
       for (Token token in supportedTokens) {
-        // if tokenId == 0 -> ETH
-        final contractAddress =
-            "0x5060b60cb8bd1c94b7adef4134555cda7b45c461"; // TGE Contract Address
-        var tokenBalance = await _contractService.getTokenBalance(
-            web3.EthereumAddress.fromHex(state.address),
-            web3.EthereumAddress.fromHex(contractAddress
-                /*token.ethereumAddress*/),
-            token.name);
-        if (tokenBalance > BigInt.zero) {
-          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
-              web3.EtherUnit.wei, tokenBalance);
-          final account = Account(
-              accountIndex: "0",
-              balance: tokenAmount.getInWei.toString(),
-              bjj: "",
-              hezEthereumAddress: state.address,
-              itemId: 0,
-              nonce: 0,
-              token: token);
-          accounts.add(account);
+        if (token.id == 0) {
+          // GET L1 ETH Balance
+          web3.EtherAmount ethBalance = await _contractService
+              .getEthBalance(web3.EthereumAddress.fromHex(state.address));
+
+          if (ethBalance.getInWei > BigInt.zero) {
+            final account = Account(
+                accountIndex: "0",
+                balance: ethBalance.getInWei.toString(),
+                bjj: "",
+                hezEthereumAddress: state.address,
+                itemId: 0,
+                nonce: 0,
+                token: token);
+            accounts.add(account);
+          }
+        } else {
+          //Map<String, BigInt> tokensBalance = Map();
+          var tokenBalance = BigInt.zero;
+          try {
+            tokenBalance = await _contractService.getTokenBalance(
+                web3.EthereumAddress.fromHex(state.address),
+                web3.EthereumAddress.fromHex(token.ethereumAddress),
+                token.name);
+          } catch (error) {}
+          if (tokenBalance > BigInt.zero) {
+            var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+                web3.EtherUnit.wei, tokenBalance);
+            final account = Account(
+                accountIndex: "0",
+                balance: tokenAmount.getInWei.toString(),
+                bjj: "",
+                hezEthereumAddress: state.address,
+                itemId: 0,
+                nonce: 0,
+                token: token);
+            accounts.add(account);
+            //tokensBalance[token.symbol] = tokenBalance;
+          }
         }
-        tokensBalance[token.symbol] = tokenBalance;
       }
 
-      /*_store.dispatch(
-          BalanceUpdated(ethBalance.getInWei, tokensBalance, accounts));*/
+      // _store.dispatch(
+      //     BalanceUpdated(ethBalance.getInWei, tokensBalance, accounts));
     }
     return accounts;
   }
@@ -347,10 +308,7 @@ class WalletHandler {
     /*_hermezService.deposit(
         amount, account, web3.EthereumAddress.fromHex(state.address));*/
 
-    final tokenContractAddress =
-        '0x10465b16615ae36F350268eb951d7B0187141D3B'; // Hermez contract address
-
-    _contractService.deposit(amount, state.address, account.token, null
+    return _contractService.deposit(amount, state.address, account.token, null
         /*state.publicKeyCompressedHex*/);
 
     /*return _contractService.approve(

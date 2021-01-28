@@ -298,7 +298,7 @@ class ContractService implements IContractService {
   /// @param {Number} gasMultiplier - Optional gas multiplier
   /// @returns {Promise} transaction parameters
   @override
-  Future<void> deposit(
+  Future<bool> deposit(
       BigInt amount, String hezEthereumAddress, Token token, String babyJubJub,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
     /*tx.deposit(amount, addresses.getHermezAddress(ethereumAddress.hex),
@@ -311,15 +311,20 @@ class ContractService implements IContractService {
 
     final AccountsResponse accounts =
         AccountsResponse.fromJson(json.decode(accountsResponse));
-    final Account account = accounts != null ? accounts.accounts[0] : null;
+    final Account account = accounts != null && accounts.accounts.isNotEmpty
+        ? accounts.accounts[0]
+        : null;
 
     final hermezContract = await ContractParser.fromAssets(
         'HermezABI.json', contractAddresses['Hermez'], "Hermez");
 
-    dynamic overrides = {gasLimit, await getGasPriceStr(gasMultiplier, client)};
+    dynamic overrides = Uint8List.fromList(
+        [gasLimit, await getGasPriceBigInt(gasMultiplier, client)]);
 
     final transactionParameters = [
-      account != null ? BigInt.zero : '0x' + babyJubJub,
+      account != null
+          ? BigInt.zero
+          : BigInt.parse('0x' + babyJubJub, radix: 16),
       account != null
           ? BigInt.from(addresses.getAccountIndex(account.accountIndex))
           : BigInt.zero,
@@ -332,69 +337,80 @@ class ContractService implements IContractService {
     print([...transactionParameters, overrides]);
 
     if (token.id == 0) {
-      overrides = Uint8List.fromList([2]);
+      overrides = Uint8List.fromList([amount.toInt()]);
       print([...transactionParameters, overrides]);
-      /*return hermezContract.addL1Transaction(...transactionParameters, overrides)
-          .then(() => {
-          return transactionParameters
-      })*/
       final addL1TransactionCall = await client.call(
           contract: hermezContract,
           function: _addL1Transaction(hermezContract),
           params: [...transactionParameters, overrides]);
+
+      return true;
     }
 
-    /*final addL1TransactionCall = await client.call(
+    await approve(amount, ethereumAddress, token.ethereumAddress, token.name);
+
+    final addL1TransactionCall = await client.call(
         contract: hermezContract,
         function: _addL1Transaction(hermezContract),
-        params: null);*/
+        params: [...transactionParameters, overrides]);
+
+    return true;
   }
 
+  /// Sends an approve transaction to an ERC 20 contract for a certain amount of tokens
+  /// @param {BigInt} amount - Amount of tokens to be approved by the ERC 20 contract
+  /// @param {String} accountAddress - The Ethereum address of the transaction sender
+  /// @param {String} contractAddress - The token smart contract address
+  /// @param {Object} signerData - Signer data used to build a Signer to send the transaction
+  /// @param {String} providerUrl - Network url (i.e, http://localhost:8545). Optional
+  /// @returns {Promise} transaction
   // ERC20 approve the spender account and set the limit of your funds that they are authorized to spend // EtherAmount
-  Future<bool> approve(BigInt amount, EthereumAddress accountAddress,
-      EthereumAddress contractAddress, String tokenContractName) async {
+  Future<bool> approve(BigInt amount, String accountAddress,
+      String contractAddress, String tokenContractName) async {
     final contract = await ContractParser.fromAssets(
-        'ERC20ABI.json', contractAddress.toString(), tokenContractName);
+        'ERC20ABI.json', contractAddress, tokenContractName);
 
-    /*final allowanceCall = await client.call(
-        contract: contract,
-        function: _allowance(contract),
-        params: [
-          accountAddress,
-          EthereumAddress.fromHex(contractAddresses['Hermez'])
-        ]);
+    try {
+      final allowanceCall = await client
+          .call(contract: contract, function: _allowance(contract), params: [
+        EthereumAddress.fromHex(accountAddress),
+        EthereumAddress.fromHex(contractAddresses['Hermez'])
+      ]);
+      final allowance = allowanceCall.first as BigInt;
 
-    final allowance = allowanceCall.first as double;
+      if (allowance < amount) {
+        var response = await client.call(
+          contract: contract,
+          function: _approve(contract),
+          params: [
+            EthereumAddress.fromHex(contractAddresses['Hermez']),
+            amount
+          ],
+        );
 
-    //final amountBigInt = utils.getTokenAmountBigInt(amount, 2);
+        return response.first as bool;
+      }
 
-    if (allowance < amount) {
+      if (!(allowance.sign == 0)) {
+        var response = await client.call(
+          contract: contract,
+          function: _approve(contract),
+          params: [EthereumAddress.fromHex(contractAddresses['Hermez']), 0],
+        );
+        return response.first as bool;
+      }
+
       var response = await client.call(
         contract: contract,
         function: _approve(contract),
-        params: [contractAddresses['Hermez'], amount],
+        params: [EthereumAddress.fromHex(accountAddress), amount],
       );
 
       return response.first as bool;
+    } catch (error, trace) {
+      print(error);
+      print(trace);
     }
-
-    if (!(allowance.sign == 0)) {
-      var response = await client.call(
-        contract: contract,
-        function: _approve(contract),
-        params: [contractAddresses['Hermez'], 0],
-      );
-      return response.first as bool;
-    }*/
-
-    var response = await client.call(
-      sender: accountAddress,
-      contract: contract,
-      function: _approve(contract),
-      params: [accountAddress, amount],
-    );
-
-    return response.first as bool;
   }
 
   /*StreamSubscription listenEthTransfer(TransferEvent onTransfer, {int take}) {
@@ -493,11 +509,11 @@ class ContractService implements IContractService {
   /// @param {Number} multiplier - multiply the average gas price by this parameter
   /// @param {String} providerUrl - Network url (i.e, http://localhost:8545). Optional
   /// @returns {Future<String>} - will return the gas price obtained.
-  Future<String> getGasPriceStr(num multiplier, Web3Client provider) async {
+  Future<int> getGasPriceBigInt(num multiplier, Web3Client provider) async {
     EtherAmount strAvgGas = await provider.getGasPrice();
     BigInt avgGas = strAvgGas.getInEther;
     BigInt res = avgGas * BigInt.from(multiplier);
-    String retValue = res.toString();
+    int retValue = res.toInt(); //toString();
     return retValue;
   }
 
