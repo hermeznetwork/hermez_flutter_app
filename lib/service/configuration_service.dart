@@ -7,11 +7,19 @@ abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
   Future<void> setupDone(bool value);
   Future<void> setPrivateKey(String value);
+  Future<void> setHermezPrivateKey(String value);
+  Future<void> setBabyJubJubHex(String value);
+  Future<void> setBabyJubJubBase64(String value);
   Future<void> setEthereumAddress(String value);
+  Future<void> setHermezAddress(String value);
   Future<void> setDefaultCurrency(WalletDefaultCurrency defaultCurrency);
   Future<String> getMnemonic();
   Future<String> getPrivateKey();
+  Future<String> getHermezPrivateKey();
+  Future<String> getBabyJubJubHex();
+  Future<String> getBabyJubJubBase64();
   Future<String> getEthereumAddress();
+  Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
   bool didSetupWallet();
 }
@@ -32,8 +40,28 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
+  Future<void> setHermezPrivateKey(String value) async {
+    await _secureStorage.write(key: "hermezPrivateKey", value: value);
+  }
+
+  @override
+  Future<void> setBabyJubJubHex(String value) async {
+    await _secureStorage.write(key: "babyJubJubHex", value: value);
+  }
+
+  @override
+  Future<void> setBabyJubJubBase64(String value) async {
+    await _secureStorage.write(key: "babyJubJubBase64", value: value);
+  }
+
+  @override
   Future<void> setEthereumAddress(String value) async {
     await _secureStorage.write(key: "ethereumAddress", value: value);
+  }
+
+  @override
+  Future<void> setHermezAddress(String value) async {
+    await _secureStorage.write(key: "hermezAddress", value: value);
   }
 
   @override
@@ -69,8 +97,28 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
+  Future<String> getHermezPrivateKey() async {
+    return _secureStorage.read(key: "hermezPrivateKey");
+  }
+
+  @override
+  Future<String> getBabyJubJubHex() async {
+    return _secureStorage.read(key: "babyJubJubHex");
+  }
+
+  @override
+  Future<String> getBabyJubJubBase64() async {
+    return _secureStorage.read(key: "babyJubJubBase64");
+  }
+
+  @override
   Future<String> getEthereumAddress() async {
     return _secureStorage.read(key: "ethereumAddress");
+  }
+
+  @override
+  Future<String> getHermezAddress() async {
+    return _secureStorage.read(key: "hermezAddress");
   }
 
   @override
@@ -79,10 +127,9 @@ class ConfigurationService implements IConfigurationService {
         await _secureStorage.read(key: "defaultCurrency");
     if (defaultCurrencyString == "EUR") {
       return WalletDefaultCurrency.EUR;
-    } else if (defaultCurrencyString == "USD") {
+    } else {
       return WalletDefaultCurrency.USD;
     }
-    return null;
   }
 
   @override
@@ -93,12 +140,11 @@ class ConfigurationService implements IConfigurationService {
   @override
   Future<TransactionLevel> getLevelSelected() async {
     String levelSelected = await _secureStorage.read(key: "levelSelected");
-    if (levelSelected == "LEVEL1") {
-      return TransactionLevel.LEVEL1;
-    } else if (levelSelected == "LEVEL2") {
+    if (levelSelected == "LEVEL2") {
       return TransactionLevel.LEVEL2;
+    } else {
+      return TransactionLevel.LEVEL1;
     }
-    return null;
   }
 
   @override

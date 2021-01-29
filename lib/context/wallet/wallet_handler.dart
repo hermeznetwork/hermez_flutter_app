@@ -65,7 +65,7 @@ class WalletHandler {
   Future<void> _initialiseFromMnemonic(String entropyMnemonic) async {
     final mnemonic = _addressService.entropyToMnemonic(entropyMnemonic);
     final privateKey = _addressService.getPrivateKey(mnemonic);
-    final address = await _addressService.getPublicAddress(privateKey);
+    final address = await _addressService.getEthereumAddress(privateKey);
 
     _store.dispatch(InitialiseWallet(address.toString(), privateKey));
 
@@ -73,7 +73,7 @@ class WalletHandler {
   }
 
   Future<void> _initialiseFromPrivateKey(String privateKey) async {
-    final address = await _addressService.getPublicAddress(privateKey);
+    final address = await _addressService.getEthereumAddress(privateKey);
 
     _store.dispatch(InitialiseWallet(address.toString(), privateKey));
 
@@ -365,7 +365,11 @@ class WalletHandler {
   Future<void> resetWallet() async {
     await _configurationService.setMnemonic("");
     await _configurationService.setPrivateKey("");
+    await _configurationService.setHermezPrivateKey("");
+    await _configurationService.setBabyJubJubHex("");
+    await _configurationService.setBabyJubJubBase64("");
     await _configurationService.setEthereumAddress("");
+    await _configurationService.setHermezAddress("");
     await _configurationService.setDefaultCurrency(WalletDefaultCurrency.EUR);
     await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
     await _configurationService.setupDone(false);
