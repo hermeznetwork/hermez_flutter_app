@@ -9,10 +9,19 @@ enum WalletDefaultCurrency { EUR, USD }
 
 abstract class Wallet implements Built<Wallet, WalletBuilder> {
   @nullable
-  String get address;
+  String get ethereumAddress;
 
   @nullable
-  String get privateKey;
+  String get ethereumPrivateKey;
+
+  @nullable
+  String get hermezAddress;
+
+  @nullable
+  String get hermezPublicKeyHex;
+
+  @nullable
+  String get hermezPublicKeyBase64;
 
   Map<String, BigInt> get tokensBalance;
 

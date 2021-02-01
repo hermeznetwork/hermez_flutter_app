@@ -41,7 +41,7 @@ class WalletHomePage extends HookWidget {
       HomeBalance(
         arguments: HomeBalanceArguments(
           controller,
-          store.state.address,
+          store.state.ethereumAddress,
           store.state.ethBalance,
           store.state.tokensBalance,
           store.state.defaultCurrency,

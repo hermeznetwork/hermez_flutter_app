@@ -121,7 +121,7 @@ class WalletAccountDetailsPage extends HookWidget {
                 arguments: ActivityArguments(
                   arguments.store,
                   arguments.element,
-                  arguments.store.state.address,
+                  arguments.store.state.ethereumAddress,
                   arguments.element.token.symbol,
                   currency == "USD"
                       ? arguments.element.token.USD

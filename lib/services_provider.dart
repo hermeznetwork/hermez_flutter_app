@@ -21,8 +21,8 @@ Future<List<SingleChildCloneableWidget>> createProviders(
   final secureStorage = new FlutterSecureStorage();
   final configurationService = ConfigurationService(sharedPrefs, secureStorage);
   final addressService = AddressService(configurationService);
-  final hermezService = HermezService(
-      params.hermezHttpUrl, params.exchangeHttpUrl, configurationService);
+  final hermezService = HermezService(params.hermezHttpUrl, client,
+      params.exchangeHttpUrl, configurationService);
   final contractService =
       ContractService(client, configurationService, params.ethGasPriceHttpUrl);
   final explorerService =

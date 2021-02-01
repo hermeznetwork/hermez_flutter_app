@@ -599,8 +599,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
     String addressFrom;
     String addressTo;
     if (store.state.ethBalance.toDouble() > 0) {
-      if (AddressUtils.isValidEthereumAddress(store.state.address)) {
-        addressFrom = store.state.address;
+      if (AddressUtils.isValidEthereumAddress(store.state.ethereumAddress)) {
+        addressFrom = store.state.ethereumAddress;
       }
       if (AddressUtils.isValidEthereumAddress(addressController.value.text)) {
         addressTo = addressController.value.text;

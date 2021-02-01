@@ -9,6 +9,7 @@ import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/exit.dart';
+import 'package:hermez/service/network/model/recommended_fee.dart';
 import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -116,7 +117,7 @@ class WalletHandler {
   }
 
   Future<void> fetchOwnL1Balance() async {
-    if (state != null && state.address != null) {
+    if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
       _store.dispatch(UpdatingBalance());
 
@@ -127,15 +128,15 @@ class WalletHandler {
       for (Token token in supportedTokens) {
         if (token.id == 0) {
           // GET L1 ETH Balance
-          ethBalance = await _contractService
-              .getEthBalance(web3.EthereumAddress.fromHex(state.address));
+          ethBalance = await _contractService.getEthBalance(
+              web3.EthereumAddress.fromHex(state.ethereumAddress));
 
           if (ethBalance.getInWei > BigInt.zero) {
             final account = Account(
                 accountIndex: "0",
                 balance: ethBalance.getInWei.toString(),
                 bjj: "",
-                hezEthereumAddress: state.address,
+                hezEthereumAddress: state.ethereumAddress,
                 itemId: 0,
                 nonce: 0,
                 token: token);
@@ -145,7 +146,7 @@ class WalletHandler {
           var tokenBalance = BigInt.zero;
           try {
             tokenBalance = await _contractService.getTokenBalance(
-                web3.EthereumAddress.fromHex(state.address),
+                web3.EthereumAddress.fromHex(state.ethereumAddress),
                 web3.EthereumAddress.fromHex(token.ethereumAddress),
                 token.name);
           } catch (error) {}
@@ -156,7 +157,7 @@ class WalletHandler {
                 accountIndex: "0",
                 balance: tokenAmount.getInWei.toString(),
                 bjj: "",
-                hezEthereumAddress: state.address,
+                hezEthereumAddress: state.ethereumAddress,
                 itemId: 0,
                 nonce: 0,
                 token: token);
@@ -173,7 +174,7 @@ class WalletHandler {
 
   Future<void> fetchOwnL2Balance() async {
     final accounts = await _hermezService
-        .getAccounts(web3.EthereumAddress.fromHex(state.address));
+        .getAccounts(web3.EthereumAddress.fromHex(state.ethereumAddress));
     _store.dispatch(UpdatingBalance());
 
     List<Account> L2accounts = List();
@@ -218,7 +219,7 @@ class WalletHandler {
 
   Future<List<Account>> getL1Accounts() async {
     List<Account> accounts = List();
-    if (state != null && state.address != null) {
+    if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
 
       //_store.dispatch(UpdatingBalance());
@@ -226,15 +227,15 @@ class WalletHandler {
       for (Token token in supportedTokens) {
         if (token.id == 0) {
           // GET L1 ETH Balance
-          web3.EtherAmount ethBalance = await _contractService
-              .getEthBalance(web3.EthereumAddress.fromHex(state.address));
+          web3.EtherAmount ethBalance = await _contractService.getEthBalance(
+              web3.EthereumAddress.fromHex(state.ethereumAddress));
 
           if (ethBalance.getInWei > BigInt.zero) {
             final account = Account(
                 accountIndex: "0",
                 balance: ethBalance.getInWei.toString(),
                 bjj: "",
-                hezEthereumAddress: state.address,
+                hezEthereumAddress: state.ethereumAddress,
                 itemId: 0,
                 nonce: 0,
                 token: token);
@@ -245,7 +246,7 @@ class WalletHandler {
           var tokenBalance = BigInt.zero;
           try {
             tokenBalance = await _contractService.getTokenBalance(
-                web3.EthereumAddress.fromHex(state.address),
+                web3.EthereumAddress.fromHex(state.ethereumAddress),
                 web3.EthereumAddress.fromHex(token.ethereumAddress),
                 token.name);
           } catch (error) {}
@@ -256,7 +257,7 @@ class WalletHandler {
                 accountIndex: "0",
                 balance: tokenAmount.getInWei.toString(),
                 bjj: "",
-                hezEthereumAddress: state.address,
+                hezEthereumAddress: state.ethereumAddress,
                 itemId: 0,
                 nonce: 0,
                 token: token);
@@ -274,7 +275,7 @@ class WalletHandler {
 
   Future<List<Account>> getAccounts() async {
     final accounts = await _hermezService
-        .getAccounts(web3.EthereumAddress.fromHex(state.address));
+        .getAccounts(web3.EthereumAddress.fromHex(state.ethereumAddress));
     return accounts;
   }
 
@@ -288,15 +289,14 @@ class WalletHandler {
     return supportedToken;
   }
 
-  Future<bool> sendL2Transaction(Transaction transaction) async {
-    final result = await _hermezService.sendL2Transaction(transaction);
-    return result;
-  }
-
   Future<List<Exit>> getExits() async {
     final exits = await _hermezService
-        .getExits(web3.EthereumAddress.fromHex(state.address));
+        .getExits(web3.EthereumAddress.fromHex(state.ethereumAddress));
     return exits;
+  }
+
+  Future<RecommendedFee> fetchFees() {
+    return _hermezService.getRecommendedFee();
   }
 
   Future<bool> deposit(BigInt amount, Account account) {
@@ -308,14 +308,21 @@ class WalletHandler {
     /*_hermezService.deposit(
         amount, account, web3.EthereumAddress.fromHex(state.address));*/
 
-    return _contractService.deposit(amount, state.address, account.token, null
-        /*state.publicKeyCompressedHex*/);
+    return _hermezService.deposit(
+        amount, state.ethereumAddress, account.token, state.ethereumPrivateKey);
 
     /*return _contractService.approve(
         amount,
         web3.EthereumAddress.fromHex(state.address),
         web3.EthereumAddress.fromHex(tokenContractAddress),
         "Hermez");*/
+  }
+
+  Future<void> withdraw(BigInt amount, Account account) {}
+
+  Future<bool> sendL2Transaction(Transaction transaction) async {
+    final result = await _hermezService.sendL2Transaction(transaction);
+    return result;
   }
 
   Future<BigInt> getEstimatedFee(String from, String to, BigInt amount) async {

@@ -23,7 +23,7 @@ class WalletMainPage extends HookWidget {
 
     return Scaffold(
       drawer: MainMenu(
-        address: store.state.address,
+        address: store.state.ethereumAddress,
         onReset: () async {
           Alert(
               title: "Warning",
@@ -74,7 +74,7 @@ class WalletMainPage extends HookWidget {
         ],
       ),
       body: Balance(
-        address: store.state.address,
+        address: store.state.ethereumAddress,
         ethBalance: store.state.ethBalance,
         tokensBalance: store.state.tokensBalance,
         cryptoList: store.state.cryptoList,

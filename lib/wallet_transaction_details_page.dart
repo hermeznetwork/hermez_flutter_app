@@ -85,7 +85,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               transactionDate: widget.arguments.transactionDate,
               onSubmit: (address, amount) async {
                 var success = await transferStore.transferEth(
-                    widget.arguments.store.state.privateKey, address, amount);
+                    widget.arguments.store.state.ethereumPrivateKey,
+                    address,
+                    amount);
                 //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
                 if (success) {
                   Navigator.of(context)
@@ -114,7 +116,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         if (widget.arguments.store.state.txLevel ==
                             TransactionLevel.LEVEL1) {
                           success = await transferStore.transferEth(
-                              widget.arguments.store.state.privateKey,
+                              widget.arguments.store.state.ethereumPrivateKey,
                               widget.arguments.addressTo,
                               widget.arguments.amount.toString());
                         } else {

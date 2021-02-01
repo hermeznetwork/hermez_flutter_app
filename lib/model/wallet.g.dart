@@ -8,9 +8,15 @@ part of 'wallet.dart';
 
 class _$Wallet extends Wallet {
   @override
-  final String address;
+  final String ethereumAddress;
   @override
-  final String privateKey;
+  final String ethereumPrivateKey;
+  @override
+  final String hermezAddress;
+  @override
+  final String hermezPublicKeyHex;
+  @override
+  final String hermezPublicKeyBase64;
   @override
   final Map<String, BigInt> tokensBalance;
   @override
@@ -34,8 +40,11 @@ class _$Wallet extends Wallet {
       (new WalletBuilder()..update(updates)).build();
 
   _$Wallet._(
-      {this.address,
-      this.privateKey,
+      {this.ethereumAddress,
+      this.ethereumPrivateKey,
+      this.hermezAddress,
+      this.hermezPublicKeyHex,
+      this.hermezPublicKeyBase64,
       this.tokensBalance,
       this.ethBalance,
       this.ethUSDPrice,
@@ -68,8 +77,11 @@ class _$Wallet extends Wallet {
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     return other is Wallet &&
-        address == other.address &&
-        privateKey == other.privateKey &&
+        ethereumAddress == other.ethereumAddress &&
+        ethereumPrivateKey == other.ethereumPrivateKey &&
+        hermezAddress == other.hermezAddress &&
+        hermezPublicKeyHex == other.hermezPublicKeyHex &&
+        hermezPublicKeyBase64 == other.hermezPublicKeyBase64 &&
         tokensBalance == other.tokensBalance &&
         ethBalance == other.ethBalance &&
         ethUSDPrice == other.ethUSDPrice &&
@@ -92,8 +104,19 @@ class _$Wallet extends Wallet {
                             $jc(
                                 $jc(
                                     $jc(
-                                        $jc($jc(0, address.hashCode),
-                                            privateKey.hashCode),
+                                        $jc(
+                                            $jc(
+                                                $jc(
+                                                    $jc(
+                                                        $jc(
+                                                            0,
+                                                            ethereumAddress
+                                                                .hashCode),
+                                                        ethereumPrivateKey
+                                                            .hashCode),
+                                                    hermezAddress.hashCode),
+                                                hermezPublicKeyHex.hashCode),
+                                            hermezPublicKeyBase64.hashCode),
                                         tokensBalance.hashCode),
                                     ethBalance.hashCode),
                                 ethUSDPrice.hashCode),
@@ -108,8 +131,11 @@ class _$Wallet extends Wallet {
   @override
   String toString() {
     return (newBuiltValueToStringHelper('Wallet')
-          ..add('address', address)
-          ..add('privateKey', privateKey)
+          ..add('ethereumAddress', ethereumAddress)
+          ..add('ethereumPrivateKey', ethereumPrivateKey)
+          ..add('hermezAddress', hermezAddress)
+          ..add('hermezPublicKeyHex', hermezPublicKeyHex)
+          ..add('hermezPublicKeyBase64', hermezPublicKeyBase64)
           ..add('tokensBalance', tokensBalance)
           ..add('ethBalance', ethBalance)
           ..add('ethUSDPrice', ethUSDPrice)
@@ -126,13 +152,30 @@ class _$Wallet extends Wallet {
 class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   _$Wallet _$v;
 
-  String _address;
-  String get address => _$this._address;
-  set address(String address) => _$this._address = address;
+  String _ethereumAddress;
+  String get ethereumAddress => _$this._ethereumAddress;
+  set ethereumAddress(String ethereumAddress) =>
+      _$this._ethereumAddress = ethereumAddress;
 
-  String _privateKey;
-  String get privateKey => _$this._privateKey;
-  set privateKey(String privateKey) => _$this._privateKey = privateKey;
+  String _ethereumPrivateKey;
+  String get ethereumPrivateKey => _$this._ethereumPrivateKey;
+  set ethereumPrivateKey(String ethereumPrivateKey) =>
+      _$this._ethereumPrivateKey = ethereumPrivateKey;
+
+  String _hermezAddress;
+  String get hermezAddress => _$this._hermezAddress;
+  set hermezAddress(String hermezAddress) =>
+      _$this._hermezAddress = hermezAddress;
+
+  String _hermezPublicKeyHex;
+  String get hermezPublicKeyHex => _$this._hermezPublicKeyHex;
+  set hermezPublicKeyHex(String hermezPublicKeyHex) =>
+      _$this._hermezPublicKeyHex = hermezPublicKeyHex;
+
+  String _hermezPublicKeyBase64;
+  String get hermezPublicKeyBase64 => _$this._hermezPublicKeyBase64;
+  set hermezPublicKeyBase64(String hermezPublicKeyBase64) =>
+      _$this._hermezPublicKeyBase64 = hermezPublicKeyBase64;
 
   Map<String, BigInt> _tokensBalance;
   Map<String, BigInt> get tokensBalance => _$this._tokensBalance;
@@ -178,8 +221,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
 
   WalletBuilder get _$this {
     if (_$v != null) {
-      _address = _$v.address;
-      _privateKey = _$v.privateKey;
+      _ethereumAddress = _$v.ethereumAddress;
+      _ethereumPrivateKey = _$v.ethereumPrivateKey;
+      _hermezAddress = _$v.hermezAddress;
+      _hermezPublicKeyHex = _$v.hermezPublicKeyHex;
+      _hermezPublicKeyBase64 = _$v.hermezPublicKeyBase64;
       _tokensBalance = _$v.tokensBalance;
       _ethBalance = _$v.ethBalance;
       _ethUSDPrice = _$v.ethUSDPrice;
@@ -213,8 +259,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
     try {
       _$result = _$v ??
           new _$Wallet._(
-              address: address,
-              privateKey: privateKey,
+              ethereumAddress: ethereumAddress,
+              ethereumPrivateKey: ethereumPrivateKey,
+              hermezAddress: hermezAddress,
+              hermezPublicKeyHex: hermezPublicKeyHex,
+              hermezPublicKeyBase64: hermezPublicKeyBase64,
               tokensBalance: tokensBalance,
               ethBalance: ethBalance,
               ethUSDPrice: ethUSDPrice,

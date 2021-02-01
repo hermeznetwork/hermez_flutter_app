@@ -250,11 +250,11 @@ class _ActivityState extends State<Activity> {
 
   Future<List<dynamic>> fetchTransactions() async {
     if (widget.arguments.account.token.symbol == "ETH") {
-      return await widget.arguments.store
-          .getTransactionsByAddress(widget.arguments.store.state.address);
+      return await widget.arguments.store.getTransactionsByAddress(
+          widget.arguments.store.state.ethereumAddress);
     } else {
-      return await widget.arguments.store
-          .getTransferEventsByAddress(widget.arguments.store.state.address);
+      return await widget.arguments.store.getTransferEventsByAddress(
+          widget.arguments.store.state.ethereumAddress);
     }
   }
 

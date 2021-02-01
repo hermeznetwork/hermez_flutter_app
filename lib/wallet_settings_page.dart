@@ -52,12 +52,13 @@ class SettingsPage extends HookWidget {
                   child: Text(
                     "0x" +
                             AddressUtils.strip0x(
-                                    store.state.address.substring(0, 6))
+                                    store.state.ethereumAddress.substring(0, 6))
                                 .toUpperCase() +
                             " ･･･ " +
-                            store.state.address
-                                .substring(store.state.address.length - 5,
-                                    store.state.address.length)
+                            store.state.ethereumAddress
+                                .substring(
+                                    store.state.ethereumAddress.length - 5,
+                                    store.state.ethereumAddress.length)
                                 .toUpperCase() ??
                         "",
                     style: TextStyle(
@@ -82,7 +83,8 @@ class SettingsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(56.0),
                       side: BorderSide(color: HermezColors.mediumOrange)),
                   onPressed: () {
-                    Clipboard.setData(ClipboardData(text: store.state.address));
+                    Clipboard.setData(
+                        ClipboardData(text: store.state.ethereumAddress));
                     _scaffoldKey.currentState.showSnackBar(SnackBar(
                       content: Text("Copied"),
                     ));
@@ -246,7 +248,7 @@ class SettingsPage extends HookWidget {
               ),
               onTap: () async {
                 var url = "https://ropsten.etherscan.io/address/" +
-                    store.state.address;
+                    store.state.ethereumAddress;
                 if (await canLaunch(url))
                   await launch(url);
                 else

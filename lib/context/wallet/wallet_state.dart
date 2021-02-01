@@ -36,8 +36,8 @@ class LevelUpdated extends WalletAction {
 Wallet reducer(Wallet state, WalletAction action) {
   if (action is InitialiseWallet) {
     return state.rebuild((b) => b
-      ..address = action.address
-      ..privateKey = action.privateKey);
+      ..ethereumAddress = action.address
+      ..ethereumPrivateKey = action.privateKey);
   }
 
   if (action is UpdatingBalance) {

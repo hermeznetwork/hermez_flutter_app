@@ -15,6 +15,7 @@ import 'package:hermez/service/network/model/register_request.dart';
 import 'package:hermez/service/network/model/tokens_request.dart';
 import 'package:hermez/service/network/model/tokens_response.dart';
 import 'package:hermez_plugin/api.dart' as api;
+//import 'package:hermez_plugin/tx-pool.dart';
 import 'package:http/http.dart' as http;
 
 import 'model/accounts_request.dart';
@@ -23,7 +24,7 @@ import 'model/coordinators_request.dart';
 import 'model/exit.dart';
 import 'model/exits_response.dart';
 import 'model/forged_transaction.dart';
-import 'model/recommended_fees.dart';
+import 'model/recommended_fee.dart';
 import 'model/token.dart';
 import 'model/transaction.dart';
 
@@ -80,8 +81,11 @@ class ApiClient {
 
   // TRANSACTION
 
-  Future<bool> sendL2Transaction(Transaction transaction) async {
+  Future<bool> sendL2Transaction(Transaction transaction, String bjj) async {
     final response = await api.postPoolTransaction(transaction.toJson());
+    /*if (response != null) {
+      tx - pool.addPoolTransaction(transaction, bjj);
+    }*/
     return response.isNotEmpty;
   }
 
@@ -142,10 +146,9 @@ class ApiClient {
     return tokenResponse;
   }
 
-  Future<RecommendedFees> getRecommendedFees() async {
+  Future<RecommendedFee> getRecommendedFees() async {
     final response = await _get(RECOMMENDED_FEES_URL, null);
-    final recommendedFees =
-        RecommendedFees.fromJson(json.decode(response.body));
+    final recommendedFees = RecommendedFee.fromJson(json.decode(response.body));
     return recommendedFees;
   }
 

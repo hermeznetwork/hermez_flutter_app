@@ -48,13 +48,13 @@ class SettingsQRCodePage extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               QrImage(
-                data: store.state.address,
+                data: store.state.ethereumAddress,
               ),
               SizedBox(
                 height: 33,
               ),
               Text(
-                store.state.address,
+                store.state.ethereumAddress,
                 style: TextStyle(
                   color: HermezColors.blackTwo,
                   fontSize: 16,
