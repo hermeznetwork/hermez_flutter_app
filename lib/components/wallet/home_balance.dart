@@ -8,12 +8,12 @@ import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/exit.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/model/account.dart';
 
 class HomeBalanceArguments {
   final String address;

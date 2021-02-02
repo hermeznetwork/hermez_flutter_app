@@ -1,35 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/account.dart';
-import 'package:hermez/service/network/model/transaction.dart';
+import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/model/account.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'components/wallet/transaction_details_form.dart';
 import 'context/transfer/wallet_transfer_provider.dart';
 
 class TransactionDetailsArguments {
-  final WalletHandler store;
-  final TransactionType amountType;
-  final TransactionStatus status;
+  final WalletHandler wallet;
+  final bool isTransactionBeingSigned;
+  final TransactionType transactionType;
+  final WalletDefaultCurrency preferredCurrency;
+  final List<int> fiatExchangeRates;
   final Account account;
-  final double amount;
-  final String transactionHash;
   final String addressFrom;
   final String addressTo;
+  final double amount;
+  final int fee;
+  final bool instantWithdrawal;
+  final bool completeDelayedWithdrawal;
+  final String transactionHash;
+  final TransactionStatus status;
   final DateTime transactionDate;
 
   TransactionDetailsArguments(
-      this.store,
-      this.amountType,
-      this.status,
+      {this.wallet,
+      this.isTransactionBeingSigned,
+      this.transactionType,
+      this.preferredCurrency,
+      this.fiatExchangeRates,
       this.account,
-      this.amount,
-      this.transactionHash,
       this.addressFrom,
       this.addressTo,
-      this.transactionDate);
+      this.amount,
+      this.fee,
+      this.instantWithdrawal,
+      this.completeDelayedWithdrawal,
+      this.transactionHash,
+      this.status,
+      this.transactionDate});
 }
 
 class TransactionDetailsPage extends StatefulWidget {
@@ -75,17 +87,17 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           _buildAmountRow(),
           Expanded(
             child: TransferSummaryForm(
-              store: widget.arguments.store,
+              store: widget.arguments.wallet,
               account: widget.arguments.account,
               transactionHash: widget.arguments.transactionHash,
-              transactionType: widget.arguments.amountType,
+              transactionType: widget.arguments.transactionType,
               status: widget.arguments.status,
               addressFrom: widget.arguments.addressFrom,
               addressTo: widget.arguments.addressTo,
               transactionDate: widget.arguments.transactionDate,
               onSubmit: (address, amount) async {
                 var success = await transferStore.transferEth(
-                    widget.arguments.store.state.ethereumPrivateKey,
+                    widget.arguments.wallet.state.ethereumPrivateKey,
                     address,
                     amount);
                 //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
@@ -113,33 +125,15 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                           side: BorderSide(color: HermezColors.darkOrange)),
                       onPressed: () async {
                         var success = false;
-                        if (widget.arguments.store.state.txLevel ==
+                        if (widget.arguments.wallet.state.txLevel ==
                             TransactionLevel.LEVEL1) {
                           success = await transferStore.transferEth(
-                              widget.arguments.store.state.ethereumPrivateKey,
+                              widget.arguments.wallet.state.ethereumPrivateKey,
                               widget.arguments.addressTo,
                               widget.arguments.amount.toString());
                         } else {
-                          if (widget.arguments.amountType ==
-                              TransactionType.DEPOSIT) {
-                            success = await widget.arguments.store.deposit(
-                                web3.EtherAmount.fromUnitAndValue(
-                                        web3.EtherUnit.wei,
-                                        (widget.arguments.amount *
-                                                BigInt.from(10)
-                                                    .pow(18)
-                                                    .toDouble())
-                                            .toInt())
-                                    .getInWei,
-                                widget.arguments.account);
-                            //widget.arguments.store
-                            //    .sendL2Transaction(transaction);
-                          } else if (widget.arguments.amountType ==
-                              TransactionType.SEND) {
-                            Transaction transaction = Transaction();
-                            widget.arguments.store
-                                .sendL2Transaction(transaction);
-                          }
+                          handleFormSubmit();
+                          success = true;
                         }
 
                         //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
@@ -153,8 +147,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               // return object of type Dialog
                               return AlertDialog(
                                 title: new Text("Transfer Error"),
-                                content:
-                                    new Text(transferStore.state.errors.first),
+                                content: new Text(
+                                    widget.arguments.wallet.state.txLevel ==
+                                            TransactionLevel.LEVEL1
+                                        ? transferStore.state.errors.first
+                                        : ""),
                                 actions: <Widget>[
                                   // usually buttons at the bottom of the dialog
                                   new FlatButton(
@@ -198,8 +195,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   Widget _buildAmountRow() {
-    final String currency =
-        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
+    final String currency = widget.arguments.wallet.state.defaultCurrency
+        .toString()
+        .split('.')
+        .last;
     // returns a row with the desired properties
     return Container(
         color: HermezColors.lightOrange,
@@ -214,7 +213,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         ? "€" +
                             (widget.arguments.amount *
                                     (widget.arguments.account.token.USD *
-                                        widget.arguments.store.state
+                                        widget.arguments.wallet.state
                                             .exchangeRatio))
                                 .toStringAsFixed(2)
                         : '\$' +
@@ -254,7 +253,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   /// @returns {string} - Button label
   String getTitleLabel() {
     var title = "";
-    switch (widget.arguments.amountType) {
+    switch (widget.arguments.transactionType) {
       case TransactionType.SEND:
         title = "Send";
         break;
@@ -281,7 +280,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   ///
   /// @returns {string} - Button label
   String getButtonLabel() {
-    switch (widget.arguments.amountType) {
+    switch (widget.arguments.transactionType) {
       case TransactionType.DEPOSIT:
         return 'Deposit';
       case TransactionType.SEND:
@@ -294,6 +293,78 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         return 'Force Withdrawal';
       default:
         return '';
+    }
+  }
+
+  /// Bubbles up an event to send the transaction accordingly
+  /// @returns {void}
+  void handleFormSubmit() async {
+    switch (widget.arguments.transactionType) {
+      case TransactionType.DEPOSIT:
+        {
+          await widget.arguments.wallet.deposit(
+              web3.EtherAmount.fromUnitAndValue(
+                      web3.EtherUnit.wei,
+                      (widget.arguments.amount *
+                              BigInt.from(10).pow(18).toDouble())
+                          .toInt())
+                  .getInWei,
+              widget.arguments.account);
+        }
+        break;
+      case TransactionType.FORCEEXIT:
+        {
+          widget.arguments.wallet.forceExit(
+              web3.EtherAmount.fromUnitAndValue(
+                      web3.EtherUnit.wei,
+                      (widget.arguments.amount *
+                              BigInt.from(10).pow(18).toDouble())
+                          .toInt())
+                  .getInWei,
+              widget.arguments.account);
+        }
+        break;
+      case TransactionType.WITHDRAW:
+        {
+          widget.arguments.wallet.withdraw(
+              web3.EtherAmount.fromUnitAndValue(
+                      web3.EtherUnit.wei,
+                      (widget.arguments.amount *
+                              BigInt.from(10).pow(18).toDouble())
+                          .toInt())
+                  .getInWei,
+              widget.arguments.account,
+              /*widget.arguments.exit*/ null,
+              widget.arguments.completeDelayedWithdrawal,
+              widget.arguments.instantWithdrawal);
+        }
+        break;
+      case TransactionType.EXIT:
+        {
+          widget.arguments.wallet.exit(
+              web3.EtherAmount.fromUnitAndValue(
+                      web3.EtherUnit.wei,
+                      (widget.arguments.amount *
+                              BigInt.from(10).pow(18).toDouble())
+                          .toInt())
+                  .getInWei,
+              widget.arguments.account,
+              BigInt.zero);
+        }
+        break;
+      default:
+        {
+          widget.arguments.wallet.transfer(
+              web3.EtherAmount.fromUnitAndValue(
+                      web3.EtherUnit.wei,
+                      (widget.arguments.amount *
+                              BigInt.from(10).pow(18).toDouble())
+                          .toInt())
+                  .getInWei,
+              widget.arguments.account,
+              widget.arguments.account,
+              0);
+        }
     }
   }
 }

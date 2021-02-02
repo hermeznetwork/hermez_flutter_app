@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/addresses.dart';
+import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -114,7 +115,10 @@ class TransferSummaryForm extends HookWidget {
                             transactionType == TransactionType.WITHDRAW
                         ? Align(
                             alignment: Alignment.centerRight,
-                            child: Text('My Ethereum address',
+                            child: Text(
+                                store.state.txLevel == TransactionLevel.LEVEL1
+                                    ? 'My Ethereum address'
+                                    : 'My Hermez address',
                                 style: TextStyle(
                                   color: HermezColors.black,
                                   fontSize: 16,
@@ -151,14 +155,22 @@ class TransferSummaryForm extends HookWidget {
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          "0x" +
-                              AddressUtils.strip0x(addressFrom.substring(0, 6))
-                                  .toUpperCase() +
-                              " ･･･ " +
-                              addressFrom
-                                  .substring(addressFrom.length - 5,
-                                      addressFrom.length)
-                                  .toUpperCase(),
+                          store.state.txLevel == TransactionLevel.LEVEL1
+                              ? "0x" +
+                                  AddressUtils.strip0x(
+                                          addressFrom.substring(0, 6))
+                                      .toUpperCase() +
+                                  " ･･･ " +
+                                  addressFrom
+                                      .substring(addressFrom.length - 5,
+                                          addressFrom.length)
+                                      .toUpperCase()
+                              : addressFrom.substring(0, 6) +
+                                  " ･･･ " +
+                                  addressFrom
+                                      .substring(addressFrom.length - 5,
+                                          addressFrom.length)
+                                      .toUpperCase(),
                           style: TextStyle(
                             color: HermezColors.blueyGreyTwo,
                             fontSize: 16,
@@ -208,13 +220,14 @@ class TransferSummaryForm extends HookWidget {
                           fontWeight: FontWeight.w500,
                         )),
                     transactionType == TransactionType.RECEIVE ||
-                            transactionType == TransactionType.DEPOSIT
+                            transactionType == TransactionType.DEPOSIT ||
+                            transactionType == TransactionType.WITHDRAW
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(
                                 store.state.txLevel == TransactionLevel.LEVEL1
-                                    ? 'My Ethereum address'
-                                    : 'My Hermez address',
+                                    ? 'My Hermez address'
+                                    : 'My Ethereum address',
                                 style: TextStyle(
                                   color: HermezColors.black,
                                   fontSize: 16,
@@ -225,15 +238,22 @@ class TransferSummaryForm extends HookWidget {
                         : Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              "0x" +
-                                  AddressUtils.strip0x(
-                                          addressFrom.substring(0, 6))
-                                      .toUpperCase() +
-                                  " ･･･ " +
-                                  addressFrom
-                                      .substring(addressFrom.length - 5,
-                                          addressFrom.length)
-                                      .toUpperCase(),
+                              store.state.txLevel == TransactionLevel.LEVEL1
+                                  ? "0x" +
+                                      AddressUtils.strip0x(
+                                              addressFrom.substring(0, 6))
+                                          .toUpperCase() +
+                                      " ･･･ " +
+                                      addressFrom
+                                          .substring(addressFrom.length - 5,
+                                              addressFrom.length)
+                                          .toUpperCase()
+                                  : addressFrom.substring(0, 6) +
+                                      " ･･･ " +
+                                      addressFrom
+                                          .substring(addressFrom.length - 5,
+                                              addressFrom.length)
+                                          .toUpperCase(),
                               style: TextStyle(
                                 color: HermezColors.black,
                                 fontSize: 16,
@@ -245,7 +265,8 @@ class TransferSummaryForm extends HookWidget {
                 ),
                 SizedBox(height: 7),
                 transactionType == TransactionType.RECEIVE ||
-                        transactionType == TransactionType.DEPOSIT
+                        transactionType == TransactionType.DEPOSIT ||
+                        transactionType == TransactionType.WITHDRAW
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
@@ -259,15 +280,27 @@ class TransferSummaryForm extends HookWidget {
                                       .substring(addressTo.length - 5,
                                           addressTo.length)
                                       .toUpperCase()
-                              : "hez:0x" +
-                                  AddressUtils.strip0x(
-                                          addressFrom.substring(0, 6))
-                                      .toUpperCase() +
-                                  " ･･･ " +
-                                  addressFrom
-                                      .substring(addressFrom.length - 5,
-                                          addressFrom.length)
-                                      .toUpperCase(),
+                              : transactionType == TransactionType.WITHDRAW
+                                  ? getEthereumAddress(addressFrom)
+                                          .substring(0, 6) +
+                                      " ･･･ " +
+                                      getEthereumAddress(addressFrom)
+                                          .substring(
+                                              getEthereumAddress(addressFrom)
+                                                      .length -
+                                                  5,
+                                              getEthereumAddress(addressFrom)
+                                                  .length)
+                                          .toUpperCase()
+                                  : "hez:0x" +
+                                      AddressUtils.strip0x(
+                                              addressFrom.substring(0, 6))
+                                          .toUpperCase() +
+                                      " ･･･ " +
+                                      addressFrom
+                                          .substring(addressFrom.length - 5,
+                                              addressFrom.length)
+                                          .toUpperCase(),
                           style: TextStyle(
                             color: HermezColors.blueyGreyTwo,
                             fontSize: 16,

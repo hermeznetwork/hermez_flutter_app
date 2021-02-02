@@ -7,12 +7,13 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/exit.dart';
 import 'package:hermez/service/network/model/recommended_fee.dart';
-import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_plugin/tx_utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'wallet_state.dart';
@@ -173,8 +174,8 @@ class WalletHandler {
   }
 
   Future<void> fetchOwnL2Balance() async {
-    final accounts = await _hermezService
-        .getAccounts(web3.EthereumAddress.fromHex(state.ethereumAddress));
+    final accounts = await _hermezService.getAccounts(
+        web3.EthereumAddress.fromHex(state.ethereumAddress), [3, 87, 91]);
     _store.dispatch(UpdatingBalance());
 
     List<Account> L2accounts = List();
@@ -274,8 +275,8 @@ class WalletHandler {
   }
 
   Future<List<Account>> getAccounts() async {
-    final accounts = await _hermezService
-        .getAccounts(web3.EthereumAddress.fromHex(state.ethereumAddress));
+    final accounts = await _hermezService.getAccounts(
+        web3.EthereumAddress.fromHex(state.ethereumAddress), [3, 87, 91]);
     return accounts;
   }
 
@@ -295,33 +296,64 @@ class WalletHandler {
     return exits;
   }
 
+  /// Fetches the details of an exit
+  /// @param {string} accountIndex - account index
+  /// @param {number} batchNum - batch number
+  /// @returns {void}
+  Future<Exit> getExit(String accountIndex, int batchNum) {
+    _hermezService.getAccount(accountIndex);
+    _hermezService.getExit(batchNum, accountIndex);
+  }
+
+  /// Fetches the recommended fees from the Coordinator
+  /// @returns {RecommendedFee}
   Future<RecommendedFee> fetchFees() {
     return _hermezService.getRecommendedFee();
   }
 
   Future<bool> deposit(BigInt amount, Account account) {
-    /*web3.EthereumAddress fromAddress;
-    if (from != null && from.isNotEmpty) {
-      fromAddress = web3.EthereumAddress.fromHex(from);
-    }*/
-
-    /*_hermezService.deposit(
-        amount, account, web3.EthereumAddress.fromHex(state.address));*/
-
     return _hermezService.deposit(
         amount, state.ethereumAddress, account.token, state.ethereumPrivateKey);
-
-    /*return _contractService.approve(
-        amount,
-        web3.EthereumAddress.fromHex(state.address),
-        web3.EthereumAddress.fromHex(tokenContractAddress),
-        "Hermez");*/
   }
 
-  Future<void> withdraw(BigInt amount, Account account) {}
+  Future<void> withdraw(BigInt amount, Account account, Exit exit,
+      bool completeDelayedWithdrawal, bool instantWithdrawal) async {
+    await getExit(account.accountIndex, null /*batchNum*/);
+    return _hermezService.withdraw(
+        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal);
+  }
+
+  Future<void> forceExit(BigInt amount, Account account) {
+    _hermezService.forceExit(amount, account);
+  }
+
+  Future<void> exit(BigInt amount, Account account, BigInt fee) {
+    Transaction transaction = Transaction(
+        type: TxType.Exit.toString(),
+        fromAccountIndex: account.accountIndex,
+        amount: amount.toInt(),
+        fee: fee.toInt(),
+        nonce: account.nonce);
+    _hermezService.generateAndSendL2Tx(
+        transaction, state.hermezWallet, account.token);
+  }
+
+  Future<void> transfer(BigInt amount, Account from, Account to, fee) {
+    Transaction transaction = Transaction(
+        type: TxType.Transfer.toString(),
+        fromAccountIndex: from.accountIndex,
+        toAccountIndex:
+            to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
+        amount: amount.toInt(),
+        fee: fee.toInt(),
+        nonce: from.nonce);
+    _hermezService.generateAndSendL2Tx(
+        transaction, state.hermezWallet, from.token);
+  }
 
   Future<bool> sendL2Transaction(Transaction transaction) async {
-    final result = await _hermezService.sendL2Transaction(transaction);
+    final result = await _hermezService.sendL2Transaction(
+        transaction, await _configurationService.getBabyJubJubHex());
     return result;
   }
 

@@ -1,5 +1,3 @@
-
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/forged_transaction.dart';
 import 'package:hermez/service/network/model/pagination.dart';
 
@@ -11,13 +9,11 @@ class ForgedTransactionsResponse {
 
   factory ForgedTransactionsResponse.fromJson(Map<String, dynamic> json) {
     return ForgedTransactionsResponse(
-        transactions: json['transactions'],
-        pagination: json['pagination']);
+        transactions: json['transactions'], pagination: json['pagination']);
   }
 
   Map<String, dynamic> toJson() => {
-    'transactions': transactions,
-    'pagination': pagination,
-  };
-
+        'transactions': transactions,
+        'pagination': pagination,
+      };
 }

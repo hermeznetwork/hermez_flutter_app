@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:hermez/service/network/api_client_exceptions.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/service/network/model/account_request.dart';
 import 'package:hermez/service/network/model/accounts_response.dart';
 import 'package:hermez/service/network/model/coordinators_response.dart';
@@ -12,9 +11,14 @@ import 'package:hermez/service/network/model/exits_request.dart';
 import 'package:hermez/service/network/model/forged_transactions_request.dart';
 import 'package:hermez/service/network/model/forged_transactions_response.dart';
 import 'package:hermez/service/network/model/register_request.dart';
+import 'package:hermez/service/network/model/state_response.dart';
 import 'package:hermez/service/network/model/tokens_request.dart';
 import 'package:hermez/service/network/model/tokens_response.dart';
 import 'package:hermez_plugin/api.dart' as api;
+import 'package:hermez_plugin/hermez_wallet.dart';
+import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_plugin/tx.dart' as tx;
 //import 'package:hermez_plugin/tx-pool.dart';
 import 'package:http/http.dart' as http;
 
@@ -25,7 +29,6 @@ import 'model/exit.dart';
 import 'model/exits_response.dart';
 import 'model/forged_transaction.dart';
 import 'model/recommended_fee.dart';
-import 'model/token.dart';
 import 'model/transaction.dart';
 
 class ApiClient {
@@ -38,8 +41,8 @@ class ApiClient {
   final String TRANSACTIONS_POOL_URL = "/transactions-pool";
   final String TRANSACTIONS_HISTORY_URL = "/transactions-history";
 
-  final String TOKENS_URL = "/tokens";*/
-  final String RECOMMENDED_FEES_URL = "/recommendedFee";
+  final String TOKENS_URL = "/tokens";
+  final String RECOMMENDED_FEES_URL = "/recommendedFee";*/
   final String COORDINATORS_URL = "/coordinators";
 
   ApiClient(this._baseAddress);
@@ -79,13 +82,21 @@ class ApiClient {
     return exitsResponse.exits;
   }
 
+  Future<Exit> getExit(int batchNum, String accountIndex) async {
+    final response = await api.getExit(batchNum, accountIndex);
+    final exit = Exit.fromJson(json.decode(response));
+    return exit;
+  }
+
   // TRANSACTION
 
+  Future<bool> generateAndSendL2Transaction(
+      Transaction transaction, HermezWallet wallet, Token token) async {
+    return await tx.generateAndSendL2Tx(transaction, wallet, token);
+  }
+
   Future<bool> sendL2Transaction(Transaction transaction, String bjj) async {
-    final response = await api.postPoolTransaction(transaction.toJson());
-    /*if (response != null) {
-      tx - pool.addPoolTransaction(transaction, bjj);
-    }*/
+    final response = await tx.sendL2Transaction(transaction.toJson(), bjj);
     return response.isNotEmpty;
   }
 
@@ -147,9 +158,10 @@ class ApiClient {
   }
 
   Future<RecommendedFee> getRecommendedFees() async {
-    final response = await _get(RECOMMENDED_FEES_URL, null);
-    final recommendedFees = RecommendedFee.fromJson(json.decode(response.body));
-    return recommendedFees;
+    final String stateResponse = await api.getState();
+    final StateResponse state =
+        StateResponse.fromJson(json.decode(stateResponse));
+    return state.recommendedFee;
   }
 
   Future<List<Coordinator>> getCoordinators(CoordinatorsRequest request) async {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
+import 'package:hermez_plugin/model/account.dart';
 
 import 'components/wallet/transfer_amount_form.dart';
 import 'context/wallet/wallet_handler.dart';
@@ -67,15 +67,14 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
           //var success = await transferStore.transfer(address, amount);
           Navigator.pushReplacementNamed(context, "/transaction_details",
               arguments: TransactionDetailsArguments(
-                  widget.arguments.store,
-                  widget.arguments.amountType,
-                  TransactionStatus.DRAFT,
-                  widget.arguments.account,
-                  amount,
-                  null,
-                  widget.arguments.account.hezEthereumAddress,
-                  address,
-                  null));
+                wallet: widget.arguments.store,
+                transactionType: widget.arguments.amountType,
+                status: TransactionStatus.DRAFT,
+                account: widget.arguments.account,
+                amount: amount,
+                addressFrom: widget.arguments.account.hezEthereumAddress,
+                addressTo: address,
+              ));
           //if (success) {
           //Navigator.popUntil(context, ModalRoute.withName('/'));
           //}

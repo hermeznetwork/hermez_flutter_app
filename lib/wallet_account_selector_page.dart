@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/account.dart';
-import 'package:hermez/service/network/model/token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/token.dart';
 
 class AccountSelectorArguments {
   //final TransactionLevel txLevel;

@@ -1,7 +1,8 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/hermez_wallet.dart';
+import 'package:hermez_plugin/model/account.dart';
 
 part 'wallet.g.dart';
 
@@ -22,6 +23,9 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   @nullable
   String get hermezPublicKeyBase64;
+
+  @nullable
+  HermezWallet get hermezWallet;
 
   Map<String, BigInt> get tokensBalance;
 

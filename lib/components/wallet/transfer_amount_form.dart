@@ -7,10 +7,11 @@ import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/addresses.dart';
+import 'package:hermez_plugin/model/account.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../wallet_account_selector_page.dart';
@@ -627,7 +628,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
 
   bool isAddressValid() {
     return addressController.value.text.isEmpty ||
-        AddressUtils.isValidEthereumAddress(addressController.value.text);
+        (store.state.txLevel == TransactionLevel.LEVEL1 &&
+            AddressUtils.isValidEthereumAddress(
+                addressController.value.text)) ||
+        (store.state.txLevel == TransactionLevel.LEVEL2 &&
+            isHermezEthereumAddress(addressController.value.text));
     /*final regex = RegExp(store.state.txLevel == TransactionLevel.LEVEL1
         ? '^(0?[xX]?)[a-fA-F0-9]{0,}\$' /*'^0x[a-fA-F0-9]{40}\$'*/
         : '^([hH]?[eE]?[zZ]?:?0?[xX]?)[a-fA-F0-9]{0,}\$' /*'^hez:0x[a-fA-F0-9]{40}\$'*/);

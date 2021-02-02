@@ -74,6 +74,7 @@ flutter:
     - partialERC20ABI.json
     - ERC20ABI.json
     - HermezABI.json
+    - WithdrawalDelayerABI.json
     - hermes.png
     - account.png
     - wallet.png

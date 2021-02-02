@@ -1,4 +1,4 @@
-import 'package:hermez/service/network/model/account.dart';
+import 'package:hermez_plugin/model/account.dart';
 
 class AccountsResponse {
   final List<Account> accounts;

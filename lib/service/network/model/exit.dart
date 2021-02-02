@@ -1,5 +1,5 @@
 import 'package:hermez/service/network/model/merkle_proof.dart';
-import 'package:hermez/service/network/model/token.dart';
+import 'package:hermez_plugin/model/token.dart';
 
 class Exit {
   final int batchNum;

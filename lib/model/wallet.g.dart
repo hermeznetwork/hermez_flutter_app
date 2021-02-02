@@ -18,6 +18,8 @@ class _$Wallet extends Wallet {
   @override
   final String hermezPublicKeyBase64;
   @override
+  final HermezWallet hermezWallet;
+  @override
   final Map<String, BigInt> tokensBalance;
   @override
   final BigInt ethBalance;
@@ -45,6 +47,7 @@ class _$Wallet extends Wallet {
       this.hermezAddress,
       this.hermezPublicKeyHex,
       this.hermezPublicKeyBase64,
+      this.hermezWallet,
       this.tokensBalance,
       this.ethBalance,
       this.ethUSDPrice,
@@ -82,6 +85,7 @@ class _$Wallet extends Wallet {
         hermezAddress == other.hermezAddress &&
         hermezPublicKeyHex == other.hermezPublicKeyHex &&
         hermezPublicKeyBase64 == other.hermezPublicKeyBase64 &&
+        hermezWallet == other.hermezWallet &&
         tokensBalance == other.tokensBalance &&
         ethBalance == other.ethBalance &&
         ethUSDPrice == other.ethUSDPrice &&
@@ -109,11 +113,13 @@ class _$Wallet extends Wallet {
                                                 $jc(
                                                     $jc(
                                                         $jc(
-                                                            0,
-                                                            ethereumAddress
+                                                            $jc(
+                                                                0,
+                                                                ethereumAddress
+                                                                    .hashCode),
+                                                            ethereumPrivateKey
                                                                 .hashCode),
-                                                        ethereumPrivateKey
-                                                            .hashCode),
+                                                        hermezWallet.hashCode),
                                                     hermezAddress.hashCode),
                                                 hermezPublicKeyHex.hashCode),
                                             hermezPublicKeyBase64.hashCode),
@@ -136,6 +142,7 @@ class _$Wallet extends Wallet {
           ..add('hermezAddress', hermezAddress)
           ..add('hermezPublicKeyHex', hermezPublicKeyHex)
           ..add('hermezPublicKeyBase64', hermezPublicKeyBase64)
+          ..add('hermezWallet', hermezWallet)
           ..add('tokensBalance', tokensBalance)
           ..add('ethBalance', ethBalance)
           ..add('ethUSDPrice', ethUSDPrice)
@@ -176,6 +183,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   String get hermezPublicKeyBase64 => _$this._hermezPublicKeyBase64;
   set hermezPublicKeyBase64(String hermezPublicKeyBase64) =>
       _$this._hermezPublicKeyBase64 = hermezPublicKeyBase64;
+
+  HermezWallet _hermezWallet;
+  HermezWallet get hermezWallet => _$this._hermezWallet;
+  set hermezWallet(HermezWallet hermezWallet) =>
+      _$this._hermezWallet = hermezWallet;
 
   Map<String, BigInt> _tokensBalance;
   Map<String, BigInt> get tokensBalance => _$this._tokensBalance;
@@ -226,6 +238,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _hermezAddress = _$v.hermezAddress;
       _hermezPublicKeyHex = _$v.hermezPublicKeyHex;
       _hermezPublicKeyBase64 = _$v.hermezPublicKeyBase64;
+      _hermezWallet = _$v.hermezWallet;
       _tokensBalance = _$v.tokensBalance;
       _ethBalance = _$v.ethBalance;
       _ethUSDPrice = _$v.ethUSDPrice;
@@ -264,6 +277,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               hermezAddress: hermezAddress,
               hermezPublicKeyHex: hermezPublicKeyHex,
               hermezPublicKeyBase64: hermezPublicKeyBase64,
+              hermezWallet: hermezWallet,
               tokensBalance: tokensBalance,
               ethBalance: ethBalance,
               ethUSDPrice: ethUSDPrice,

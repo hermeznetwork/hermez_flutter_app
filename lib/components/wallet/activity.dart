@@ -5,9 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/service/network/model/account.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 
 import '../../wallet_transaction_details_page.dart';
@@ -214,18 +214,18 @@ class _ActivityState extends State<Activity> {
                 onTap: () async {
                   Navigator.pushNamed(context, "/transaction_details",
                       arguments: TransactionDetailsArguments(
-                          widget.arguments.store,
-                          txType,
-                          TransactionStatus.CONFIRMED,
-                          widget.arguments.account,
+                          wallet: widget.arguments.store,
+                          transactionType: txType,
+                          status: TransactionStatus.CONFIRMED,
+                          account: widget.arguments.account,
                           /*widget.arguments.store,
                             widget.arguments.amountType,
                             widget.arguments.account,*/
-                          amount,
-                          txHash,
-                          addressFrom,
-                          addressTo,
-                          date));
+                          amount: amount,
+                          transactionHash: txHash,
+                          addressFrom: addressFrom,
+                          addressTo: addressTo,
+                          transactionDate: date));
                 },
               ),
             );
