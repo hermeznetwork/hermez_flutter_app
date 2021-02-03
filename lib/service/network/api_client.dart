@@ -13,7 +13,6 @@ import 'package:hermez/service/network/model/forged_transactions_response.dart';
 import 'package:hermez/service/network/model/register_request.dart';
 import 'package:hermez/service/network/model/state_response.dart';
 import 'package:hermez/service/network/model/tokens_request.dart';
-import 'package:hermez/service/network/model/tokens_response.dart';
 import 'package:hermez_plugin/api.dart' as api;
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
@@ -111,12 +110,9 @@ class ApiClient {
 
   Future<List<ForgedTransaction>> getForgedTransactions(
       ForgedTransactionsRequest request) async {
-    final response = await api.getTransactions(
-        request.ethereumAddress,
-        [request.tokenId],
-        request.batchNum,
-        request.accountIndex,
-        request.fromItem);
+    final response = await api.getTransactions(request.ethereumAddress,
+        [request.tokenId], request.batchNum, request.accountIndex,
+        fromItem: request.fromItem);
     final ForgedTransactionsResponse forgedTransactionsResponse =
         ForgedTransactionsResponse.fromJson(json.decode(response));
     return forgedTransactionsResponse.transactions;
@@ -144,10 +140,10 @@ class ApiClient {
   // HERMEZ
 
   Future<List<Token>> getSupportedTokens(TokensRequest request) async {
-    final response =
-        await api.getTokens(request != null ? request.ids : List());
-    final TokensResponse tokensResponse =
-        TokensResponse.fromJson(json.decode(response));
+    final tokensResponse =
+        await api.getTokens(tokenIds: request != null ? request.ids : List());
+    /*final TokensResponse tokensResponse =
+        TokensResponse.fromJson(json.decode(response));*/
     return tokensResponse.tokens;
   }
 
