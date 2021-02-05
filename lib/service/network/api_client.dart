@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:hermez/service/network/api_client_exceptions.dart';
 import 'package:hermez/service/network/model/account_request.dart';
-import 'package:hermez/service/network/model/accounts_response.dart';
 import 'package:hermez/service/network/model/coordinators_response.dart';
 import 'package:hermez/service/network/model/exits_request.dart';
 import 'package:hermez/service/network/model/forged_transactions_request.dart';
@@ -16,6 +15,7 @@ import 'package:hermez/service/network/model/tokens_request.dart';
 import 'package:hermez_plugin/api.dart' as api;
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/tx.dart' as tx;
 //import 'package:hermez_plugin/tx-pool.dart';
@@ -24,8 +24,6 @@ import 'package:http/http.dart' as http;
 import 'model/accounts_request.dart';
 import 'model/coordinator.dart';
 import 'model/coordinators_request.dart';
-import 'model/exit.dart';
-import 'model/exits_response.dart';
 import 'model/forged_transaction.dart';
 import 'model/recommended_fee.dart';
 import 'model/transaction.dart';
@@ -60,10 +58,8 @@ class ApiClient {
   }
 
   Future<List<Account>> getAccounts(AccountsRequest request) async {
-    final response =
+    final accountsResponse =
         await api.getAccounts(request.hezEthereumAddress, request.tokenIds);
-    final AccountsResponse accountsResponse =
-        AccountsResponse.fromJson(json.decode(response));
     return accountsResponse.accounts;
   }
 
@@ -74,10 +70,8 @@ class ApiClient {
   }
 
   Future<List<Exit>> getExits(ExitsRequest request) async {
-    final response = await api.getExits(
+    final exitsResponse = await api.getExits(
         request.hezEthereumAddress, request.onlyPendingWithdraws);
-    final ExitsResponse exitsResponse =
-        ExitsResponse.fromJson(json.decode(response));
     return exitsResponse.exits;
   }
 
