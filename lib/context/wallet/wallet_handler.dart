@@ -7,12 +7,12 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
-import 'package:hermez/service/network/model/exit.dart';
-import 'package:hermez/service/network/model/recommended_fee.dart';
-import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/exit.dart';
+import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_plugin/model/transaction.dart';
 import 'package:hermez_plugin/tx_utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 

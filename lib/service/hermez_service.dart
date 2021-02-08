@@ -1,38 +1,59 @@
 import 'dart:async';
 
-import 'package:built_collection/built_collection.dart';
-import 'package:hermez/service/network/api_client.dart';
 import 'package:hermez/service/network/api_exchange_rate_client.dart';
-import 'package:hermez/service/network/model/account_request.dart';
-import 'package:hermez/service/network/model/accounts_request.dart';
-import 'package:hermez/service/network/model/exits_request.dart';
 import 'package:hermez/service/network/model/rates_request.dart';
-import 'package:hermez/service/network/model/recommended_fee.dart';
-import 'package:hermez/service/network/model/transaction.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
+import 'package:hermez_plugin/api.dart' as api;
+import 'package:hermez_plugin/api.dart';
 import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/coordinator.dart';
+import 'package:hermez_plugin/model/create_account_authorization.dart';
 import 'package:hermez_plugin/model/exit.dart';
+import 'package:hermez_plugin/model/exits_request.dart';
+import 'package:hermez_plugin/model/forged_transaction.dart';
+import 'package:hermez_plugin/model/forged_transactions_request.dart';
+import 'package:hermez_plugin/model/recommended_fee.dart';
+import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_plugin/model/tokens_request.dart';
+import 'package:hermez_plugin/model/transaction.dart';
 import 'package:hermez_plugin/tx.dart' as tx;
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'configuration_service.dart';
 
 abstract class IHermezService {
+  Future<bool> authorizeAccountCreation(
+      web3.EthereumAddress ethereumAddress, String bjj, String signature);
+  Future<CreateAccountAuthorization> getCreateAccountAuthorization(
+      web3.EthereumAddress ethereumAddress);
   Future<List<Account>> getAccounts(
-      web3.EthereumAddress ethereumAddress, List<int> tokenIds);
+      web3.EthereumAddress ethereumAddress, List<int> tokenIds,
+      {int fromItem = 0,
+      PaginationOrder order = PaginationOrder.ASC,
+      int limit = DEFAULT_PAGE_SIZE});
   Future<Account> getAccount(String accountIndex);
   Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress);
-  Future<List<Transaction>> getTransactions(
-      web3.EthereumAddress ethereumAddress);
+  Future<List<Coordinator>> getCoordinators(
+      String forgerAddr, String bidderAddr);
+  Future<List<ForgedTransaction>> getForgedTransactions(
+      ForgedTransactionsRequest request);
+  Future<ForgedTransaction> getTransactionById(String transactionId);
+  Future<Transaction> getPoolTransactionById(String transactionId);
   Future<List<Token>> getTokens();
+  Future<Token> getTokenById(int tokenId);
   Future<bool> deposit(
       BigInt amount, String hezEthereumAddress, Token token, String babyJubJub,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
-  //Future<bool> withdraw(BigInt amount);
+  Future<void> withdraw(BigInt amount, Account account, Exit exit,
+      bool completeDelayedWithdrawal, bool instantWithdrawal,
+      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
+  Future<void> generateAndSendL2Tx(
+      Transaction transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
+  Future<RecommendedFee> getRecommendedFee();
 }
 
 class HermezService implements IHermezService {
@@ -43,68 +64,115 @@ class HermezService implements IHermezService {
   HermezService(
       this._baseUrl, this.client, this._exchangeUrl, this._configService);
 
-  ApiClient _apiClient() => ApiClient(this._baseUrl);
   ApiExchangeRateClient _apiExchangeRateClient() =>
       ApiExchangeRateClient(_exchangeUrl);
 
   @override
+  Future<bool> authorizeAccountCreation(web3.EthereumAddress ethereumAddress,
+      String bjj, String signature) async {
+    final response = await api.postCreateAccountAuthorization(
+        addresses.getHermezAddress(ethereumAddress.hex), bjj, signature);
+    return response.statusCode == 200;
+  }
+
+  @override
+  Future<CreateAccountAuthorization> getCreateAccountAuthorization(
+      web3.EthereumAddress ethereumAddress) async {
+    final response = await api.getCreateAccountAuthorization(
+        addresses.getHermezAddress(ethereumAddress.hex));
+    return response;
+  }
+
+  @override
   Future<List<Account>> getAccounts(
-      web3.EthereumAddress ethereumAddress, List<int> tokenIds) async {
-    AccountsRequest accountsRequest = new AccountsRequest(
-        hezEthereumAddress: addresses.getHermezAddress(ethereumAddress.hex),
-        tokenIds: tokenIds);
-    return _apiClient().getAccounts(accountsRequest);
+      web3.EthereumAddress ethereumAddress, List<int> tokenIds,
+      {int fromItem = 0,
+      PaginationOrder order = PaginationOrder.ASC,
+      int limit = DEFAULT_PAGE_SIZE}) async {
+    final accountsResponse = await api.getAccounts(
+        addresses.getHermezAddress(ethereumAddress.hex), tokenIds,
+        fromItem: fromItem, order: order, limit: limit);
+    return accountsResponse.accounts;
   }
 
   @override
   Future<Account> getAccount(String accountIndex) async {
-    AccountRequest accountRequest =
-        new AccountRequest(accountIndex: accountIndex);
-    return _apiClient().getAccount(accountRequest);
+    final response = await api.getAccount(accountIndex);
+    return response;
   }
 
   @override
   Future<List<Token>> getTokens() async {
-    return _apiClient().getSupportedTokens(null);
-  }
-
-  Future<Token> getTokenById(int tokenId) {
-    return _apiClient().getSupportedTokenById(tokenId.toString());
+    final TokensRequest tokensRequest = null;
+    final tokensResponse = await api.getTokens(
+        tokenIds: tokensRequest != null ? tokensRequest.ids : List());
+    return tokensResponse.tokens;
   }
 
   @override
-  Future<List<Transaction>> getTransactions(
-      web3.EthereumAddress ethereumAddress) async {
-    // TODO: implement getTransactions
-    return BuiltList<Transaction>().toList();
+  Future<Token> getTokenById(int tokenId) async {
+    final tokenResponse = await api.getToken(tokenId);
+    return tokenResponse;
   }
 
+  @override
+  Future<List<ForgedTransaction>> getForgedTransactions(
+      ForgedTransactionsRequest request) async {
+    final response = await api.getTransactions(request.ethereumAddress,
+        [request.tokenId], request.batchNum, request.accountIndex,
+        fromItem: request.fromItem);
+    return response;
+  }
+
+  @override
+  Future<ForgedTransaction> getTransactionById(String transactionId) async {
+    final response = await api.getHistoryTransaction(transactionId);
+    return response;
+  }
+
+  @override
+  Future<Transaction> getPoolTransactionById(String transactionId) async {
+    final response = await api.getPoolTransaction(transactionId);
+    return response;
+  }
+
+  @override
   Future<void> generateAndSendL2Tx(
       Transaction transaction, HermezWallet wallet, Token token) async {
     tx.generateAndSendL2Tx(transaction, wallet, token);
   }
 
   @override
-  Future<bool> sendL2Transaction(Transaction transaction, String bJJ) {
-    return _apiClient().sendL2Transaction(transaction, bJJ);
+  Future<bool> sendL2Transaction(Transaction transaction, String bjj) async {
+    final response = await tx.sendL2Transaction(transaction.toJson(), bjj);
+    return response.isNotEmpty;
   }
 
   @override
-  Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress) {
+  Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress) async {
     ExitsRequest exitsRequest = new ExitsRequest(
         hezEthereumAddress: addresses.getHermezAddress(ethereumAddress.hex),
         onlyPendingWithdraws: true);
-    return _apiClient().getExits(exitsRequest);
+    final exitsResponse = await api.getExits(
+        exitsRequest.hezEthereumAddress, exitsRequest.onlyPendingWithdraws);
+    return exitsResponse.exits;
   }
 
   @override
-  Future<Exit> getExit(int batchNum, String accountIndex) {
-    return _apiClient().getExit(batchNum, accountIndex);
+  Future<Exit> getExit(int batchNum, String accountIndex) async {
+    final exitResponse = await api.getExit(batchNum, accountIndex);
+    return exitResponse;
   }
 
+  @override
   Future<RecommendedFee> getRecommendedFee() async {
-    return _apiClient().getRecommendedFees();
+    final StateResponse state = await api.getState();
+    return state.recommendedFee;
   }
+
+  @override
+  Future<List<Coordinator>> getCoordinators(
+      String forgerAddr, String bidderAddr) async {}
 
   /// Makes a deposit.
   /// It detects if it's a 'createAccountDeposit' or a 'deposit' and prepares the parameters accordingly.
@@ -125,6 +193,7 @@ class HermezService implements IHermezService {
     return tx.deposit(amount, hezEthereumAddress, token, babyJubJub, client);
   }
 
+  @override
   Future<void> withdraw(BigInt amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
