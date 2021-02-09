@@ -235,6 +235,9 @@ class ContractService implements IContractService {
 
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName) async {
+    /*final Web3Client web3client =
+        Web3Client('http://192.168.250.101:8545', Client());*/
+
     final contract = await ContractParser.fromAssets(
         'ERC20ABI.json', tokenContractAddress.toString(), tokenContractName);
 
@@ -244,7 +247,7 @@ class ContractService implements IContractService {
       params: [from],
     );
 
-    return response.first as BigInt;
+    return response[0] as BigInt;
   }
 
   Future<BigInt> getEstimatedGas(

@@ -1,8 +1,8 @@
 class AppConfig {
   AppConfig() {
     params['dev'] = AppConfigParams(
-        "http://192.168.182.2:7546",
-        "ws://192.168.182.2:7546",
+        "http://192.168.250.101:8545",
+        "ws://192.168.250.101:8545",
         "167.71.59.190:4010",
         "api.exchangeratesapi.io",
         "http://api-ropsten.etherscan.io/api",

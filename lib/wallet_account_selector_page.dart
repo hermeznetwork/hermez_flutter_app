@@ -166,6 +166,7 @@ class WalletAccountSelectorPage extends HookWidget {
 
                   //final Color color = _colors[index %
                   //    _colors.length];
+
                   return AccountRow(
                       account.token.name,
                       account.token.symbol,
@@ -174,7 +175,8 @@ class WalletAccountSelectorPage extends HookWidget {
                               arguments.store.state.exchangeRatio
                           : account.token.USD,
                       currency,
-                      double.parse(account.balance) / pow(10, 18),
+                      double.parse(account.balance) /
+                          pow(10, account.token.decimals),
                       false,
                       true, (String token, String amount) async {
                     final Token supportedToken =

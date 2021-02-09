@@ -250,21 +250,23 @@ class WalletHandler {
                 web3.EthereumAddress.fromHex(state.ethereumAddress),
                 web3.EthereumAddress.fromHex(token.ethereumAddress),
                 token.name);
-          } catch (error) {}
-          if (tokenBalance > BigInt.zero) {
-            var tokenAmount = web3.EtherAmount.fromUnitAndValue(
-                web3.EtherUnit.wei, tokenBalance);
-            final account = Account(
-                accountIndex: "0",
-                balance: tokenAmount.getInWei.toString(),
-                bjj: "",
-                hezEthereumAddress: state.ethereumAddress,
-                itemId: 0,
-                nonce: 0,
-                token: token);
-            accounts.add(account);
-            //tokensBalance[token.symbol] = tokenBalance;
+          } catch (error) {
+            throw error;
           }
+          //if (tokenBalance > BigInt.zero) {
+          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+              web3.EtherUnit.wei, tokenBalance);
+          final account = Account(
+              accountIndex: "0",
+              balance: tokenAmount.getInWei.toString(),
+              bjj: "",
+              hezEthereumAddress: state.ethereumAddress,
+              itemId: 0,
+              nonce: 0,
+              token: token);
+          accounts.add(account);
+          //tokensBalance[token.symbol] = tokenBalance;
+          //}
         }
       }
 
