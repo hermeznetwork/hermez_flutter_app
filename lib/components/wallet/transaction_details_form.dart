@@ -225,9 +225,9 @@ class TransferSummaryForm extends HookWidget {
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                                store.state.txLevel == TransactionLevel.LEVEL1
-                                    ? 'My Hermez address'
-                                    : 'My Ethereum address',
+                                transactionType == TransactionType.WITHDRAW
+                                    ? 'My Ethereum address'
+                                    : 'My Hermez address',
                                 style: TextStyle(
                                   color: HermezColors.black,
                                   fontSize: 16,

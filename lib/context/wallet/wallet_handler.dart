@@ -313,7 +313,7 @@ class WalletHandler {
 
   Future<bool> deposit(BigInt amount, Account account) {
     return _hermezService.deposit(
-        amount, state.ethereumAddress, account.token, state.ethereumPrivateKey);
+        amount, state.ethereumAddress, account.token, state.hermezPublicKeyHex);
   }
 
   Future<void> withdraw(BigInt amount, Account account, Exit exit,

@@ -4,6 +4,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'components/wallet/transaction_details_form.dart';
@@ -132,8 +133,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               widget.arguments.addressTo,
                               widget.arguments.amount.toString());
                         } else {
-                          handleFormSubmit();
-                          success = true;
+                          success = await handleFormSubmit();
                         }
 
                         //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
@@ -298,18 +298,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
   /// Bubbles up an event to send the transaction accordingly
   /// @returns {void}
-  void handleFormSubmit() async {
+  Future<bool> handleFormSubmit() async {
     switch (widget.arguments.transactionType) {
       case TransactionType.DEPOSIT:
         {
-          await widget.arguments.wallet.deposit(
-              web3.EtherAmount.fromUnitAndValue(
-                      web3.EtherUnit.wei,
-                      (widget.arguments.amount *
-                              BigInt.from(10).pow(18).toDouble())
-                          .toInt())
-                  .getInWei,
-              widget.arguments.account);
+          final amountDeposit =
+              getTokenAmountBigInt(widget.arguments.amount, 18);
+          return await widget.arguments.wallet
+              .deposit(amountDeposit, widget.arguments.account);
         }
         break;
       case TransactionType.FORCEEXIT:
