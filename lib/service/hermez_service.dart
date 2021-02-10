@@ -25,6 +25,7 @@ import 'package:web3dart/web3dart.dart' as web3;
 import 'configuration_service.dart';
 
 abstract class IHermezService {
+  Future<StateResponse> getState();
   Future<bool> authorizeAccountCreation(
       web3.EthereumAddress ethereumAddress, String bjj, String signature);
   Future<CreateAccountAuthorization> getCreateAccountAuthorization(
@@ -66,6 +67,13 @@ class HermezService implements IHermezService {
 
   ApiExchangeRateClient _apiExchangeRateClient() =>
       ApiExchangeRateClient(_exchangeUrl);
+
+  @override
+  Future<StateResponse> getState() async {
+    final StateResponse state = await api.getState();
+    //api.setBaseApiUrl(state.network.nextForgers[0].coordinator.URL);
+    return state;
+  }
 
   @override
   Future<bool> authorizeAccountCreation(web3.EthereumAddress ethereumAddress,
