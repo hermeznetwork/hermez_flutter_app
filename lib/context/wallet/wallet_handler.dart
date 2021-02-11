@@ -96,7 +96,7 @@ class WalletHandler {
     final defaultCurrency = await _configurationService.getDefaultCurrency();
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
 
-    final state = await _hermezService.getState();
+    //final state = await _hermezService.getState();
 
     final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();
     _configurationService.setExchangeRatio(exchangeRatio);

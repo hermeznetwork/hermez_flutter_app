@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:intl/intl.dart';
 
 class AccountRow extends StatelessWidget {
   AccountRow(this.name, this.symbol, this.price, this.defaultCurrency,
@@ -66,11 +67,7 @@ class AccountRow extends StatelessWidget {
                   children: <Widget>[
                     Container(
                       child: Text(
-                        currencyFirst
-                            ? (this.price * this.amount).toStringAsFixed(2) +
-                                " " +
-                                this.defaultCurrency
-                            : this.amount.toString() + " " + this.symbol,
+                        accountBalance(),
                         style: TextStyle(
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,
@@ -98,5 +95,34 @@ class AccountRow extends StatelessWidget {
             ],
           ), //title to be name of the crypto
         ));
+  }
+
+  String accountBalance() {
+    double accountAmount =
+        currencyFirst ? (this.price * this.amount) : this.amount;
+
+    /*.toStringAsFixed(2) +
+        " " +
+        this.defaultCurrency
+        : this.amount.toString() + " " + this.symbol*/
+
+    double resultValue = 0;
+    String result = "";
+    String locale = "";
+    String symbol = "";
+    if (currencyFirst) {
+      symbol = defaultCurrency;
+    } else {
+      symbol = this.symbol;
+    }
+    locale = 'eu';
+    if (accountAmount != null) {
+      double value = accountAmount;
+      resultValue = resultValue + value;
+    }
+    //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
+    result = NumberFormat.currency(locale: locale, symbol: symbol)
+        .format(accountAmount);
+    return result;
   }
 }

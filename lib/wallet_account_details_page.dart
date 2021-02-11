@@ -7,6 +7,7 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:intl/intl.dart';
 
 import 'context/wallet/wallet_handler.dart';
 
@@ -86,16 +87,7 @@ class WalletAccountDetailsPage extends HookWidget {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
-                          (currency == "USD" ? "\$" : "€") +
-                              ((currency == "USD"
-                                          ? arguments.element.token.USD
-                                          : arguments.element.token.USD *
-                                              arguments
-                                                  .store.state.exchangeRatio) *
-                                      (double.parse(arguments.element.balance) /
-                                          pow(10, 18)))
-                                  .toStringAsFixed(2),
+                      Text(accountBalance(),
                           style: TextStyle(
                               color: HermezColors.blackTwo,
                               fontFamily: 'ModernEra',
@@ -241,5 +233,33 @@ class WalletAccountDetailsPage extends HookWidget {
                 ),
           SizedBox(width: 20.0),
         ]);
+  }
+
+  String accountBalance() {
+    double resultValue = 0;
+    String result = "";
+    String locale = "";
+    String symbol = "";
+    final String currency =
+        arguments.store.state.defaultCurrency.toString().split('.').last;
+    if (currency == "EUR") {
+      locale = 'eu';
+      symbol = '€';
+    } else /* if (currency == "USD")*/ {
+      locale = 'en';
+      symbol = '\$';
+    }
+    if (arguments.element.token.USD != null) {
+      double value =
+          arguments.element.token.USD * double.parse(arguments.element.balance);
+      if (currency == "EUR") {
+        value *= arguments.store.state.exchangeRatio;
+      }
+      resultValue = resultValue + value;
+    }
+    //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
+    result = NumberFormat.currency(locale: locale, symbol: symbol)
+        .format(resultValue / pow(10, 18));
+    return result;
   }
 }

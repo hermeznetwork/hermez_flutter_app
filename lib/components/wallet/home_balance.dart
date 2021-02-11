@@ -14,6 +14,7 @@ import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
+import 'package:intl/intl.dart';
 
 class HomeBalanceArguments {
   final String address;
@@ -380,7 +381,7 @@ class _HomeBalanceState extends State<HomeBalance> {
           ),
         );
       } else {
-        if (snapshot.hasData) {
+        if (snapshot.hasData && (snapshot.data as List).length > 0) {
           // data loaded:
           _accounts = snapshot.data;
           buildAccountsList();
@@ -504,31 +505,6 @@ class _HomeBalanceState extends State<HomeBalance> {
               );*/
   }
 
-  /*String totalL1Balance(AsyncSnapshot snapshot) {
-    if (snapshot.hasData) {
-      // data loaded:
-      _accounts = snapshot.data;
-    }
-    double resultValue = 0;
-    String result = "";
-    final String currency =
-        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
-    if (currency == "EUR") {
-      result += '€';
-    } else if (currency == "USD") {
-      result += '\$';
-    }
-    for (Account account in _accounts) {
-      double value = account.token.USD * double.parse(account.balance);
-      if (currency == "EUR") {
-        value *= widget.arguments.store.state.exchangeRatio;
-      }
-      resultValue = resultValue + value;
-    }
-    result += (resultValue / pow(10, 18)).toStringAsFixed(2);
-    return result;
-  }*/
-
   String totalBalance(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
@@ -536,12 +512,16 @@ class _HomeBalanceState extends State<HomeBalance> {
     }
     double resultValue = 0;
     String result = "";
+    String locale = "";
+    String symbol = "";
     final String currency =
         widget.arguments.store.state.defaultCurrency.toString().split('.').last;
     if (currency == "EUR") {
-      result += '€';
-    } else if (currency == "USD") {
-      result += '\$';
+      locale = 'eu';
+      symbol = '€';
+    } else /* if (currency == "USD")*/ {
+      locale = 'en';
+      symbol = '\$';
     }
     if (_accounts != null && _accounts.length > 0) {
       for (Account account in _accounts) {
@@ -554,7 +534,9 @@ class _HomeBalanceState extends State<HomeBalance> {
         }
       }
     }
-    result += (resultValue / pow(10, 18)).toStringAsFixed(2);
+    //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
+    result = NumberFormat.currency(locale: locale, symbol: symbol)
+        .format(resultValue / pow(10, 18));
     return result;
   }
 }
