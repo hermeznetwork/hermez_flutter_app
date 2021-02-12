@@ -4,6 +4,7 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import 'context/wallet/wallet_handler.dart';
+import 'wallet_transfer_amount_page.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable
@@ -48,13 +49,17 @@ class SettingsQRCodePage extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               QrImage(
-                data: store.state.ethereumAddress,
+                data: (store.state.txLevel == TransactionLevel.LEVEL2
+                        ? "hez:"
+                        : "") +
+                    store.state.ethereumAddress,
               ),
               SizedBox(
                 height: 33,
               ),
               Text(
-                store.state.ethereumAddress,
+                (store.state.txLevel == TransactionLevel.LEVEL2 ? "hez:" : "") +
+                    store.state.ethereumAddress,
                 style: TextStyle(
                   color: HermezColors.blackTwo,
                   fontSize: 16,

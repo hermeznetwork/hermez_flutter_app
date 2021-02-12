@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'context/wallet/wallet_handler.dart';
@@ -50,7 +51,10 @@ class SettingsPage extends HookWidget {
                 child: Container(
                   padding: EdgeInsets.only(top: 44.0, bottom: 20.0),
                   child: Text(
-                    "0x" +
+                    (store.state.txLevel == TransactionLevel.LEVEL2
+                                ? "hez:"
+                                : "") +
+                            "0x" +
                             AddressUtils.strip0x(
                                     store.state.ethereumAddress.substring(0, 6))
                                 .toUpperCase() +
@@ -73,46 +77,85 @@ class SettingsPage extends HookWidget {
               ),
             ),
             Container(
-              padding: EdgeInsets.only(bottom: 24.0),
-              color: HermezColors.lightOrange,
-              child: Align(
-                alignment: Alignment.center,
-                child: FlatButton(
-                  height: 44,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(56.0),
-                      side: BorderSide(color: HermezColors.mediumOrange)),
-                  onPressed: () {
-                    Clipboard.setData(
-                        ClipboardData(text: store.state.ethereumAddress));
-                    _scaffoldKey.currentState.showSnackBar(SnackBar(
-                      content: Text("Copied"),
-                    ));
-                  },
-                  color: HermezColors.mediumOrange,
-                  textColor: HermezColors.steel,
-                  child: Wrap(
-                    children: [
-                      Image.asset(
-                        'assets/paste.png',
-                        width: 20,
-                        height: 20,
+                padding: EdgeInsets.only(bottom: 24.0),
+                color: HermezColors.lightOrange,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FlatButton(
+                      height: 44,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(56.0),
+                          side: BorderSide(color: HermezColors.mediumOrange)),
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushNamed("/qrcode", arguments: store);
+                      },
+                      color: HermezColors.mediumOrange,
+                      textColor: HermezColors.steel,
+                      child: Wrap(
+                        children: [
+                          Image.asset(
+                            'assets/qr_code.png',
+                            width: 20,
+                            height: 20,
+                          ),
+                          SizedBox(width: 10.0),
+                          Text(
+                            "Show QR",
+                            style: TextStyle(
+                              color: HermezColors.steel,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 10.0),
-                      Text(
-                        "Copy",
-                        style: TextStyle(
-                          color: HermezColors.steel,
-                          fontSize: 16,
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
-                        ),
+                    ),
+                    SizedBox(width: 10.0),
+                    FlatButton(
+                      height: 44,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(56.0),
+                          side: BorderSide(color: HermezColors.mediumOrange)),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(
+                            text:
+                                (store.state.txLevel == TransactionLevel.LEVEL2
+                                        ? "hez:"
+                                        : "") +
+                                    store.state.ethereumAddress));
+                        _scaffoldKey.currentState.showSnackBar(SnackBar(
+                          content: Text("Copied"),
+                        ));
+                      },
+                      color: HermezColors.mediumOrange,
+                      textColor: HermezColors.steel,
+                      child: Wrap(
+                        children: [
+                          Image.asset(
+                            'assets/paste.png',
+                            width: 20,
+                            height: 20,
+                          ),
+                          SizedBox(width: 10.0),
+                          Text(
+                            "Copy",
+                            style: TextStyle(
+                              color: HermezColors.steel,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              /*FlatButton(
+                    ),
+                  ],
+                )
+
+                /*FlatButton(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                       side: BorderSide(color: Colors.grey[300])),
@@ -128,169 +171,120 @@ class SettingsPage extends HookWidget {
                     trailing: Icon(Icons.content_copy),
                   ),
                 ),*/
-            ),
-            SizedBox(
-              height: 30,
-            ),
-            ListTile(
-              title: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: EdgeInsets.only(left: 5.0, top: 25.0, bottom: 25.0),
-                  child: Text(
-                    "View QR code",
-                    style: TextStyle(
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
                 ),
+            Expanded(
+              child: Container(
+                color: Colors.white,
+                child: buildSettingsList(),
               ),
-              leading: Container(
-                padding: EdgeInsets.only(
-                  top: 12.0,
-                ),
-                child: Image.asset(
-                  "assets/qr_code.png",
-                  width: 20,
-                  height: 20,
-                ),
-              ),
-              onTap: () {
-                Navigator.of(context).pushNamed("/qrcode", arguments: store);
-              },
-            ),
-            ListTile(
-              title: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: EdgeInsets.only(top: 25.0, bottom: 25.0),
-                  child: Text(
-                    "Currency conversion - " +
-                        store.state.defaultCurrency.toString().split('.').last,
-                    style: TextStyle(
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-              ),
-              leading: Container(
-                padding: EdgeInsets.only(
-                  top: 12.0,
-                ),
-                child: Image.asset(
-                  "assets/currency_conversion.png",
-                  width: 20,
-                  height: 20,
-                ),
-              ),
-              onTap: () {
-                Navigator.of(context)
-                    .pushNamed("/currency_selector", arguments: store);
-              },
-            ),
-            ListTile(
-              title: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: EdgeInsets.only(left: 5.0, top: 25.0, bottom: 25.0),
-                  child: Text(
-                    "Force withdrawal",
-                    style: TextStyle(
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-              ),
-              leading: Container(
-                padding: EdgeInsets.only(
-                  top: 12.0,
-                ),
-                child: Image.asset(
-                  "assets/force_exit.png",
-                  width: 20,
-                  height: 20,
-                ),
-              ),
-              onTap: () {
-                //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
-              },
-            ),
-            ListTile(
-              title: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: EdgeInsets.only(left: 5.0, top: 25.0, bottom: 25.0),
-                  child: Text(
-                    "View in explorer",
-                    style: TextStyle(
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-              ),
-              leading: Container(
-                padding: EdgeInsets.only(
-                  top: 12.0,
-                ),
-                child: Image.asset(
-                  "assets/explorer.png",
-                  width: 20,
-                  height: 20,
-                ),
-              ),
-              onTap: () async {
-                var url = "https://ropsten.etherscan.io/address/" +
-                    store.state.ethereumAddress;
-                if (await canLaunch(url))
-                  await launch(url);
-                else
-                  // can't launch url, there is some error
-                  throw "Could not launch $url";
-              },
-            ),
-            ListTile(
-              title: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: EdgeInsets.only(left: 5.0, top: 25.0, bottom: 25.0),
-                  child: Text(
-                    "Disconnect wallet",
-                    style: TextStyle(
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-              ),
-              leading: Container(
-                padding: EdgeInsets.only(
-                  top: 12.0,
-                ),
-                child: Image.asset(
-                  "assets/disconnect.png",
-                  width: 20,
-                  height: 20,
-                ),
-              ),
-              onTap: () async {
-                await store.resetWallet();
-                //Navigator.popAndPushNamed(context, "/");
-                Navigator.pushNamedAndRemoveUntil(
-                    context, "/", (Route<dynamic> route) => false);
-              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  buildSettingsList() {
+    return Container(
+      color: Colors.white,
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: 4,
+        //set the item count so that index won't be out of range
+        padding: const EdgeInsets.all(16.0),
+        //add some padding to make it look good
+        itemBuilder: (context, i) {
+          //item builder returns a row for each index i=0,1,2,3,4
+          // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+
+          // final index = i ~/ 2; //get the actual index excluding dividers.
+          final index = i;
+
+          String title = "";
+          String image = "";
+
+          switch (index) {
+            case 0:
+              title = "Currency conversion - " +
+                  store.state.defaultCurrency.toString().split('.').last;
+              image = 'currency_conversion';
+              break;
+            case 1:
+              title = "Force withdrawal";
+              image = 'force_exit';
+              break;
+            case 2:
+              title = "View in explorer";
+              image = "explorer";
+              break;
+            case 3:
+              title = "Disconnect wallet";
+              image = "disconnect";
+              break;
+          }
+
+          return ListTile(
+            title: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: EdgeInsets.only(left: 5.0, top: 25.0, bottom: 25.0),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+            ),
+            leading: Container(
+              padding: EdgeInsets.only(
+                top: 12.0,
+              ),
+              child: Image.asset(
+                "assets/$image.png",
+                width: 20,
+                height: 20,
+              ),
+            ),
+            onTap: () {
+              switch (index) {
+                case 0:
+                  Navigator.of(context)
+                      .pushNamed("/currency_selector", arguments: store);
+                  break;
+                case 1:
+                  //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
+                  break;
+                case 2:
+                  viewInExplorer();
+                  break;
+                case 3:
+                  disconnectWallet(context);
+                  break;
+              }
+            },
+          ); //iterate through indexes and get the next colour
+          //return _buildRow(context, element, color); //build the row widget
+        },
+      ),
+    );
+  }
+
+  viewInExplorer() async {
+    var url =
+        "https://ropsten.etherscan.io/address/" + store.state.ethereumAddress;
+    if (await canLaunch(url))
+      await launch(url);
+    else
+      // can't launch url, there is some error
+      throw "Could not launch $url";
+  }
+
+  disconnectWallet(context) async {
+    await store.resetWallet();
+    Navigator.pushNamedAndRemoveUntil(
+        context, "/", (Route<dynamic> route) => false);
   }
 }

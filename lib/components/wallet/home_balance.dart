@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
@@ -165,8 +166,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                 margin: EdgeInsets.only(left: 40, right: 40),
                 child: FlatButton(
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40.0),
-                      side: BorderSide(color: Color(0xfff6e9d3))),
+                      borderRadius: BorderRadius.circular(56.0),
+                      side: BorderSide(color: HermezColors.mediumOrange)),
                   onPressed: () {
                     Clipboard.setData(ClipboardData(
                         text: widget.arguments.store.state.txLevel ==
@@ -178,22 +179,44 @@ class _HomeBalanceState extends State<HomeBalance> {
                       content: Text("Copied"),
                     ));
                   },
-                  padding: EdgeInsets.all(20.0),
+                  padding: EdgeInsets.only(
+                      left: 20.0, right: 20.0, top: 12.0, bottom: 12.0),
                   color: HermezColors.mediumOrange,
-                  textColor: Color(0xff7a7c89),
+                  textColor: HermezColors.steel,
                   child: Text(
                       widget != null &&
                               widget.arguments != null &&
                               widget.arguments.address != null
                           ? (widget.arguments.store.state.txLevel ==
                                   TransactionLevel.LEVEL1
-                              ? widget.arguments.address
-                              : "hez:" + widget.arguments.address)
+                              ? "0x" +
+                                      AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
+                                          .toUpperCase() +
+                                      " ･･･ " +
+                                      widget.arguments.address
+                                          .substring(
+                                              widget.arguments.address.length -
+                                                  5,
+                                              widget.arguments.address.length)
+                                          .toUpperCase() ??
+                                  ""
+                              : "hez:" +
+                                      "0x" +
+                                      AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
+                                          .toUpperCase() +
+                                      " ･･･ " +
+                                      widget.arguments.address
+                                          .substring(
+                                              widget.arguments.address.length -
+                                                  5,
+                                              widget.arguments.address.length)
+                                          .toUpperCase() ??
+                                  "")
                           : "",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Color(0xff7a7c89),
+                        color: HermezColors.steel,
                         fontSize: 16,
                         fontFamily: 'ModernEra',
                         fontWeight: FontWeight.w500,

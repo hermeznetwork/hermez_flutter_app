@@ -96,10 +96,9 @@ class WalletAccountDetailsPage extends HookWidget {
                     ])),
             SizedBox(height: 10),
             Text(
-                (double.parse(arguments.element.balance) / pow(10, 18))
-                        .toString() +
-                    " " +
-                    arguments.element.token.symbol,
+                formatAmount(
+                    double.parse(arguments.element.balance) / pow(10, 18),
+                    arguments.element.token.symbol),
                 style: TextStyle(
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w500,
@@ -233,6 +232,20 @@ class WalletAccountDetailsPage extends HookWidget {
                 ),
           SizedBox(width: 20.0),
         ]);
+  }
+
+  String formatAmount(double amount, String symbol) {
+    double resultValue = 0;
+    String result = "";
+    String locale = "";
+    locale = 'eu';
+    if (amount != null) {
+      double value = amount;
+      resultValue = resultValue + value;
+    }
+    result =
+        NumberFormat.currency(locale: locale, symbol: symbol).format(amount);
+    return result;
   }
 
   String accountBalance() {

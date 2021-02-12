@@ -67,7 +67,11 @@ class AccountRow extends StatelessWidget {
                   children: <Widget>[
                     Container(
                       child: Text(
-                        accountBalance(),
+                        formatAmount(
+                            currencyFirst
+                                ? (this.price * this.amount)
+                                : this.amount,
+                            currencyFirst ? defaultCurrency : this.symbol),
                         style: TextStyle(
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,
@@ -81,9 +85,9 @@ class AccountRow extends StatelessWidget {
                         : Container(
                             padding: EdgeInsets.only(top: 15.0),
                             child: Text(
-                              currencyFirst
-                                  ? this.amount.toString() + " " + this.symbol
-                                  : this.price,
+                              formatAmount(
+                                  currencyFirst ? this.amount : this.price,
+                                  this.symbol),
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
                                   color: HermezColors.blueyGreyTwo,
@@ -97,32 +101,23 @@ class AccountRow extends StatelessWidget {
         ));
   }
 
-  String accountBalance() {
-    double accountAmount =
-        currencyFirst ? (this.price * this.amount) : this.amount;
-
-    /*.toStringAsFixed(2) +
-        " " +
-        this.defaultCurrency
-        : this.amount.toString() + " " + this.symbol*/
-
+  String formatAmount(double amount, String symbol) {
     double resultValue = 0;
     String result = "";
-    String locale = "";
-    String symbol = "";
-    if (currencyFirst) {
-      symbol = defaultCurrency;
-    } else {
-      symbol = this.symbol;
+    String locale = "eu";
+    if (symbol == "EUR") {
+      locale = 'eu';
+      symbol = '€';
+    } else if (symbol == "USD") {
+      locale = 'en';
+      symbol = '\$';
     }
-    locale = 'eu';
-    if (accountAmount != null) {
-      double value = accountAmount;
+    if (amount != null) {
+      double value = amount;
       resultValue = resultValue + value;
     }
-    //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
-    result = NumberFormat.currency(locale: locale, symbol: symbol)
-        .format(accountAmount);
+    result =
+        NumberFormat.currency(locale: locale, symbol: symbol).format(amount);
     return result;
   }
 }

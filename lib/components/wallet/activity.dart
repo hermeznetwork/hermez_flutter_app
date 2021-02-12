@@ -58,13 +58,24 @@ class _ActivityState extends State<Activity> {
               ),
             );
           } else {
-            if (snapshot.hasData) {
+            if (snapshot.hasData && snapshot.data.length > 0) {
               return buildActivityList(snapshot.data);
             } else {
-              return Container(
-                color: Colors.white,
-                child: Center(
-                  child: Text('There is no data'),
+              return Expanded(
+                child: Container(
+                  padding: const EdgeInsets.only(
+                      left: 60.0, right: 60.0, top: 50.0, bottom: 50.0),
+                  color: Colors.white,
+                  child: Text(
+                    'Account transactions will appear here.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: HermezColors.blueyGrey,
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               );
             }
