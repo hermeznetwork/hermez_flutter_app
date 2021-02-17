@@ -13,7 +13,8 @@ import 'package:web_socket_channel/io.dart';
 
 Future<List<SingleChildCloneableWidget>> createProviders(
     AppConfigParams params) async {
-  final client = Web3Client(params.web3HttpUrl, Client(), socketConnector: () {
+  final client = Web3Client(params.web3HttpUrl, Client(),
+      enableBackgroundIsolate: true, socketConnector: () {
     return IOWebSocketChannel.connect(params.web3RdpUrl).cast<String>();
   });
 

@@ -259,6 +259,10 @@ class ContractService implements IContractService {
     );
   }
 
+  Future<int> getNetworkId() {
+    return client.getNetworkId();
+  }
+
   Future<EtherAmount> getGasPrice() async {
     //double gasPrice = await _apiEthGasStationClient().getGasPrice();
     //return EtherAmount.fromUnitAndValue(

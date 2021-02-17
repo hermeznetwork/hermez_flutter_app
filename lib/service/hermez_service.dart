@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:hermez/service/network/api_exchange_rate_client.dart';
 import 'package:hermez/service/network/model/rates_request.dart';
@@ -45,8 +46,8 @@ abstract class IHermezService {
   Future<Transaction> getPoolTransactionById(String transactionId);
   Future<List<Token>> getTokens();
   Future<Token> getTokenById(int tokenId);
-  Future<bool> deposit(
-      BigInt amount, String hezEthereumAddress, Token token, String babyJubJub,
+  Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
+      String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
   Future<void> withdraw(BigInt amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
@@ -80,6 +81,8 @@ class HermezService implements IHermezService {
       String bjj, String signature) async {
     final response = await api.postCreateAccountAuthorization(
         addresses.getHermezAddress(ethereumAddress.hex), bjj, signature);
+    String body = response.body;
+    Map result = json.decode(body);
     return response.statusCode == 200;
   }
 
@@ -195,10 +198,11 @@ class HermezService implements IHermezService {
   /// @param {Number} gasMultiplier - Optional gas multiplier
   /// @returns {Promise} transaction parameters
   @override
-  Future<bool> deposit(
-      BigInt amount, String hezEthereumAddress, Token token, String babyJubJub,
+  Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
+      String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    return tx.deposit(amount, hezEthereumAddress, token, babyJubJub, client);
+    return tx.deposit(
+        amount, hezEthereumAddress, token, babyJubJub, client, privateKey);
   }
 
   @override

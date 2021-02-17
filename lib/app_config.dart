@@ -1,16 +1,19 @@
 class AppConfig {
   AppConfig() {
     params['dev'] = AppConfigParams(
-        "http://192.168.250.102:8545",
-        "ws://192.168.250.102:8545",
+        //"http://192.168.250.102:8545",
+        //"ws://192.168.250.102:8545",
+        "http://192.168.1.134:8545",
+        "ws://192.168.1.134:8545",
         "167.71.59.190:4010",
         "api.exchangeratesapi.io",
         "http://api-ropsten.etherscan.io/api",
         "B697CBT5AUE1PUSUGFXZUIFVBFG8G7889D",
-        "ethgasstation.info", {
-      "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
-      "0x5060b60cb8Bd1C94B7ADEF4134555CDa7B45c461" // TargaryenCoin
-    });
+        "ethgasstation.info",
+        {
+          "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
+          "0x5060b60cb8Bd1C94B7ADEF4134555CDa7B45c461" // TargaryenCoin
+        });
 
     params['ropsten'] = AppConfigParams(
         "https://ropsten.infura.io/v3/e2d8687b60b944d58adc96485cbab18c",

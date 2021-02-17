@@ -8,12 +8,14 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
 import 'package:hermez_plugin/tx_utils.dart';
+import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'wallet_state.dart';
@@ -255,20 +257,20 @@ class WalletHandler {
           } catch (error) {
             throw error;
           }
-          //if (tokenBalance > BigInt.zero) {
-          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
-              web3.EtherUnit.wei, tokenBalance);
-          final account = Account(
-              accountIndex: "0",
-              balance: tokenAmount.getInWei.toString(),
-              bjj: "",
-              hezEthereumAddress: state.ethereumAddress,
-              itemId: 0,
-              nonce: 0,
-              token: token);
-          accounts.add(account);
-          //tokensBalance[token.symbol] = tokenBalance;
-          //}
+          if (tokenBalance > BigInt.zero) {
+            var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+                web3.EtherUnit.wei, tokenBalance);
+            final account = Account(
+                accountIndex: "0",
+                balance: tokenAmount.getInWei.toString(),
+                bjj: "",
+                hezEthereumAddress: state.ethereumAddress,
+                itemId: 0,
+                nonce: 0,
+                token: token);
+            accounts.add(account);
+            //tokensBalance[token.symbol] = tokenBalance;
+          }
         }
       }
 
@@ -315,9 +317,25 @@ class WalletHandler {
     return _hermezService.getRecommendedFee();
   }
 
+  Future<bool> authorizeAccountCreation() async {
+    final hermezPrivateKey = await _addressService
+        .getHermezPrivateKey(await _configurationService.getPrivateKey());
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hexToByte = hexToBytes(hermezPrivateKey);
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+    final signature = await hermezWallet.signCreateAccountAuthorization(
+        BigInt.from(await _contractService.getNetworkId()).toRadixString(16),
+        state.ethereumPrivateKey);
+    return _hermezService.authorizeAccountCreation(
+        web3.EthereumAddress.fromHex(state.ethereumAddress),
+        hermezWallet.publicKeyBase64,
+        signature);
+  }
+
   Future<bool> deposit(BigInt amount, Account account) {
-    return _hermezService.deposit(
-        amount, state.ethereumAddress, account.token, state.hermezPublicKeyHex);
+    return _hermezService.deposit(amount, state.ethereumAddress, account.token,
+        state.hermezPublicKeyHex, state.ethereumPrivateKey);
   }
 
   Future<void> withdraw(BigInt amount, Account account, Exit exit,

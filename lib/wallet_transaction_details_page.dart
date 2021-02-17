@@ -304,6 +304,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         {
           final amountDeposit =
               getTokenAmountBigInt(widget.arguments.amount, 18);
+
+          final accounts = await widget.arguments.wallet.getAccounts();
+
+          if (accounts.length == 0 || accounts[0] == null) {
+            await widget.arguments.wallet.authorizeAccountCreation();
+          }
+
           return await widget.arguments.wallet
               .deposit(amountDeposit, widget.arguments.account);
         }

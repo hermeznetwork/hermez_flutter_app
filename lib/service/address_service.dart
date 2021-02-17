@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:hermez/constants.dart';
 import 'package:hermez/service/configuration_service.dart';
@@ -38,93 +40,12 @@ class AddressService implements IAddressService {
   @override
   Future<bool> setupFromMnemonic(String mnemonic) async {
     final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
-    //final privateKey = getPrivateKey(cryptMnemonic);
-    final privateKey =
-        "451c81d2f92dc77ca53fad01d225becc169f3c3480c7f0fdcc77b6c86f342e03";
-    final privateKeybuf = privateKey.codeUnits;
-    print(privateKeybuf);
-    final privateKeyBuffer = [
-      251,
-      91,
-      139,
-      155,
-      180,
-      41,
-      31,
-      201,
-      43,
-      184,
-      125,
-      185,
-      163,
-      250,
-      143,
-      219,
-      158,
-      10,
-      187,
-      8,
-      159,
-      82,
-      212,
-      201,
-      152,
-      70,
-      204,
-      95,
-      2,
-      26,
-      31,
-      181
-    ];
+    final privateKey = getPrivateKey(cryptMnemonic);
     final hermezPrivateKey = await getHermezPrivateKey(privateKey);
     final ethereumAddress = await getEthereumAddress(privateKey);
     final hermezAddress = await getHermezAddress(privateKey);
     final babyJubJubHex = await getBabyJubJubHex(privateKey);
     final babyJubJubBase64 = await getBabyJubJubBase64(privateKey);
-
-    //final hermezAddress =
-    //    'hez:0x4294cE558F2Eb6ca4C3191AeD502cF0c625AE995';
-    //const hermezEthereumAddressError = '0x4294cE558F2Eb6ca4C3191AeD502cF0c625AE995'
-    /*final hashedSignatureBuffer = Uint8List.fromList([
-      10,
-      147,
-      192,
-      202,
-      232,
-      207,
-      65,
-      134,
-      114,
-      147,
-      167,
-      10,
-      140,
-      18,
-      111,
-      145,
-      163,
-      133,
-      85,
-      250,
-      191,
-      58,
-      146,
-      129,
-      0,
-      79,
-      4,
-      238,
-      153,
-      79,
-      151,
-      219
-    ]);*/
-    //const privateKeyError = Buffer.from([10, 147, 192, 202, 232, 207, 65, 134, 114, 147, 167, 10, 140, 18, 111, 145, 163, 133, 85, 250, 191, 58, 146, 129, 0, 79, 4, 238, 153, 79, 151])
-    //const wallet = new HermezWallet(privateKey, hermezEthereumAddress)
-
-    /*final hermezWallet = HermezWallet(
-        Uint8ArrayUtils.uint8ListfromString(hermezPrivateKey), hermezAddress);*/
 
     await _configService.setMnemonic(cryptMnemonic);
     await _configService.setPrivateKey(privateKey);
@@ -170,15 +91,12 @@ class AddressService implements IAddressService {
   @override
   Future<String> getHermezPrivateKey(String privateKey) async {
     final private = EthPrivateKey.fromHex(privateKey);
-    print(private.privateKey);
     final signature =
-        await private.sign(Uint8ArrayUtils.uint8ListfromString(AUTH_MESSAGE));
-    print(signature);
-    final hashedSignatureBuffer = keccak256(signature);
-    print(hashedSignatureBuffer);
-    String hermezPrivateKey =
-        Uint8ArrayUtils.uint8ListToString(hashedSignatureBuffer);
-    print("hermez private key: $hermezPrivateKey");
+        await private.signPersonalMessage(ascii.encode(AUTH_MESSAGE));
+    final hashedSignatureBuffer =
+        keccakAscii(bytesToHex(signature, include0x: true));
+    final hermezPrivateKey = bytesToHex(hashedSignatureBuffer);
+    print("hermez private key 2: $hermezPrivateKey");
     return hermezPrivateKey;
   }
 
