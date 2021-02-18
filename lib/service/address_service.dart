@@ -104,8 +104,8 @@ class AddressService implements IAddressService {
   Future<String> getBabyJubJubHex(String privateKey) async {
     final hermezPrivateKey = await getHermezPrivateKey(privateKey);
     final hermezAddress = await getHermezAddress(privateKey);
-    final hermezWallet = HermezWallet(
-        Uint8ArrayUtils.uint8ListfromString(hermezPrivateKey), hermezAddress);
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final babyJubJubHex = hermezWallet.publicKeyCompressedHex;
     print("babyjubjub hex: $babyJubJubHex");
     return babyJubJubHex;

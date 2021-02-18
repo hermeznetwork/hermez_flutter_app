@@ -318,10 +318,8 @@ class WalletHandler {
   }
 
   Future<bool> authorizeAccountCreation() async {
-    final hermezPrivateKey = await _addressService
-        .getHermezPrivateKey(await _configurationService.getPrivateKey());
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
-    final hexToByte = hexToBytes(hermezPrivateKey);
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final signature = await hermezWallet.signCreateAccountAuthorization(
