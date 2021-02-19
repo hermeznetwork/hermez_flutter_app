@@ -6,7 +6,6 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hd_key.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/hermez_wallet.dart';
-import 'package:hermez_plugin/utils/uint8_list_utils.dart';
 import "package:hex/hex.dart";
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/crypto.dart';
@@ -115,8 +114,8 @@ class AddressService implements IAddressService {
   Future<String> getBabyJubJubBase64(String privateKey) async {
     final hermezPrivateKey = await getHermezPrivateKey(privateKey);
     final hermezAddress = await getHermezAddress(privateKey);
-    final hermezWallet = HermezWallet(
-        Uint8ArrayUtils.uint8ListfromString(hermezPrivateKey), hermezAddress);
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final babyJubJubBase64 = hermezWallet.publicKeyBase64;
     print("babyjubjub base64: $babyJubJubBase64");
     return babyJubJubBase64;
