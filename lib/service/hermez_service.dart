@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:hermez/service/network/api_exchange_rate_client.dart';
 import 'package:hermez/service/network/model/rates_request.dart';
@@ -59,12 +58,10 @@ abstract class IHermezService {
 }
 
 class HermezService implements IHermezService {
-  String _baseUrl;
   final web3.Web3Client client;
   String _exchangeUrl;
   IConfigurationService _configService;
-  HermezService(
-      this._baseUrl, this.client, this._exchangeUrl, this._configService);
+  HermezService(this.client, this._exchangeUrl, this._configService);
 
   ApiExchangeRateClient _apiExchangeRateClient() =>
       ApiExchangeRateClient(_exchangeUrl);
@@ -81,9 +78,11 @@ class HermezService implements IHermezService {
       String bjj, String signature) async {
     final response = await api.postCreateAccountAuthorization(
         addresses.getHermezAddress(ethereumAddress.hex), bjj, signature);
-    String body = response.body;
-    Map result = json.decode(body);
-    return response.statusCode == 200;
+    if (response != null) {
+      return response.statusCode == 200;
+    } else {
+      return false;
+    }
   }
 
   @override

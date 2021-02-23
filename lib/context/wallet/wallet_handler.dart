@@ -8,6 +8,7 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
@@ -318,17 +319,24 @@ class WalletHandler {
   }
 
   Future<bool> authorizeAccountCreation() async {
+    final ethereumPrivateKey = await _configurationService.getPrivateKey();
+    final ethereumAddress = await _configurationService.getEthereumAddress();
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
+    final chainId = getCurrentEnvironment().chainId;
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    final signature = await hermezWallet.signCreateAccountAuthorization(
-        BigInt.from(await _contractService.getNetworkId()).toRadixString(16),
-        state.ethereumPrivateKey);
-    return _hermezService.authorizeAccountCreation(
-        web3.EthereumAddress.fromHex(state.ethereumAddress),
-        hermezWallet.publicKeyBase64,
-        signature);
+    final createAccountAuth =
+        await _hermezService.getCreateAccountAuthorization(
+            web3.EthereumAddress.fromHex(ethereumAddress));
+    if (createAccountAuth == null) {
+      final signature = await hermezWallet.signCreateAccountAuthorization(
+          BigInt.from(chainId).toRadixString(16), ethereumPrivateKey);
+      return _hermezService.authorizeAccountCreation(
+          web3.EthereumAddress.fromHex(ethereumAddress),
+          hermezWallet.publicKeyBase64,
+          signature);
+    }
   }
 
   Future<bool> deposit(BigInt amount, Account account) {

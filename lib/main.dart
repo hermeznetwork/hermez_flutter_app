@@ -4,12 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:hermez/app_config.dart';
 import 'package:hermez/router.dart';
 import 'package:hermez/services_provider.dart';
+import 'package:hermez_plugin/environment.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   // bootstrapping;
   WidgetsFlutterBinding.ensureInitialized();
-  final stores = await createProviders(AppConfig().params["dev"]);
+
+  setEnvironment('rinkeby');
+
+  final stores =
+      await createProviders(AppConfig().params["dev"], getCurrentEnvironment());
 
   runApp(MainApp(stores));
 }
