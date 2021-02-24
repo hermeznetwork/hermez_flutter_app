@@ -28,8 +28,8 @@ class AppConfig {
     });
 
     params['rinkeby'] = AppConfigParams(
-        "https://ropsten.infura.io/v3/e2d8687b60b944d58adc96485cbab18c",
-        "wss://ropsten.infura.io/ws/v3/e2d8687b60b944d58adc96485cbab18c",
+        "https://rinkeby.infura.io/v3/e2d8687b60b944d58adc96485cbab18c",
+        "wss://rinkeby.infura.io/ws/v3/e2d8687b60b944d58adc96485cbab18c",
         "167.71.59.190:4010",
         "api.exchangeratesapi.io",
         "http://api-ropsten.etherscan.io/api",

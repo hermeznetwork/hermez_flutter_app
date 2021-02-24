@@ -339,9 +339,13 @@ class WalletHandler {
     }
   }
 
-  Future<bool> deposit(BigInt amount, Account account) {
+  Future<bool> deposit(BigInt amount, Account account) async {
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.deposit(amount, state.ethereumAddress, account.token,
-        state.hermezPublicKeyHex, state.ethereumPrivateKey);
+        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
   }
 
   Future<void> withdraw(BigInt amount, Account account, Exit exit,

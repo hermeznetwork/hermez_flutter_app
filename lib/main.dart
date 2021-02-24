@@ -11,7 +11,7 @@ void main() async {
   // bootstrapping;
   WidgetsFlutterBinding.ensureInitialized();
 
-  setEnvironment('rinkeby');
+  setEnvironment('local');
 
   final stores =
       await createProviders(AppConfig().params["dev"], getCurrentEnvironment());

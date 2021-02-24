@@ -6,6 +6,7 @@ import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/api.dart' as api;
 import 'package:hermez_plugin/api.dart';
 import 'package:hermez_plugin/constants.dart';
+import 'package:hermez_plugin/hermez_compressed_amount.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/coordinator.dart';
@@ -200,8 +201,8 @@ class HermezService implements IHermezService {
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    return tx.deposit(
-        amount, hezEthereumAddress, token, babyJubJub, client, privateKey);
+    return tx.deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
+        hezEthereumAddress, token, babyJubJub, client, privateKey);
   }
 
   @override
