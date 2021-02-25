@@ -129,9 +129,8 @@ class HermezService implements IHermezService {
   @override
   Future<List<ForgedTransaction>> getForgedTransactions(
       ForgedTransactionsRequest request) async {
-    final response = await api.getTransactions(request.ethereumAddress,
-        [request.tokenId], request.batchNum, request.accountIndex,
-        fromItem: request.fromItem);
+    final response = await api.getTransactions(
+        accountIndex: request.accountIndex, fromItem: request.fromItem);
     return response;
   }
 
@@ -202,7 +201,8 @@ class HermezService implements IHermezService {
       String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
     return tx.deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
-        hezEthereumAddress, token, babyJubJub, client, privateKey);
+        hezEthereumAddress, token, babyJubJub, client, privateKey,
+        gasMultiplier: gasMultiplier);
   }
 
   @override

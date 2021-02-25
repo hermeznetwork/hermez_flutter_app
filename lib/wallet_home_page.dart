@@ -88,7 +88,7 @@ class WalletHomePage extends HookWidget {
       body: PageView(
         controller: controller,
         children: _children,
-        onPageChanged: (index) => {print(index)},
+        onPageChanged: (index) => {},
       ),
     );
   }

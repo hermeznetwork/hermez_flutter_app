@@ -302,17 +302,19 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     switch (widget.arguments.transactionType) {
       case TransactionType.DEPOSIT:
         {
+          // check getCreateAccountAuth
+
           final amountDeposit =
               getTokenAmountBigInt(widget.arguments.amount, 18);
 
           final accounts = await widget.arguments.wallet.getAccounts();
 
-          if (accounts.length == 0 || accounts[0] == null) {
+          if (accounts == null || accounts.length == 0) {
             await widget.arguments.wallet.authorizeAccountCreation();
           }
 
           return await widget.arguments.wallet
-              .deposit(amountDeposit, widget.arguments.account);
+              .deposit(amountDeposit, widget.arguments.account.token);
         }
         break;
       case TransactionType.FORCEEXIT:

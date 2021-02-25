@@ -1,6 +1,7 @@
-import 'package:hermez/model/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/model/wallet.dart';
+
 import 'context/wallet/wallet_handler.dart';
 import 'context/wallet/wallet_provider.dart';
 
@@ -27,9 +28,7 @@ class WalletActivityPage extends HookWidget {
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text(title),
-        elevation: 0),
+      appBar: AppBar(title: Text(title), elevation: 0),
       body: Column(
         children: <Widget>[
           buildCurrencyList(),
@@ -46,15 +45,14 @@ class WalletActivityPage extends HookWidget {
           child: ListView.builder(
               shrinkWrap: true,
               itemCount: WalletDefaultCurrency.values.length,
-              padding:
-              const EdgeInsets.all(16.0), //add some padding to make it look good
+              padding: const EdgeInsets.all(
+                  16.0), //add some padding to make it look good
               itemBuilder: (context, i) {
                 //item builder returns a row for each index i=0,1,2,3,4
                 // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
                 // final index = i ~/ 2; //get the actual index excluding dividers.
                 final index = i;
-                print(index);
 
                 dynamic element = WalletDefaultCurrency.values.elementAt(index);
                 //final MaterialColor color = _colors[index %
@@ -63,31 +61,34 @@ class WalletActivityPage extends HookWidget {
                     title: Align(
                       alignment: Alignment.centerLeft,
                       child: Container(
-                        padding: EdgeInsets.only(left:5.0, top: 30.0, bottom: 30.0),
-                        child: Text(element.toString().split(".").last,
-                          style: TextStyle(fontFamily: 'ModernEra',
+                        padding:
+                            EdgeInsets.only(left: 5.0, top: 30.0, bottom: 30.0),
+                        child: Text(
+                          element.toString().split(".").last,
+                          style: TextStyle(
+                              fontFamily: 'ModernEra',
                               fontWeight: FontWeight.w800,
-                              fontSize: 16)
-                          ,textAlign: TextAlign.left,
+                              fontSize: 16),
+                          textAlign: TextAlign.left,
                         ),
                       ),
                     ),
-                    trailing: store.state.defaultCurrency == element ? Container(
-                        padding: EdgeInsets.only(right:10.0, top: 10.0,),
-                        child:  Icon(Icons.check)) : null,
-                    onTap: ()  {
+                    trailing: store.state.defaultCurrency == element
+                        ? Container(
+                            padding: EdgeInsets.only(
+                              right: 10.0,
+                              top: 10.0,
+                            ),
+                            child: Icon(Icons.check))
+                        : null,
+                    onTap: () {
                       store.updateDefaultCurrency(element);
                     }
-                  //store.fetchOwnBalance() = Wallet();
-                  //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));,
-                );
+                    //store.fetchOwnBalance() = Wallet();
+                    //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));,
+                    );
                 //return _buildRow(); //build the row widget
-              })
-      ),
+              })),
     );
   }
 }
-
-
-
-

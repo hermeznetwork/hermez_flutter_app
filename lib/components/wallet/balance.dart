@@ -150,7 +150,6 @@ class Balance extends StatelessWidget {
 
                 // final index = i ~/ 2; //get the actual index excluding dividers.
                 final index = i;
-                print(index);
                 final MaterialColor color = _colors[index %
                     _colors
                         .length]; //iterate through indexes and get the next colour

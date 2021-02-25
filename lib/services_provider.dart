@@ -14,9 +14,9 @@ import 'package:web_socket_channel/io.dart';
 
 Future<List<SingleChildCloneableWidget>> createProviders(
     AppConfigParams params, EnvParams hermezParams) async {
-  final client = Web3Client('http://' + hermezParams.baseWeb3Url, Client(),
+  final client = Web3Client(hermezParams.baseWeb3Url, Client(),
       enableBackgroundIsolate: true, socketConnector: () {
-    return IOWebSocketChannel.connect('wss://' + hermezParams.baseWeb3Url)
+    return IOWebSocketChannel.connect(hermezParams.baseWeb3RdpUrl)
         .cast<String>();
   });
 

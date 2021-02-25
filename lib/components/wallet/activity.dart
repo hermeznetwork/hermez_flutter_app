@@ -8,6 +8,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/forged_transaction.dart';
 import 'package:intl/intl.dart';
 
 import '../../wallet_transaction_details_page.dart';
@@ -99,18 +100,54 @@ class _ActivityState extends State<Activity> {
           itemBuilder: (context, i) {
             var title = "";
             var subtitle = "";
-            LinkedHashMap event = dataList.elementAt(i);
-            var type = event['type'];
+            dynamic element = dataList.elementAt(i);
+            var type = 'type';
             var txType;
-            var status = event['status'];
-            var timestamp = event['timestamp'];
-            var txHash = event['txHash'];
-            var addressFrom = event['from'];
-            var addressTo = event['to'];
+            var status = 'status';
+            var timestamp = 0;
+            var txHash = 'txHash';
+            var addressFrom = 'from';
+            var addressTo = 'to';
+            var value = '0';
+            if (element.runtimeType == LinkedHashMap) {
+              LinkedHashMap event = element;
+              type = event['type'];
+              status = event['status'];
+              timestamp = event['timestamp'];
+              txHash = event['txHash'];
+              addressFrom = event['from'];
+              addressTo = event['to'];
+              value = event['value'];
+            } else if (element.runtimeType == ForgedTransaction) {
+              ForgedTransaction transaction = element;
+              if (transaction.type == "CreateAccountDeposit" ||
+                  transaction.type == "Deposit") {
+                type = "DEPOSIT";
+                value = transaction.l1info.depositAmount.toString();
+                if (transaction.l1info.depositAmountSuccess == true) {
+                  status = "CONFIRMED";
+                }
+              } else if (transaction.type == "Exit" ||
+                  transaction.type == "ForceExit") {
+                type = "WITHDRAW";
+                value = transaction.amount.toString();
+              } else if (transaction.type == "Transfer") {
+                value = transaction.amount.toString();
+                if (transaction.fromAccountIndex ==
+                    widget.arguments.account.accountIndex) {
+                  type = "SEND";
+                } else if (transaction.toAccountIndex ==
+                    widget.arguments.account.accountIndex) {
+                  type = "RECEIVE";
+                }
+              } else {
+                txHash = transaction.id;
+              }
+              txHash = transaction.id;
+            }
             final String currency =
                 widget.arguments.defaultCurrency.toString().split('.').last;
 
-            var value = event['value'];
             var amount = double.parse(value) / pow(10, 18);
             /*EtherAmount.fromUnitAndValue(
                   EtherUnit.wei, ));*/
@@ -260,13 +297,8 @@ class _ActivityState extends State<Activity> {
   }
 
   Future<List<dynamic>> fetchTransactions() async {
-    if (widget.arguments.account.token.symbol == "ETH") {
-      return await widget.arguments.store.getTransactionsByAddress(
-          widget.arguments.store.state.ethereumAddress);
-    } else {
-      return await widget.arguments.store.getTransferEventsByAddress(
-          widget.arguments.store.state.ethereumAddress);
-    }
+    return await widget.arguments.store.getTransactionsByAddress(
+        widget.arguments.store.state.ethereumAddress, widget.arguments.account);
   }
 
   // takes in an object and color and returns a circle avatar with first letter and required color

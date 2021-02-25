@@ -133,7 +133,6 @@ class WalletAccountSelectorPage extends HookWidget {
 
             // final index = i ~/ 2; //get the actual index excluding dividers.
             final index = i;
-            print(index);
             final Account account = _accounts[index];
 
             final String currency = arguments.store.state.defaultCurrency

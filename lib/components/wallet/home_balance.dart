@@ -448,7 +448,6 @@ class _HomeBalanceState extends State<HomeBalance> {
 
             // final index = i ~/ 2; //get the actual index excluding dividers.
             final index = i;
-            print(index);
             final Account account = _accounts[index];
 
             final String currency = widget.arguments.store.state.defaultCurrency
@@ -494,7 +493,6 @@ class _HomeBalanceState extends State<HomeBalance> {
 
                       // final index = i ~/ 2; //get the actual index excluding dividers.
                       final index = i;
-                      print(index);
                       final Account account = _accounts[index];
 
                       final String currency = widget

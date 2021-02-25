@@ -65,7 +65,6 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
 
                 // final index = i ~/ 2; //get the actual index excluding dividers.
                 final index = i;
-                print(index);
 
                 dynamic element = WalletDefaultCurrency.values.elementAt(index);
                 //final MaterialColor color = _colors[index %

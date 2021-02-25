@@ -18,9 +18,8 @@ import 'context/wallet/wallet_handler.dart';
 class WalletAccountDetailsArguments {
   final Account element;
   WalletHandler store;
-  //final Color color;
 
-  WalletAccountDetailsArguments(this.element, this.store /*this.color*/);
+  WalletAccountDetailsArguments(this.element, this.store);
 }
 
 class WalletAccountDetailsPage extends HookWidget {

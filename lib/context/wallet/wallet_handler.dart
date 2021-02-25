@@ -8,10 +8,12 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
+import 'package:hermez_plugin/model/forged_transactions_request.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
@@ -282,8 +284,8 @@ class WalletHandler {
   }
 
   Future<List<Account>> getAccounts() async {
-    final accounts = await _hermezService.getAccounts(
-        web3.EthereumAddress.fromHex(state.ethereumAddress), [3, 87, 91]);
+    final accounts = await _hermezService
+        .getAccounts(web3.EthereumAddress.fromHex(state.ethereumAddress), []);
     return accounts;
   }
 
@@ -339,13 +341,14 @@ class WalletHandler {
     }
   }
 
-  Future<bool> deposit(BigInt amount, Account account) async {
+  Future<bool> deposit(BigInt amount, Token token) async {
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    return _hermezService.deposit(amount, state.ethereumAddress, account.token,
-        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
+    return _hermezService.deposit(amount, hermezAddress, token,
+        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey,
+        gasMultiplier: 3);
   }
 
   Future<void> withdraw(BigInt amount, Account account, Exit exit,
@@ -425,12 +428,24 @@ class WalletHandler {
     _store.dispatch(LevelUpdated(txLevel));
   }
 
-  Future<List<dynamic>> getTransferEventsByAddress(String address) {
-    return _explorerService.getTransferEventsByAccountAddress(address);
-  }
-
-  Future<List<dynamic>> getTransactionsByAddress(String address) {
-    return _explorerService.getTransactionsByAccountAddress(address);
+  Future<List<dynamic>> getTransactionsByAddress(
+      String address, Account account) async {
+    final level = await _configurationService.getLevelSelected();
+    if (level == TransactionLevel.LEVEL1) {
+      if (account.token.symbol == "ETH") {
+        return _explorerService.getTransactionsByAccountAddress(address);
+      } else {
+        return _explorerService.getTransferEventsByAccountAddress(address);
+      }
+    } else {
+      ForgedTransactionsRequest request = ForgedTransactionsRequest(
+          ethereumAddress: addresses.getHermezAddress(address),
+          accountIndex: account.accountIndex,
+          batchNum: account.token.ethereumBlockNum,
+          tokenId: account.token.id,
+          fromItem: 0);
+      return _hermezService.getForgedTransactions(request);
+    }
   }
 
   Future<void> resetWallet() async {
