@@ -347,15 +347,19 @@ class WalletHandler {
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.deposit(amount, hermezAddress, token,
-        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey,
-        gasMultiplier: 3);
+        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
   }
 
   Future<void> withdraw(BigInt amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+
     await getExit(account.accountIndex, null /*batchNum*/);
-    return _hermezService.withdraw(
-        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal);
+    return _hermezService.withdraw(amount, account, exit,
+        completeDelayedWithdrawal, instantWithdrawal, hermezWallet);
   }
 
   Future<void> forceExit(BigInt amount, Account account) {

@@ -49,9 +49,15 @@ abstract class IHermezService {
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
-  Future<void> withdraw(BigInt amount, Account account, Exit exit,
-      bool completeDelayedWithdrawal, bool instantWithdrawal,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
+  Future<void> withdraw(
+      BigInt amount,
+      Account account,
+      Exit exit,
+      bool completeDelayedWithdrawal,
+      bool instantWithdrawal,
+      HermezWallet wallet,
+      {int gasLimit = GAS_LIMIT,
+      int gasMultiplier = GAS_MULTIPLIER});
   Future<void> generateAndSendL2Tx(
       Transaction transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
@@ -200,31 +206,59 @@ class HermezService implements IHermezService {
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    return tx.deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
+    return tx.deposit(HermezCompressedAmount.compressAmount(amount),
         hezEthereumAddress, token, babyJubJub, client, privateKey,
-        gasMultiplier: gasMultiplier);
+        gasLimit: gasLimit, gasMultiplier: gasMultiplier);
   }
 
   @override
-  Future<void> withdraw(BigInt amount, Account account, Exit exit,
-      bool completeDelayedWithdrawal, bool instantWithdrawal,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
+  Future<void> withdraw(
+      BigInt amount,
+      Account account,
+      Exit exit,
+      bool completeDelayedWithdrawal,
+      bool instantWithdrawal,
+      HermezWallet wallet,
+      {int gasLimit = GAS_LIMIT,
+      int gasMultiplier = GAS_MULTIPLIER}) async {
     final withdrawalId = account.accountIndex + exit.merkleProof.root;
 
     if (!completeDelayedWithdrawal) {
-      tx.withdraw(
-          amount,
-          account.accountIndex,
-          account.token,
-          /*babyjubjub*/ null,
-          BigInt.from(exit.batchNum),
-          exit.merkleProof.siblings,
-          client);
+      try {
+        tx
+            .withdraw(
+                amount,
+                account.accountIndex,
+                account.token,
+                wallet.publicKeyCompressedHex,
+                BigInt.from(exit.batchNum),
+                exit.merkleProof.siblings,
+                client)
+            .then((value) => {
+                  if (instantWithdrawal)
+                    {
+                      //addPendingWithdraw(wallet.hermezEthereumAddress, withdrawalId);
+                    }
+                  else
+                    {
+                      /*addPendingDelayedWithdraw(
+          {'id': withdrawalId, 'instant': false, 'date': DateTime.now()});*/
+                    }
+                });
+      } catch (error) {
+        print(error);
+      }
     } else {
-      tx.delayedWithdraw(
-          /*wallet.hermezAddress*/ null,
-          account.token,
-          client);
+      try {
+        tx
+            .delayedWithdraw(
+                wallet.hermezEthereumAddress, account.token, client)
+            .then((value) => {
+                  //removePendingDelayedWithdraw(withdrawalId);
+                });
+      } catch (error) {
+        print(error);
+      }
     }
   }
 
