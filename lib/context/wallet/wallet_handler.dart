@@ -106,6 +106,14 @@ class WalletHandler {
     final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();
     _configurationService.setExchangeRatio(exchangeRatio);
     _store.dispatch(ExchangeRatioUpdated(exchangeRatio));
+
+    final address = await _configurationService.getEthereumAddress();
+    final createAccountAuth = await _hermezService
+        .getCreateAccountAuthorization(web3.EthereumAddress.fromHex(address));
+
+    if (createAccountAuth == null) {
+      await authorizeAccountCreation();
+    }
     //await this.fetchOwnBalance();
 
     /*
@@ -358,8 +366,14 @@ class WalletHandler {
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
 
     await getExit(account.accountIndex, null /*batchNum*/);
-    return _hermezService.withdraw(amount, account, exit,
-        completeDelayedWithdrawal, instantWithdrawal, hermezWallet);
+    return _hermezService.withdraw(
+        amount,
+        account,
+        exit,
+        completeDelayedWithdrawal,
+        instantWithdrawal,
+        hermezAddress,
+        hermezWallet.publicKeyCompressedHex);
   }
 
   Future<void> forceExit(BigInt amount, Account account) {
@@ -378,6 +392,14 @@ class WalletHandler {
   }
 
   Future<void> transfer(BigInt amount, Account from, Account to, fee) {
+    // generate L2 transaction
+    /*final l2TxTransfer = {
+      'from': infoAccountSender.accountIndex,
+      'to': hermezEthereumAddress2,
+      'amount': amountTransfer,
+      'fee': recommendedFee.createAccount
+    };*/
+
     Transaction transaction = Transaction(
         type: TxType.Transfer.toString(),
         fromAccountIndex: from.accountIndex,

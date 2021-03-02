@@ -55,7 +55,8 @@ abstract class IHermezService {
       Exit exit,
       bool completeDelayedWithdrawal,
       bool instantWithdrawal,
-      HermezWallet wallet,
+      String hezEthereumAddress,
+      String babyJubJub,
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER});
   Future<void> generateAndSendL2Tx(
@@ -218,7 +219,8 @@ class HermezService implements IHermezService {
       Exit exit,
       bool completeDelayedWithdrawal,
       bool instantWithdrawal,
-      HermezWallet wallet,
+      String hezEthereumAddress,
+      String babyJubJub,
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER}) async {
     final withdrawalId = account.accountIndex + exit.merkleProof.root;
@@ -226,14 +228,8 @@ class HermezService implements IHermezService {
     if (!completeDelayedWithdrawal) {
       try {
         tx
-            .withdraw(
-                amount,
-                account.accountIndex,
-                account.token,
-                wallet.publicKeyCompressedHex,
-                BigInt.from(exit.batchNum),
-                exit.merkleProof.siblings,
-                client)
+            .withdraw(amount, account.accountIndex, account.token, babyJubJub,
+                BigInt.from(exit.batchNum), exit.merkleProof.siblings, client)
             .then((value) => {
                   if (instantWithdrawal)
                     {
@@ -251,8 +247,7 @@ class HermezService implements IHermezService {
     } else {
       try {
         tx
-            .delayedWithdraw(
-                wallet.hermezEthereumAddress, account.token, client)
+            .delayedWithdraw(hezEthereumAddress, account.token, client)
             .then((value) => {
                   //removePendingDelayedWithdraw(withdrawalId);
                 });
