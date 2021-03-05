@@ -107,13 +107,13 @@ class WalletHandler {
     _configurationService.setExchangeRatio(exchangeRatio);
     _store.dispatch(ExchangeRatioUpdated(exchangeRatio));
 
-    final address = await _configurationService.getEthereumAddress();
+    /*final address = await _configurationService.getEthereumAddress();
     final createAccountAuth = await _hermezService
-        .getCreateAccountAuthorization(web3.EthereumAddress.fromHex(address));
+        .getCreateAccountAuthorization(web3.EthereumAddress.fromHex(address));*/
 
-    if (createAccountAuth == null) {
-      await authorizeAccountCreation();
-    }
+    //if (createAccountAuth == null) {
+    await authorizeAccountCreation();
+    //}
     //await this.fetchOwnBalance();
 
     /*
@@ -329,23 +329,26 @@ class WalletHandler {
   }
 
   Future<bool> authorizeAccountCreation() async {
-    final ethereumPrivateKey = await _configurationService.getPrivateKey();
     final ethereumAddress = await _configurationService.getEthereumAddress();
-    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
-    final hermezAddress = await _configurationService.getHermezAddress();
-    final chainId = getCurrentEnvironment().chainId;
-    final hermezWallet =
-        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final createAccountAuth =
         await _hermezService.getCreateAccountAuthorization(
             web3.EthereumAddress.fromHex(ethereumAddress));
-    if (createAccountAuth == null) {
+    if (createAccountAuth != null) {
+      final ethereumPrivateKey = await _configurationService.getPrivateKey();
+      final hermezPrivateKey =
+          await _configurationService.getHermezPrivateKey();
+      final hermezAddress = await _configurationService.getHermezAddress();
+      final chainId = getCurrentEnvironment().chainId;
+      final hermezWallet =
+          HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
       final signature = await hermezWallet.signCreateAccountAuthorization(
           BigInt.from(chainId).toRadixString(16), ethereumPrivateKey);
       return _hermezService.authorizeAccountCreation(
           web3.EthereumAddress.fromHex(ethereumAddress),
           hermezWallet.publicKeyBase64,
           signature);
+    } else {
+      return true;
     }
   }
 
