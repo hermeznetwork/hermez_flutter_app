@@ -30,4 +30,12 @@ class HermezColors {
   static const Color lightOrange = Color(0xfffaf4ea);
 
   static const Color green = Color(0xff219653);
+
+  static const Color statusOrange = Color(0xffd8853b);
+
+  static const Color statusOrangeBackground = Color(0xfff2994a);
+
+  static const Color statusRed = Color(0xffff4b40);
+
+  static const Color statusRedBackground = Color(0xffff4b40);
 }

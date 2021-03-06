@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
+import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -438,7 +439,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       child: RefreshIndicator(
         child: ListView.builder(
           shrinkWrap: true,
-          itemCount: _accounts.length,
+          itemCount: _accounts.length + _exits.length,
           //set the item count so that index won't be out of range
           padding: const EdgeInsets.all(16.0),
           //add some padding to make it look good
@@ -447,30 +448,56 @@ class _HomeBalanceState extends State<HomeBalance> {
             // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
             // final index = i ~/ 2; //get the actual index excluding dividers.
-            final index = i;
-            final Account account = _accounts[index];
 
-            final String currency = widget.arguments.store.state.defaultCurrency
-                .toString()
-                .split('.')
-                .last;
-            //final Color color = _colors[index %
-            //    _colors.length];
-            return AccountRow(
-                account.token.name,
-                account.token.symbol,
-                currency == "EUR"
-                    ? account.token.USD *
-                        widget.arguments.store.state.exchangeRatio
-                    : account.token.USD,
-                currency,
-                double.parse(account.balance) / pow(10, account.token.decimals),
-                false,
-                true, (token, amount) async {
-              Navigator.of(context).pushNamed("/account_details",
-                  arguments: WalletAccountDetailsArguments(
-                      account, widget.arguments.store));
-            }); //iterate through indexes and get the next colour
+            if (_exits.length > 0 && i < _exits.length) {
+              final index = i;
+              final Exit exit = _exits[index];
+
+              final String currency = widget
+                  .arguments.store.state.defaultCurrency
+                  .toString()
+                  .split('.')
+                  .last;
+
+              return WithdrawalRow(
+                  exit,
+                  2,
+                  currency,
+                  widget.arguments.store.state
+                      .exchangeRatio /* (token, amount) async {
+                Navigator.of(context).pushNamed("/account_details",
+                    arguments: WalletAccountDetailsArguments(
+                        account, widget.arguments.store));
+              }*/
+                  );
+            } else {
+              final index = i - _exits.length;
+              final Account account = _accounts[index];
+
+              final String currency = widget
+                  .arguments.store.state.defaultCurrency
+                  .toString()
+                  .split('.')
+                  .last;
+              //final Color color = _colors[index %
+              //    _colors.length];
+              return AccountRow(
+                  account.token.name,
+                  account.token.symbol,
+                  currency == "EUR"
+                      ? account.token.USD *
+                          widget.arguments.store.state.exchangeRatio
+                      : account.token.USD,
+                  currency,
+                  double.parse(account.balance) /
+                      pow(10, account.token.decimals),
+                  false,
+                  true, (token, amount) async {
+                Navigator.of(context).pushNamed("/account_details",
+                    arguments: WalletAccountDetailsArguments(
+                        account, widget.arguments.store));
+              }); //iterate through indexes and get the next colour
+            }
             //return _buildRow(context, element, color); //build the row widget
           },
         ),

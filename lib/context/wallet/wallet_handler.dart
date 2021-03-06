@@ -333,7 +333,7 @@ class WalletHandler {
     final createAccountAuth =
         await _hermezService.getCreateAccountAuthorization(
             web3.EthereumAddress.fromHex(ethereumAddress));
-    if (createAccountAuth != null) {
+    if (createAccountAuth == null) {
       final ethereumPrivateKey = await _configurationService.getPrivateKey();
       final hermezPrivateKey =
           await _configurationService.getHermezPrivateKey();
