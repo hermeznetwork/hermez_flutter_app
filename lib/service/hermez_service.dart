@@ -60,7 +60,7 @@ abstract class IHermezService {
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER});
   Future<void> generateAndSendL2Tx(
-      Transaction transaction, HermezWallet wallet, Token token);
+      Map transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
   Future<RecommendedFee> getRecommendedFee();
 }
@@ -137,7 +137,9 @@ class HermezService implements IHermezService {
   Future<List<ForgedTransaction>> getForgedTransactions(
       ForgedTransactionsRequest request) async {
     final response = await api.getTransactions(
-        accountIndex: request.accountIndex, fromItem: request.fromItem);
+        accountIndex: request.accountIndex,
+        fromItem: request.fromItem,
+        order: api.PaginationOrder.DESC);
     return response;
   }
 
@@ -155,7 +157,7 @@ class HermezService implements IHermezService {
 
   @override
   Future<void> generateAndSendL2Tx(
-      Transaction transaction, HermezWallet wallet, Token token) async {
+      Map transaction, HermezWallet wallet, Token token) async {
     tx.generateAndSendL2Tx(transaction, wallet, token);
   }
 
@@ -207,7 +209,7 @@ class HermezService implements IHermezService {
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    return tx.deposit(HermezCompressedAmount.compressAmount(amount),
+    return tx.deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
         hezEthereumAddress, token, babyJubJub, client, privateKey,
         gasLimit: gasLimit, gasMultiplier: gasMultiplier);
   }
@@ -230,15 +232,20 @@ class HermezService implements IHermezService {
         tx
             .withdraw(amount, account.accountIndex, account.token, babyJubJub,
                 BigInt.from(exit.batchNum), exit.merkleProof.siblings, client)
-            .then((value) => {
+            .then((value) async => {
                   if (instantWithdrawal)
                     {
-                      //addPendingWithdraw(wallet.hermezEthereumAddress, withdrawalId);
+                      _configService.addPendingWithdraw(
+                          hezEthereumAddress, withdrawalId)
                     }
                   else
                     {
-                      /*addPendingDelayedWithdraw(
-          {'id': withdrawalId, 'instant': false, 'date': DateTime.now()});*/
+                      _configService.addPendingDelayedWithdraw(
+                          await _configService.getHermezAddress(), {
+                        'id': withdrawalId,
+                        'instant': false,
+                        'date': DateTime.now()
+                      })
                     }
                 });
       } catch (error) {
@@ -248,8 +255,9 @@ class HermezService implements IHermezService {
       try {
         tx
             .delayedWithdraw(hezEthereumAddress, account.token, client)
-            .then((value) => {
-                  //removePendingDelayedWithdraw(withdrawalId);
+            .then((value) async => {
+                  _configService.removePendingDelayedWithdraw(
+                      await _configService.getHermezAddress(), withdrawalId)
                 });
       } catch (error) {
         print(error);

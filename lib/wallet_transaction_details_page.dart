@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
@@ -360,12 +362,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       default:
         {
           widget.arguments.wallet.transfer(
-              web3.EtherAmount.fromUnitAndValue(
+              widget.arguments.amount *
+                  pow(10, widget.arguments.account.token.decimals),
+              /*web3.EtherAmount.fromUnitAndValue(
                       web3.EtherUnit.wei,
                       (widget.arguments.amount *
-                              BigInt.from(10).pow(18).toDouble())
+                              BigInt.from(10)
+                                  .pow(widget.arguments.account.token.decimals)
+                                  .toDouble())
                           .toInt())
-                  .getInWei,
+                  .getInWei*/
               widget.arguments.account,
               widget.arguments.account,
               0);

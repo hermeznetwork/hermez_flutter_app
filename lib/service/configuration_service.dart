@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +25,13 @@ abstract class IConfigurationService {
   Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
   bool didSetupWallet();
+  void addPendingWithdraw(String hermezEthereumAddress, String pendingWithdraw);
+  void removePendingWithdraw(
+      String hermezEthereumAddress, String pendingWithdraw);
+  void addPendingDelayedWithdraw(
+      String hermezEthereumAddress, dynamic pendingDelayedWithdraw);
+  void removePendingDelayedWithdraw(
+      String hermezEthereumAddress, dynamic pendingDelayedWithdrawId);
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -150,5 +160,93 @@ class ConfigurationService implements IConfigurationService {
   @override
   bool didSetupWallet() {
     return _preferences.getBool("didSetupWallet") ?? false;
+  }
+
+  /// Adds a pendingWithdraw to the pendingWithdraw pool
+  /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was made
+  /// @param {string} pendingWithdraw - The pendingWithdraw to add to the pool
+  /// @returns {void}
+  @override
+  void addPendingWithdraw(
+      String hermezEthereumAddress, String pendingWithdraw) {
+    final pendingWithdrawPool =
+        json.decode(_preferences.getString(PENDING_WITHDRAWS_KEY));
+    final accountPendingWithdrawPool =
+        pendingWithdrawPool[hermezEthereumAddress];
+    final newAccountPendingWithdrawPool = accountPendingWithdrawPool == null
+        ? [pendingWithdraw]
+        : [...accountPendingWithdrawPool, pendingWithdraw];
+    final newPendingWithdrawPool = {
+      ...pendingWithdrawPool,
+      [hermezEthereumAddress]: newAccountPendingWithdrawPool
+    };
+
+    _preferences.setString(
+        PENDING_WITHDRAWS_KEY, json.encode(newPendingWithdrawPool));
+  }
+
+  /// Removes a pendingWithdraw from the pendingWithdraw pool
+  /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was originally made
+  /// @param {string} pendingWithdrawId - The pendingWithdraw identifier to remove from the pool
+  /// @returns {void}
+  void removePendingWithdraw(
+      String hermezEthereumAddress, String pendingWithdrawId) {
+    final pendingWithdrawPool =
+        json.decode(_preferences.getString(PENDING_WITHDRAWS_KEY));
+    final List accountPendingWithdrawPool =
+        pendingWithdrawPool[hermezEthereumAddress];
+    accountPendingWithdrawPool
+        .removeWhere((pendingWithdraw) => pendingWithdraw == pendingWithdrawId);
+
+    final newPendingWithdrawPool = {
+      ...pendingWithdrawPool,
+      [hermezEthereumAddress]: accountPendingWithdrawPool
+    };
+
+    _preferences.setString(
+        PENDING_WITHDRAWS_KEY, json.encode(newPendingWithdrawPool));
+  }
+
+  /// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
+  /// @param {dynamic} pendingDelayedWithdraw - The pendingDelayedWithdraw to add to the store
+  /// @returns {void}
+  void addPendingDelayedWithdraw(
+      String hermezEthereumAddress, dynamic pendingDelayedWithdraw) {
+    final pendingDelayedWithdrawStore =
+        json.decode(_preferences.getString(PENDING_DELAYED_WITHDRAWS_KEY));
+    final accountPendingDelayedWithdrawStore =
+        pendingDelayedWithdrawStore[hermezEthereumAddress];
+    final newAccountPendingDelayedWithdrawStore =
+        accountPendingDelayedWithdrawStore == null
+            ? [pendingDelayedWithdraw]
+            : [...accountPendingDelayedWithdrawStore, pendingDelayedWithdraw];
+    final newPendingDelayedWithdrawStore = {
+      ...pendingDelayedWithdrawStore,
+      [hermezEthereumAddress]: newAccountPendingDelayedWithdrawStore
+    };
+
+    _preferences.setString(PENDING_DELAYED_WITHDRAWS_KEY,
+        json.encode(newPendingDelayedWithdrawStore));
+  }
+
+  /// Removes a pendingDelayedWithdraw from the pendingDelayedWithdraw store
+  /// @param {string} pendingDelayedWithdrawId - The pendingDelayedWithdraw identifier to remove from the store
+  /// @returns {void}
+  void removePendingDelayedWithdraw(
+      String hermezEthereumAddress, dynamic pendingDelayedWithdrawId) {
+    final pendingDelayedWithdrawStore =
+        json.decode(_preferences.getString(PENDING_DELAYED_WITHDRAWS_KEY));
+    final List accountPendingDelayedWithdrawStore =
+        pendingDelayedWithdrawStore[hermezEthereumAddress];
+    accountPendingDelayedWithdrawStore.removeWhere((pendingDelayedWithdraw) =>
+        pendingDelayedWithdraw['id'] == pendingDelayedWithdrawId);
+
+    final newPendingDelayedWithdrawStore = {
+      ...pendingDelayedWithdrawStore,
+      [hermezEthereumAddress]: accountPendingDelayedWithdrawStore
+    };
+
+    _preferences.setString(PENDING_DELAYED_WITHDRAWS_KEY,
+        json.encode(newPendingDelayedWithdrawStore));
   }
 }

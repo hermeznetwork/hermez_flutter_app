@@ -50,7 +50,7 @@ class HomeBalance extends StatefulWidget {
 
 class _HomeBalanceState extends State<HomeBalance> {
   List<Account> _accounts;
-  List<Exit> _exits;
+  List<Exit> _exits = [];
 
   @override
   void initState() {

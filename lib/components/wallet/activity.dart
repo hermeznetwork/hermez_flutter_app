@@ -297,8 +297,23 @@ class _ActivityState extends State<Activity> {
   }
 
   Future<List<dynamic>> fetchTransactions() async {
-    return await widget.arguments.store.getTransactionsByAddress(
-        widget.arguments.store.state.ethereumAddress, widget.arguments.account);
+    //return await widget.arguments.store.getTransactionsByAddress(
+    //    widget.arguments.store.state.ethereumAddress, widget.arguments.account);
+  }
+
+  /// Fetches the transactions details for the specified account index
+  /// @param {string} accountIndex - Account index
+  /// @returns {void}
+  Future<List<dynamic>> fetchHistoryTransactions(
+      Account account, int fromItem) async {
+    await widget.arguments.store
+        .getTransactionsByAddress(
+            widget.arguments.store.state.ethereumAddress, account, fromItem)
+        .then((res) => {
+              //List<ForgedTransaction> transactions = res.transactions;
+              //transactions.remove
+              //res.transactions as ForgedTransaction = res.transactions.
+            });
   }
 
   // takes in an object and color and returns a circle avatar with first letter and required color

@@ -10,6 +10,7 @@ import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/environment.dart';
+import 'package:hermez_plugin/hermez_compressed_amount.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
@@ -17,7 +18,6 @@ import 'package:hermez_plugin/model/forged_transactions_request.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
-import 'package:hermez_plugin/tx_utils.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -384,17 +384,29 @@ class WalletHandler {
   }
 
   Future<void> exit(BigInt amount, Account account, BigInt fee) {
-    Transaction transaction = Transaction(
+    /*Transaction transaction = Transaction(
         type: TxType.Exit.toString(),
         fromAccountIndex: account.accountIndex,
         amount: amount.toInt(),
         fee: fee.toInt(),
-        nonce: account.nonce);
+        nonce: account.nonce);*/
+
+    final exitTx = {
+      'type': 'Exit',
+      'from': account.accountIndex,
+      //'to': account.accountIndex,
+      'toHezEthereumAddress': null,
+      'toBjj': null,
+      'amount': HermezCompressedAmount.compressAmount(amount.toDouble()),
+      'fee': fee.toDouble(),
+      'nonce': account.nonce
+    };
+
     _hermezService.generateAndSendL2Tx(
-        transaction, state.hermezWallet, account.token);
+        exitTx, state.hermezWallet, account.token);
   }
 
-  Future<void> transfer(BigInt amount, Account from, Account to, fee) {
+  Future<void> transfer(double amount, Account from, Account to, fee) async {
     // generate L2 transaction
     /*final l2TxTransfer = {
       'from': infoAccountSender.accountIndex,
@@ -402,17 +414,40 @@ class WalletHandler {
       'amount': amountTransfer,
       'fee': recommendedFee.createAccount
     };*/
+    /*const transferTx = {
+      from: 'hez:DAI:4444',
+      to: 'hez:DAI:1234',
+      toHezEthereumAddress: null,
+      toBjj: null,
+      amount: HermezCompressedAmount.compressAmount('3400000000'),
+      fee: 0.000003,
+      nonce: 2
+    }*/
 
-    Transaction transaction = Transaction(
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+
+    final transferTx = {
+      'type': 'Transfer',
+      'from': from.accountIndex,
+      'to': to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
+      'toBjj': null,
+      'amount': HermezCompressedAmount.compressAmount(amount),
+      'fee': fee.toDouble(),
+      'nonce': from.nonce
+    };
+
+    /*Transaction transaction = Transaction(
         type: TxType.Transfer.toString(),
         fromAccountIndex: from.accountIndex,
         toAccountIndex:
             to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
         amount: amount.toInt(),
         fee: fee.toInt(),
-        nonce: from.nonce);
-    _hermezService.generateAndSendL2Tx(
-        transaction, state.hermezWallet, from.token);
+        nonce: from.nonce);*/
+    _hermezService.generateAndSendL2Tx(transferTx, hermezWallet, from.token);
   }
 
   Future<bool> sendL2Transaction(Transaction transaction) async {
@@ -458,7 +493,7 @@ class WalletHandler {
   }
 
   Future<List<dynamic>> getTransactionsByAddress(
-      String address, Account account) async {
+      String address, Account account, int fromItem) async {
     final level = await _configurationService.getLevelSelected();
     if (level == TransactionLevel.LEVEL1) {
       if (account.token.symbol == "ETH") {
@@ -472,7 +507,7 @@ class WalletHandler {
           accountIndex: account.accountIndex,
           batchNum: account.token.ethereumBlockNum,
           tokenId: account.token.id,
-          fromItem: 0);
+          fromItem: fromItem);
       return _hermezService.getForgedTransactions(request);
     }
   }
