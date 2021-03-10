@@ -59,7 +59,7 @@ abstract class IHermezService {
       String babyJubJub,
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER});
-  Future<void> generateAndSendL2Tx(
+  Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
   Future<RecommendedFee> getRecommendedFee();
@@ -137,9 +137,8 @@ class HermezService implements IHermezService {
   Future<List<ForgedTransaction>> getForgedTransactions(
       ForgedTransactionsRequest request) async {
     final response = await api.getTransactions(
-        accountIndex: request.accountIndex,
-        fromItem: request.fromItem,
-        order: api.PaginationOrder.DESC);
+        accountIndex: request.accountIndex, fromItem: request.fromItem);
+    //order: api.PaginationOrder.DESC);
     return response;
   }
 
@@ -156,9 +155,10 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<void> generateAndSendL2Tx(
+  Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token) async {
-    tx.generateAndSendL2Tx(transaction, wallet, token);
+    final l2TxResult = tx.generateAndSendL2Tx(transaction, wallet, token);
+    return l2TxResult != null;
   }
 
   @override

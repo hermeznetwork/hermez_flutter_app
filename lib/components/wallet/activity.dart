@@ -297,8 +297,10 @@ class _ActivityState extends State<Activity> {
   }
 
   Future<List<dynamic>> fetchTransactions() async {
-    //return await widget.arguments.store.getTransactionsByAddress(
-    //    widget.arguments.store.state.ethereumAddress, widget.arguments.account);
+    return await widget.arguments.store.getTransactionsByAddress(
+        widget.arguments.store.state.ethereumAddress,
+        widget.arguments.account,
+        0);
   }
 
   /// Fetches the transactions details for the specified account index

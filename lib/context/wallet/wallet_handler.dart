@@ -291,9 +291,16 @@ class WalletHandler {
     return accounts;
   }
 
-  Future<List<Account>> getAccounts() async {
-    final accounts = await _hermezService
-        .getAccounts(web3.EthereumAddress.fromHex(state.ethereumAddress), []);
+  Future<List<Account>> getAccounts(
+      {String ethereumAddress, List<int> tokenIds}) async {
+    if (ethereumAddress == null) {
+      ethereumAddress = state.ethereumAddress;
+    }
+    if (tokenIds == null) {
+      tokenIds = [];
+    }
+    final accounts = await _hermezService.getAccounts(
+        web3.EthereumAddress.fromHex(ethereumAddress), tokenIds);
     return accounts;
   }
 
@@ -328,12 +335,17 @@ class WalletHandler {
     return _hermezService.getRecommendedFee();
   }
 
-  Future<bool> authorizeAccountCreation() async {
-    final ethereumAddress = await _configurationService.getEthereumAddress();
+  Future<bool> getCreateAccountAuthorization(String ethereumAddress) async {
     final createAccountAuth =
         await _hermezService.getCreateAccountAuthorization(
             web3.EthereumAddress.fromHex(ethereumAddress));
-    if (createAccountAuth == null) {
+    return createAccountAuth != null;
+  }
+
+  Future<bool> authorizeAccountCreation() async {
+    final ethereumAddress = await _configurationService.getEthereumAddress();
+    final accountCreated = await getCreateAccountAuthorization(ethereumAddress);
+    if (!accountCreated) {
       final ethereumPrivateKey = await _configurationService.getPrivateKey();
       final hermezPrivateKey =
           await _configurationService.getHermezPrivateKey();
@@ -406,48 +418,24 @@ class WalletHandler {
         exitTx, state.hermezWallet, account.token);
   }
 
-  Future<void> transfer(double amount, Account from, Account to, fee) async {
-    // generate L2 transaction
-    /*final l2TxTransfer = {
-      'from': infoAccountSender.accountIndex,
-      'to': hermezEthereumAddress2,
-      'amount': amountTransfer,
-      'fee': recommendedFee.createAccount
-    };*/
-    /*const transferTx = {
-      from: 'hez:DAI:4444',
-      to: 'hez:DAI:1234',
-      toHezEthereumAddress: null,
-      toBjj: null,
-      amount: HermezCompressedAmount.compressAmount('3400000000'),
-      fee: 0.000003,
-      nonce: 2
-    }*/
-
+  Future<bool> transfer(
+      double amount, Account from, Account to, double fee) async {
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
 
     final transferTx = {
-      'type': 'Transfer',
       'from': from.accountIndex,
       'to': to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
       'toBjj': null,
       'amount': HermezCompressedAmount.compressAmount(amount),
-      'fee': fee.toDouble(),
+      'fee': fee,
       'nonce': from.nonce
     };
 
-    /*Transaction transaction = Transaction(
-        type: TxType.Transfer.toString(),
-        fromAccountIndex: from.accountIndex,
-        toAccountIndex:
-            to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
-        amount: amount.toInt(),
-        fee: fee.toInt(),
-        nonce: from.nonce);*/
-    _hermezService.generateAndSendL2Tx(transferTx, hermezWallet, from.token);
+    return _hermezService.generateAndSendL2Tx(
+        transferTx, hermezWallet, from.token);
   }
 
   Future<bool> sendL2Transaction(Transaction transaction) async {

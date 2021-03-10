@@ -347,7 +347,8 @@ class _HomeBalanceState extends State<HomeBalance> {
           _accounts != null &&
                   _accounts.length > 0 &&
                   widget.arguments.store.state.txLevel ==
-                      TransactionLevel.LEVEL2
+                      TransactionLevel.LEVEL2 &&
+                  _exits.length == 0
               ? Expanded(
                   child:
                       // takes in an object and color and returns a circle avatar with first letter and required color
@@ -384,7 +385,8 @@ class _HomeBalanceState extends State<HomeBalance> {
           _accounts != null &&
                   _accounts.length > 0 &&
                   widget.arguments.store.state.txLevel ==
-                      TransactionLevel.LEVEL2
+                      TransactionLevel.LEVEL2 &&
+                  _exits.length == 0
               ? SizedBox(width: 20.0)
               : Container(),
         ]);

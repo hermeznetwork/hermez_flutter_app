@@ -38,27 +38,28 @@ class AccountRow extends StatelessWidget {
                   children: <Widget>[
                     Container(
                       alignment: Alignment.centerLeft,
-                      child: Text(this.name,
-                          style: TextStyle(
-                            color: HermezColors.blackTwo,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
-                          )),
+                      child: Text(
+                        simplified ? this.name : this.symbol,
+                        style: TextStyle(
+                          color: HermezColors.blackTwo,
+                          fontSize: 16,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                     simplified
                         ? Container()
                         : Container(
-                            alignment: Alignment.centerLeft,
                             padding: EdgeInsets.only(top: 15.0),
-                            child: Text(
-                              this.symbol,
-                              style: TextStyle(
-                                color: HermezColors.blueyGreyTwo,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          )
+                            alignment: Alignment.centerLeft,
+                            child: Text(this.name,
+                                style: TextStyle(
+                                  color: HermezColors.blueyGreyTwo,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                )),
+                          ),
                   ],
                 ),
               ),
@@ -67,14 +68,18 @@ class AccountRow extends StatelessWidget {
                   children: <Widget>[
                     Container(
                       child: Text(
-                        formatAmount(
-                            currencyFirst
-                                ? (this.price * this.amount)
-                                : this.amount,
-                            currencyFirst ? defaultCurrency : this.symbol),
+                        simplified
+                            ? formatAmount(
+                                currencyFirst
+                                    ? (this.price * this.amount)
+                                    : this.amount,
+                                currencyFirst ? defaultCurrency : this.symbol)
+                            : formatAmount(
+                                currencyFirst ? this.amount : this.price,
+                                this.symbol),
                         style: TextStyle(
                             fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             color: HermezColors.blackTwo,
                             fontSize: 16),
                         textAlign: TextAlign.right,
@@ -86,12 +91,17 @@ class AccountRow extends StatelessWidget {
                             padding: EdgeInsets.only(top: 15.0),
                             child: Text(
                               formatAmount(
-                                  currencyFirst ? this.amount : this.price,
-                                  this.symbol),
+                                  currencyFirst
+                                      ? (this.price * this.amount)
+                                      : this.amount,
+                                  currencyFirst
+                                      ? defaultCurrency
+                                      : this.symbol),
                               style: TextStyle(
-                                  fontFamily: 'ModernEra',
-                                  color: HermezColors.blueyGreyTwo,
-                                  fontWeight: FontWeight.w500),
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w500,
+                                color: HermezColors.blueyGreyTwo,
+                              ),
                               textAlign: TextAlign.right,
                             ),
                           ),

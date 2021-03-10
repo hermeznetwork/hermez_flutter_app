@@ -5,7 +5,9 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -298,6 +300,25 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     }
   }
 
+  /// Calculates the fee for the transaction.
+  /// It takes the appropriate recomended fee in USD from the coordinator
+  /// and converts it to token value.
+  /// @param {Object} fees - The recommended Fee object returned by the Coordinator
+  /// @param {Boolean} iExistingAccount - Whether it's a existingAccount transfer
+  /// @returns {number} - Transaction fee
+  double getFee(RecommendedFee fees, bool isExistingAccount) {
+    if (widget.arguments.account.token.USD == 0) {
+      return 0;
+    }
+
+    final fee = (isExistingAccount ||
+            widget.arguments.transactionType == TransactionType.EXIT)
+        ? fees.existingAccount
+        : fees.createAccount;
+
+    return fee / widget.arguments.account.token.USD;
+  }
+
   /// Bubbles up an event to send the transaction accordingly
   /// @returns {void}
   Future<bool> handleFormSubmit() async {
@@ -361,20 +382,31 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         break;
       default:
         {
-          widget.arguments.wallet.transfer(
+          final ethereumAddress =
+              getEthereumAddress(widget.arguments.addressTo);
+          final accounts = await widget.arguments.wallet.getAccounts(
+              ethereumAddress: ethereumAddress,
+              tokenIds: [widget.arguments.account.token.id]);
+          final accountCreated = await widget.arguments.wallet
+              .getCreateAccountAuthorization(ethereumAddress);
+          var receiverAccount;
+          final fees = await widget.arguments.wallet.fetchFees();
+          var transactionFee;
+          if (accounts != null && accounts.length > 0 && accountCreated) {
+            receiverAccount = accounts[0];
+            transactionFee = getFee(fees, receiverAccount != null);
+          } else {
+            receiverAccount =
+                Account(hezEthereumAddress: widget.arguments.addressTo);
+            transactionFee = getFee(fees, false);
+          }
+
+          return await widget.arguments.wallet.transfer(
               widget.arguments.amount *
                   pow(10, widget.arguments.account.token.decimals),
-              /*web3.EtherAmount.fromUnitAndValue(
-                      web3.EtherUnit.wei,
-                      (widget.arguments.amount *
-                              BigInt.from(10)
-                                  .pow(widget.arguments.account.token.decimals)
-                                  .toDouble())
-                          .toInt())
-                  .getInWei*/
               widget.arguments.account,
-              widget.arguments.account,
-              0);
+              receiverAccount,
+              transactionFee);
         }
     }
   }
