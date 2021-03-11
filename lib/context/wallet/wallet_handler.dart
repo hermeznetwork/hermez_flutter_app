@@ -18,6 +18,7 @@ import 'package:hermez_plugin/model/forged_transactions_request.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
+import 'package:hermez_plugin/tx_pool.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -113,6 +114,8 @@ class WalletHandler {
 
     //if (createAccountAuth == null) {
     await authorizeAccountCreation();
+
+    initializeTransactionPool();
     //}
     //await this.fetchOwnBalance();
 
