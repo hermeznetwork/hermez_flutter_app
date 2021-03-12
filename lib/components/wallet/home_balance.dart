@@ -51,6 +51,7 @@ class HomeBalance extends StatefulWidget {
 class _HomeBalanceState extends State<HomeBalance> {
   List<Account> _accounts;
   List<Exit> _exits = [];
+  List<dynamic> _poolTxs;
 
   @override
   void initState() {
@@ -65,6 +66,7 @@ class _HomeBalanceState extends State<HomeBalance> {
   Future<List<Account>> fetchAccounts() async {
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
       _exits = await fetchExits();
+      _poolTxs = await fetchPoolTransactions();
       return widget.arguments.store.getAccounts();
     } else {
       return widget.arguments.store.getL1Accounts();
@@ -73,6 +75,10 @@ class _HomeBalanceState extends State<HomeBalance> {
 
   Future<List<Exit>> fetchExits() {
     return widget.arguments.store.getExits();
+  }
+
+  Future<List<dynamic>> fetchPoolTransactions() {
+    return widget.arguments.store.getPoolTransactions();
   }
 
   @override

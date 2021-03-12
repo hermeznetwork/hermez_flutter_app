@@ -225,26 +225,32 @@ class HermezService implements IHermezService {
       String babyJubJub,
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER}) async {
-    final withdrawalId = account.accountIndex + exit.merkleProof.root;
+    final withdrawalId = account.accountIndex + exit.batchNum.toString();
 
     if (!completeDelayedWithdrawal) {
       try {
         tx
             .withdraw(amount, account.accountIndex, account.token, babyJubJub,
-                BigInt.from(exit.batchNum), exit.merkleProof.siblings, client)
+                BigInt.from(exit.batchNum), exit.merkleProof.siblings, client,
+                isInstant: instantWithdrawal)
             .then((value) async => {
                   if (instantWithdrawal)
                     {
-                      _configService.addPendingWithdraw(
-                          hezEthereumAddress, withdrawalId)
+                      _configService.addPendingWithdraw({
+                        'hermezEthereumAddress': hezEthereumAddress,
+                        'id': withdrawalId,
+                        'amount': amount,
+                        'token': account.token
+                      })
                     }
                   else
                     {
-                      _configService.addPendingDelayedWithdraw(
-                          await _configService.getHermezAddress(), {
+                      _configService.addPendingDelayedWithdraw({
                         'id': withdrawalId,
                         'instant': false,
-                        'date': DateTime.now()
+                        'date': DateTime.now(),
+                        'amount': amount,
+                        'token': account.token
                       })
                     }
                 });
@@ -253,12 +259,9 @@ class HermezService implements IHermezService {
       }
     } else {
       try {
-        tx
-            .delayedWithdraw(hezEthereumAddress, account.token, client)
-            .then((value) async => {
-                  _configService.removePendingDelayedWithdraw(
-                      await _configService.getHermezAddress(), withdrawalId)
-                });
+        tx.delayedWithdraw(hezEthereumAddress, account.token, client).then(
+            (value) async =>
+                {_configService.removePendingDelayedWithdraw(withdrawalId)});
       } catch (error) {
         print(error);
       }

@@ -369,15 +369,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         break;
       case TransactionType.EXIT:
         {
+          final fees = await widget.arguments.wallet.fetchFees();
+          final transactionFee = getFee(fees, true);
+
           widget.arguments.wallet.exit(
-              web3.EtherAmount.fromUnitAndValue(
-                      web3.EtherUnit.wei,
-                      (widget.arguments.amount *
-                              BigInt.from(10).pow(18).toDouble())
-                          .toInt())
-                  .getInWei,
+              widget.arguments.amount *
+                  pow(10, widget.arguments.account.token.decimals),
               widget.arguments.account,
-              BigInt.zero);
+              transactionFee);
         }
         break;
       default:

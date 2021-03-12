@@ -25,3 +25,7 @@ const ACCOUNT_AUTH_SIGNATURE_KEY = 'accountAuthSignature';
 const PRIVACY_POLICY_URL = 'https://hermez.io/privacy-policy';
 
 const TERMS_OF_SERVICE_URL = 'https://hermez.io/terms-of-service';
+
+const STORAGE_VERSION_KEY = 'hermezWalletStorageVersion';
+
+const STORAGE_VERSION = 1;

@@ -25,13 +25,10 @@ abstract class IConfigurationService {
   Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
   bool didSetupWallet();
-  void addPendingWithdraw(String hermezEthereumAddress, String pendingWithdraw);
-  void removePendingWithdraw(
-      String hermezEthereumAddress, String pendingWithdraw);
-  void addPendingDelayedWithdraw(
-      String hermezEthereumAddress, dynamic pendingDelayedWithdraw);
-  void removePendingDelayedWithdraw(
-      String hermezEthereumAddress, dynamic pendingDelayedWithdrawId);
+  void addPendingWithdraw(dynamic pendingWithdraw);
+  void removePendingWithdraw(String pendingWithdrawId);
+  void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
+  void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -167,8 +164,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} pendingWithdraw - The pendingWithdraw to add to the pool
   /// @returns {void}
   @override
-  void addPendingWithdraw(
-      String hermezEthereumAddress, String pendingWithdraw) {
+  void addPendingWithdraw(dynamic pendingWithdraw) {
     final pendingWithdrawPool =
         json.decode(_preferences.getString(PENDING_WITHDRAWS_KEY));
     final accountPendingWithdrawPool =
@@ -189,8 +185,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was originally made
   /// @param {string} pendingWithdrawId - The pendingWithdraw identifier to remove from the pool
   /// @returns {void}
-  void removePendingWithdraw(
-      String hermezEthereumAddress, String pendingWithdrawId) {
+  void removePendingWithdraw(String pendingWithdrawId) {
     final pendingWithdrawPool =
         json.decode(_preferences.getString(PENDING_WITHDRAWS_KEY));
     final List accountPendingWithdrawPool =
@@ -210,8 +205,7 @@ class ConfigurationService implements IConfigurationService {
   /// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
   /// @param {dynamic} pendingDelayedWithdraw - The pendingDelayedWithdraw to add to the store
   /// @returns {void}
-  void addPendingDelayedWithdraw(
-      String hermezEthereumAddress, dynamic pendingDelayedWithdraw) {
+  void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw) {
     final pendingDelayedWithdrawStore =
         json.decode(_preferences.getString(PENDING_DELAYED_WITHDRAWS_KEY));
     final accountPendingDelayedWithdrawStore =
@@ -232,8 +226,7 @@ class ConfigurationService implements IConfigurationService {
   /// Removes a pendingDelayedWithdraw from the pendingDelayedWithdraw store
   /// @param {string} pendingDelayedWithdrawId - The pendingDelayedWithdraw identifier to remove from the store
   /// @returns {void}
-  void removePendingDelayedWithdraw(
-      String hermezEthereumAddress, dynamic pendingDelayedWithdrawId) {
+  void removePendingDelayedWithdraw(String pendingDelayedWithdrawId) {
     final pendingDelayedWithdrawStore =
         json.decode(_preferences.getString(PENDING_DELAYED_WITHDRAWS_KEY));
     final List accountPendingDelayedWithdrawStore =

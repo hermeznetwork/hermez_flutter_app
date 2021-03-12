@@ -18,7 +18,7 @@ import 'package:hermez_plugin/model/forged_transactions_request.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
-import 'package:hermez_plugin/tx_pool.dart';
+import 'package:hermez_plugin/tx_pool.dart' as tx_pool;
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -114,8 +114,6 @@ class WalletHandler {
 
     //if (createAccountAuth == null) {
     await authorizeAccountCreation();
-
-    initializeTransactionPool();
     //}
     //await this.fetchOwnBalance();
 
@@ -398,27 +396,19 @@ class WalletHandler {
     _hermezService.forceExit(amount, account);
   }
 
-  Future<void> exit(BigInt amount, Account account, BigInt fee) {
-    /*Transaction transaction = Transaction(
-        type: TxType.Exit.toString(),
-        fromAccountIndex: account.accountIndex,
-        amount: amount.toInt(),
-        fee: fee.toInt(),
-        nonce: account.nonce);*/
+  Future<void> exit(double amount, Account account, double fee) async {
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
 
     final exitTx = {
-      'type': 'Exit',
       'from': account.accountIndex,
-      //'to': account.accountIndex,
-      'toHezEthereumAddress': null,
-      'toBjj': null,
-      'amount': HermezCompressedAmount.compressAmount(amount.toDouble()),
-      'fee': fee.toDouble(),
-      'nonce': account.nonce
+      'amount': HermezCompressedAmount.compressAmount(amount),
+      'fee': fee,
     };
 
-    _hermezService.generateAndSendL2Tx(
-        exitTx, state.hermezWallet, account.token);
+    _hermezService.generateAndSendL2Tx(exitTx, hermezWallet, account.token);
   }
 
   Future<bool> transfer(
@@ -439,6 +429,15 @@ class WalletHandler {
 
     return _hermezService.generateAndSendL2Tx(
         transferTx, hermezWallet, from.token);
+  }
+
+  Future<List<dynamic>> getPoolTransactions() async {
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+    return tx_pool.getPoolTransactions(
+        null, hermezWallet.publicKeyCompressedHex);
   }
 
   Future<bool> sendL2Transaction(Transaction transaction) async {
