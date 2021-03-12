@@ -236,22 +236,22 @@ class HermezService implements IHermezService {
             .then((value) async => {
                   if (instantWithdrawal)
                     {
-                      _configService.addPendingWithdraw({
+                      /*_configService.addPendingWithdraw({
                         'hermezEthereumAddress': hezEthereumAddress,
                         'id': withdrawalId,
                         'amount': amount,
                         'token': account.token
-                      })
+                      })*/
                     }
                   else
                     {
-                      _configService.addPendingDelayedWithdraw({
+                      /*_configService.addPendingDelayedWithdraw({
                         'id': withdrawalId,
                         'instant': false,
                         'date': DateTime.now(),
                         'amount': amount,
                         'token': account.token
-                      })
+                      })*/
                     }
                 });
       } catch (error) {
@@ -259,9 +259,11 @@ class HermezService implements IHermezService {
       }
     } else {
       try {
-        tx.delayedWithdraw(hezEthereumAddress, account.token, client).then(
-            (value) async =>
-                {_configService.removePendingDelayedWithdraw(withdrawalId)});
+        tx
+            .delayedWithdraw(hezEthereumAddress, account.token, client)
+            .then((value) async => {
+                  /*_configService.removePendingDelayedWithdraw(withdrawalId)*/
+                });
       } catch (error) {
         print(error);
       }

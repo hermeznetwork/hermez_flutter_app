@@ -366,7 +366,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                             Navigator.of(context).pushNamed("/account_selector",
                                 arguments: AccountSelectorArguments(
                                   //widget.arguments.store.state.txLevel,
-                                  TransactionType.WITHDRAW,
+                                  TransactionType.EXIT,
                                   widget.arguments.store,
                                 ));
                           },

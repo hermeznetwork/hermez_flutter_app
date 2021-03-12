@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,10 +22,10 @@ abstract class IConfigurationService {
   Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
   bool didSetupWallet();
-  void addPendingWithdraw(dynamic pendingWithdraw);
+  /*void addPendingWithdraw(dynamic pendingWithdraw);
   void removePendingWithdraw(String pendingWithdrawId);
   void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
-  void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
+  void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);*/
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -163,7 +160,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was made
   /// @param {string} pendingWithdraw - The pendingWithdraw to add to the pool
   /// @returns {void}
-  @override
+  /*@override
   void addPendingWithdraw(dynamic pendingWithdraw) {
     final pendingWithdrawPool =
         json.decode(_preferences.getString(PENDING_WITHDRAWS_KEY));
@@ -241,5 +238,5 @@ class ConfigurationService implements IConfigurationService {
 
     _preferences.setString(PENDING_DELAYED_WITHDRAWS_KEY,
         json.encode(newPendingDelayedWithdrawStore));
-  }
+  }*/
 }
