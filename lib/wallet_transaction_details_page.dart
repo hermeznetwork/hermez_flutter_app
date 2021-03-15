@@ -7,7 +7,9 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
+import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -21,6 +23,8 @@ class TransactionDetailsArguments {
   final WalletDefaultCurrency preferredCurrency;
   final List<int> fiatExchangeRates;
   final Account account;
+  final Token token;
+  final Exit exit;
   final String addressFrom;
   final String addressTo;
   final double amount;
@@ -38,6 +42,8 @@ class TransactionDetailsArguments {
       this.preferredCurrency,
       this.fiatExchangeRates,
       this.account,
+      this.token,
+      this.exit,
       this.addressFrom,
       this.addressTo,
       this.amount,
@@ -203,6 +209,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         .toString()
         .split('.')
         .last;
+
     // returns a row with the desired properties
     return Container(
         color: HermezColors.lightOrange,
@@ -216,13 +223,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     currency == "EUR"
                         ? "€" +
                             (widget.arguments.amount *
-                                    (widget.arguments.account.token.USD *
+                                    (widget.arguments.token.USD *
                                         widget.arguments.wallet.state
                                             .exchangeRatio))
                                 .toStringAsFixed(2)
                         : '\$' +
                             (widget.arguments.amount *
-                                    widget.arguments.account.token.USD)
+                                    widget.arguments.token.USD)
                                 .toStringAsFixed(2),
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -237,7 +244,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 child: Text(
                   (widget.arguments.amount).toString() +
                       " " +
-                      widget.arguments.account.token.symbol,
+                      widget.arguments.token.symbol,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: HermezColors.steel,
@@ -307,7 +314,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   /// @param {Boolean} iExistingAccount - Whether it's a existingAccount transfer
   /// @returns {number} - Transaction fee
   double getFee(RecommendedFee fees, bool isExistingAccount) {
-    if (widget.arguments.account.token.USD == 0) {
+    if (widget.arguments.token.USD == 0) {
       return 0;
     }
 
@@ -316,7 +323,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         ? fees.existingAccount
         : fees.createAccount;
 
-    return fee / widget.arguments.account.token.USD;
+    return fee / widget.arguments.token.USD;
   }
 
   /// Bubbles up an event to send the transaction accordingly
@@ -337,7 +344,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           }
 
           return await widget.arguments.wallet
-              .deposit(amountDeposit, widget.arguments.account.token);
+              .deposit(amountDeposit, widget.arguments.token);
         }
         break;
       case TransactionType.FORCEEXIT:
@@ -354,15 +361,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         break;
       case TransactionType.WITHDRAW:
         {
-          widget.arguments.wallet.withdraw(
-              web3.EtherAmount.fromUnitAndValue(
-                      web3.EtherUnit.wei,
-                      (widget.arguments.amount *
-                              BigInt.from(10).pow(18).toDouble())
-                          .toInt())
-                  .getInWei,
+          return await widget.arguments.wallet.withdraw(
+              widget.arguments.amount *
+                  pow(10, widget.arguments.token.decimals),
               widget.arguments.account,
-              /*widget.arguments.exit*/ null,
+              widget.arguments.exit,
               widget.arguments.completeDelayedWithdrawal,
               widget.arguments.instantWithdrawal);
         }
@@ -372,9 +375,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           final fees = await widget.arguments.wallet.fetchFees();
           final transactionFee = getFee(fees, true);
 
-          widget.arguments.wallet.exit(
+          return await widget.arguments.wallet.exit(
               widget.arguments.amount *
-                  pow(10, widget.arguments.account.token.decimals),
+                  pow(10, widget.arguments.token.decimals),
               widget.arguments.account,
               transactionFee);
         }
@@ -385,7 +388,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               getEthereumAddress(widget.arguments.addressTo);
           final accounts = await widget.arguments.wallet.getAccounts(
               ethereumAddress: ethereumAddress,
-              tokenIds: [widget.arguments.account.token.id]);
+              tokenIds: [widget.arguments.token.id]);
           final accountCreated = await widget.arguments.wallet
               .getCreateAccountAuthorization(ethereumAddress);
           var receiverAccount;
@@ -402,7 +405,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
           return await widget.arguments.wallet.transfer(
               widget.arguments.amount *
-                  pow(10, widget.arguments.account.token.decimals),
+                  pow(10, widget.arguments.token.decimals),
               widget.arguments.account,
               receiverAccount,
               transactionFee);

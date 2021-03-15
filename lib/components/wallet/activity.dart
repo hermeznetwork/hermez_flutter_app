@@ -266,6 +266,7 @@ class _ActivityState extends State<Activity> {
                           transactionType: txType,
                           status: TransactionStatus.CONFIRMED,
                           account: widget.arguments.account,
+                          token: widget.arguments.account.token,
                           /*widget.arguments.store,
                             widget.arguments.amountType,
                             widget.arguments.account,*/

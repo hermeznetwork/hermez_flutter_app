@@ -374,29 +374,28 @@ class WalletHandler {
         hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
   }
 
-  Future<void> withdraw(BigInt amount, Account account, Exit exit,
+  Future<bool> withdraw(double amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-
-    await getExit(account.accountIndex, null /*batchNum*/);
     return _hermezService.withdraw(
-        amount,
+        BigInt.from(amount),
         account,
         exit,
         completeDelayedWithdrawal,
         instantWithdrawal,
         hermezAddress,
-        hermezWallet.publicKeyCompressedHex);
+        hermezWallet.publicKeyCompressedHex,
+        state.ethereumPrivateKey);
   }
 
   Future<void> forceExit(BigInt amount, Account account) {
     _hermezService.forceExit(amount, account);
   }
 
-  Future<void> exit(double amount, Account account, double fee) async {
+  Future<bool> exit(double amount, Account account, double fee) async {
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
@@ -408,7 +407,8 @@ class WalletHandler {
       'fee': fee,
     };
 
-    _hermezService.generateAndSendL2Tx(exitTx, hermezWallet, account.token);
+    return _hermezService.generateAndSendL2Tx(
+        exitTx, hermezWallet, account.token);
   }
 
   Future<bool> transfer(

@@ -57,6 +57,7 @@ abstract class IHermezService {
       bool instantWithdrawal,
       String hezEthereumAddress,
       String babyJubJub,
+      String privateKey,
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER});
   Future<bool> generateAndSendL2Tx(
@@ -215,7 +216,7 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<void> withdraw(
+  Future<bool> withdraw(
       BigInt amount,
       Account account,
       Exit exit,
@@ -223,18 +224,28 @@ class HermezService implements IHermezService {
       bool instantWithdrawal,
       String hezEthereumAddress,
       String babyJubJub,
+      String privateKey,
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER}) async {
-    final withdrawalId = account.accountIndex + exit.batchNum.toString();
+    final withdrawalId = exit.accountIndex + exit.batchNum.toString();
 
-    if (!completeDelayedWithdrawal) {
+    if (completeDelayedWithdrawal == null ||
+        completeDelayedWithdrawal == false) {
       try {
-        tx
-            .withdraw(amount, account.accountIndex, account.token, babyJubJub,
-                BigInt.from(exit.batchNum), exit.merkleProof.siblings, client,
-                isInstant: instantWithdrawal)
+        bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
+        await tx
+            .withdraw(
+                amount,
+                exit.accountIndex,
+                exit.token,
+                babyJubJub,
+                BigInt.from(exit.batchNum),
+                exit.merkleProof.siblings,
+                client,
+                privateKey,
+                isInstant: isIntant)
             .then((value) async => {
-                  if (instantWithdrawal)
+                  if (isIntant)
                     {
                       /*_configService.addPendingWithdraw({
                         'hermezEthereumAddress': hezEthereumAddress,
@@ -254,6 +265,7 @@ class HermezService implements IHermezService {
                       })*/
                     }
                 });
+        return true;
       } catch (error) {
         print(error);
       }

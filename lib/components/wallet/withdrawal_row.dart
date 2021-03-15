@@ -6,15 +6,14 @@ import 'package:hermez_plugin/model/exit.dart';
 import 'package:intl/intl.dart';
 
 class WithdrawalRow extends StatelessWidget {
-  WithdrawalRow(this.exit, this.step, this.currency, this.exchangeRatio
-      /*this.onPressed*/
-      );
+  WithdrawalRow(
+      this.exit, this.step, this.currency, this.exchangeRatio, this.onPressed);
 
   final Exit exit;
   final int step;
   final String currency;
   final double exchangeRatio;
-  //final void Function(String token, String amount) onPressed;
+  final void Function() onPressed;
 
   Widget build(BuildContext context) {
     String status = "";
@@ -196,7 +195,9 @@ class WithdrawalRow extends StatelessWidget {
                           borderRadius: BorderRadius.circular(100.0),
                           side: BorderSide(color: Color(0xffe75a2b)),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          this.onPressed();
+                        },
                         padding: EdgeInsets.only(
                             top: 13.0, bottom: 13.0, right: 24.0, left: 24.0),
                         color: Color(0xffe75a2b),

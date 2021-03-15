@@ -71,6 +71,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
                 transactionType: widget.arguments.amountType,
                 status: TransactionStatus.DRAFT,
                 account: widget.arguments.account,
+                token: widget.arguments.account.token,
                 amount: amount,
                 addressFrom: widget.arguments.account.hezEthereumAddress,
                 addressTo: address,

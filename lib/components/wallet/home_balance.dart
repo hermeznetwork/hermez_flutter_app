@@ -18,6 +18,8 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:intl/intl.dart';
 
+import '../../wallet_transaction_details_page.dart';
+
 class HomeBalanceArguments {
   final String address;
   final BigInt ethBalance;
@@ -468,16 +470,22 @@ class _HomeBalanceState extends State<HomeBalance> {
                   .last;
 
               return WithdrawalRow(
-                  exit,
-                  2,
-                  currency,
-                  widget.arguments.store.state
-                      .exchangeRatio /* (token, amount) async {
-                Navigator.of(context).pushNamed("/account_details",
-                    arguments: WalletAccountDetailsArguments(
-                        account, widget.arguments.store));
-              }*/
-                  );
+                  exit, 2, currency, widget.arguments.store.state.exchangeRatio,
+                  () async {
+                Navigator.of(context).pushNamed("/transaction_details",
+                    arguments: TransactionDetailsArguments(
+                      wallet: widget.arguments.store,
+                      transactionType: TransactionType.WITHDRAW,
+                      status: TransactionStatus.DRAFT,
+                      token: exit.token,
+                      //account: widget.arguments.account,
+                      exit: exit,
+                      amount: double.parse(exit.balance) /
+                          pow(10, exit.token.decimals),
+                      addressFrom: exit.hezEthereumAddress,
+                      //addressTo: address,
+                    ));
+              });
             } else {
               final index = i - _exits.length;
               final Account account = _accounts[index];
