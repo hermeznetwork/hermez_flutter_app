@@ -16,6 +16,7 @@ import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
+import 'package:hermez_plugin/model/transaction.dart';
 import 'package:intl/intl.dart';
 
 import '../../wallet_transaction_details_page.dart';
@@ -53,7 +54,7 @@ class HomeBalance extends StatefulWidget {
 class _HomeBalanceState extends State<HomeBalance> {
   List<Account> _accounts;
   List<Exit> _exits = [];
-  List<dynamic> _poolTxs;
+  List<Transaction> _poolTxs = [];
 
   @override
   void initState() {
@@ -67,8 +68,29 @@ class _HomeBalanceState extends State<HomeBalance> {
 
   Future<List<Account>> fetchAccounts() async {
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
+      /*const accountPendingDeposits = storage.getItemsByHermezAddress(
+          pendingDeposits,
+          ethereumNetworkTask.data.chainId,
+          wallet.hermezEthereumAddress
+      )
+      const accountPendingWithdraws = storage.getItemsByHermezAddress(
+          pendingWithdraws,
+          ethereumNetworkTask.data.chainId,
+          wallet.hermezEthereumAddress
+      )
+      const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
+          pendingDelayedWithdraws,
+          ethereumNetworkTask.data.chainId,
+          wallet.hermezEthereumAddress
+      )
+      const pendingOnTopDeposits = accountPendingDeposits
+          .filter(deposit => deposit.type === TxType.Deposit)
+      const pendingCreateAccountDeposits = accountPendingDeposits
+          .filter(deposit => deposit.type === TxType.CreateAccountDeposit)*/
+
       _exits = await fetchExits();
       _poolTxs = await fetchPoolTransactions();
+      _poolTxs = getPendingExits();
       return widget.arguments.store.getAccounts();
     } else {
       return widget.arguments.store.getL1Accounts();
@@ -81,6 +103,16 @@ class _HomeBalanceState extends State<HomeBalance> {
 
   Future<List<dynamic>> fetchPoolTransactions() {
     return widget.arguments.store.getPoolTransactions();
+  }
+
+  /*Future<List<dynamic>> checkPendingDeposits() {
+    return null;
+  }*/
+
+  List<Transaction> getPendingExits() {
+    List<Transaction> poolTxs = List.from(_poolTxs);
+    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
+    return poolTxs;
   }
 
   @override
@@ -449,7 +481,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       child: RefreshIndicator(
         child: ListView.builder(
           shrinkWrap: true,
-          itemCount: _accounts.length + _exits.length,
+          itemCount: _poolTxs.length + _exits.length + _accounts.length,
           //set the item count so that index won't be out of range
           padding: const EdgeInsets.all(16.0),
           //add some padding to make it look good
@@ -459,9 +491,41 @@ class _HomeBalanceState extends State<HomeBalance> {
 
             // final index = i ~/ 2; //get the actual index excluding dividers.
 
-            if (_exits.length > 0 && i < _exits.length) {
+            if (_poolTxs.length > 0 && i < _poolTxs.length) {
+              final index = i;
+              final Transaction transaction = _poolTxs[index];
+
+              final Exit exit = Exit.fromTransaction(transaction);
+
+              final String currency = widget
+                  .arguments.store.state.defaultCurrency
+                  .toString()
+                  .split('.')
+                  .last;
+
+              return WithdrawalRow(
+                  exit, 1, currency, widget.arguments.store.state.exchangeRatio,
+                  () async {
+                /*Navigator.of(context).pushNamed("/transaction_details",
+                    arguments: TransactionDetailsArguments(
+                      wallet: widget.arguments.store,
+                      transactionType: TransactionType.WITHDRAW,
+                      status: TransactionStatus.DRAFT,
+                      token: exit.token,
+                      //account: widget.arguments.account,
+                      exit: exit,
+                      amount: double.parse(exit.balance) /
+                          pow(10, exit.token.decimals),
+                      addressFrom: exit.hezEthereumAddress,
+                      //addressTo: address,
+                    ));*/
+              });
+            } else if (_exits.length > 0 &&
+                i < _exits.length + _poolTxs.length) {
               final index = i;
               final Exit exit = _exits[index];
+
+              // final Exit exit2 =
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency

@@ -5,6 +5,7 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/storage_service.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
@@ -20,9 +21,11 @@ Future<List<SingleChildCloneableWidget>> createProviders(
         .cast<String>();
   });
 
-  final sharedPrefs = await SharedPreferences.getInstance();
+  final localStorage = await SharedPreferences.getInstance();
   final secureStorage = new FlutterSecureStorage();
-  final configurationService = ConfigurationService(sharedPrefs, secureStorage);
+  final storageService = StorageService(localStorage, secureStorage);
+  final configurationService =
+      ConfigurationService(localStorage, secureStorage, storageService);
   final addressService = AddressService(configurationService);
   final hermezService =
       HermezService(client, params.exchangeHttpUrl, configurationService);
@@ -44,6 +47,7 @@ Future<List<SingleChildCloneableWidget>> createProviders(
     Provider.value(value: addressService),
     Provider.value(value: contractService),
     Provider.value(value: explorerService),
+    Provider.value(value: storageService),
     Provider.value(value: configurationService),
     Provider.value(value: hermezService)
   ];
