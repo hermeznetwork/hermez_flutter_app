@@ -152,67 +152,76 @@ class WithdrawalRow extends StatelessWidget {
                     : Container(),
               ]),
               Row(children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                          child: RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyText2,
-                          children: [
-                            WidgetSpan(
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 5.0),
-                                child: Image.asset("assets/info.png",
-                                    width: 15,
-                                    height: 15,
-                                    color: HermezColors.steel),
+                step == 2
+                    ? Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                                child: RichText(
+                              text: TextSpan(
+                                style: Theme.of(context).textTheme.bodyText2,
+                                children: [
+                                  WidgetSpan(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 5.0),
+                                      child: Image.asset("assets/info.png",
+                                          width: 15,
+                                          height: 15,
+                                          color: HermezColors.steel),
+                                    ),
+                                  ),
+                                  TextSpan(
+                                      text:
+                                          "Sign required to\nfinalize withdraw",
+                                      style: TextStyle(
+                                        color: HermezColors.steel,
+                                        fontSize: 14,
+                                        height: 1.43,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                ],
                               ),
-                            ),
-                            TextSpan(
-                                text: "Sign required to\nfinalize withdraw",
-                                style: TextStyle(
-                                  color: HermezColors.steel,
-                                  fontSize: 14,
-                                  height: 1.43,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w500,
-                                )),
+                            )),
                           ],
                         ),
-                      )),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    SizedBox(
-                      height: 42,
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100.0),
-                          side: BorderSide(color: Color(0xffe75a2b)),
-                        ),
-                        onPressed: () {
-                          this.onPressed();
-                        },
-                        padding: EdgeInsets.only(
-                            top: 13.0, bottom: 13.0, right: 24.0, left: 24.0),
-                        color: Color(0xffe75a2b),
-                        textColor: Colors.white,
-                        child: Text("Finalise",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w700,
-                            )),
-                      ),
-                    ),
-                  ],
-                ),
+                      )
+                    : Container(),
+                step == 2
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 42,
+                            child: FlatButton(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100.0),
+                                side: BorderSide(color: Color(0xffe75a2b)),
+                              ),
+                              onPressed: () {
+                                this.onPressed();
+                              },
+                              padding: EdgeInsets.only(
+                                  top: 13.0,
+                                  bottom: 13.0,
+                                  right: 24.0,
+                                  left: 24.0),
+                              color: Color(0xffe75a2b),
+                              textColor: Colors.white,
+                              child: Text("Finalise",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(),
               ]), //title to be name of the crypto
             ])));
   }

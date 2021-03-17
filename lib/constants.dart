@@ -16,6 +16,8 @@ const AUTH_MESSAGE =
 
 //const MAX_TOKEN_DECIMALS = 6;
 
+const PENDING_DEPOSITS_KEY = 'pendingDeposits';
+
 const PENDING_WITHDRAWS_KEY = 'pendingWithdraws';
 
 const PENDING_DELAYED_WITHDRAWS_KEY = 'pendingDelayedWithdraws';

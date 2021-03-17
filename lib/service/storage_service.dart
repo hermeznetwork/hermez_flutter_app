@@ -121,7 +121,7 @@ class StorageService implements IStorageService {
             ? chainIdStorage[hermezEthereumAddress]
             : [];
 
-    accountStorage.removeWhere((item) => item.id != id);
+    accountStorage.removeWhere((item) => item['id'] == id);
 
     final Map<String, dynamic> newChainIdStorage = Map<String, dynamic>()
       ..addAll(chainIdStorage);

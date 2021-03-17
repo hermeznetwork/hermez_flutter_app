@@ -1,12 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/environment.dart';
@@ -15,6 +17,7 @@ import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/forged_transactions_request.dart';
+import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
@@ -25,14 +28,21 @@ import 'package:web3dart/web3dart.dart' as web3;
 import 'wallet_state.dart';
 
 class WalletHandler {
-  WalletHandler(this._store, this._addressService, this._contractService,
-      this._explorerService, this._configurationService, this._hermezService);
+  WalletHandler(
+      this._store,
+      this._addressService,
+      this._contractService,
+      this._explorerService,
+      this._configurationService,
+      this._storageService,
+      this._hermezService);
 
   final Store<Wallet, WalletAction> _store;
   final AddressService _addressService;
-  final ConfigurationService _configurationService;
   final ContractService _contractService;
   final ExplorerService _explorerService;
+  final StorageService _storageService;
+  final ConfigurationService _configurationService;
   final HermezService _hermezService;
 
   Wallet get state => _store.state;
@@ -315,10 +325,36 @@ class WalletHandler {
     return supportedToken;
   }
 
-  Future<List<Exit>> getExits() async {
-    final exits = await _hermezService
-        .getExits(web3.EthereumAddress.fromHex(state.ethereumAddress));
+  Future<List<Exit>> getExits({bool onlyPendingWithdraws = true}) async {
+    final exits = await _hermezService.getExits(
+        web3.EthereumAddress.fromHex(state.ethereumAddress),
+        onlyPendingWithdraws: onlyPendingWithdraws);
     return exits;
+  }
+
+  Future<List<dynamic>> getPendingWithdraws() async {
+    final storage =
+        await _storageService.getStorage(PENDING_WITHDRAWS_KEY, false);
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress =
+        await _configurationService.getHermezAddress();
+    final List accountPendingWithdraws = _storageService
+        .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
+
+    final exits = await getExits(onlyPendingWithdraws: false);
+    accountPendingWithdraws.forEach((pendingWithdraw) {
+      exits.forEach((exit) {
+        final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+        if (pendingWithdraw['id'] == withdrawalId) {
+          if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
+            accountPendingWithdraws.remove(pendingWithdraw);
+            _configurationService.removePendingWithdraw(withdrawalId);
+          }
+        }
+      });
+    });
+
+    return accountPendingWithdraws;
   }
 
   /// Fetches the details of an exit
@@ -431,12 +467,12 @@ class WalletHandler {
         transferTx, hermezWallet, from.token);
   }
 
-  Future<List<dynamic>> getPoolTransactions() async {
+  Future<List<PoolTransaction>> getPoolTransactions() async {
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    return tx_pool.getPoolTransactions(
+    return await tx_pool.getPoolTransactions(
         null, hermezWallet.publicKeyCompressedHex);
   }
 

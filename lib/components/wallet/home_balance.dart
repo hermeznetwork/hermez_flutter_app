@@ -16,7 +16,8 @@ import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/transaction.dart';
+import 'package:hermez_plugin/model/pool_transaction.dart';
+import 'package:hermez_plugin/model/token.dart';
 import 'package:intl/intl.dart';
 
 import '../../wallet_transaction_details_page.dart';
@@ -54,7 +55,8 @@ class HomeBalance extends StatefulWidget {
 class _HomeBalanceState extends State<HomeBalance> {
   List<Account> _accounts;
   List<Exit> _exits = [];
-  List<Transaction> _poolTxs = [];
+  List<PoolTransaction> _poolTxs = [];
+  List<dynamic> _pendingWithdraws = [];
 
   @override
   void initState() {
@@ -72,13 +74,9 @@ class _HomeBalanceState extends State<HomeBalance> {
           pendingDeposits,
           ethereumNetworkTask.data.chainId,
           wallet.hermezEthereumAddress
-      )
-      const accountPendingWithdraws = storage.getItemsByHermezAddress(
-          pendingWithdraws,
-          ethereumNetworkTask.data.chainId,
-          wallet.hermezEthereumAddress
-      )
-      const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
+      )*/
+
+      /*const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
           pendingDelayedWithdraws,
           ethereumNetworkTask.data.chainId,
           wallet.hermezEthereumAddress
@@ -88,32 +86,35 @@ class _HomeBalanceState extends State<HomeBalance> {
       const pendingCreateAccountDeposits = accountPendingDeposits
           .filter(deposit => deposit.type === TxType.CreateAccountDeposit)*/
 
+      _poolTxs = await getPendingExits();
       _exits = await fetchExits();
-      _poolTxs = await fetchPoolTransactions();
-      _poolTxs = getPendingExits();
+      final accountPendingWithdraws =
+          await widget.arguments.store.getPendingWithdraws();
+      _pendingWithdraws = accountPendingWithdraws;
+
       return widget.arguments.store.getAccounts();
     } else {
       return widget.arguments.store.getL1Accounts();
     }
   }
 
-  Future<List<Exit>> fetchExits() {
-    return widget.arguments.store.getExits();
+  Future<List<PoolTransaction>> getPendingExits() async {
+    List<PoolTransaction> poolTxs = List.from(await fetchPoolTransactions());
+    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
+    return poolTxs;
   }
 
-  Future<List<dynamic>> fetchPoolTransactions() {
-    return widget.arguments.store.getPoolTransactions();
+  Future<List<PoolTransaction>> fetchPoolTransactions() async {
+    return await widget.arguments.store.getPoolTransactions();
+  }
+
+  Future<List<Exit>> fetchExits() {
+    return widget.arguments.store.getExits(); // TODO : only pending withdraws?
   }
 
   /*Future<List<dynamic>> checkPendingDeposits() {
     return null;
   }*/
-
-  List<Transaction> getPendingExits() {
-    List<Transaction> poolTxs = List.from(_poolTxs);
-    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
-    return poolTxs;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -481,7 +482,12 @@ class _HomeBalanceState extends State<HomeBalance> {
       child: RefreshIndicator(
         child: ListView.builder(
           shrinkWrap: true,
-          itemCount: _poolTxs.length + _exits.length + _accounts.length,
+          itemCount: (_poolTxs.isNotEmpty ||
+                      _exits.isNotEmpty ||
+                      _pendingWithdraws.isNotEmpty
+                  ? 1
+                  : 0) +
+              _accounts.length,
           //set the item count so that index won't be out of range
           padding: const EdgeInsets.all(16.0),
           //add some padding to make it look good
@@ -489,11 +495,9 @@ class _HomeBalanceState extends State<HomeBalance> {
             //item builder returns a row for each index i=0,1,2,3,4
             // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
-            // final index = i ~/ 2; //get the actual index excluding dividers.
-
-            if (_poolTxs.length > 0 && i < _poolTxs.length) {
+            if (i == 0 && _poolTxs.length > 0 && i < _poolTxs.length) {
               final index = i;
-              final Transaction transaction = _poolTxs[index];
+              final PoolTransaction transaction = _poolTxs[index];
 
               final Exit exit = Exit.fromTransaction(transaction);
 
@@ -503,25 +507,9 @@ class _HomeBalanceState extends State<HomeBalance> {
                   .split('.')
                   .last;
 
-              return WithdrawalRow(
-                  exit, 1, currency, widget.arguments.store.state.exchangeRatio,
-                  () async {
-                /*Navigator.of(context).pushNamed("/transaction_details",
-                    arguments: TransactionDetailsArguments(
-                      wallet: widget.arguments.store,
-                      transactionType: TransactionType.WITHDRAW,
-                      status: TransactionStatus.DRAFT,
-                      token: exit.token,
-                      //account: widget.arguments.account,
-                      exit: exit,
-                      amount: double.parse(exit.balance) /
-                          pow(10, exit.token.decimals),
-                      addressFrom: exit.hezEthereumAddress,
-                      //addressTo: address,
-                    ));*/
-              });
-            } else if (_exits.length > 0 &&
-                i < _exits.length + _poolTxs.length) {
+              return WithdrawalRow(exit, 1, currency,
+                  widget.arguments.store.state.exchangeRatio, () async {});
+            } else if (i == 0 && _exits.length > 0) {
               final index = i;
               final Exit exit = _exits[index];
 
@@ -550,8 +538,39 @@ class _HomeBalanceState extends State<HomeBalance> {
                       //addressTo: address,
                     ));
               });
+            } // final index = i ~/ 2; //get the actual index excluding dividers.
+            else if (i == 0 && _pendingWithdraws.length > 0) {
+              final index = i;
+              //final Transaction transaction =
+              //_pendingWithdraws[index]['transaction'];
+              final Token token =
+                  Token.fromJson(_pendingWithdraws[index]['token']);
+
+              //exitId={transaction.accountIndex + transaction.batchNum}
+              final Exit exit = Exit(
+                  //itemId: ,
+                  hezEthereumAddress: _pendingWithdraws[index]
+                      ['hermezEthereumAddress'],
+                  token: token,
+                  balance: _pendingWithdraws[index]['amount']
+                      .toString()
+                      .replaceAll('.0', ''));
+
+              final String currency = widget
+                  .arguments.store.state.defaultCurrency
+                  .toString()
+                  .split('.')
+                  .last;
+
+              return WithdrawalRow(exit, 3, currency,
+                  widget.arguments.store.state.exchangeRatio, () {});
             } else {
-              final index = i - _exits.length;
+              final index = i -
+                  (_poolTxs.isNotEmpty ||
+                          _exits.isNotEmpty ||
+                          _pendingWithdraws.isNotEmpty
+                      ? 1
+                      : 0);
               final Account account = _accounts[index];
 
               final String currency = widget

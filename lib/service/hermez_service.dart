@@ -15,6 +15,7 @@ import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/exits_request.dart';
 import 'package:hermez_plugin/model/forged_transaction.dart';
 import 'package:hermez_plugin/model/forged_transactions_request.dart';
+import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
@@ -43,7 +44,7 @@ abstract class IHermezService {
   Future<List<ForgedTransaction>> getForgedTransactions(
       ForgedTransactionsRequest request);
   Future<ForgedTransaction> getTransactionById(String transactionId);
-  Future<Transaction> getPoolTransactionById(String transactionId);
+  Future<PoolTransaction> getPoolTransactionById(String transactionId);
   Future<List<Token>> getTokens();
   Future<Token> getTokenById(int tokenId);
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
@@ -150,7 +151,7 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<Transaction> getPoolTransactionById(String transactionId) async {
+  Future<PoolTransaction> getPoolTransactionById(String transactionId) async {
     final response = await api.getPoolTransaction(transactionId);
     return response;
   }
@@ -169,10 +170,11 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress) async {
+  Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress,
+      {bool onlyPendingWithdraws = true}) async {
     ExitsRequest exitsRequest = new ExitsRequest(
         hezEthereumAddress: addresses.getHermezAddress(ethereumAddress.hex),
-        onlyPendingWithdraws: true);
+        onlyPendingWithdraws: onlyPendingWithdraws);
     final exitsResponse = await api.getExits(
         exitsRequest.hezEthereumAddress, exitsRequest.onlyPendingWithdraws);
     return exitsResponse.exits;
