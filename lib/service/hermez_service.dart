@@ -139,8 +139,9 @@ class HermezService implements IHermezService {
   Future<List<ForgedTransaction>> getForgedTransactions(
       ForgedTransactionsRequest request) async {
     final response = await api.getTransactions(
-        accountIndex: request.accountIndex, fromItem: request.fromItem);
-    //order: api.PaginationOrder.DESC);
+        accountIndex: request.accountIndex,
+        fromItem: request.fromItem,
+        order: api.PaginationOrder.DESC);
     return response;
   }
 

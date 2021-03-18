@@ -7,7 +7,9 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/forged_transaction.dart';
 import 'package:intl/intl.dart';
 
@@ -126,11 +128,30 @@ class _ActivityState extends State<Activity> {
                 value = transaction.l1info.depositAmount.toString();
                 if (transaction.l1info.depositAmountSuccess == true) {
                   status = "CONFIRMED";
+                  final formatter = DateFormat(
+                      "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                  final DateTime dateTimeFromStr =
+                      formatter.parse(transaction.timestamp);
+                  timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                 }
+                addressFrom =
+                    getEthereumAddress(transaction.fromHezEthereumAddress);
+                addressTo = transaction.fromHezEthereumAddress;
               } else if (transaction.type == "Exit" ||
                   transaction.type == "ForceExit") {
                 type = "WITHDRAW";
                 value = transaction.amount.toString();
+                if (transaction.timestamp.isNotEmpty) {
+                  status = "CONFIRMED";
+                  final formatter = DateFormat(
+                      "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                  final DateTime dateTimeFromStr =
+                      formatter.parse(transaction.timestamp);
+                  timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+                }
+                addressFrom = transaction.fromHezEthereumAddress;
+                addressTo =
+                    getEthereumAddress(transaction.fromHezEthereumAddress);
               } else if (transaction.type == "Transfer") {
                 value = transaction.amount.toString();
                 if (transaction.fromAccountIndex ==
@@ -152,7 +173,8 @@ class _ActivityState extends State<Activity> {
             /*EtherAmount.fromUnitAndValue(
                   EtherUnit.wei, ));*/
             var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
-            var format = DateFormat('dd MMM');
+            //var format = DateFormat('dd MMM');
+            var format = DateFormat('dd/MM/yyyy');
             var icon = "";
             var isNegative = false;
 
@@ -227,6 +249,19 @@ class _ActivityState extends State<Activity> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
                       Container(
+                        padding: EdgeInsets.all(5.0),
+                        child: Text(
+                          amount.toString() + " " + widget.arguments.symbol,
+                          style: TextStyle(
+                            color: HermezColors.black,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                      Container(
                         //color: double.parse(element['value']) < 0 ? Colors.transparent : Color.fromRGBO(228, 244, 235, 1.0),
                         padding: EdgeInsets.all(5.0),
                         child: Text(
@@ -236,21 +271,8 @@ class _ActivityState extends State<Activity> {
                                   .toStringAsFixed(2),
                           style: TextStyle(
                             color: isNegative
-                                ? HermezColors.black
+                                ? HermezColors.blueyGreyTwo
                                 : HermezColors.green,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
-                          ),
-                          textAlign: TextAlign.right,
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(5.0),
-                        child: Text(
-                          amount.toString() + " " + widget.arguments.symbol,
-                          style: TextStyle(
-                            color: HermezColors.blueyGreyTwo,
                             fontSize: 16,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,
@@ -307,8 +329,8 @@ class _ActivityState extends State<Activity> {
   /// Fetches the transactions details for the specified account index
   /// @param {string} accountIndex - Account index
   /// @returns {void}
-  Future<List<dynamic>> fetchHistoryTransactions(
-      Account account, int fromItem) async {
+  Future<List<dynamic>> fetchHistoryTransactions(Account account, int fromItem,
+      {List<Exit> exits}) async {
     await widget.arguments.store
         .getTransactionsByAddress(
             widget.arguments.store.state.ethereumAddress, account, fromItem)
