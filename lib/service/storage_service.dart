@@ -93,14 +93,6 @@ class StorageService implements IStorageService {
     newStorage.update(chainId, (value) => newChainIdStorage,
         ifAbsent: () => newChainIdStorage);
 
-    /*final Map newStorage = {
-      ...storage,
-      [chainId]: {
-        ...chainIdStorage,
-        [hermezEthereumAddress]: [...accountStorage, item]
-      }
-    };*/
-
     if (secure) {
       await _secureStorage.write(key: key, value: json.encode(newStorage));
     } else {
@@ -132,14 +124,6 @@ class StorageService implements IStorageService {
       ..addAll(storage);
     newStorage.update(chainId, (value) => newChainIdStorage,
         ifAbsent: () => newChainIdStorage);
-
-    /*final Map newStorage = {
-      ...storage,
-      [chainId]: {
-        ...chainIdStorage,
-        [hermezEthereumAddress]: accountStorage
-      }
-    };*/
 
     if (secure) {
       await _secureStorage.write(key: key, value: json.encode(newStorage));

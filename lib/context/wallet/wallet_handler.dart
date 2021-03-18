@@ -341,18 +341,19 @@ class WalletHandler {
     final List accountPendingWithdraws = _storageService
         .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
 
-    final exits = await getExits(onlyPendingWithdraws: false);
-    accountPendingWithdraws.forEach((pendingWithdraw) {
-      exits.forEach((exit) {
+    List withdawalIds = [];
+    accountPendingWithdraws.forEach((pendingWithdraw) async {
+      final exit = await getExit(
+          pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
+      if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
         final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-        if (pendingWithdraw['id'] == withdrawalId) {
-          if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
-            accountPendingWithdraws.remove(pendingWithdraw);
-            _configurationService.removePendingWithdraw(withdrawalId);
-          }
-        }
-      });
+        withdawalIds.add(withdrawalId);
+        _configurationService.removePendingWithdraw(withdrawalId);
+      }
     });
+
+    accountPendingWithdraws.removeWhere(
+        (pendingWithdraw) => withdawalIds.contains(pendingWithdraw['id']));
 
     return accountPendingWithdraws;
   }
@@ -360,10 +361,9 @@ class WalletHandler {
   /// Fetches the details of an exit
   /// @param {string} accountIndex - account index
   /// @param {number} batchNum - batch number
-  /// @returns {void}
+  /// @returns {Exit}
   Future<Exit> getExit(String accountIndex, int batchNum) {
-    _hermezService.getAccount(accountIndex);
-    _hermezService.getExit(batchNum, accountIndex);
+    return _hermezService.getExit(batchNum, accountIndex);
   }
 
   /// Fetches the recommended fees from the Coordinator
@@ -412,11 +412,13 @@ class WalletHandler {
 
   Future<bool> withdraw(double amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
+    _store.dispatch(TransactionStarted());
+
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    return _hermezService.withdraw(
+    final success = await _hermezService.withdraw(
         BigInt.from(amount),
         account,
         exit,
@@ -425,6 +427,15 @@ class WalletHandler {
         hermezAddress,
         hermezWallet.publicKeyCompressedHex,
         state.ethereumPrivateKey);
+
+    //if (success) {
+
+    //}
+    return success;
+  }
+
+  void transactionFinished() {
+    _store.dispatch(TransactionFinished());
   }
 
   Future<void> forceExit(BigInt amount, Account account) {
@@ -432,6 +443,8 @@ class WalletHandler {
   }
 
   Future<bool> exit(double amount, Account account, double fee) async {
+    _store.dispatch(TransactionStarted());
+
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
@@ -443,12 +456,18 @@ class WalletHandler {
       'fee': fee,
     };
 
-    return _hermezService.generateAndSendL2Tx(
+    final success = await _hermezService.generateAndSendL2Tx(
         exitTx, hermezWallet, account.token);
+
+    //_store.dispatch(TransactionFinished());
+
+    return success;
   }
 
   Future<bool> transfer(
       double amount, Account from, Account to, double fee) async {
+    _store.dispatch(TransactionStarted());
+
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
@@ -463,8 +482,13 @@ class WalletHandler {
       'nonce': from.nonce
     };
 
-    return _hermezService.generateAndSendL2Tx(
+    final success = await _hermezService.generateAndSendL2Tx(
         transferTx, hermezWallet, from.token);
+
+    //if (success) {
+    //_store.dispatch(TransactionFinished());
+    //}
+    return success;
   }
 
   Future<List<PoolTransaction>> getPoolTransactions() async {

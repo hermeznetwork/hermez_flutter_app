@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
+import 'context/wallet/wallet_handler.dart';
+
+class TransactionInfoArguments {
+  final WalletHandler store;
+
+  TransactionInfoArguments(this.store);
+}
+
 class TransactionInfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final TransactionInfoArguments args =
+        ModalRoute.of(context).settings.arguments;
     return Scaffold(
       backgroundColor: HermezColors.lightOrange,
       body: Column(
@@ -40,6 +50,7 @@ class TransactionInfoPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16.0),
                   side: BorderSide(color: HermezColors.darkOrange)),
               onPressed: () {
+                args.store.transactionFinished();
                 Navigator.pop(context);
               },
               padding: EdgeInsets.all(15.0),

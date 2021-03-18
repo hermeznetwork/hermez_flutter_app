@@ -33,6 +33,12 @@ class LevelUpdated extends WalletAction {
   final TransactionLevel txLevel;
 }
 
+// transaction
+
+class TransactionStarted extends WalletAction {}
+
+class TransactionFinished extends WalletAction {}
+
 Wallet reducer(Wallet state, WalletAction action) {
   if (action is InitialiseWallet) {
     return state.rebuild((b) => b
@@ -62,6 +68,14 @@ Wallet reducer(Wallet state, WalletAction action) {
 
   if (action is LevelUpdated) {
     return state.rebuild((b) => b..txLevel = action.txLevel);
+  }
+
+  if (action is TransactionStarted) {
+    return state.rebuild((b) => b..loading = true);
+  }
+
+  if (action is TransactionFinished) {
+    return state.rebuild((b) => b..loading = false);
   }
 
   return state;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/wallet_transaction_info_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
@@ -113,8 +114,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     amount);
                 //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
                 if (success) {
-                  Navigator.of(context)
-                      .pushReplacementNamed("/transaction_info");
+                  Navigator.pushReplacementNamed(context, "/transaction_info",
+                      arguments:
+                          TransactionInfoArguments(widget.arguments.wallet));
                 } else {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: Text(transferStore.state.errors.first),
@@ -148,8 +150,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
                         //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
                         if (success) {
-                          Navigator.of(context)
-                              .pushReplacementNamed("/transaction_info");
+                          Navigator.pushReplacementNamed(
+                              context, "/transaction_info",
+                              arguments: TransactionInfoArguments(
+                                  widget.arguments.wallet));
                         } else {
                           showDialog(
                             context: context,

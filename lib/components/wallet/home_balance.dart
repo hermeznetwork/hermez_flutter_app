@@ -55,7 +55,7 @@ class HomeBalance extends StatefulWidget {
 class _HomeBalanceState extends State<HomeBalance> {
   List<Account> _accounts;
   List<Exit> _exits = [];
-  List<PoolTransaction> _poolTxs = [];
+  List<dynamic> _poolTxs = [];
   List<dynamic> _pendingWithdraws = [];
 
   @override
@@ -98,7 +98,7 @@ class _HomeBalanceState extends State<HomeBalance> {
     }
   }
 
-  Future<List<PoolTransaction>> getPendingExits() async {
+  Future<List<dynamic>> getPendingExits() async {
     List<PoolTransaction> poolTxs = List.from(await fetchPoolTransactions());
     poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
     return poolTxs;
@@ -495,11 +495,18 @@ class _HomeBalanceState extends State<HomeBalance> {
             //item builder returns a row for each index i=0,1,2,3,4
             // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
-            if (i == 0 && _poolTxs.length > 0 && i < _poolTxs.length) {
+            if (i == 0 && _pendingWithdraws.length > 0) {
               final index = i;
-              final PoolTransaction transaction = _poolTxs[index];
+              final Token token =
+                  Token.fromJson(_pendingWithdraws[index]['token']);
 
-              final Exit exit = Exit.fromTransaction(transaction);
+              final Exit exit = Exit(
+                  hezEthereumAddress: _pendingWithdraws[index]
+                      ['hermezEthereumAddress'],
+                  token: token,
+                  balance: _pendingWithdraws[index]['amount']
+                      .toString()
+                      .replaceAll('.0', ''));
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency
@@ -507,13 +514,11 @@ class _HomeBalanceState extends State<HomeBalance> {
                   .split('.')
                   .last;
 
-              return WithdrawalRow(exit, 1, currency,
-                  widget.arguments.store.state.exchangeRatio, () async {});
+              return WithdrawalRow(exit, 3, currency,
+                  widget.arguments.store.state.exchangeRatio, () {});
             } else if (i == 0 && _exits.length > 0) {
               final index = i;
               final Exit exit = _exits[index];
-
-              // final Exit exit2 =
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency
@@ -539,22 +544,11 @@ class _HomeBalanceState extends State<HomeBalance> {
                     ));
               });
             } // final index = i ~/ 2; //get the actual index excluding dividers.
-            else if (i == 0 && _pendingWithdraws.length > 0) {
+            else if (i == 0 && _poolTxs.length > 0 && i < _poolTxs.length) {
               final index = i;
-              //final Transaction transaction =
-              //_pendingWithdraws[index]['transaction'];
-              final Token token =
-                  Token.fromJson(_pendingWithdraws[index]['token']);
+              final PoolTransaction transaction = _poolTxs[index];
 
-              //exitId={transaction.accountIndex + transaction.batchNum}
-              final Exit exit = Exit(
-                  //itemId: ,
-                  hezEthereumAddress: _pendingWithdraws[index]
-                      ['hermezEthereumAddress'],
-                  token: token,
-                  balance: _pendingWithdraws[index]['amount']
-                      .toString()
-                      .replaceAll('.0', ''));
+              final Exit exit = Exit.fromTransaction(transaction);
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency
@@ -562,8 +556,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                   .split('.')
                   .last;
 
-              return WithdrawalRow(exit, 3, currency,
-                  widget.arguments.store.state.exchangeRatio, () {});
+              return WithdrawalRow(exit, 1, currency,
+                  widget.arguments.store.state.exchangeRatio, () async {});
             } else {
               final index = i -
                   (_poolTxs.isNotEmpty ||
@@ -578,8 +572,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                   .toString()
                   .split('.')
                   .last;
-              //final Color color = _colors[index %
-              //    _colors.length];
+
               return AccountRow(
                   account.token.name,
                   account.token.symbol,
@@ -603,53 +596,6 @@ class _HomeBalanceState extends State<HomeBalance> {
         onRefresh: _onRefresh,
       ),
     );
-    /*: Container(
-                color: Colors.white,
-                child: RefreshIndicator(
-                  child: ListView.builder(
-                    //shrinkWrap: true,
-                    itemCount: _accounts.length,
-                    itemExtent: 100.0,
-                    //set the item count so that index won't be out of range
-                    padding: const EdgeInsets.all(16.0),
-                    //add some padding to make it look good
-                    itemBuilder: (context, i) {
-                      //item builder returns a row for each index i=0,1,2,3,4
-                      // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
-
-                      // final index = i ~/ 2; //get the actual index excluding dividers.
-                      final index = i;
-                      final Account account = _accounts[index];
-
-                      final String currency = widget
-                          .arguments.store.state.defaultCurrency
-                          .toString()
-                          .split('.')
-                          .last;
-                      //final Color color = _colors[index %
-                      //    _colors.length];
-                      return AccountRow(
-                          //account.,
-                          account.bjj,
-                          account.token.symbol,
-                          currency == "EUR"
-                              ? account.token.USD *
-                                  widget.arguments.store.state.exchangeRatio
-                              : account.token.USD,
-                          currency,
-                          double.parse(account.balance) / pow(10, 18),
-                          false,
-                          true, (token, amount) async {
-                        Navigator.of(context).pushNamed("/account_details",
-                            arguments: WalletAccountDetailsArguments(
-                                account, widget.arguments.store));
-                      }); //iterate through indexes and get the next colour
-                      //return _buildRow(context, element, color); //build the row widget
-                    },
-                  ),
-                  onRefresh: _onRefresh,
-                ),
-              );*/
   }
 
   String totalBalance(AsyncSnapshot snapshot) {

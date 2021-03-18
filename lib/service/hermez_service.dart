@@ -252,6 +252,8 @@ class HermezService implements IHermezService {
                       _configService.addPendingWithdraw({
                         'hermezEthereumAddress': hezEthereumAddress,
                         'id': withdrawalId,
+                        'accountIndex': exit.accountIndex,
+                        'batchNum': exit.batchNum,
                         'amount': amount.toDouble(),
                         'token': exit.token.toJson()
                       })
@@ -260,6 +262,8 @@ class HermezService implements IHermezService {
                     {
                       _configService.addPendingDelayedWithdraw({
                         'id': withdrawalId,
+                        'accountIndex': exit.accountIndex,
+                        'batchNum': exit.batchNum,
                         'instant': false,
                         'date': DateTime.now(),
                         'amount': amount,

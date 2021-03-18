@@ -172,20 +172,6 @@ class ConfigurationService implements IConfigurationService {
 
     _storageService.addItem(PENDING_WITHDRAWS_KEY, chainId.toString(),
         hermezEthereumAddress, pendingWithdraw, false);
-    /*final pendingWithdrawPool =
-        json.decode(_preferences.getString(PENDING_WITHDRAWS_KEY));
-    final accountPendingWithdrawPool =
-        pendingWithdrawPool[hermezEthereumAddress];
-    final newAccountPendingWithdrawPool = accountPendingWithdrawPool == null
-        ? [pendingWithdraw]
-        : [...accountPendingWithdrawPool, pendingWithdraw];
-    final newPendingWithdrawPool = {
-      ...pendingWithdrawPool,
-      [hermezEthereumAddress]: newAccountPendingWithdrawPool
-    };
-
-    _preferences.setString(
-        PENDING_WITHDRAWS_KEY, json.encode(newPendingWithdrawPool));*/
   }
 
   /// Removes a pendingWithdraw from the pendingWithdraw pool
@@ -198,21 +184,6 @@ class ConfigurationService implements IConfigurationService {
 
     _storageService.removeItem(PENDING_WITHDRAWS_KEY, chainId.toString(),
         hermezEthereumAddress, pendingWithdrawId, false);
-
-    /*final pendingWithdrawPool =
-        json.decode(_preferences.getString(PENDING_WITHDRAWS_KEY));
-    final List accountPendingWithdrawPool =
-        pendingWithdrawPool[hermezEthereumAddress];
-    accountPendingWithdrawPool
-        .removeWhere((pendingWithdraw) => pendingWithdraw == pendingWithdrawId);
-
-    final newPendingWithdrawPool = {
-      ...pendingWithdrawPool,
-      [hermezEthereumAddress]: accountPendingWithdrawPool
-    };
-
-    _preferences.setString(
-        PENDING_WITHDRAWS_KEY, json.encode(newPendingWithdrawPool));*/
   }
 
   /// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
@@ -224,22 +195,6 @@ class ConfigurationService implements IConfigurationService {
 
     _storageService.addItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId.toString(),
         hermezEthereumAddress, pendingDelayedWithdraw, false);
-
-    /*final pendingDelayedWithdrawStore =
-        json.decode(_preferences.getString(PENDING_DELAYED_WITHDRAWS_KEY));
-    final accountPendingDelayedWithdrawStore =
-        pendingDelayedWithdrawStore[hermezEthereumAddress];
-    final newAccountPendingDelayedWithdrawStore =
-        accountPendingDelayedWithdrawStore == null
-            ? [pendingDelayedWithdraw]
-            : [...accountPendingDelayedWithdrawStore, pendingDelayedWithdraw];
-    final newPendingDelayedWithdrawStore = {
-      ...pendingDelayedWithdrawStore,
-      [hermezEthereumAddress]: newAccountPendingDelayedWithdrawStore
-    };
-
-    _preferences.setString(PENDING_DELAYED_WITHDRAWS_KEY,
-        json.encode(newPendingDelayedWithdrawStore));*/
   }
 
   /// Removes a pendingDelayedWithdraw from the pendingDelayedWithdraw store
@@ -255,20 +210,5 @@ class ConfigurationService implements IConfigurationService {
         hermezEthereumAddress,
         pendingDelayedWithdrawId,
         false);
-
-    /*final pendingDelayedWithdrawStore =
-        json.decode(_preferences.getString(PENDING_DELAYED_WITHDRAWS_KEY));
-    final List accountPendingDelayedWithdrawStore =
-        pendingDelayedWithdrawStore[hermezEthereumAddress];
-    accountPendingDelayedWithdrawStore.removeWhere((pendingDelayedWithdraw) =>
-        pendingDelayedWithdraw['id'] == pendingDelayedWithdrawId);
-
-    final newPendingDelayedWithdrawStore = {
-      ...pendingDelayedWithdrawStore,
-      [hermezEthereumAddress]: accountPendingDelayedWithdrawStore
-    };
-
-    _preferences.setString(PENDING_DELAYED_WITHDRAWS_KEY,
-        json.encode(newPendingDelayedWithdrawStore));*/
   }
 }
