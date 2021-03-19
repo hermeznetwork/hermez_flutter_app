@@ -86,7 +86,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       const pendingCreateAccountDeposits = accountPendingDeposits
           .filter(deposit => deposit.type === TxType.CreateAccountDeposit)*/
 
-      _poolTxs = await getPendingExits();
+      _poolTxs = await fetchPendingExits();
       _exits = await fetchExits();
       final accountPendingWithdraws =
           await widget.arguments.store.getPendingWithdraws();
@@ -98,14 +98,11 @@ class _HomeBalanceState extends State<HomeBalance> {
     }
   }
 
-  Future<List<dynamic>> getPendingExits() async {
-    List<PoolTransaction> poolTxs = List.from(await fetchPoolTransactions());
+  Future<List<dynamic>> fetchPendingExits() async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions();
     poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
     return poolTxs;
-  }
-
-  Future<List<PoolTransaction>> fetchPoolTransactions() async {
-    return await widget.arguments.store.getPoolTransactions();
   }
 
   Future<List<Exit>> fetchExits() {
@@ -482,6 +479,9 @@ class _HomeBalanceState extends State<HomeBalance> {
       child: RefreshIndicator(
         child: ListView.builder(
           shrinkWrap: true,
+          // To make listView scrollable
+          // even if there is only a single item.
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: (_poolTxs.isNotEmpty ||
                       _exits.isNotEmpty ||
                       _pendingWithdraws.isNotEmpty
