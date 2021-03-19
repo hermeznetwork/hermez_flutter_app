@@ -17,6 +17,7 @@ import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/forged_transactions_request.dart';
+import 'package:hermez_plugin/model/forged_transactions_response.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
@@ -325,10 +326,12 @@ class WalletHandler {
     return supportedToken;
   }
 
-  Future<List<Exit>> getExits({bool onlyPendingWithdraws = true}) async {
+  Future<List<Exit>> getExits(
+      {bool onlyPendingWithdraws = true, int tokenId = -1}) async {
     final exits = await _hermezService.getExits(
         web3.EthereumAddress.fromHex(state.ethereumAddress),
-        onlyPendingWithdraws: onlyPendingWithdraws);
+        onlyPendingWithdraws: onlyPendingWithdraws,
+        tokenId: tokenId);
     return exits;
   }
 
@@ -542,24 +545,24 @@ class WalletHandler {
     _store.dispatch(LevelUpdated(txLevel));
   }
 
-  Future<List<dynamic>> getTransactionsByAddress(
+  Future<List<dynamic>> getEthereumTransactionsByAddress(
       String address, Account account, int fromItem) async {
-    final level = await _configurationService.getLevelSelected();
-    if (level == TransactionLevel.LEVEL1) {
-      if (account.token.symbol == "ETH") {
-        return _explorerService.getTransactionsByAccountAddress(address);
-      } else {
-        return _explorerService.getTransferEventsByAccountAddress(address);
-      }
+    if (account.token.symbol == "ETH") {
+      return _explorerService.getTransactionsByAccountAddress(address);
     } else {
-      ForgedTransactionsRequest request = ForgedTransactionsRequest(
-          ethereumAddress: addresses.getHermezAddress(address),
-          accountIndex: account.accountIndex,
-          batchNum: account.token.ethereumBlockNum,
-          tokenId: account.token.id,
-          fromItem: fromItem);
-      return _hermezService.getForgedTransactions(request);
+      return _explorerService.getTransferEventsByAccountAddress(address);
     }
+  }
+
+  Future<ForgedTransactionsResponse> getHermezTransactionsByAddress(
+      String address, Account account, int fromItem) async {
+    ForgedTransactionsRequest request = ForgedTransactionsRequest(
+        ethereumAddress: addresses.getHermezAddress(address),
+        accountIndex: account.accountIndex,
+        batchNum: account.token.ethereumBlockNum,
+        tokenId: account.token.id,
+        fromItem: fromItem);
+    return _hermezService.getForgedTransactions(request);
   }
 
   Future<void> resetWallet() async {

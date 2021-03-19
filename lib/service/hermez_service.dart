@@ -15,6 +15,7 @@ import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/exits_request.dart';
 import 'package:hermez_plugin/model/forged_transaction.dart';
 import 'package:hermez_plugin/model/forged_transactions_request.dart';
+import 'package:hermez_plugin/model/forged_transactions_response.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
@@ -41,7 +42,7 @@ abstract class IHermezService {
   Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress);
   Future<List<Coordinator>> getCoordinators(
       String forgerAddr, String bidderAddr);
-  Future<List<ForgedTransaction>> getForgedTransactions(
+  Future<ForgedTransactionsResponse> getForgedTransactions(
       ForgedTransactionsRequest request);
   Future<ForgedTransaction> getTransactionById(String transactionId);
   Future<PoolTransaction> getPoolTransactionById(String transactionId);
@@ -136,7 +137,7 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<List<ForgedTransaction>> getForgedTransactions(
+  Future<ForgedTransactionsResponse> getForgedTransactions(
       ForgedTransactionsRequest request) async {
     final response = await api.getTransactions(
         accountIndex: request.accountIndex,
@@ -172,12 +173,13 @@ class HermezService implements IHermezService {
 
   @override
   Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress,
-      {bool onlyPendingWithdraws = true}) async {
+      {bool onlyPendingWithdraws = true, int tokenId = -1}) async {
     ExitsRequest exitsRequest = new ExitsRequest(
         hezEthereumAddress: addresses.getHermezAddress(ethereumAddress.hex),
-        onlyPendingWithdraws: onlyPendingWithdraws);
-    final exitsResponse = await api.getExits(
-        exitsRequest.hezEthereumAddress, exitsRequest.onlyPendingWithdraws);
+        onlyPendingWithdraws: onlyPendingWithdraws,
+        tokenId: tokenId);
+    final exitsResponse = await api.getExits(exitsRequest.hezEthereumAddress,
+        exitsRequest.onlyPendingWithdraws, exitsRequest.tokenId);
     return exitsResponse.exits;
   }
 

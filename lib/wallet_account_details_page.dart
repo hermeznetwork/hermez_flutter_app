@@ -86,7 +86,11 @@ class WalletAccountDetailsPage extends HookWidget {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(accountBalance(),
+                      Text(
+                          formatAmount(
+                              double.parse(arguments.element.balance) /
+                                  pow(10, 18),
+                              arguments.element.token.symbol),
                           style: TextStyle(
                               color: HermezColors.blackTwo,
                               fontFamily: 'ModernEra',
@@ -94,10 +98,7 @@ class WalletAccountDetailsPage extends HookWidget {
                               fontSize: 32)),
                     ])),
             SizedBox(height: 10),
-            Text(
-                formatAmount(
-                    double.parse(arguments.element.balance) / pow(10, 18),
-                    arguments.element.token.symbol),
+            Text(accountBalance(),
                 style: TextStyle(
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w500,

@@ -224,17 +224,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                   margin: EdgeInsets.only(top: 20.0),
                   child: Text(
-                    currency == "EUR"
-                        ? "€" +
-                            (widget.arguments.amount *
-                                    (widget.arguments.token.USD *
-                                        widget.arguments.wallet.state
-                                            .exchangeRatio))
-                                .toStringAsFixed(2)
-                        : '\$' +
-                            (widget.arguments.amount *
-                                    widget.arguments.token.USD)
-                                .toStringAsFixed(2),
+                    (widget.arguments.amount).toString() +
+                        " " +
+                        widget.arguments.token.symbol,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: HermezColors.blackTwo,
@@ -246,9 +238,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                 margin: EdgeInsets.only(top: 15.0, bottom: 30.0),
                 child: Text(
-                  (widget.arguments.amount).toString() +
-                      " " +
-                      widget.arguments.token.symbol,
+                  currency == "EUR"
+                      ? "€" +
+                          (widget.arguments.amount *
+                                  (widget.arguments.token.USD *
+                                      widget.arguments.wallet.state
+                                          .exchangeRatio))
+                              .toStringAsFixed(2)
+                      : '\$' +
+                          (widget.arguments.amount * widget.arguments.token.USD)
+                              .toStringAsFixed(2),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: HermezColors.steel,

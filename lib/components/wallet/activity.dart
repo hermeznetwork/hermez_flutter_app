@@ -11,6 +11,7 @@ import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/forged_transaction.dart';
+import 'package:hermez_plugin/model/forged_transactions_response.dart';
 import 'package:intl/intl.dart';
 
 import '../../wallet_transaction_details_page.dart';
@@ -37,9 +38,41 @@ class Activity extends StatefulWidget {
 }
 
 class _ActivityState extends State<Activity> {
+  final ScrollController _controller = ScrollController();
+
+  bool _isLoading = false;
+  List<String> _dummy = List.generate(20, (index) => 'Item $index');
+  int fromItem = 0;
+  int pendingItems = 0;
+  List<ForgedTransaction> transactions = [];
+
+  @override
+  void initState() {
+    _controller.addListener(_onScroll);
+    fetchData();
+    super.initState();
+  }
+
+  _onScroll() {
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange &&
+        pendingItems > 0) {
+      setState(() {
+        _isLoading = true;
+        fetchData();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
+    /*return FutureBuilder<List<dynamic>>(
       future: fetchTransactions(),
       builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -62,7 +95,7 @@ class _ActivityState extends State<Activity> {
             );
           } else {
             if (snapshot.hasData && snapshot.data.length > 0) {
-              return buildActivityList(snapshot.data);
+              return buildActivityList();
             } else {
               return Expanded(
                 child: Container(
@@ -85,24 +118,28 @@ class _ActivityState extends State<Activity> {
           }
         }
       },
-    );
+    );*/
+    return buildActivityList();
   }
 
   //widget that builds the list
-  Widget buildActivityList(List<dynamic> dataList) {
+  Widget buildActivityList(/*List<dynamic> dataList*/) {
     return Container(
       color: Colors.white,
       child: RefreshIndicator(
         child: ListView.builder(
+          controller: _controller,
           shrinkWrap: true,
-          itemCount: dataList.length,
+          itemCount: _isLoading ? transactions.length + 1 : transactions.length,
           //set the item count so that index won't be out of range
           padding: const EdgeInsets.all(16.0),
           //add some padding to make it look good
-          itemBuilder: (context, i) {
+          itemBuilder: (context, index) {
+            if (transactions.length == index)
+              return Center(child: CircularProgressIndicator());
             var title = "";
             var subtitle = "";
-            dynamic element = dataList.elementAt(i);
+            dynamic element = transactions.elementAt(index);
             var type = 'type';
             var txType;
             var status = 'status';
@@ -157,9 +194,27 @@ class _ActivityState extends State<Activity> {
                 if (transaction.fromAccountIndex ==
                     widget.arguments.account.accountIndex) {
                   type = "SEND";
+                  if (transaction.timestamp.isNotEmpty) {
+                    status = "CONFIRMED";
+                    final formatter = DateFormat(
+                        "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                    final DateTime dateTimeFromStr =
+                        formatter.parse(transaction.timestamp);
+                    timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+                  }
+                  addressFrom = transaction.fromHezEthereumAddress;
+                  addressTo = transaction.toHezEthereumAddress;
                 } else if (transaction.toAccountIndex ==
                     widget.arguments.account.accountIndex) {
                   type = "RECEIVE";
+                  if (transaction.timestamp.isNotEmpty) {
+                    status = "CONFIRMED";
+                    final formatter = DateFormat(
+                        "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                    final DateTime dateTimeFromStr =
+                        formatter.parse(transaction.timestamp);
+                    timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+                  }
                 }
               } else {
                 txHash = transaction.id;
@@ -312,24 +367,90 @@ class _ActivityState extends State<Activity> {
     await Future.delayed(Duration(milliseconds: 1000));
 
     setState(() {
-      fetchTransactions();
+      fromItem = 0;
+      _isLoading = true;
+      transactions = [];
+      fetchData();
     });
     // if failed,use refreshFailed()
     //_elements = widget.arguments.cryptoList;
     //_refreshController.refreshCompleted();
   }
 
-  Future<List<dynamic>> fetchTransactions() async {
-    return await widget.arguments.store.getTransactionsByAddress(
+  Future<void> fetchData() async {
+    List<Exit> exits = await fetchExits(widget.arguments.account.token.id);
+    ForgedTransactionsResponse response = await fetchHistoryTransactions();
+    final filteredTransactions = filterExitsFromHistoryTransactions(
+      response.transactions,
+      exits,
+      /*pendingWithdrawsAccount,
+        pendingDelayedWithdrawsAccount,
+        wallet,
+        dispatch*/
+    );
+    setState(() {
+      pendingItems = response.pendingItems;
+      fromItem = filteredTransactions.last.itemId;
+      transactions.addAll(filteredTransactions);
+      _isLoading = false;
+    });
+  }
+
+  Future<ForgedTransactionsResponse> fetchHistoryTransactions() async {
+    return await widget.arguments.store.getHermezTransactionsByAddress(
         widget.arguments.store.state.ethereumAddress,
         widget.arguments.account,
-        0);
+        fromItem);
+  }
+
+  Future<List<Exit>> fetchExits(int tokenId) {
+    return widget.arguments.store.getExits(tokenId: tokenId);
+  }
+
+  List<ForgedTransaction> filterExitsFromHistoryTransactions(
+      List<ForgedTransaction> historyTransactions, List<Exit> exits) {
+    List<ForgedTransaction> filteredTransactions =
+        List.from(historyTransactions);
+    filteredTransactions.removeWhere((ForgedTransaction transaction) {
+      if (transaction.type == 'Exit') {
+        final exitId =
+            transaction.fromAccountIndex + transaction.batchNum.toString();
+        Exit exitTx;
+        exits.forEach((Exit exit) {
+          if (exit.batchNum == transaction.batchNum &&
+              exit.accountIndex == transaction.fromAccountIndex) {
+            exitTx = exit;
+          }
+        });
+
+        if (exitTx != null) {
+          if (exitTx.instantWithdraw != null ||
+              exitTx.delayedWithdraw != null) {
+            /*const pendingWithdraw = pendingWithdraws.find((pendingWithdraw) => pendingWithdraw.id === exitId)
+          if (pendingWithdraw) {
+            dispatch(removePendingWithdraw(exitId))
+          }
+
+          const pendingDelayedWithdraw = pendingDelayedWithdraws.find((pendingDelayedWithdraw) => pendingDelayedWithdraw.id === exitId)
+          if (pendingDelayedWithdraw) {
+            dispatch(removePendingDelayedWithdraw(exitId))
+          }*/
+            return false;
+          } else {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    });
+    return filteredTransactions;
   }
 
   /// Fetches the transactions details for the specified account index
   /// @param {string} accountIndex - Account index
   /// @returns {void}
-  Future<List<dynamic>> fetchHistoryTransactions(Account account, int fromItem,
+  /*Future<List<dynamic>> fetchHistoryTransactions(Account account, int fromItem,
       {List<Exit> exits}) async {
     await widget.arguments.store
         .getTransactionsByAddress(
@@ -339,7 +460,7 @@ class _ActivityState extends State<Activity> {
               //transactions.remove
               //res.transactions as ForgedTransaction = res.transactions.
             });
-  }
+  }*/
 
   // takes in an object and color and returns a circle avatar with first letter and required color
   CircleAvatar _getLeadingWidget(String icon, Color color) {

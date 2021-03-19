@@ -42,7 +42,7 @@ class TransferSummaryForm extends HookWidget {
     final amountController = useTextEditingController();
     final transferStore = useWalletTransfer(context);
 
-    var format = DateFormat('dd MMM yyyy');
+    var format = DateFormat('dd/MM/yyyy, hh:mm:ss a');
     var date = "";
     if (transactionDate != null) {
       date = format.format(transactionDate);
