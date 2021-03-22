@@ -23,6 +23,7 @@ import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/tokens_request.dart';
 import 'package:hermez_plugin/model/transaction.dart';
 import 'package:hermez_plugin/tx.dart' as tx;
+import 'package:hermez_plugin/tx_utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'configuration_service.dart';
@@ -215,9 +216,31 @@ class HermezService implements IHermezService {
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    return tx.deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
-        hezEthereumAddress, token, babyJubJub, client, privateKey,
-        gasLimit: gasLimit, gasMultiplier: gasMultiplier);
+    final txHash = await tx
+        .deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
+            hezEthereumAddress, token, babyJubJub, client, privateKey,
+            gasLimit: gasLimit, gasMultiplier: gasMultiplier)
+        .then((txHash) async {
+      if (txHash != null) {
+        await api.getAccounts(hezEthereumAddress, [token.id]).then((res) {
+          _configService.addPendingDeposit({
+            'id': txHash,
+            'fromHezEthereumAddress': hezEthereumAddress,
+            'toHezEthereumAddress': hezEthereumAddress,
+            'token': token,
+            'amount': amount.toDouble(),
+            'state': 'pend',
+            'timestamp': DateTime.now().toIso8601String(),
+            'type':
+                res != null && res.accounts != null && res.accounts.length > 0
+                    ? TxType.Deposit.toString().split('.').last
+                    : TxType.CreateAccountDeposit.toString().split('.').last
+          });
+        });
+      }
+      return txHash != null;
+    });
+    return txHash != null;
   }
 
   @override

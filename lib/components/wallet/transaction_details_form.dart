@@ -6,6 +6,7 @@ import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
+import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -382,8 +383,16 @@ class TransferSummaryForm extends HookWidget {
                   contentPadding:
                       EdgeInsets.only(top: 20, bottom: 20, left: 15, right: 15),
                   onTap: () async {
-                    var url =
-                        "https://ropsten.etherscan.io/tx/" + transactionHash;
+                    var url;
+                    if (store.state.txLevel == TransactionLevel.LEVEL1) {
+                      url = getCurrentEnvironment().etherscanUrl +
+                          "/tx/" +
+                          transactionHash;
+                    } else {
+                      url = getCurrentEnvironment().batchExplorerUrl +
+                          '/transaction/' +
+                          transactionHash;
+                    }
                     if (await canLaunch(url))
                       await launch(url);
                     else

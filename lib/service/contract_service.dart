@@ -108,6 +108,22 @@ class ContractService implements IContractService {
     return txHash;
   }
 
+  Future<TransactionInformation> getTransactionByHash(String txHash) async {
+    TransactionInformation transaction =
+        await client.getTransactionByHash(txHash);
+    return transaction;
+  }
+
+  Future<TransactionReceipt> getTxReceipt(String txHash) async {
+    TransactionReceipt receipt;
+    try {
+      receipt = await client.getTransactionReceipt(txHash);
+    } catch (err) {
+      print('could not get $txHash receipt, try again');
+    }
+    return receipt;
+  }
+
   Future<TransactionReceipt> getTransactionReceipt(String txHash) async {
     TransactionReceipt receipt;
     try {

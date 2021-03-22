@@ -57,6 +57,7 @@ class _HomeBalanceState extends State<HomeBalance> {
   List<Exit> _exits = [];
   List<dynamic> _poolTxs = [];
   List<dynamic> _pendingWithdraws = [];
+  List<dynamic> _pendingDeposits = [];
 
   @override
   void initState() {
@@ -88,9 +89,8 @@ class _HomeBalanceState extends State<HomeBalance> {
 
       _poolTxs = await fetchPendingExits();
       _exits = await fetchExits();
-      final accountPendingWithdraws =
-          await widget.arguments.store.getPendingWithdraws();
-      _pendingWithdraws = accountPendingWithdraws;
+      _pendingWithdraws = await fetchPendingWithdraws();
+      _pendingDeposits = await fetchPendingDeposits();
 
       return widget.arguments.store.getAccounts();
     } else {
@@ -109,9 +109,13 @@ class _HomeBalanceState extends State<HomeBalance> {
     return widget.arguments.store.getExits(); // TODO : only pending withdraws?
   }
 
-  /*Future<List<dynamic>> checkPendingDeposits() {
-    return null;
-  }*/
+  Future<List<dynamic>> fetchPendingWithdraws() {
+    return widget.arguments.store.getPendingWithdraws();
+  }
+
+  Future<List<dynamic>> fetchPendingDeposits() {
+    return widget.arguments.store.getPendingDeposits();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -573,6 +577,13 @@ class _HomeBalanceState extends State<HomeBalance> {
                   .split('.')
                   .last;
 
+              var isPendingDeposit = false;
+              _pendingDeposits.forEach((pendingDeposit) {
+                if (account.token.id == (pendingDeposit['token'])['id']) {
+                  isPendingDeposit = true;
+                }
+              });
+
               return AccountRow(
                   account.token.name,
                   account.token.symbol,
@@ -584,7 +595,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                   double.parse(account.balance) /
                       pow(10, account.token.decimals),
                   false,
-                  true, (token, amount) async {
+                  true,
+                  isPendingDeposit, (token, amount) async {
                 Navigator.of(context).pushNamed("/account_details",
                     arguments: WalletAccountDetailsArguments(
                         account, widget.arguments.store));

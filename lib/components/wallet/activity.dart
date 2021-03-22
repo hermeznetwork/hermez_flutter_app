@@ -12,7 +12,6 @@ import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/forged_transaction.dart';
-import 'package:hermez_plugin/model/forged_transactions_response.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:intl/intl.dart';
@@ -46,7 +45,7 @@ class _ActivityState extends State<Activity> {
   bool _isLoading = false;
   int fromItem = 0;
   int pendingItems = 0;
-  List<ForgedTransaction> transactions = [];
+  List<dynamic> transactions = [];
   List<Exit> exits = [];
   List<dynamic> poolTxs = [];
   List<dynamic> pendingWithdraws = [];
@@ -101,53 +100,6 @@ class _ActivityState extends State<Activity> {
 
   @override
   Widget build(BuildContext context) {
-    /*return FutureBuilder<List<dynamic>>(
-      future: fetchTransactions(),
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            color: Colors.white,
-            child: Center(
-              child: CircularProgressIndicator(
-                backgroundColor: HermezColors.orange,
-              ),
-            ),
-          );
-        } else {
-          if (snapshot.hasError) {
-            // while data is loading:
-            return Container(
-              color: Colors.white,
-              child: Center(
-                child: Text('There was an error:' + snapshot.error.toString()),
-              ),
-            );
-          } else {
-            if (snapshot.hasData && snapshot.data.length > 0) {
-              return buildActivityList();
-            } else {
-              return Expanded(
-                child: Container(
-                  padding: const EdgeInsets.only(
-                      left: 60.0, right: 60.0, top: 50.0, bottom: 50.0),
-                  color: Colors.white,
-                  child: Text(
-                    'Account transactions will appear here.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: HermezColors.blueyGrey,
-                      fontSize: 16,
-                      fontFamily: 'ModernEra',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-        }
-      },
-    );*/
     return buildActivityList();
   }
 
@@ -174,9 +126,7 @@ class _ActivityState extends State<Activity> {
           color: Colors.white,
           padding: const EdgeInsets.all(34.0),
           child: Text(
-            widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
-                ? 'There are no tokens in this account. \n\n Please make a deposit.'
-                : 'Deposit tokens from your \n\n Ethereum account.',
+            'Account transactions will appear here.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: HermezColors.blueyGrey,
@@ -293,16 +243,7 @@ class _ActivityState extends State<Activity> {
                   var addressFrom = 'from';
                   var addressTo = 'to';
                   var value = '0';
-                  if (element.runtimeType == LinkedHashMap) {
-                    LinkedHashMap event = element;
-                    type = event['type'];
-                    status = event['status'];
-                    timestamp = event['timestamp'];
-                    txHash = event['txHash'];
-                    addressFrom = event['from'];
-                    addressTo = event['to'];
-                    value = event['value'];
-                  } else if (element.runtimeType == ForgedTransaction) {
+                  if (element.runtimeType == ForgedTransaction) {
                     ForgedTransaction transaction = element;
                     if (transaction.type == "CreateAccountDeposit" ||
                         transaction.type == "Deposit") {
@@ -365,6 +306,15 @@ class _ActivityState extends State<Activity> {
                       txHash = transaction.id;
                     }
                     txHash = transaction.id;
+                  } else {
+                    LinkedHashMap event = element;
+                    type = event['type'];
+                    status = event['status'];
+                    timestamp = event['timestamp'];
+                    txHash = event['txHash'];
+                    addressFrom = event['from'];
+                    addressTo = event['to'];
+                    value = event['value'];
                   }
                   final String currency = widget.arguments.defaultCurrency
                       .toString()
@@ -513,25 +463,35 @@ class _ActivityState extends State<Activity> {
   }
 
   Future<void> fetchData() async {
-    poolTxs = await fetchPendingExits(widget.arguments.account.token.id);
-    exits = await fetchExits(widget.arguments.account.token.id);
-    pendingWithdraws =
-        await fetchPendingWithdraws(widget.arguments.account.token.id);
-    ForgedTransactionsResponse response = await fetchHistoryTransactions();
-    final filteredTransactions = filterExitsFromHistoryTransactions(
-      response.transactions,
-      exits,
-      /*pendingWithdrawsAccount,
+    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
+      poolTxs = await fetchPendingExits(widget.arguments.account.token.id);
+      exits = await fetchExits(widget.arguments.account.token.id);
+      pendingWithdraws =
+          await fetchPendingWithdraws(widget.arguments.account.token.id);
+      List<dynamic> historyTransactions = await fetchHistoryTransactions();
+      final filteredTransactions = filterExitsFromHistoryTransactions(
+        historyTransactions,
+        exits,
+        /*pendingWithdrawsAccount,
         pendingDelayedWithdrawsAccount,
         wallet,
         dispatch*/
-    );
-    setState(() {
-      pendingItems = response.pendingItems;
-      fromItem = filteredTransactions.last.itemId;
-      transactions.addAll(filteredTransactions);
-      _isLoading = false;
-    });
+      );
+      setState(() {
+        pendingItems = pendingItems;
+        fromItem = filteredTransactions.last.itemId;
+        transactions.addAll(filteredTransactions);
+        _isLoading = false;
+      });
+    } else {
+      List<dynamic> historyTransactions = await fetchHistoryTransactions();
+      setState(() {
+        pendingItems = 0;
+        //fromItem = transactions.last.itemId;
+        transactions.addAll(historyTransactions);
+        _isLoading = false;
+      });
+    }
   }
 
   Future<List<PoolTransaction>> fetchPendingExits(int tokenId) async {
@@ -554,11 +514,21 @@ class _ActivityState extends State<Activity> {
     return accountPendingWithdraws;
   }
 
-  Future<ForgedTransactionsResponse> fetchHistoryTransactions() async {
-    return await widget.arguments.store.getHermezTransactionsByAddress(
-        widget.arguments.store.state.ethereumAddress,
-        widget.arguments.account,
-        fromItem);
+  Future<List<dynamic>> fetchHistoryTransactions() async {
+    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
+      return await widget.arguments.store.getEthereumTransactionsByAddress(
+          widget.arguments.store.state.ethereumAddress,
+          widget.arguments.account,
+          fromItem);
+    } else {
+      final transactionsResponse = await widget.arguments.store
+          .getHermezTransactionsByAddress(
+              widget.arguments.store.state.ethereumAddress,
+              widget.arguments.account,
+              fromItem);
+      pendingItems = transactionsResponse.pendingItems;
+      return transactionsResponse.transactions;
+    }
   }
 
   List<ForgedTransaction> filterExitsFromHistoryTransactions(
@@ -567,8 +537,6 @@ class _ActivityState extends State<Activity> {
         List.from(historyTransactions);
     filteredTransactions.removeWhere((ForgedTransaction transaction) {
       if (transaction.type == 'Exit') {
-        final exitId =
-            transaction.fromAccountIndex + transaction.batchNum.toString();
         Exit exitTx;
         exits.forEach((Exit exit) {
           if (exit.batchNum == transaction.batchNum &&
@@ -580,15 +548,6 @@ class _ActivityState extends State<Activity> {
         if (exitTx != null) {
           if (exitTx.instantWithdraw != null ||
               exitTx.delayedWithdraw != null) {
-            /*const pendingWithdraw = pendingWithdraws.find((pendingWithdraw) => pendingWithdraw.id === exitId)
-          if (pendingWithdraw) {
-            dispatch(removePendingWithdraw(exitId))
-          }
-
-          const pendingDelayedWithdraw = pendingDelayedWithdraws.find((pendingDelayedWithdraw) => pendingDelayedWithdraw.id === exitId)
-          if (pendingDelayedWithdraw) {
-            dispatch(removePendingDelayedWithdraw(exitId))
-          }*/
             return false;
           } else {
             return true;
@@ -600,21 +559,6 @@ class _ActivityState extends State<Activity> {
     });
     return filteredTransactions;
   }
-
-  /// Fetches the transactions details for the specified account index
-  /// @param {string} accountIndex - Account index
-  /// @returns {void}
-  /*Future<List<dynamic>> fetchHistoryTransactions(Account account, int fromItem,
-      {List<Exit> exits}) async {
-    await widget.arguments.store
-        .getTransactionsByAddress(
-            widget.arguments.store.state.ethereumAddress, account, fromItem)
-        .then((res) => {
-              //List<ForgedTransaction> transactions = res.transactions;
-              //transactions.remove
-              //res.transactions as ForgedTransaction = res.transactions.
-            });
-  }*/
 
   // takes in an object and color and returns a circle avatar with first letter and required color
   CircleAvatar _getLeadingWidget(String icon, Color color) {

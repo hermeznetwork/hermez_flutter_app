@@ -5,6 +5,7 @@ import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web3dart/web3dart.dart';
 
 abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
@@ -29,6 +30,8 @@ abstract class IConfigurationService {
   void removePendingWithdraw(String pendingWithdrawId);
   void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
   void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
+  void addPendingDeposit(dynamic pendingDeposit);
+  void removePendingDeposit(String pendingDepositId);
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -167,10 +170,10 @@ class ConfigurationService implements IConfigurationService {
   /// @returns {void}
   @override
   void addPendingWithdraw(dynamic pendingWithdraw) async {
-    final chainId = getCurrentEnvironment().chainId;
+    final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.addItem(PENDING_WITHDRAWS_KEY, chainId.toString(),
+    _storageService.addItem(PENDING_WITHDRAWS_KEY, chainId,
         hermezEthereumAddress, pendingWithdraw, false);
   }
 
@@ -178,37 +181,200 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was originally made
   /// @param {string} pendingWithdrawId - The pendingWithdraw identifier to remove from the pool
   /// @returns {void}
+  @override
   void removePendingWithdraw(String pendingWithdrawId) async {
-    final chainId = getCurrentEnvironment().chainId;
+    final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.removeItem(PENDING_WITHDRAWS_KEY, chainId.toString(),
+    _storageService.removeItem(PENDING_WITHDRAWS_KEY, chainId,
         hermezEthereumAddress, pendingWithdrawId, false);
   }
 
   /// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
   /// @param {dynamic} pendingDelayedWithdraw - The pendingDelayedWithdraw to add to the store
   /// @returns {void}
+  @override
   void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw) async {
-    final chainId = getCurrentEnvironment().chainId;
+    final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.addItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId.toString(),
+    _storageService.addItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId,
         hermezEthereumAddress, pendingDelayedWithdraw, false);
   }
 
   /// Removes a pendingDelayedWithdraw from the pendingDelayedWithdraw store
   /// @param {string} pendingDelayedWithdrawId - The pendingDelayedWithdraw identifier to remove from the store
   /// @returns {void}
+  @override
   void removePendingDelayedWithdraw(String pendingDelayedWithdrawId) async {
-    final chainId = getCurrentEnvironment().chainId;
+    final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.removeItem(
+    _storageService.removeItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId,
+        hermezEthereumAddress, pendingDelayedWithdrawId, false);
+  }
+
+  /// Updates the date in a delayed withdraw transaction
+  /// to the time when the transaction was mined
+  /// @param {String} transactionHash - The L1 transaction hash for a non-instant withdraw
+  /// @param {Number} pendingDelayedWithdrawDate - The date when the L1 transaction was mined
+  void updatePendingDelayedWithdrawDate(
+      String transactionHash, num pendingDelayedWithdrawDate) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    _storageService.updatePartialItemByCustomProp(
         PENDING_DELAYED_WITHDRAWS_KEY,
-        chainId.toString(),
+        chainId,
         hermezEthereumAddress,
-        pendingDelayedWithdrawId,
+        {'name': 'hash', 'value': transactionHash},
+        {'date': pendingDelayedWithdrawDate},
         false);
   }
+
+  /*@override
+  function checkPendingDelayedWithdraw (exitId) {
+    return (dispatch, getState) => {
+    const { global: { wallet, pendingDelayedWithdraws, ethereumNetworkTask } } = getState()
+
+    dispatch(globalActions.checkPendingDelayedWithdraw())
+    const provider = Providers.getProvider()
+    const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
+    pendingDelayedWithdraws,
+    ethereumNetworkTask.data.chainId,
+    wallet.hermezEthereumAddress
+    )
+
+    const pendingDelayedWithdraw = accountPendingDelayedWithdraws.find((delayedWithdraw) => delayedWithdraw.id === exitId)
+    if (pendingDelayedWithdraw) {
+      provider.getTransaction(pendingDelayedWithdraw.hash).then((transaction) => {
+        provider.getBlock(transaction.blockNumber).then((block) => {
+          // Converts timestamp from s to ms
+          const newTimestamp = block.timestamp * 1000
+          if (pendingDelayedWithdraw.date !== newTimestamp) {
+            dispatch(updatePendingDelayedWithdrawDate(pendingDelayedWithdraw.hash, newTimestamp))
+          }
+          dispatch(globalActions.checkPendingDelayedWithdrawSuccess())
+        })
+      }).catch(console.log)
+    } else {
+    dispatch(globalActions.checkPendingDelayedWithdrawSuccess())
+    }
+  }
+  }*/
+
+  /// Adds a pendingDeposit to the pendingDeposits store
+  /// @param {string} pendingDeposit - The pendingDeposit to add to the store
+  /// @returns {void}
+  @override
+  void addPendingDeposit(dynamic pendingDeposit) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    _storageService.addItem(PENDING_DEPOSITS_KEY, chainId,
+        hermezEthereumAddress, pendingDeposit, false);
+  }
+
+  /// Removes a pendingDeposit from the pendingDeposit store
+  /// @param {string} transactionId - The transaction identifier used to remove a pendingDeposit from the store
+  /// @returns {void}
+  @override
+  void removePendingDeposit(String transactionId) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    _storageService.removeItem(PENDING_DEPOSITS_KEY, chainId,
+        hermezEthereumAddress, transactionId, false);
+  }
+
+  void updatePendingDepositId(
+      String transactionHash, String transactionId) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    _storageService.updatePartialItemByCustomProp(
+        PENDING_DEPOSITS_KEY,
+        chainId,
+        hermezEthereumAddress,
+        {'name': 'hash', 'value': transactionHash},
+        {'id': transactionId},
+        false);
+  }
+
+  void checkPendingDeposits(Web3Client web3Client) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+    final storage =
+        await _storageService.getStorage(PENDING_DEPOSITS_KEY, false);
+
+    final List accountPendingDeposits = _storageService.getItemsByHermezAddress(
+        storage, chainId, hermezEthereumAddress);
+    final pendingDepositsHashes =
+        accountPendingDeposits.map((deposit) => deposit['hash']).toList();
+    final pendingDepositsTxReceipts = pendingDepositsHashes
+        .map((hash) async => await web3Client.getTransactionReceipt(hash))
+        .toList();
+    /*pendingDepositsTxReceipts.forEach((List txReceipts) {
+      txReceipts.removeWhere((txReceipt) => txReceipt != null && txReceipt.logs && txReceipt.logs.length > 0)
+    });*/
+  }
+
+  /*function checkPendingDeposits () {
+    return (dispatch, getState) => {
+    const { global: { wallet, pendingDeposits, ethereumNetworkTask } } = getState()
+
+    dispatch(globalActions.checkPendingDeposits())
+    const provider = Providers.getProvider()
+    const accountPendingDeposits = storage.getItemsByHermezAddress(
+    pendingDeposits,
+    ethereumNetworkTask.data.chainId,
+    wallet.hermezEthereumAddress
+    )
+    const pendingDepositsHashes = accountPendingDeposits.map(deposit => deposit.hash)
+    const pendingDepositsTxReceipts = pendingDepositsHashes.map(hash => provider.getTransactionReceipt(hash))
+
+    Promise.all(pendingDepositsTxReceipts).then((txReceipts) => {
+    const transactionHistoryPromises = txReceipts
+        .filter(txReceipt => txReceipt && txReceipt.logs && txReceipt.logs.length > 0)
+        .map((txReceipt) => {
+    const hermezContractInterface = new ethers.utils.Interface(HermezABI)
+    // Need to parse logs, but only events from the Hermez SC. Ignore errors when trying to parse others
+    const parsedLogs = []
+    for (const txReceiptLog of txReceipt.logs) {
+    try {
+    const parsedLog = hermezContractInterface.parseLog(txReceiptLog)
+    parsedLogs.push(parsedLog)
+    } catch (e) {}
+    }
+    const l1UserTxEvent = parsedLogs.find((event) => event.name === 'L1UserTxEvent')
+
+    if (!l1UserTxEvent) {
+    return Promise.resolve()
+    }
+
+    const txId = TxUtils.getL1UserTxId(l1UserTxEvent.args[0], l1UserTxEvent.args[1])
+    const pendingDeposit = accountPendingDeposits.find(deposit => deposit.hash === txReceipt.transactionHash)
+
+    if (pendingDeposit && !pendingDeposit.id) {
+    dispatch(updatePendingDepositId(txReceipt.transactionHash, txId))
+    }
+
+    return CoordinatorAPI.getHistoryTransaction(txId)
+    })
+
+    Promise.all(transactionHistoryPromises)
+        .then((results) => {
+    results
+        .filter(result => result !== undefined)
+        .forEach((transaction) => {
+    if (transaction.batchNum !== null) {
+    dispatch(removePendingDeposit(transaction.id))
+    }
+    })
+    dispatch(globalActions.checkPendingDepositsSuccess())
+    })
+        .catch(() => dispatch(globalActions.checkPendingDepositsSuccess()))
+    })
+  }
+  }*/
 }

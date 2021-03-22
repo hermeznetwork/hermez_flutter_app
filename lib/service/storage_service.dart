@@ -19,8 +19,8 @@ class StorageService implements IStorageService {
   FlutterSecureStorage _secureStorage;
   StorageService(this._localStorage, this._secureStorage);
 
-  Future<Map> initStorage(String key, bool secure) async {
-    final initialStorage = {};
+  Future<Map<String, dynamic>> initStorage(String key, bool secure) async {
+    final initialStorage = Map<String, dynamic>();
 
     if (secure) {
       await _secureStorage.write(key: key, value: json.encode(initialStorage));
@@ -32,7 +32,7 @@ class StorageService implements IStorageService {
   }
 
   @override
-  Future<Map> getStorage(String key, bool secure) async {
+  Future<Map<String, dynamic>> getStorage(String key, bool secure) async {
     var storage;
     var storageVersion;
     if (secure) {
@@ -70,7 +70,7 @@ class StorageService implements IStorageService {
   @override
   Future<Map> addItem(String key, String chainId, String hermezEthereumAddress,
       dynamic item, bool secure) async {
-    final Map storage = await getStorage(key, secure);
+    final Map<String, dynamic> storage = await getStorage(key, secure);
     final Map<String, dynamic> chainIdStorage = storage.containsKey(chainId)
         ? storage[chainId]
         : Map<String, dynamic>();
@@ -134,11 +134,36 @@ class StorageService implements IStorageService {
     return newStorage;
   }
 
-  /*function updatePartialItemByCustomProp (key, chainId, hermezEthereumAddress, prop, partialItem) {
-    const storage = getStorage(key)
-    const chainIdStorage = storage[chainId] || {}
-    const accountStorage = chainIdStorage[hermezEthereumAddress] || []
-    const newStorage = {
+  @override
+  Future<Map> updatePartialItemByCustomProp(
+      String key,
+      String chainId,
+      String hermezEthereumAddress,
+      Map<String, dynamic> prop,
+      Map<String, dynamic> partialItem,
+      bool secure) async {
+    final Map storage = await getStorage(key, secure);
+    final Map chainIdStorage =
+        storage.containsKey(chainId) ? storage[chainId] : {};
+    final List accountStorage =
+        chainIdStorage.containsKey(hermezEthereumAddress)
+            ? chainIdStorage[hermezEthereumAddress]
+            : [];
+
+    // TODO: unfinished
+
+    /*(accountStorage.firstWhere((item) => item[prop['name']] == prop['value']) as Map)
+
+    final Map<String, dynamic> newChainIdStorage = Map<String, dynamic>()
+      ..addAll(chainIdStorage);
+    newChainIdStorage.update(
+        hermezEthereumAddress, (value) => newAccountStorage,
+        ifAbsent: () => newAccountStorage);*/
+
+    final Map<String, dynamic> newStorage = Map<String, dynamic>()
+      ..addAll(storage);
+
+    /*const newStorage = {
       ...storage,
       [chainId]: {
         ...chainIdStorage,
@@ -149,12 +174,16 @@ class StorageService implements IStorageService {
             return item
         })
       }
+    }*/
+
+    if (secure) {
+      await _secureStorage.write(key: key, value: json.encode(newStorage));
+    } else {
+      await _localStorage.setString(key, json.encode(newStorage));
     }
 
-    localStorage.setItem(key, JSON.stringify(newStorage))
-
-    return newStorage
-  }*/
+    return newStorage;
+  }
 
   @override
   dynamic getItemsByHermezAddress(

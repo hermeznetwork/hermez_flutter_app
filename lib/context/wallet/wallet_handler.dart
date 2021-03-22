@@ -335,6 +335,32 @@ class WalletHandler {
     return exits;
   }
 
+  Future<List<dynamic>> getPendingDeposits() async {
+    final storage =
+        await _storageService.getStorage(PENDING_DEPOSITS_KEY, false);
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress =
+        await _configurationService.getHermezAddress();
+    final List accountPendingDeposits = _storageService.getItemsByHermezAddress(
+        storage, chainId, hermezEthereumAddress);
+
+    List depositIds = [];
+    accountPendingDeposits.forEach((pendingDeposit) async {
+      final transactionId = pendingDeposit['id'];
+      web3.TransactionInformation transaction =
+          await _contractService.getTransactionByHash(transactionId);
+      if (transaction != null && transaction.transactionIndex != null) {
+        depositIds.add(transactionId);
+        _configurationService.removePendingDeposit(transactionId);
+      }
+    });
+
+    accountPendingDeposits.removeWhere(
+        (pendingDeposit) => depositIds.contains(pendingDeposit['id']));
+
+    return accountPendingDeposits;
+  }
+
   Future<List<dynamic>> getPendingWithdraws() async {
     final storage =
         await _storageService.getStorage(PENDING_WITHDRAWS_KEY, false);
@@ -405,6 +431,7 @@ class WalletHandler {
   }
 
   Future<bool> deposit(BigInt amount, Token token) async {
+    _store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =

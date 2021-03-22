@@ -165,6 +165,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                       double.parse(account.balance) / pow(10, 18),
                       true,
                       defaultCurrencySelected,
+                      false,
                       (token, amount) async {
                         Navigator.of(context)
                             .pushReplacementNamed("/account_selector",

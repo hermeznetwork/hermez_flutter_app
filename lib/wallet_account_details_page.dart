@@ -30,6 +30,10 @@ class WalletAccountDetailsPage extends HookWidget {
   Widget build(BuildContext context) {
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+    useEffect(() {
+      return null;
+    }, [arguments.store]);
+
     final String currency =
         arguments.store.state.defaultCurrency.toString().split('.').last;
 
@@ -211,7 +215,11 @@ class WalletAccountDetailsPage extends HookWidget {
                           ),
                           onPressed: () {
                             Navigator.of(context).pushNamed("/account_selector",
-                                arguments: TransactionType.WITHDRAW);
+                                arguments: AccountSelectorArguments(
+                                  //widget.arguments.store.state.txLevel,
+                                  TransactionType.EXIT,
+                                  arguments.store,
+                                ));
                           },
                           padding: EdgeInsets.all(10.0),
                           color: Colors.transparent,

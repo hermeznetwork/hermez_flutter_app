@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/environment.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'context/wallet/wallet_handler.dart';
@@ -273,8 +274,9 @@ class SettingsPage extends HookWidget {
   }
 
   viewInExplorer() async {
-    var url =
-        "https://ropsten.etherscan.io/address/" + store.state.ethereumAddress;
+    var url = getCurrentEnvironment().etherscanUrl +
+        "/address/" +
+        store.state.ethereumAddress;
     if (await canLaunch(url))
       await launch(url);
     else

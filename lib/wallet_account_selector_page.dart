@@ -150,7 +150,8 @@ class WalletAccountSelectorPage extends HookWidget {
                 currency,
                 double.parse(account.balance) / pow(10, account.token.decimals),
                 false,
-                true, (String token, String amount) async {
+                true,
+                false, (String token, String amount) async {
               final Token supportedToken =
                   await arguments.store.getTokenById(account.token.id);
               Navigator.pushReplacementNamed(context, "/transfer_amount",
