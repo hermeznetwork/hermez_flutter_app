@@ -598,8 +598,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                   true,
                   isPendingDeposit, (token, amount) async {
                 Navigator.of(context).pushNamed("/account_details",
-                    arguments: WalletAccountDetailsArguments(
-                        account, widget.arguments.store));
+                    arguments: WalletAccountDetailsArguments(account));
               }); //iterate through indexes and get the next colour
             }
             //return _buildRow(context, element, color); //build the row widget

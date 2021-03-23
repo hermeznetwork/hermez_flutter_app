@@ -10,6 +10,7 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 
 import 'context/wallet/wallet_handler.dart';
+import 'context/wallet/wallet_provider.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable
@@ -17,25 +18,45 @@ import 'context/wallet/wallet_handler.dart';
 
 class WalletAccountDetailsArguments {
   final Account element;
-  WalletHandler store;
+  //WalletHandler store;
 
-  WalletAccountDetailsArguments(this.element, this.store);
+  WalletAccountDetailsArguments(
+    this.element,
+    /*this.store*/
+  );
 }
 
 class WalletAccountDetailsPage extends HookWidget {
   WalletAccountDetailsPage(this.arguments);
   final WalletAccountDetailsArguments arguments;
 
+  WalletHandler store;
+
   @override
   Widget build(BuildContext context) {
+    store = useWallet(context);
+    //store.state = arguments.store.state;
+    //_currentIndex = useState(0);
+
+    /*useEffect(() {
+      store.initialise();
+      if (store.state.txLevel == TransactionLevel.LEVEL1) {
+        store.fetchOwnL1Balance();
+      } else {
+        store.fetchOwnL2Balance();
+      }
+      return null;
+    }, [store]);*/
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     useEffect(() {
+      store.initialise();
+      //fetchState();
       return null;
-    }, [arguments.store]);
+    }, [store]);
 
     final String currency =
-        arguments.store.state.defaultCurrency.toString().split('.').last;
+        store.state.defaultCurrency.toString().split('.').last;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -65,7 +86,7 @@ class WalletAccountDetailsPage extends HookWidget {
                 padding:
                     EdgeInsets.only(left: 10, right: 10, top: 7, bottom: 5),
                 child: Text(
-                    arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                    store.state.txLevel == TransactionLevel.LEVEL1
                         ? "L1"
                         : "L2",
                     style: TextStyle(
@@ -114,15 +135,14 @@ class WalletAccountDetailsPage extends HookWidget {
             Expanded(
               child: Activity(
                 arguments: ActivityArguments(
-                  arguments.store,
+                  store,
                   arguments.element,
-                  arguments.store.state.ethereumAddress,
+                  store.state.ethereumAddress,
                   arguments.element.token.symbol,
                   currency == "USD"
                       ? arguments.element.token.USD
-                      : arguments.element.token.USD *
-                          arguments.store.state.exchangeRatio,
-                  arguments.store.state.defaultCurrency,
+                      : arguments.element.token.USD * store.state.exchangeRatio,
+                  store.state.defaultCurrency,
                 ),
               ),
             ),
@@ -177,14 +197,14 @@ class WalletAccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                      store.state.txLevel == TransactionLevel.LEVEL1
                           ? Navigator.of(context)
-                              .pushNamed("/qrcode", arguments: arguments.store)
+                              .pushNamed("/qrcode", arguments: store)
                           : Navigator.of(context).pushNamed("/account_selector",
                               arguments: AccountSelectorArguments(
                                 //widget.arguments.store.state.txLevel,
                                 TransactionType.DEPOSIT,
-                                arguments.store,
+                                store,
                               ));
                     },
                     padding: EdgeInsets.all(10.0),
@@ -204,7 +224,7 @@ class WalletAccountDetailsPage extends HookWidget {
                       ],
                     )),
           ),
-          arguments.store.state.txLevel == TransactionLevel.LEVEL1
+          store.state.txLevel == TransactionLevel.LEVEL1
               ? Container()
               : Expanded(
                   child:
@@ -218,7 +238,7 @@ class WalletAccountDetailsPage extends HookWidget {
                                 arguments: AccountSelectorArguments(
                                   //widget.arguments.store.state.txLevel,
                                   TransactionType.EXIT,
-                                  arguments.store,
+                                  store,
                                 ));
                           },
                           padding: EdgeInsets.all(10.0),
@@ -262,7 +282,7 @@ class WalletAccountDetailsPage extends HookWidget {
     String locale = "";
     String symbol = "";
     final String currency =
-        arguments.store.state.defaultCurrency.toString().split('.').last;
+        store.state.defaultCurrency.toString().split('.').last;
     if (currency == "EUR") {
       locale = 'eu';
       symbol = '€';
@@ -274,7 +294,7 @@ class WalletAccountDetailsPage extends HookWidget {
       double value =
           arguments.element.token.USD * double.parse(arguments.element.balance);
       if (currency == "EUR") {
-        value *= arguments.store.state.exchangeRatio;
+        value *= store.state.exchangeRatio;
       }
       resultValue = resultValue + value;
     }
@@ -282,5 +302,9 @@ class WalletAccountDetailsPage extends HookWidget {
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));
     return result;
+  }
+
+  void fetchState() {
+    store.getState();
   }
 }

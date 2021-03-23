@@ -20,6 +20,7 @@ import 'package:hermez_plugin/model/forged_transactions_request.dart';
 import 'package:hermez_plugin/model/forged_transactions_response.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
+import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
 import 'package:hermez_plugin/tx_pool.dart' as tx_pool;
@@ -113,7 +114,7 @@ class WalletHandler {
     final defaultCurrency = await _configurationService.getDefaultCurrency();
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
 
-    //final state = await _hermezService.getState();
+    //final state = await getState();
 
     final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();
     _configurationService.setExchangeRatio(exchangeRatio);
@@ -314,6 +315,11 @@ class WalletHandler {
     final accounts = await _hermezService.getAccounts(
         web3.EthereumAddress.fromHex(ethereumAddress), tokenIds);
     return accounts;
+  }
+
+  Future<StateResponse> getState() async {
+    final state = await _hermezService.getState();
+    return state;
   }
 
   Future<List<Token>> getTokens() async {

@@ -42,25 +42,27 @@ class Activity extends StatefulWidget {
 class _ActivityState extends State<Activity> {
   final ScrollController _controller = ScrollController();
 
-  bool _isLoading = false;
+  bool _isLoading = true;
   int fromItem = 0;
   int pendingItems = 0;
   List<dynamic> transactions = [];
   List<Exit> exits = [];
   List<dynamic> poolTxs = [];
   List<dynamic> pendingWithdraws = [];
+  List<dynamic> pendingDeposits = [];
 
   @override
   void initState() {
     _controller.addListener(_onScroll);
-    fromItem = 0;
-    _isLoading = true;
-    exits = [];
-    poolTxs = [];
-    pendingWithdraws = [];
-    transactions = [];
     fetchData();
     super.initState();
+  }
+
+  @override
+  void setState(fn) {
+    if (this.mounted) {
+      super.setState(fn);
+    }
   }
 
   _onScroll() {
@@ -77,14 +79,15 @@ class _ActivityState extends State<Activity> {
   Future<void> _onRefresh() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
+    fromItem = 0;
+    exits = [];
+    poolTxs = [];
+    pendingWithdraws = [];
+    pendingDeposits = [];
+    transactions = [];
 
     setState(() {
-      fromItem = 0;
       _isLoading = true;
-      exits = [];
-      poolTxs = [];
-      pendingWithdraws = [];
-      transactions = [];
       fetchData();
     });
     // if failed,use refreshFailed()
@@ -468,6 +471,46 @@ class _ActivityState extends State<Activity> {
       exits = await fetchExits(widget.arguments.account.token.id);
       pendingWithdraws =
           await fetchPendingWithdraws(widget.arguments.account.token.id);
+      pendingDeposits =
+          await fetchPendingDeposits(widget.arguments.account.token.id);
+      pendingDeposits.map((pendingDeposit) {
+        ForgedTransaction(
+            type: pendingDeposit['type'],
+            fromHezEthereumAddress: pendingDeposit['fromHezEthereumAddress'],
+            timestamp: pendingDeposit['timestamp']);
+        /*
+
+        'id': txHash,
+            'fromHezEthereumAddress': hezEthereumAddress,
+            'toHezEthereumAddress': hezEthereumAddress,
+            'token': token,
+            'amount': amount.toDouble(),
+            'state': 'pend',
+            'timestamp': DateTime.now().toIso8601String(),
+            'type':
+                res != null && res.accounts != null && res.accounts.length > 0
+                    ? TxType.Deposit.toString().split('.').last
+                    : TxType.CreateAccountDeposit.toString().split('.').last
+          }
+
+        ForgedTransaction transaction = element;
+        if (transaction.type == "CreateAccountDeposit" ||
+            transaction.type == "Deposit") {
+          type = "DEPOSIT";
+          value = transaction.l1info.depositAmount.toString();
+          if (transaction.l1info.depositAmountSuccess == true) {
+            status = "CONFIRMED";
+            final formatter = DateFormat(
+                "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+            final DateTime dateTimeFromStr =
+            formatter.parse(transaction.timestamp);
+            timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+          }
+          addressFrom = getEthereumAddress(
+              transaction.fromHezEthereumAddress);
+          addressTo = transaction.fromHezEthereumAddress;
+        }*/
+      }).toList();
       List<dynamic> historyTransactions = await fetchHistoryTransactions();
       final filteredTransactions = filterExitsFromHistoryTransactions(
         historyTransactions,
@@ -494,7 +537,7 @@ class _ActivityState extends State<Activity> {
     }
   }
 
-  Future<List<PoolTransaction>> fetchPendingExits(int tokenId) async {
+  Future<List<dynamic>> fetchPendingExits(int tokenId) async {
     List<PoolTransaction> poolTxs =
         await widget.arguments.store.getPoolTransactions();
     poolTxs.removeWhere((transaction) =>
@@ -512,6 +555,14 @@ class _ActivityState extends State<Activity> {
     accountPendingWithdraws.removeWhere((pendingWithdraw) =>
         Token.fromJson(pendingWithdraw['token']).id != tokenId);
     return accountPendingWithdraws;
+  }
+
+  Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
+    final accountPendingDeposits =
+        await widget.arguments.store.getPendingDeposits();
+    accountPendingDeposits.removeWhere((pendingDeposit) =>
+        Token.fromJson(pendingDeposit['token']).id != tokenId);
+    return accountPendingDeposits;
   }
 
   Future<List<dynamic>> fetchHistoryTransactions() async {

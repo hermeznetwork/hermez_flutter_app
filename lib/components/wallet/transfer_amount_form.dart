@@ -48,7 +48,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   final void Function(double amount, String token, String addressTo) onSubmit;
   bool amountIsValid = true;
   bool addressIsValid = true;
-  bool defaultCurrencySelected = true;
+  bool defaultCurrencySelected = false;
 
   final TextEditingController amountController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
