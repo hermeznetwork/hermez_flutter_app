@@ -32,9 +32,12 @@ class WalletAccountDetailsPage extends HookWidget {
 
   WalletHandler store;
 
+  BuildContext context;
+
   @override
   Widget build(BuildContext context) {
     store = useWallet(context);
+    this.context = context;
     //store.state = arguments.store.state;
     //_currentIndex = useState(0);
 
@@ -169,7 +172,7 @@ class WalletAccountDetailsPage extends HookWidget {
                           arguments: AccountSelectorArguments(
                             //widget.arguments.store.state.txLevel,
                             TransactionType.SEND,
-                            arguments.store,
+                            store,
                           ));
                     },
                     padding: EdgeInsets.all(10.0),
