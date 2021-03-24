@@ -17,6 +17,7 @@ class TransferSummaryForm extends HookWidget {
     this.account,
     this.amount,
     this.status,
+    this.transactionId,
     this.transactionHash,
     this.transactionType,
     this.transactionDate,
@@ -28,6 +29,7 @@ class TransferSummaryForm extends HookWidget {
   final WalletHandler store;
   final Account account;
   final int amount;
+  final String transactionId;
   final String transactionHash;
   final TransactionType transactionType;
   final TransactionStatus status;
@@ -384,13 +386,13 @@ class TransferSummaryForm extends HookWidget {
                       EdgeInsets.only(top: 20, bottom: 20, left: 15, right: 15),
                   onTap: () async {
                     var url;
-                    if (store.state.txLevel == TransactionLevel.LEVEL1) {
-                      url = getCurrentEnvironment().etherscanUrl +
-                          "/tx/" +
-                          transactionHash;
-                    } else {
+                    if (transactionId != null) {
                       url = getCurrentEnvironment().batchExplorerUrl +
                           '/transaction/' +
+                          transactionId;
+                    } else {
+                      url = getCurrentEnvironment().etherscanUrl +
+                          "/tx/" +
                           transactionHash;
                     }
                     if (await canLaunch(url))

@@ -9,8 +9,11 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/storage_service.dart';
+import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
+import 'package:hermez_plugin/api.dart';
+import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/hermez_compressed_amount.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
@@ -24,6 +27,7 @@ import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/model/transaction.dart';
 import 'package:hermez_plugin/tx_pool.dart' as tx_pool;
+import 'package:hermez_plugin/tx_utils.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -351,18 +355,53 @@ class WalletHandler {
         storage, chainId, hermezEthereumAddress);
 
     List depositIds = [];
-    accountPendingDeposits.forEach((pendingDeposit) async {
-      final transactionId = pendingDeposit['id'];
+    for (final pendingDeposit in accountPendingDeposits) {
+      final transactionHash = pendingDeposit['hash'];
+      web3.TransactionReceipt receipt =
+          await _contractService.getTxReceipt(transactionHash);
+      if (receipt != null) {
+        final hermezContract = await ContractParser.fromAssets(
+            'HermezABI.json', contractAddresses['Hermez'], "Hermez");
+        final contractEvent = hermezContract.event('L1UserTxEvent');
+        for (var log in receipt.logs) {
+          List<String> topics =
+              List<String>.from(log['topics'].map((topic) => topic.toString()));
+          try {
+            List l1UserTxEvent =
+                contractEvent.decodeResults(topics, log['data']);
+            final transactionId =
+                getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
+
+            if (pendingDeposit['id'] == null) {
+              pendingDeposit['id'] = transactionId;
+              accountPendingDeposits[accountPendingDeposits.indexWhere(
+                      (element) => element['hash'] == pendingDeposit['hash'])] =
+                  pendingDeposit;
+              _configurationService.updatePendingDepositId(
+                  transactionHash, transactionId);
+            }
+
+            final forgedTransaction =
+                await getHistoryTransaction(transactionId);
+            if (forgedTransaction != null &&
+                forgedTransaction.batchNum != null) {
+              depositIds.add(transactionHash);
+              _configurationService.removePendingDeposit(transactionId);
+            }
+          } catch (e) {}
+        }
+      }
+      /*
       web3.TransactionInformation transaction =
-          await _contractService.getTransactionByHash(transactionId);
+          await _contractService.getTransactionByHash(transactionHash);
       if (transaction != null && transaction.transactionIndex != null) {
         depositIds.add(transactionId);
         _configurationService.removePendingDeposit(transactionId);
-      }
-    });
+      }*/
+    }
 
     accountPendingDeposits.removeWhere(
-        (pendingDeposit) => depositIds.contains(pendingDeposit['id']));
+        (pendingDeposit) => depositIds.contains(pendingDeposit['hash']));
 
     return accountPendingDeposits;
   }
@@ -527,13 +566,14 @@ class WalletHandler {
     return success;
   }
 
-  Future<List<PoolTransaction>> getPoolTransactions() async {
+  Future<List<PoolTransaction>> getPoolTransactions(
+      [String accountIndex]) async {
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return await tx_pool.getPoolTransactions(
-        null, hermezWallet.publicKeyCompressedHex);
+        accountIndex, hermezWallet.publicKeyCompressedHex);
   }
 
   Future<bool> sendL2Transaction(Transaction transaction) async {

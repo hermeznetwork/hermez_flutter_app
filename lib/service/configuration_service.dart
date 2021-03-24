@@ -314,6 +314,12 @@ class ConfigurationService implements IConfigurationService {
     final pendingDepositsTxReceipts = pendingDepositsHashes
         .map((hash) async => await web3Client.getTransactionReceipt(hash))
         .toList();
+
+    /*final txId = getL1UserTxId(l1UserTxEvent.args[0], l1UserTxEvent.args[1]);
+    if (pendingDeposit && !pendingDeposit.id) {
+      dispatch(updatePendingDepositId(txReceipt.transactionHash, txId));
+    }*/
+
     /*pendingDepositsTxReceipts.forEach((List txReceipts) {
       txReceipts.removeWhere((txReceipt) => txReceipt != null && txReceipt.logs && txReceipt.logs.length > 0)
     });*/

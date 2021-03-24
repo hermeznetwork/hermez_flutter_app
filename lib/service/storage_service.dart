@@ -150,31 +150,26 @@ class StorageService implements IStorageService {
             ? chainIdStorage[hermezEthereumAddress]
             : [];
 
-    // TODO: unfinished
-
-    /*(accountStorage.firstWhere((item) => item[prop['name']] == prop['value']) as Map)
-
-    final Map<String, dynamic> newChainIdStorage = Map<String, dynamic>()
-      ..addAll(chainIdStorage);
-    newChainIdStorage.update(
-        hermezEthereumAddress, (value) => newAccountStorage,
-        ifAbsent: () => newAccountStorage);*/
-
     final Map<String, dynamic> newStorage = Map<String, dynamic>()
       ..addAll(storage);
 
-    /*const newStorage = {
-      ...storage,
-      [chainId]: {
-        ...chainIdStorage,
-        [hermezEthereumAddress]: accountStorage.map((item) => {
-        if (item[prop.name] === prop.value) {
-            return { ...item, ...partialItem }
-        }
-            return item
-        })
+    final Map<String, dynamic> newChainIdStorage = Map<String, dynamic>()
+      ..addAll(chainIdStorage);
+
+    final List newAccountStorage = accountStorage.map((item) {
+      if (item[prop['name']] == prop['value']) {
+        return {...item, ...partialItem};
+      } else {
+        return item;
       }
-    }*/
+    }).toList();
+
+    newChainIdStorage.update(
+        hermezEthereumAddress, (value) => newAccountStorage,
+        ifAbsent: () => newAccountStorage);
+
+    newStorage.update(chainId, (value) => newChainIdStorage,
+        ifAbsent: () => newChainIdStorage);
 
     if (secure) {
       await _secureStorage.write(key: key, value: json.encode(newStorage));

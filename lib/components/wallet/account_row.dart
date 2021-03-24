@@ -72,7 +72,7 @@ class AccountRow extends StatelessWidget {
                     simplified
                         ? Container()
                         : pendingDeposit
-                            ? (Container(
+                            ? Container(
                                 padding: EdgeInsets.all(8.0),
                                 margin: EdgeInsets.only(top: 8.0),
                                 decoration: BoxDecoration(
@@ -87,7 +87,7 @@ class AccountRow extends StatelessWidget {
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
                                     )),
-                              ))
+                              )
                             : Container(
                                 padding: EdgeInsets.only(top: 15.0),
                                 alignment: Alignment.centerLeft,

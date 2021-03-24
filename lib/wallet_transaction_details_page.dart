@@ -32,6 +32,7 @@ class TransactionDetailsArguments {
   final int fee;
   final bool instantWithdrawal;
   final bool completeDelayedWithdrawal;
+  final String transactionId;
   final String transactionHash;
   final TransactionStatus status;
   final DateTime transactionDate;
@@ -51,6 +52,7 @@ class TransactionDetailsArguments {
       this.fee,
       this.instantWithdrawal,
       this.completeDelayedWithdrawal,
+      this.transactionId,
       this.transactionHash,
       this.status,
       this.transactionDate});
@@ -101,6 +103,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             child: TransferSummaryForm(
               store: widget.arguments.wallet,
               account: widget.arguments.account,
+              transactionId: widget.arguments.transactionId,
               transactionHash: widget.arguments.transactionHash,
               transactionType: widget.arguments.transactionType,
               status: widget.arguments.status,

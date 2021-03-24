@@ -12,6 +12,7 @@ import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/forged_transaction.dart';
+import 'package:hermez_plugin/model/l1info.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:intl/intl.dart';
@@ -230,6 +231,9 @@ class _ActivityState extends State<Activity> {
                     i) {
                   return Center(child: CircularProgressIndicator());
                 } else {
+                  Color statusColor = HermezColors.statusOrange;
+                  Color statusBackgroundColor =
+                      HermezColors.statusOrangeBackground;
                   var title = "";
                   var subtitle = "";
                   final index = i -
@@ -242,12 +246,16 @@ class _ActivityState extends State<Activity> {
                   var txType;
                   var status = 'status';
                   var timestamp = 0;
-                  var txHash = 'txHash';
+                  var txId;
+                  var txHash;
                   var addressFrom = 'from';
                   var addressTo = 'to';
                   var value = '0';
                   if (element.runtimeType == ForgedTransaction) {
                     ForgedTransaction transaction = element;
+                    if (transaction.id != null) {
+                      txId = transaction.id;
+                    }
                     if (transaction.type == "CreateAccountDeposit" ||
                         transaction.type == "Deposit") {
                       type = "DEPOSIT";
@@ -259,6 +267,15 @@ class _ActivityState extends State<Activity> {
                         final DateTime dateTimeFromStr =
                             formatter.parse(transaction.timestamp);
                         timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+                      } else if (transaction.timestamp.isNotEmpty) {
+                        final formatter = DateFormat(
+                            "yyyy-MM-ddThh:mm:ss"); // "2021-03-24T15:42:544802"
+                        final DateTime dateTimeFromStr =
+                            formatter.parse(transaction.timestamp);
+                        timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+                        if (transaction.hash != null) {
+                          txHash = transaction.hash;
+                        }
                       }
                       addressFrom = getEthereumAddress(
                           transaction.fromHezEthereumAddress);
@@ -305,10 +322,7 @@ class _ActivityState extends State<Activity> {
                           timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                         }
                       }
-                    } else {
-                      txHash = transaction.id;
                     }
-                    txHash = transaction.id;
                   } else {
                     LinkedHashMap event = element;
                     type = event['type'];
@@ -386,20 +400,41 @@ class _ActivityState extends State<Activity> {
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      subtitle: Container(
-                        child: Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: HermezColors.blueyGreyTwo,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
+                      subtitle: status != "CONFIRMED"
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                  Container(
+                                    padding: EdgeInsets.all(8.0),
+                                    decoration: BoxDecoration(
+                                      color: statusBackgroundColor
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text("Pending",
+                                        // On Hold, Pending
+                                        style: TextStyle(
+                                          color: statusColor,
+                                          fontSize: 16,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w500,
+                                        )),
+                                  )
+                                ])
+                          : Container(
+                              child: Text(
+                                subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: HermezColors.blueyGreyTwo,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
                       trailing: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
@@ -443,13 +478,13 @@ class _ActivityState extends State<Activity> {
                             arguments: TransactionDetailsArguments(
                                 wallet: widget.arguments.store,
                                 transactionType: txType,
-                                status: TransactionStatus.CONFIRMED,
+                                status: status != "CONFIRMED"
+                                    ? TransactionStatus.PENDING
+                                    : TransactionStatus.CONFIRMED,
                                 account: widget.arguments.account,
                                 token: widget.arguments.account.token,
-                                /*widget.arguments.store,
-                            widget.arguments.amountType,
-                            widget.arguments.account,*/
                                 amount: amount,
+                                transactionId: txId,
                                 transactionHash: txHash,
                                 addressFrom: addressFrom,
                                 addressTo: addressTo,
@@ -473,52 +508,23 @@ class _ActivityState extends State<Activity> {
           await fetchPendingWithdraws(widget.arguments.account.token.id);
       pendingDeposits =
           await fetchPendingDeposits(widget.arguments.account.token.id);
-      pendingDeposits.map((pendingDeposit) {
-        ForgedTransaction(
+      final List<ForgedTransaction> pendingDepositsTxs =
+          pendingDeposits.map((pendingDeposit) {
+        return ForgedTransaction(
+            id: pendingDeposit['id'],
+            hash: pendingDeposit['hash'],
+            l1info: L1Info(depositAmount: pendingDeposit['amount'].toString()),
             type: pendingDeposit['type'],
             fromHezEthereumAddress: pendingDeposit['fromHezEthereumAddress'],
             timestamp: pendingDeposit['timestamp']);
-        /*
-
-        'id': txHash,
-            'fromHezEthereumAddress': hezEthereumAddress,
-            'toHezEthereumAddress': hezEthereumAddress,
-            'token': token,
-            'amount': amount.toDouble(),
-            'state': 'pend',
-            'timestamp': DateTime.now().toIso8601String(),
-            'type':
-                res != null && res.accounts != null && res.accounts.length > 0
-                    ? TxType.Deposit.toString().split('.').last
-                    : TxType.CreateAccountDeposit.toString().split('.').last
-          }
-
-        ForgedTransaction transaction = element;
-        if (transaction.type == "CreateAccountDeposit" ||
-            transaction.type == "Deposit") {
-          type = "DEPOSIT";
-          value = transaction.l1info.depositAmount.toString();
-          if (transaction.l1info.depositAmountSuccess == true) {
-            status = "CONFIRMED";
-            final formatter = DateFormat(
-                "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
-            final DateTime dateTimeFromStr =
-            formatter.parse(transaction.timestamp);
-            timestamp = dateTimeFromStr.millisecondsSinceEpoch;
-          }
-          addressFrom = getEthereumAddress(
-              transaction.fromHezEthereumAddress);
-          addressTo = transaction.fromHezEthereumAddress;
-        }*/
       }).toList();
+      if (transactions.isEmpty) {
+        transactions.addAll(pendingDepositsTxs);
+      }
       List<dynamic> historyTransactions = await fetchHistoryTransactions();
       final filteredTransactions = filterExitsFromHistoryTransactions(
         historyTransactions,
         exits,
-        /*pendingWithdrawsAccount,
-        pendingDelayedWithdrawsAccount,
-        wallet,
-        dispatch*/
       );
       setState(() {
         pendingItems = pendingItems;
@@ -530,11 +536,24 @@ class _ActivityState extends State<Activity> {
       List<dynamic> historyTransactions = await fetchHistoryTransactions();
       setState(() {
         pendingItems = 0;
-        //fromItem = transactions.last.itemId;
         transactions.addAll(historyTransactions);
         _isLoading = false;
       });
     }
+  }
+
+  Future<List<dynamic>> fetchPoolTransactions(String accountIndex) async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions(accountIndex);
+    return poolTxs;
+  }
+
+  Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
+    final accountPendingDeposits =
+        await widget.arguments.store.getPendingDeposits();
+    accountPendingDeposits.removeWhere((pendingDeposit) =>
+        Token.fromJson(pendingDeposit['token']).id != tokenId);
+    return accountPendingDeposits;
   }
 
   Future<List<dynamic>> fetchPendingExits(int tokenId) async {
@@ -555,14 +574,6 @@ class _ActivityState extends State<Activity> {
     accountPendingWithdraws.removeWhere((pendingWithdraw) =>
         Token.fromJson(pendingWithdraw['token']).id != tokenId);
     return accountPendingWithdraws;
-  }
-
-  Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
-    final accountPendingDeposits =
-        await widget.arguments.store.getPendingDeposits();
-    accountPendingDeposits.removeWhere((pendingDeposit) =>
-        Token.fromJson(pendingDeposit['token']).id != tokenId);
-    return accountPendingDeposits;
   }
 
   Future<List<dynamic>> fetchHistoryTransactions() async {

@@ -227,7 +227,7 @@ class HermezService implements IHermezService {
       if (txHash != null) {
         await api.getAccounts(hezEthereumAddress, [token.id]).then((res) {
           _configService.addPendingDeposit({
-            'id': txHash,
+            'hash': txHash,
             'fromHezEthereumAddress': hezEthereumAddress,
             'toHezEthereumAddress': hezEthereumAddress,
             'token': token,
