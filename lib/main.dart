@@ -1,5 +1,6 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
+//import 'package:firebase_analytics/firebase_analytics.dart';
+//import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/app_config.dart';
 import 'package:hermez/router.dart';
@@ -16,45 +17,65 @@ void main() async {
   final stores =
       await createProviders(AppConfig().params["dev"], getCurrentEnvironment());
 
-  runApp(MainApp(stores));
+  runApp(MultiProvider(
+    providers: stores,
+    child: MainApp(),
+  ));
 }
 
 class MainApp extends StatelessWidget {
-  MainApp(this.stores);
-  final List<SingleChildCloneableWidget> stores;
-  final FirebaseAnalytics analytics = FirebaseAnalytics();
+  //MainApp();
+  // Create the initialization Future outside of `build`:
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+  //final FirebaseAnalytics analytics = FirebaseAnalytics();
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: stores,
-        child: new MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Flutter App',
-          initialRoute: '/',
-          routes: getRoutes(context),
-          navigatorObservers: [
-            FirebaseAnalyticsObserver(analytics: analytics),
-          ],
-          theme: ThemeData(
-              // This is the theme of your application.
-              //
-              // Try running your application with "flutter run". You'll see the
-              // application has a blue toolbar. Then, without quitting the app, try
-              // changing the primarySwatch below to Colors.green and then invoke
-              // "hot reload" (press "r" in the console where you ran "flutter run",
-              // or simply save your changes to "hot reload" in a Flutter IDE).
-              // Notice that the counter didn't reset back to zero; the application
-              // is not restarted.
-              primarySwatch: primaryWhite,
-              accentColor: primaryOrange,
-              buttonTheme: ButtonThemeData(
-                buttonColor: primaryOrange,
-                textTheme: ButtonTextTheme.accent,
-              ),
-              fontFamily: 'ModernEra'),
-        ));
+    return FutureBuilder(
+        // Initialize FlutterFire:
+        future: _initialization,
+        builder: (context, snapshot) {
+          // Check for errors
+          /*if (snapshot.hasError) {
+            return SomethingWentWrong();
+          }*/
+
+          // Once complete, show your application
+          if (snapshot.connectionState == ConnectionState.done) {
+            return new MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Flutter App',
+              initialRoute: '/',
+              routes: getRoutes(context),
+              /*navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: analytics),
+      ],*/
+              theme: ThemeData(
+                  // This is the theme of your application.
+                  //
+                  // Try running your application with "flutter run". You'll see the
+                  // application has a blue toolbar. Then, without quitting the app, try
+                  // changing the primarySwatch below to Colors.green and then invoke
+                  // "hot reload" (press "r" in the console where you ran "flutter run",
+                  // or simply save your changes to "hot reload" in a Flutter IDE).
+                  // Notice that the counter didn't reset back to zero; the application
+                  // is not restarted.
+                  primarySwatch: primaryWhite,
+                  accentColor: primaryOrange,
+                  buttonTheme: ButtonThemeData(
+                    buttonColor: primaryOrange,
+                    textTheme: ButtonTextTheme.accent,
+                  ),
+                  fontFamily: 'ModernEra'),
+            );
+          }
+
+          // Otherwise, show something whilst waiting for initialization to complete
+          return new Center(
+            child: new CircularProgressIndicator(),
+          );
+        });
   }
 }
 

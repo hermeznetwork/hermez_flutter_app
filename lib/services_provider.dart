@@ -9,11 +9,12 @@ import 'package:hermez/service/storage_service.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:web_socket_channel/io.dart';
 
-Future<List<SingleChildCloneableWidget>> createProviders(
+Future<List<SingleChildWidget>> createProviders(
     AppConfigParams params, EnvParams hermezParams) async {
   final client = Web3Client(hermezParams.baseWeb3Url, Client(),
       enableBackgroundIsolate: true, socketConnector: () {

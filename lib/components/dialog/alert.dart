@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Alert {
-  Alert({@required this.title, @required this.text, this.actions});
+  Alert({this.title = '', this.text = '', this.actions});
 
   final String title;
   final String text;
