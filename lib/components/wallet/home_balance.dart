@@ -87,7 +87,9 @@ class _HomeBalanceState extends State<HomeBalance> {
       const pendingCreateAccountDeposits = accountPendingDeposits
           .filter(deposit => deposit.type === TxType.CreateAccountDeposit)*/
 
-      _poolTxs = await fetchPendingExits();
+      try {
+        _poolTxs = await fetchPendingExits();
+      } catch (e) {}
       _exits = await fetchExits();
       _pendingWithdraws = await fetchPendingWithdraws();
       _pendingDeposits = await fetchPendingDeposits();

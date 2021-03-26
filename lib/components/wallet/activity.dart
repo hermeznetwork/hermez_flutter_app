@@ -502,7 +502,9 @@ class _ActivityState extends State<Activity> {
 
   Future<void> fetchData() async {
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
-      poolTxs = await fetchPendingExits(widget.arguments.account.token.id);
+      try {
+        poolTxs = await fetchPendingExits(widget.arguments.account.token.id);
+      } catch (e) {}
       exits = await fetchExits(widget.arguments.account.token.id);
       pendingWithdraws =
           await fetchPendingWithdraws(widget.arguments.account.token.id);
