@@ -72,9 +72,13 @@ class MainApp extends StatelessWidget {
           }
 
           // Otherwise, show something whilst waiting for initialization to complete
-          return new Center(
-            child: new CircularProgressIndicator(),
-          );
+          return Container(
+              color: Colors.white,
+              child: Center(
+                child: new CircularProgressIndicator(
+                  valueColor: new AlwaysStoppedAnimation<Color>(primaryOrange),
+                ),
+              ));
         });
   }
 }

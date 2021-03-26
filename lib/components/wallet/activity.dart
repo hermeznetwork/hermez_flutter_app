@@ -49,6 +49,7 @@ class _ActivityState extends State<Activity> {
   List<dynamic> transactions = [];
   List<Exit> exits = [];
   List<dynamic> poolTxs = [];
+  List<dynamic> pendingExits = [];
   List<dynamic> pendingWithdraws = [];
   List<dynamic> pendingDeposits = [];
 
@@ -83,6 +84,7 @@ class _ActivityState extends State<Activity> {
     fromItem = 0;
     exits = [];
     poolTxs = [];
+    pendingExits = [];
     pendingWithdraws = [];
     pendingDeposits = [];
     transactions = [];
@@ -207,9 +209,11 @@ class _ActivityState extends State<Activity> {
                           //addressTo: address,
                         ));
                   });
-                } else if (i == 0 && poolTxs.length > 0 && i < poolTxs.length) {
+                } else if (i == 0 &&
+                    pendingExits.length > 0 &&
+                    i < pendingExits.length) {
                   final index = i;
-                  final PoolTransaction transaction = poolTxs[index];
+                  final PoolTransaction transaction = pendingExits[index];
 
                   final Exit exit = Exit.fromTransaction(transaction);
 
@@ -222,7 +226,7 @@ class _ActivityState extends State<Activity> {
                   return WithdrawalRow(exit, 1, currency,
                       widget.arguments.store.state.exchangeRatio, () async {});
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
-                else if ((poolTxs.isNotEmpty || exits.isNotEmpty
+                else if ((pendingExits.isNotEmpty || exits.isNotEmpty
                             /*||
                 _pendingWithdraws.isNotEmpty*/
                             ? 1
@@ -237,7 +241,7 @@ class _ActivityState extends State<Activity> {
                   var title = "";
                   var subtitle = "";
                   final index = i -
-                      (poolTxs.isNotEmpty || exits.isNotEmpty //||
+                      (pendingExits.isNotEmpty || exits.isNotEmpty //||
                           //_pendingWithdraws.isNotEmpty
                           ? 1
                           : 0);
@@ -300,10 +304,16 @@ class _ActivityState extends State<Activity> {
                       if (transaction.fromAccountIndex ==
                           widget.arguments.account.accountIndex) {
                         type = "SEND";
-                        if (transaction.timestamp.isNotEmpty) {
+                        if (transaction.batchNum != null) {
                           status = "CONFIRMED";
                           final formatter = DateFormat(
                               "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                          final DateTime dateTimeFromStr =
+                              formatter.parse(transaction.timestamp);
+                          timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+                        } else if (transaction.timestamp.isNotEmpty) {
+                          final formatter = DateFormat(
+                              "yyyy-MM-ddThh:mm:ss"); // "2021-03-24T15:42:544802"
                           final DateTime dateTimeFromStr =
                               formatter.parse(transaction.timestamp);
                           timestamp = dateTimeFromStr.millisecondsSinceEpoch;
@@ -502,9 +512,22 @@ class _ActivityState extends State<Activity> {
 
   Future<void> fetchData() async {
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
-      try {
-        poolTxs = await fetchPendingExits(widget.arguments.account.token.id);
-      } catch (e) {}
+      poolTxs =
+          await fetchPoolTransactions(widget.arguments.account.accountIndex);
+      final List<ForgedTransaction> pendingPoolTxs =
+          poolTxs.map((poolTransaction) {
+        return ForgedTransaction(
+            id: poolTransaction.id,
+            amount: poolTransaction.amount,
+            type: poolTransaction.type,
+            fromHezEthereumAddress: poolTransaction.fromHezEthereumAddress,
+            fromAccountIndex: poolTransaction.fromAccountIndex,
+            toAccountIndex: poolTransaction.toAccountIndex,
+            toHezEthereumAddress: poolTransaction.toHezEthereumAddress,
+            timestamp: poolTransaction.timestamp);
+      }).toList();
+      pendingExits =
+          await fetchPendingExits(widget.arguments.account.accountIndex);
       exits = await fetchExits(widget.arguments.account.token.id);
       pendingWithdraws =
           await fetchPendingWithdraws(widget.arguments.account.token.id);
@@ -521,6 +544,7 @@ class _ActivityState extends State<Activity> {
             timestamp: pendingDeposit['timestamp']);
       }).toList();
       if (transactions.isEmpty) {
+        transactions.addAll(pendingPoolTxs);
         transactions.addAll(pendingDepositsTxs);
       }
       List<dynamic> historyTransactions = await fetchHistoryTransactions();
@@ -547,10 +571,13 @@ class _ActivityState extends State<Activity> {
   Future<List<dynamic>> fetchPoolTransactions(String accountIndex) async {
     List<PoolTransaction> poolTxs =
         await widget.arguments.store.getPoolTransactions(accountIndex);
+    poolTxs.removeWhere((transaction) => transaction.type == 'Exit');
     return poolTxs;
   }
 
   Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions();
     final accountPendingDeposits =
         await widget.arguments.store.getPendingDeposits();
     accountPendingDeposits.removeWhere((pendingDeposit) =>
@@ -558,11 +585,10 @@ class _ActivityState extends State<Activity> {
     return accountPendingDeposits;
   }
 
-  Future<List<dynamic>> fetchPendingExits(int tokenId) async {
+  Future<List<dynamic>> fetchPendingExits(String accountIndex) async {
     List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions();
-    poolTxs.removeWhere((transaction) =>
-        transaction.type != 'Exit' && transaction.token.id != tokenId);
+        await widget.arguments.store.getPoolTransactions(accountIndex);
+    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
     return poolTxs;
   }
 

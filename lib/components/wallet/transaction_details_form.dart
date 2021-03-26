@@ -251,11 +251,11 @@ class TransferSummaryForm extends HookWidget {
                                           .substring(addressFrom.length - 5,
                                               addressFrom.length)
                                           .toUpperCase()
-                                  : addressFrom.substring(0, 6) +
+                                  : addressTo.substring(0, 6) +
                                       " ･･･ " +
-                                      addressFrom
-                                          .substring(addressFrom.length - 5,
-                                              addressFrom.length)
+                                      addressTo
+                                          .substring(addressTo.length - 5,
+                                              addressTo.length)
                                           .toUpperCase(),
                               style: TextStyle(
                                 color: HermezColors.black,
