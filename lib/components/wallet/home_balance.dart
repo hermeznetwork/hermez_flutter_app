@@ -126,178 +126,184 @@ class _HomeBalanceState extends State<HomeBalance> {
       child: FutureBuilder(
         future: fetchAccounts(),
         builder: (buildContext, snapshot) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+          return SafeArea(
+              left: false,
+              top: true,
+              bottom: true,
+              right: false,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  IconButton(
-                    icon: ImageIcon(
-                      AssetImage('assets/account.png'),
-                    ),
-                    onPressed: () {
-                      widget.arguments.controller.animateToPage(
-                        0,
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.linear,
-                      );
-                      //Navigator.of(context).pushNamed("/settings");
-                    },
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      IconButton(
+                        icon: ImageIcon(
+                          AssetImage('assets/account.png'),
+                        ),
+                        onPressed: () {
+                          widget.arguments.controller.animateToPage(
+                            0,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.linear,
+                          );
+                          //Navigator.of(context).pushNamed("/settings");
+                        },
+                      ),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            ToggleButtons(
+                              children: <Widget>[
+                                Text(
+                                  "L1",
+                                  style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 20),
+                                ),
+                                Text(
+                                  "L2",
+                                  style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 20),
+                                ),
+                              ],
+                              fillColor: Color.fromRGBO(51, 51, 51, 1.0),
+                              selectedColor: Color.fromRGBO(249, 244, 235, 1.0),
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderColor: Color.fromRGBO(51, 51, 51, 1.0),
+                              selectedBorderColor:
+                                  Color.fromRGBO(51, 51, 51, 1.0),
+                              borderWidth: 2,
+                              isSelected: [
+                                widget.arguments.store.state.txLevel ==
+                                    TransactionLevel.LEVEL1,
+                                widget.arguments.store.state.txLevel ==
+                                    TransactionLevel.LEVEL2
+                              ],
+                              onPressed: (int index) {
+                                setState(() {
+                                  widget.arguments.store.updateLevel(index == 1
+                                      ? TransactionLevel.LEVEL2
+                                      : TransactionLevel.LEVEL1);
+                                  //index == 1 ? _accounts = [] : fetchAccounts();
+                                });
+                              },
+                            )
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: ImageIcon(
+                          AssetImage('assets/scan.png'),
+                        ),
+                        onPressed: () {
+                          widget.arguments.controller.animateToPage(
+                            2,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.linear,
+                          );
+                          //Navigator.of(context).pushNamed("/settings");
+                        },
+                      )
+                    ],
                   ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        ToggleButtons(
+                  SizedBox(height: 30),
+                  Container(
+                    margin: EdgeInsets.only(left: 40, right: 40),
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(56.0),
+                          side: BorderSide(color: HermezColors.mediumOrange)),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(
+                            text: widget.arguments.store.state.txLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? widget.arguments.address
+                                : "hez:" + widget.arguments.address));
+                        widget.arguments.scaffoldKey.currentState
+                            .showSnackBar(SnackBar(
+                          content: Text("Copied"),
+                        ));
+                      },
+                      padding: EdgeInsets.only(
+                          left: 20.0, right: 20.0, top: 12.0, bottom: 12.0),
+                      color: HermezColors.mediumOrange,
+                      textColor: HermezColors.steel,
+                      child: Text(
+                          widget != null &&
+                                  widget.arguments != null &&
+                                  widget.arguments.address != null
+                              ? (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                                  ? "0x" +
+                                          AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
+                                              .toUpperCase() +
+                                          " ･･･ " +
+                                          widget.arguments.address
+                                              .substring(
+                                                  widget.arguments.address.length -
+                                                      5,
+                                                  widget
+                                                      .arguments.address.length)
+                                              .toUpperCase() ??
+                                      ""
+                                  : "hez:" +
+                                          "0x" +
+                                          AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
+                                              .toUpperCase() +
+                                          " ･･･ " +
+                                          widget.arguments.address
+                                              .substring(
+                                                  widget.arguments.address.length -
+                                                      5,
+                                                  widget.arguments.address.length)
+                                              .toUpperCase() ??
+                                      "")
+                              : "",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: HermezColors.steel,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          )),
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  SizedBox(
+                      width: double.infinity,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              "L1",
-                              style: TextStyle(
+                                widget.arguments.store.state.txLevel ==
+                                        TransactionLevel.LEVEL1
+                                    ? totalBalance(snapshot)
+                                    : totalBalance(snapshot),
+                                //"\$${EthAmountFormatter(tokenBalance).format()}",
+                                style: TextStyle(
+                                  color: HermezColors.black,
+                                  fontSize: 32,
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w800,
-                                  fontSize: 20),
-                            ),
-                            Text(
-                              "L2",
-                              style: TextStyle(
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 20),
-                            ),
-                          ],
-                          fillColor: Color.fromRGBO(51, 51, 51, 1.0),
-                          selectedColor: Color.fromRGBO(249, 244, 235, 1.0),
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderColor: Color.fromRGBO(51, 51, 51, 1.0),
-                          selectedBorderColor: Color.fromRGBO(51, 51, 51, 1.0),
-                          borderWidth: 2,
-                          isSelected: [
-                            widget.arguments.store.state.txLevel ==
-                                TransactionLevel.LEVEL1,
-                            widget.arguments.store.state.txLevel ==
-                                TransactionLevel.LEVEL2
-                          ],
-                          onPressed: (int index) {
-                            setState(() {
-                              widget.arguments.store.updateLevel(index == 1
-                                  ? TransactionLevel.LEVEL2
-                                  : TransactionLevel.LEVEL1);
-                              //index == 1 ? _accounts = [] : fetchAccounts();
-                            });
-                          },
-                        )
-                      ],
+                                )),
+                          ])),
+                  SizedBox(height: 16),
+                  buildButtonsRow(context, snapshot),
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: Container(
+                      color: Colors.white,
+                      child: handleAccountsList(snapshot),
                     ),
                   ),
-                  IconButton(
-                    icon: ImageIcon(
-                      AssetImage('assets/scan.png'),
-                    ),
-                    onPressed: () {
-                      widget.arguments.controller.animateToPage(
-                        2,
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.linear,
-                      );
-                      //Navigator.of(context).pushNamed("/settings");
-                    },
-                  )
                 ],
-              ),
-              SizedBox(height: 30),
-              Container(
-                margin: EdgeInsets.only(left: 40, right: 40),
-                child: FlatButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(56.0),
-                      side: BorderSide(color: HermezColors.mediumOrange)),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(
-                        text: widget.arguments.store.state.txLevel ==
-                                TransactionLevel.LEVEL1
-                            ? widget.arguments.address
-                            : "hez:" + widget.arguments.address));
-                    widget.arguments.scaffoldKey.currentState
-                        .showSnackBar(SnackBar(
-                      content: Text("Copied"),
-                    ));
-                  },
-                  padding: EdgeInsets.only(
-                      left: 20.0, right: 20.0, top: 12.0, bottom: 12.0),
-                  color: HermezColors.mediumOrange,
-                  textColor: HermezColors.steel,
-                  child: Text(
-                      widget != null &&
-                              widget.arguments != null &&
-                              widget.arguments.address != null
-                          ? (widget.arguments.store.state.txLevel ==
-                                  TransactionLevel.LEVEL1
-                              ? "0x" +
-                                      AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
-                                          .toUpperCase() +
-                                      " ･･･ " +
-                                      widget.arguments.address
-                                          .substring(
-                                              widget.arguments.address.length -
-                                                  5,
-                                              widget.arguments.address.length)
-                                          .toUpperCase() ??
-                                  ""
-                              : "hez:" +
-                                      "0x" +
-                                      AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
-                                          .toUpperCase() +
-                                      " ･･･ " +
-                                      widget.arguments.address
-                                          .substring(
-                                              widget.arguments.address.length -
-                                                  5,
-                                              widget.arguments.address.length)
-                                          .toUpperCase() ??
-                                  "")
-                          : "",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: HermezColors.steel,
-                        fontSize: 16,
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w500,
-                      )),
-                ),
-              ),
-              SizedBox(height: 30),
-              SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                            widget.arguments.store.state.txLevel ==
-                                    TransactionLevel.LEVEL1
-                                ? totalBalance(snapshot)
-                                : totalBalance(snapshot),
-                            //"\$${EthAmountFormatter(tokenBalance).format()}",
-                            style: TextStyle(
-                              color: HermezColors.black,
-                              fontSize: 32,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w800,
-                            )),
-                      ])),
-              SizedBox(height: 16),
-              buildButtonsRow(context, snapshot),
-              SizedBox(height: 20),
-              Expanded(
-                child: Container(
-                  color: Colors.white,
-                  child: handleAccountsList(snapshot),
-                ),
-              ),
-            ],
-          );
+              ));
         },
       ),
     );

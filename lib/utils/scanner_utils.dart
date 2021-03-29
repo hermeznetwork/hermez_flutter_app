@@ -4,11 +4,12 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui';
 
+// import 'package:barcode_scan_fix/barcode_scan.dart';
 import 'package:camera/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+//import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
+// import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class ScannerUtils {
   ScannerUtils._();
@@ -23,15 +24,26 @@ class ScannerUtils {
 
   static Future<dynamic> detect({
     @required CameraImage image,
-    @required Future<dynamic> Function(FirebaseVisionImage image) detectInImage,
+    //@required Future<dynamic> Function(FirebaseVisionImage image) detectInImage,
     @required int imageRotation,
   }) async {
-    return detectInImage(
+    String codeScanner;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    /*try {
+      codeScanner = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.QR);
+      print(codeScanner);
+    } on PlatformException {
+      codeScanner = 'Failed to get platform version.';
+    }*/
+    //String codeScanner = await BarcodeScanner.scan();
+    return codeScanner;
+    /*detectInImage(
       FirebaseVisionImage.fromBytes(
         _concatenatePlanes(image.planes),
         _buildMetaData(image, _rotationIntToImageRotation(imageRotation)),
       ),
-    );
+    );*/
   }
 
   static Uint8List _concatenatePlanes(List<Plane> planes) {
@@ -42,7 +54,7 @@ class ScannerUtils {
     return allBytes.done().buffer.asUint8List();
   }
 
-  static FirebaseVisionImageMetadata _buildMetaData(
+  /* static FirebaseVisionImageMetadata _buildMetaData(
     CameraImage image,
     ImageRotation rotation,
   ) {
@@ -60,9 +72,9 @@ class ScannerUtils {
         },
       ).toList(),
     );
-  }
+  }*/
 
-  static ImageRotation _rotationIntToImageRotation(int rotation) {
+  /*static ImageRotation _rotationIntToImageRotation(int rotation) {
     switch (rotation) {
       case 0:
         return ImageRotation.rotation0;
@@ -74,5 +86,5 @@ class ScannerUtils {
         assert(rotation == 270);
         return ImageRotation.rotation270;
     }
-  }
+  }*/
 }

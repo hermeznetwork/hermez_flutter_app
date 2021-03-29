@@ -11,14 +11,14 @@ class BarcodeDetectorPainter extends CustomPainter {
   BarcodeDetectorPainter(this.absoluteImageSize, this.barcodeLocations);
 
   final Size absoluteImageSize;
-  final List<dynamic/*Barcode*/> barcodeLocations;
+  final dynamic /*Barcode*/ barcodeLocations;
 
   @override
   void paint(Canvas canvas, Size size) {
     final double scaleX = size.width / absoluteImageSize.width;
     final double scaleY = size.height / absoluteImageSize.height;
 
-    Rect scaleRect(dynamic/*Barcode*/ barcode) {
+    Rect scaleRect(dynamic /*Barcode*/ barcode) {
       return Rect.fromLTRB(
         barcode.boundingBox.left * scaleX,
         barcode.boundingBox.top * scaleY,
@@ -31,7 +31,7 @@ class BarcodeDetectorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    for (dynamic/*Barcode*/ barcode in barcodeLocations) {
+    for (dynamic /*Barcode*/ barcode in barcodeLocations) {
       paint.color = Colors.green;
       canvas.drawRect(scaleRect(barcode), paint);
     }

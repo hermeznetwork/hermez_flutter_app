@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:hermez/utils/scanner_utils.dart';
 import 'package:camera/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+//import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hermez/utils/scanner_utils.dart';
+
 import 'utils/detector_painters.dart';
 
 typedef OnScanned = void Function(String address);
@@ -24,13 +25,16 @@ class QRCodeReaderPage extends StatefulWidget {
 class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
   static final RegExp _basicAddress =
       RegExp(r'^(0x)?[0-9a-f]{40}', caseSensitive: false);
-  List<Barcode> _scanResults;
+  //List<Barcode> _scanResults;
+  String _scanResult;
   CameraController _camera;
   bool _isDetecting = false;
   CameraLensDirection _direction = CameraLensDirection.back;
 
-  final BarcodeDetector _barcodeDetector =
-      FirebaseVision.instance.barcodeDetector();
+  //String codeScanner = await BarcodeScanner.scan();
+
+  /*final BarcodeDetector _barcodeDetector =
+      FirebaseVision.instance.barcodeDetector();*/
 
   @override
   void initState() {
@@ -58,9 +62,15 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
 
       ScannerUtils.detect(
         image: image,
-        detectInImage: _barcodeDetector.detectInImage,
+        //detectInImage: _barcodeDetector.detectInImage,
         imageRotation: description.sensorOrientation,
-      ).then((dynamic results) => results as List<Barcode>).then(
+      ).then((dynamic result) => result as String).then((String result) {
+        setState(() {
+          if (_basicAddress.hasMatch(result)) {
+            _scanResult = result;
+          }
+        });
+      }) /*List<Barcode>).then(
         (List<Barcode> results) {
           setState(() {
             _scanResults = results
@@ -68,10 +78,10 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
                 .toList();
           });
         },
-      ).whenComplete(() {
-        if (_scanResults.length > 0) {
-          if (widget.onScanned != null)
-            widget.onScanned(_scanResults.first.displayValue);
+      )*/
+          .whenComplete(() {
+        if (_scanResult.isNotEmpty) {
+          if (widget.onScanned != null) widget.onScanned(_scanResult);
 
           if (widget.closeWhenScanned) {
             _isDetecting = true; // stop looping
@@ -91,7 +101,7 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
   }
 
   Widget _buildResults() {
-    if (_scanResults == null ||
+    if (_scanResult == null ||
         _camera == null ||
         !_camera.value.isInitialized) {
       return Container();
@@ -103,7 +113,7 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
     );
 
     return CustomPaint(
-      painter: BarcodeDetectorPainter(imageSize, _scanResults),
+      painter: BarcodeDetectorPainter(imageSize, _scanResult),
     );
   }
 
@@ -156,9 +166,11 @@ class _QRCodeReaderPageState extends State<QRCodeReaderPage> {
 
   @override
   void dispose() {
-    _camera.dispose().then((_) {
-      _barcodeDetector.close();
-    });
+    if (_camera != null) {
+      _camera.dispose().then((_) {
+        //_barcodeDetector.close();
+      });
+    }
 
     super.dispose();
   }

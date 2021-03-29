@@ -1,6 +1,10 @@
 name: hermez
 description: Hermez native wallet project.
 
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
@@ -12,6 +16,8 @@ description: Hermez native wallet project.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.1.0+4
+
+
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -25,7 +31,7 @@ dependencies:
     sdk: flutter
 
   hermez_plugin:
-    path: ../hermez-mobile-library/
+    path: ../hermez_mobile_library/
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -33,6 +39,9 @@ dependencies:
   web3dart: ^1.2.3
   provider: ^5.0.0
   qr_flutter: ^4.0.0
+  # barcode_scan_fix: ^1.0.2
+  #flutter_barcode_scanner: ^2.0.0-nullsafety.0
+  # qr_code_scanner: ^0.4.0
   bip39: ^1.0.3
   tweetnacl: ^0.3.1
   pointycastle: ^1.0.2
@@ -45,8 +54,8 @@ dependencies:
   intl: ^0.16.1
   flutter_spinkit: "^4.1.1+1"
   # firebase_analytics: ^7.1.1
-  firebase_core: ^1.0.2
-  firebase_ml_vision: ^0.11.0
+  # firebase_core: ^1.0.2
+  # firebase_ml_vision: ^0.11.0
   url_launcher: ^6.0.2
   flutter_hooks: ^0.9.0
   built_value: ^7.1.0

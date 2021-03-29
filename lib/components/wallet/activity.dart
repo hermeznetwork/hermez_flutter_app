@@ -114,6 +114,7 @@ class _ActivityState extends State<Activity> {
     if (_isLoading &&
         transactions.isEmpty &&
         poolTxs.isEmpty &&
+        pendingExits.isEmpty &&
         exits.isEmpty &&
         pendingWithdraws.isEmpty) {
       return Container(
@@ -125,6 +126,7 @@ class _ActivityState extends State<Activity> {
     } else if (!_isLoading &&
         transactions.isEmpty &&
         poolTxs.isEmpty &&
+        pendingExits.isEmpty &&
         exits.isEmpty &&
         pendingWithdraws.isEmpty) {
       return Container(
@@ -151,7 +153,7 @@ class _ActivityState extends State<Activity> {
               // To make listView scrollable
               // even if there is only a single item.
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: (poolTxs.isNotEmpty ||
+              itemCount: (pendingExits.isNotEmpty ||
                           exits.isNotEmpty ||
                           pendingWithdraws.isNotEmpty
                       ? 1
@@ -331,6 +333,8 @@ class _ActivityState extends State<Activity> {
                               formatter.parse(transaction.timestamp);
                           timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                         }
+                        addressFrom = transaction.fromHezEthereumAddress;
+                        addressTo = transaction.toHezEthereumAddress;
                       }
                     }
                   } else {
@@ -576,8 +580,6 @@ class _ActivityState extends State<Activity> {
   }
 
   Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
-    List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions();
     final accountPendingDeposits =
         await widget.arguments.store.getPendingDeposits();
     accountPendingDeposits.removeWhere((pendingDeposit) =>
