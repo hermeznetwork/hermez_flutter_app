@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/qrcode_reader_page.dart';
+import 'package:hermez/screens/intro.dart';
+import 'package:hermez/screens/pin.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
@@ -21,7 +23,6 @@ import 'package:provider/provider.dart';
 import 'context/setup/wallet_setup_provider.dart';
 import 'context/transfer/wallet_transfer_provider.dart';
 import 'context/wallet/wallet_provider.dart';
-import 'intro_page.dart';
 import 'wallet_receiver_page.dart';
 
 Map<String, WidgetBuilder> getRoutes(context) {
@@ -35,6 +36,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
 
       return IntroPage();
     },
+    '/pin': (BuildContext context) => PinPage(),
     '/activity': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())

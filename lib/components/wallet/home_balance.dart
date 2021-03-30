@@ -129,7 +129,7 @@ class _HomeBalanceState extends State<HomeBalance> {
           return SafeArea(
               left: false,
               top: true,
-              bottom: true,
+              bottom: false,
               right: false,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
