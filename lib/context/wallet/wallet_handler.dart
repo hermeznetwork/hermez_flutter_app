@@ -646,6 +646,9 @@ class WalletHandler {
     await _configurationService.setBabyJubJubBase64("");
     await _configurationService.setEthereumAddress("");
     await _configurationService.setHermezAddress("");
+    await _configurationService.setPasscode("");
+    await _configurationService.setBiometricsFingerprint(false);
+    await _configurationService.setBiometricsFace(false);
     await _configurationService.setDefaultCurrency(WalletDefaultCurrency.EUR);
     await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
     await _configurationService.setupDone(false);

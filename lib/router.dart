@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/qrcode_reader_page.dart';
+import 'package:hermez/screens/biometrics.dart';
+import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/intro.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/service/configuration_service.dart';
@@ -29,14 +31,36 @@ Map<String, WidgetBuilder> getRoutes(context) {
   return {
     '/': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet())
+      if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
           return WalletHomePage("Hermez");
         });
+      } else {
+        return WalletSetupProvider(builder: (context, store) {
+          useEffect(() {
+            store.generateMnemonic();
+            return null;
+          }, []);
 
-      return IntroPage();
+          return IntroPage();
+        });
+      }
     },
-    '/pin': (BuildContext context) => PinPage(),
+    '/pin': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return PinPage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
+    },
+    '/info': (BuildContext context) {
+      return InfoPage(arguments: ModalRoute.of(context).settings.arguments);
+    },
+    '/biometrics': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return BiometricsPage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
+    },
     '/activity': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())

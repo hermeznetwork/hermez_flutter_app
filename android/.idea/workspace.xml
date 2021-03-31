@@ -1,18 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9cb6f491-a6f8-461b-8a62-a56a9a018574" name="Default Changelist" comment="" />
+    <list default="true" id="2702f2f8-4f74-4528-828d-cbdca29d22f1" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../assets/biometrics_face.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../assets/biometrics_fingerprint.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../assets/info_success.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../lib/screens/biometrics.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../lib/screens/info.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/beercoinapp/MainActivity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/iden3/wallet_native/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/iden3/wallet_native/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lib/context/wallet/wallet_handler.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/context/wallet/wallet_handler.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lib/router.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/router.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lib/screens/intro.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/screens/intro.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lib/screens/pin.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/screens/pin.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lib/service/configuration_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/service/configuration_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../pubspec.yaml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[Nexus_5X_API_30]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
     </projectState>
   </component>
-  <component name="ProjectId" id="1qTkNXWhUEeNWZCeyDdmHqQnPzk" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="1qWnFobfp0if9N1rJwoKjdVCXKF" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
+    <property name="dart.analysis.tool.window.visible" value="false" />
+    <property name="project.structure.last.edited" value="SDK Location" />
+    <property name="project.structure.proportion" value="0.17" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="show.migrate.to.gradle.popup" value="false" />
+  </component>
   <component name="RunManager">
     <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
       <option name="TEST_OBJECT" value="class" />
@@ -21,14 +61,93 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="android.app" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <created>1617110927642</created>
+      <changelist id="2702f2f8-4f74-4528-828d-cbdca29d22f1" name="Default Changelist" comment="" />
+      <created>1617204112307</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1617110927642</updated>
+      <updated>1617204112307</updated>
     </task>
     <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="1344" height="262" key="GridCell.Tab.0.bottom" timestamp="1617204340425">
+      <screen x="1440" y="25" width="2560" height="1055" />
+    </state>
+    <state width="1344" height="262" key="GridCell.Tab.0.bottom/1440.25.2560.1055/0.25.1440.832@1440.25.2560.1055" timestamp="1617204340425" />
+    <state width="1344" height="262" key="GridCell.Tab.0.center" timestamp="1617204340425">
+      <screen x="1440" y="25" width="2560" height="1055" />
+    </state>
+    <state width="1344" height="262" key="GridCell.Tab.0.center/1440.25.2560.1055/0.25.1440.832@1440.25.2560.1055" timestamp="1617204340425" />
+    <state width="1344" height="262" key="GridCell.Tab.0.left" timestamp="1617204340424">
+      <screen x="1440" y="25" width="2560" height="1055" />
+    </state>
+    <state width="1344" height="262" key="GridCell.Tab.0.left/1440.25.2560.1055/0.25.1440.832@1440.25.2560.1055" timestamp="1617204340424" />
+    <state width="1344" height="262" key="GridCell.Tab.0.right" timestamp="1617204340425">
+      <screen x="1440" y="25" width="2560" height="1055" />
+    </state>
+    <state width="1344" height="262" key="GridCell.Tab.0.right/1440.25.2560.1055/0.25.1440.832@1440.25.2560.1055" timestamp="1617204340425" />
   </component>
 </project>

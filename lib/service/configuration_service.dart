@@ -17,6 +17,9 @@ abstract class IConfigurationService {
   Future<void> setEthereumAddress(String value);
   Future<void> setHermezAddress(String value);
   Future<void> setDefaultCurrency(WalletDefaultCurrency defaultCurrency);
+  Future<void> setPasscode(String value);
+  Future<void> setBiometricsFingerprint(bool value);
+  Future<void> setBiometricsFace(bool value);
   Future<String> getMnemonic();
   Future<String> getPrivateKey();
   Future<String> getHermezPrivateKey();
@@ -25,6 +28,9 @@ abstract class IConfigurationService {
   Future<String> getEthereumAddress();
   Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
+  Future<String> getPasscode();
+  Future<bool> getBiometricsFingerprint();
+  Future<bool> getBiometricsFace();
   bool didSetupWallet();
   void addPendingWithdraw(dynamic pendingWithdraw);
   void removePendingWithdraw(String pendingWithdrawId);
@@ -80,6 +86,22 @@ class ConfigurationService implements IConfigurationService {
   Future<void> setDefaultCurrency(WalletDefaultCurrency value) async {
     await _secureStorage.write(
         key: "defaultCurrency", value: value.toString().split(".").last);
+  }
+
+  @override
+  Future<void> setPasscode(String value) async {
+    await _secureStorage.write(key: 'passcode', value: value);
+  }
+
+  @override
+  Future<void> setBiometricsFingerprint(bool value) async {
+    await _secureStorage.write(
+        key: 'biometrics_fingerprint', value: value.toString());
+  }
+
+  @override
+  Future<void> setBiometricsFace(bool value) async {
+    await _secureStorage.write(key: 'biometrics_face', value: value.toString());
   }
 
   Future<void> setExchangeRatio(double value) async {
@@ -142,6 +164,21 @@ class ConfigurationService implements IConfigurationService {
     } else {
       return WalletDefaultCurrency.USD;
     }
+  }
+
+  @override
+  Future<String> getPasscode() async {
+    return _secureStorage.read(key: 'passcode');
+  }
+
+  @override
+  Future<bool> getBiometricsFingerprint() async {
+    return await _secureStorage.read(key: 'biometrics_fingerprint') as bool;
+  }
+
+  @override
+  Future<bool> getBiometricsFace() async {
+    return await _secureStorage.read(key: 'biometrics_face') as bool;
   }
 
   @override

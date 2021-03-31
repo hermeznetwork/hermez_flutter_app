@@ -51,7 +51,7 @@ dependencies:
   camera: ^0.5.7+3
 
   web_socket_channel: ^1.1.0
-  intl: ^0.16.1
+  intl: ^0.17.0
   flutter_spinkit: "^4.1.1+1"
   # firebase_analytics: ^7.1.1
   # firebase_core: ^1.0.2
@@ -63,6 +63,7 @@ dependencies:
   flutter_svg: ^0.17.4
   auto_size_text: ^2.1.0
   grouped_list: ^3.3.0
+  local_auth: ^1.1.1
 
   http: ^0.12.0+1
 
@@ -87,6 +88,9 @@ flutter:
   assets:
     # Intro
     - intro_hermez_logo.png
+    - info_success.png
+    - biometrics_fingerprint.png
+    - biometrics_face.png
     - TargaryenCoin.json
     - partialERC20ABI.json
     - ERC20ABI.json
