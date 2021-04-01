@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:local_auth/local_auth.dart';
 
+import 'biometrics.dart';
 import 'info.dart';
 
 class PinArguments {
@@ -525,13 +528,36 @@ class _PinPageState extends State<PinPage> {
           } else {
             if (pinString == confirmPinString) {
               widget.configurationService.setPasscode(pinString);
-              Navigator.of(context)
-                  .pushNamed("/info",
-                      arguments: InfoArguments(
-                          "info_success.png", false, "Passcode created"))
-                  .then((value) {
-                Navigator.pop(context, pinString);
-              });
+              var value = await Navigator.of(context).pushNamed("/info",
+                  arguments: InfoArguments(
+                      "info_success.png", false, "Passcode created"));
+              if (await BiometricsUtils.canCheckBiometrics() &&
+                  await BiometricsUtils.isDeviceSupported()) {
+                List<BiometricType> availableBiometrics =
+                    await BiometricsUtils.getAvailableBiometrics();
+                if (availableBiometrics.contains(BiometricType.face)) {
+                  // Face ID.
+                  Navigator.of(context)
+                      .pushNamed("/biometrics",
+                          arguments: BiometricsArguments(false))
+                      .then((value) {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context, value);
+                    }
+                  });
+                } else if (availableBiometrics
+                    .contains(BiometricType.fingerprint)) {
+                  // Touch ID.
+                  Navigator.of(context)
+                      .pushNamed("/biometrics",
+                          arguments: BiometricsArguments(true))
+                      .then((value) {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context, value);
+                    }
+                  });
+                }
+              }
             } else {
               pinInfoText = "Passcode doesn\'t match";
               pinError = true;

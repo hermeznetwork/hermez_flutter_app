@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/context/setup/wallet_setup_provider.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:local_auth/local_auth.dart';
 
-import 'biometrics.dart';
+class IntroPage extends HookWidget {
+  IntroPage();
 
-class IntroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var store = useWalletSetup(context);
+
     return Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
@@ -66,29 +68,10 @@ class IntroPage extends StatelessWidget {
                             .pushNamed("/pin", arguments: PinArguments(true))
                             .then(
                           (value) async {
-                            final LocalAuthentication auth =
-                                LocalAuthentication();
-                            bool canCheckBiometrics =
-                                await _checkBiometrics(auth);
-
-                            if (canCheckBiometrics) {
-                              List<BiometricType> availableBiometrics =
-                                  await auth.getAvailableBiometrics();
-                              if (availableBiometrics
-                                  .contains(BiometricType.face)) {
-                                // Face ID.
-                                Navigator.of(context)
-                                    .pushNamed("/biometrics",
-                                        arguments: BiometricsArguments(false))
-                                    .then((value) => null);
-                              } else if (availableBiometrics
-                                  .contains(BiometricType.fingerprint)) {
-                                // Touch ID.
-                                Navigator.of(context)
-                                    .pushNamed("/biometrics",
-                                        arguments: BiometricsArguments(true))
-                                    .then((value) => null);
-                              }
+                            if (value.toString() == 'true') {
+                              store.generateMnemonic();
+                              Navigator.pushNamedAndRemoveUntil(context, "/",
+                                  (Route<dynamic> route) => false);
                             }
                           },
                         );
@@ -144,16 +127,5 @@ class IntroPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<bool> _checkBiometrics(LocalAuthentication auth) async {
-    bool canCheckBiometrics = false;
-    try {
-      canCheckBiometrics = await auth.canCheckBiometrics;
-    } on PlatformException catch (e) {
-      canCheckBiometrics = false;
-      print(e);
-    }
-    return canCheckBiometrics;
   }
 }

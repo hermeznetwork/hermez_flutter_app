@@ -95,7 +95,7 @@ class _InfoPageState extends State<InfoPage> {
 
   route() {
     if (Navigator.canPop(context)) {
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     }
   }
 

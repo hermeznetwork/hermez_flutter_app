@@ -6,7 +6,7 @@ class AppConfig {
         //"http://192.168.1.134:8545",
         //"ws://192.168.1.134:8545",
         "167.71.59.190:4010",
-        "api.exchangeratesapi.io",
+        "https://api.exchangeratesapi.io",
         "http://api-ropsten.etherscan.io/api",
         "B697CBT5AUE1PUSUGFXZUIFVBFG8G7889D",
         "ethgasstation.info",
@@ -19,7 +19,7 @@ class AppConfig {
         "https://ropsten.infura.io/v3/e2d8687b60b944d58adc96485cbab18c",
         "wss://ropsten.infura.io/ws/v3/e2d8687b60b944d58adc96485cbab18c",
         "167.71.59.190:4010",
-        "api.exchangeratesapi.io",
+        "https://api.exchangeratesapi.io",
         "http://api-ropsten.etherscan.io/api",
         "B697CBT5AUE1PUSUGFXZUIFVBFG8G7889D",
         "ethgasstation.info", {
@@ -43,7 +43,7 @@ class AppConfig {
         "https://mainnet.infura.io/v3/e2d8687b60b944d58adc96485cbab18c",
         "wss://mainnet.infura.io/ws/v3/e2d8687b60b944d58adc96485cbab18c",
         "167.71.59.190:4010",
-        "api.exchangeratesapi.io",
+        "https://api.exchangeratesapi.io",
         "https://api.etherscan.io/api",
         "B697CBT5AUE1PUSUGFXZUIFVBFG8G7889D",
         "ethgasstation.info", {

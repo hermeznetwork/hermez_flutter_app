@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -91,18 +91,20 @@ class _BiometricsPageState extends State<BiometricsPage> {
                         borderRadius: BorderRadius.circular(100.0),
                       ),
                       onPressed: () async {
-                        final LocalAuthentication auth = LocalAuthentication();
-                        bool canCheckBiometrics = await _checkBiometrics(auth);
-
-                        if (canCheckBiometrics) {
+                        if (await BiometricsUtils.canCheckBiometrics() &&
+                            await BiometricsUtils.isDeviceSupported()) {
                           List<BiometricType> availableBiometrics =
-                              await auth.getAvailableBiometrics();
+                              await BiometricsUtils.getAvailableBiometrics();
                           if (!widget.arguments.isFingerprint &&
                               availableBiometrics
                                   .contains(BiometricType.face)) {
                             // Face ID.
-                            bool authenticated =
-                                await _authenticateWithBiometrics(auth);
+                            bool authenticated = await BiometricsUtils
+                                .authenticateWithBiometrics('Scan your ' +
+                                    (widget.arguments.isFingerprint
+                                        ? 'fingerprint'
+                                        : 'face') +
+                                    ' to authenticate');
                             if (authenticated) {
                               widget.configurationService
                                   .setBiometricsFace(true);
@@ -112,8 +114,12 @@ class _BiometricsPageState extends State<BiometricsPage> {
                               availableBiometrics
                                   .contains(BiometricType.fingerprint)) {
                             // Touch ID.
-                            bool authenticated =
-                                await _authenticateWithBiometrics(auth);
+                            bool authenticated = await BiometricsUtils
+                                .authenticateWithBiometrics('Scan your ' +
+                                    (widget.arguments.isFingerprint
+                                        ? 'fingerprint'
+                                        : 'face') +
+                                    ' to authenticate');
                             if (authenticated) {
                               widget.configurationService
                                   .setBiometricsFingerprint(true);
@@ -155,7 +161,7 @@ class _BiometricsPageState extends State<BiometricsPage> {
                         borderRadius: BorderRadius.circular(100.0),
                       ),
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(true);
                       },
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
@@ -177,35 +183,5 @@ class _BiometricsPageState extends State<BiometricsPage> {
         ),
       ),
     );
-  }
-
-  Future<bool> _checkBiometrics(LocalAuthentication auth) async {
-    bool canCheckBiometrics = false;
-    try {
-      canCheckBiometrics = await auth.canCheckBiometrics;
-    } on PlatformException catch (e) {
-      canCheckBiometrics = false;
-      print(e);
-    }
-    return canCheckBiometrics;
-  }
-
-  Future<bool> _authenticateWithBiometrics(LocalAuthentication auth) async {
-    bool authenticated = false;
-    try {
-      authenticated = await auth.authenticate(
-          localizedReason: 'Scan your ' +
-              (widget.arguments.isFingerprint ? 'fingerprint' : 'face') +
-              ' to authenticate',
-          useErrorDialogs: true,
-          stickyAuth: true,
-          biometricOnly: true);
-    } on PlatformException catch (e) {
-      print(e);
-      return false;
-    }
-    if (!mounted) return false;
-
-    return authenticated;
   }
 }

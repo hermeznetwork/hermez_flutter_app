@@ -91,6 +91,8 @@ flutter:
     - info_success.png
     - biometrics_fingerprint.png
     - biometrics_face.png
+    - arrow_right.png
+    - backup_warning.png
     - TargaryenCoin.json
     - partialERC20ABI.json
     - ERC20ABI.json

@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet_setup.dart';
 import 'package:hermez/service/address_service.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'wallet_setup_state.dart';
 
@@ -14,8 +14,9 @@ class WalletSetupHandler {
 
   WalletSetup get state => _store.state;
 
-  void generateMnemonic() {
+  void generateMnemonic() async {
     var mnemonic = _addressService.generateMnemonic();
+    await _addressService.setupFromMnemonic(mnemonic);
     _store.dispatch(WalletSetupConfirmMnemonic(mnemonic));
   }
 

@@ -120,9 +120,9 @@ class WalletHandler {
 
     //final state = await getState();
 
-    final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();
+    /*final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();
     _configurationService.setExchangeRatio(exchangeRatio);
-    _store.dispatch(ExchangeRatioUpdated(exchangeRatio));
+    _store.dispatch(ExchangeRatioUpdated(exchangeRatio));*/
 
     /*final address = await _configurationService.getEthereumAddress();
     final createAccountAuth = await _hermezService
