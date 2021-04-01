@@ -13,6 +13,11 @@ class BackupRow extends StatelessWidget {
             color: HermezColors.blackTwo),
         padding: EdgeInsets.all(6.0),
         child: ListTile(
+          onTap: () {
+            if (onPressed != null) {
+              onPressed();
+            }
+          },
           leading: Container(
               padding: EdgeInsets.only(top: 16.0),
               child: Image.asset("assets/backup_warning.png", height: 20)),

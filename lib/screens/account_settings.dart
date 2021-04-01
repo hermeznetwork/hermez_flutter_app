@@ -204,7 +204,9 @@ class AccountSettingsPage extends HookWidget {
           final index = i;
 
           if (index == 0) {
-            return BackupRow(() {});
+            return BackupRow(() {
+              Navigator.of(context).pushNamed("/backup_info");
+            });
           } else {
             String title = "";
 

@@ -30,7 +30,7 @@ class _InfoPageState extends State<InfoPage> {
       startTime(context);
     }
     return Scaffold(
-      backgroundColor: HermezColors.mediumOrange,
+      backgroundColor: HermezColors.lightOrange,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,

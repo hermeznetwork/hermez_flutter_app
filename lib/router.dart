@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/qrcode_reader_page.dart';
+import 'package:hermez/screens/backup_info.dart';
 import 'package:hermez/screens/biometrics.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/intro.dart';
 import 'package:hermez/screens/pin.dart';
+import 'package:hermez/screens/recovery_phrase.dart';
+import 'package:hermez/screens/recovery_phrase_confirm.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
@@ -60,6 +63,16 @@ Map<String, WidgetBuilder> getRoutes(context) {
       return BiometricsPage(
           arguments: ModalRoute.of(context).settings.arguments,
           configurationService: configurationService);
+    },
+    '/backup_info': (BuildContext context) {
+      return BackupInfoPage();
+    },
+    '/recovery_phrase': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return RecoveryPhrasePage(configurationService: configurationService);
+    },
+    '/recovery_phrase_confirm': (BuildContext context) {
+      return RecoveryPhraseConfirmPage();
     },
     '/activity': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
