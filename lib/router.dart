@@ -72,7 +72,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
       return RecoveryPhrasePage(configurationService: configurationService);
     },
     '/recovery_phrase_confirm': (BuildContext context) {
-      return RecoveryPhraseConfirmPage();
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return RecoveryPhraseConfirmPage(
+          configurationService: configurationService);
     },
     '/activity': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);

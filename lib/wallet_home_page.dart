@@ -3,7 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/home_balance.dart';
 import 'package:hermez/qrcode_reader_page.dart';
 import 'package:hermez/screens/account_settings.dart';
+import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:provider/provider.dart';
 
 import 'context/wallet/wallet_handler.dart';
 import 'context/wallet/wallet_provider.dart';
@@ -37,7 +39,7 @@ class WalletHomePage extends HookWidget {
     }, [store]);
 
     final _children = <Widget>[
-      settingsPage(store),
+      settingsPage(context),
       HomeBalance(
         arguments: HomeBalanceArguments(
           controller,
@@ -100,10 +102,10 @@ class WalletHomePage extends HookWidget {
   }
 
   Widget settingsPage(dynamic context) {
-    /*var configurationService = Provider.of<ConfigurationService>(context);
-    if (configurationService.didSetupWallet())
+    var configurationService = Provider.of<ConfigurationService>(context);
+    /*if (configurationService.didSetupWallet())
       return WalletProvider(builder: (context, store) {*/
-    return AccountSettingsPage(store);
+    return AccountSettingsPage(store, configurationService);
     //});
   }
 }

@@ -89,11 +89,15 @@ flutter:
   assets:
     # Intro
     - intro_hermez_logo.png
+    # Info
     - info_success.png
+    - info_failure.png
+    # Biometrics
     - biometrics_fingerprint.png
     - biometrics_face.png
     - arrow_right.png
     - backup_warning.png
+
     - TargaryenCoin.json
     - partialERC20ABI.json
     - ERC20ABI.json

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/backup_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -14,9 +15,10 @@ import 'package:hermez/wallet_transfer_amount_page.dart';
 // title and message.
 
 class AccountSettingsPage extends HookWidget {
-  AccountSettingsPage(this.store);
+  AccountSettingsPage(this.store, this.configurationService);
 
   WalletHandler store;
+  ConfigurationService configurationService;
 
   @override
   Widget build(BuildContext context) {
@@ -183,14 +185,14 @@ class AccountSettingsPage extends HookWidget {
       color: Colors.white,
       child: ListView.separated(
         shrinkWrap: true,
-        itemCount: 4,
+        itemCount: configurationService.didBackupWallet() ? 3 : 4,
         separatorBuilder: (BuildContext context, int index) {
-          if (index != 0) {
+          if (index == 0 && !configurationService.didBackupWallet()) {
+            return Container();
+          } else {
             return Container(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                 child: Divider(color: HermezColors.steel));
-          } else {
-            return Container();
           }
         },
         //set the item count so that index won't be out of range
@@ -201,15 +203,15 @@ class AccountSettingsPage extends HookWidget {
           // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
           // final index = i ~/ 2; //get the actual index excluding dividers.
-          final index = i;
 
-          if (index == 0) {
+          if (!configurationService.didBackupWallet() && i == 0) {
             return BackupRow(() {
               Navigator.of(context).pushNamed("/backup_info");
             });
           } else {
             String title = "";
 
+            final index = i + (configurationService.didBackupWallet() ? 1 : 0);
             switch (index) {
               case 1:
                 title = "General";
@@ -244,14 +246,14 @@ class AccountSettingsPage extends HookWidget {
               ),
               onTap: () {
                 switch (index) {
-                  case 0:
+                  case 1:
                     //Navigator.of(context)
                     //    .pushNamed("/currency_selector", arguments: store);
                     break;
-                  case 1:
+                  case 2:
                     //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
                     break;
-                  case 2:
+                  case 3:
                     // viewInExplorer();
                     break;
                 }

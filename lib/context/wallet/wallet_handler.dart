@@ -652,5 +652,6 @@ class WalletHandler {
     await _configurationService.setDefaultCurrency(WalletDefaultCurrency.EUR);
     await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
     await _configurationService.setupDone(false);
+    await _configurationService.backupDone(false);
   }
 }

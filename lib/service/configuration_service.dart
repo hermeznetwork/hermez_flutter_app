@@ -10,6 +10,7 @@ import 'package:web3dart/web3dart.dart';
 abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
   Future<void> setupDone(bool value);
+  Future<void> backupDone(bool value);
   Future<void> setPrivateKey(String value);
   Future<void> setHermezPrivateKey(String value);
   Future<void> setBabyJubJubHex(String value);
@@ -32,6 +33,7 @@ abstract class IConfigurationService {
   Future<bool> getBiometricsFingerprint();
   Future<bool> getBiometricsFace();
   bool didSetupWallet();
+  bool didBackupWallet();
   void addPendingWithdraw(dynamic pendingWithdraw);
   void removePendingWithdraw(String pendingWithdrawId);
   void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
@@ -119,6 +121,11 @@ class ConfigurationService implements IConfigurationService {
     await _preferences.setBool("didSetupWallet", value);
   }
 
+  @override
+  Future<void> backupDone(bool value) async {
+    await _preferences.setBool("didBackupWallet", value);
+  }
+
   // gets
   @override
   Future<String> getMnemonic() async {
@@ -199,6 +206,11 @@ class ConfigurationService implements IConfigurationService {
   @override
   bool didSetupWallet() {
     return _preferences.getBool("didSetupWallet") ?? false;
+  }
+
+  @override
+  bool didBackupWallet() {
+    return _preferences.getBool("didBackupWallet") ?? false;
   }
 
   /// Adds a pendingWithdraw to the pendingWithdraw pool
