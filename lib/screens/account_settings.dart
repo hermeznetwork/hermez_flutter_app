@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/backup_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -247,14 +248,19 @@ class AccountSettingsPage extends HookWidget {
               onTap: () {
                 switch (index) {
                   case 1:
-                    //Navigator.of(context)
-                    //    .pushNamed("/currency_selector", arguments: store);
+                    Navigator.of(context).pushNamed("/settings_details",
+                        arguments: SettingsDetailsArguments(
+                            store, SettingsDetailsType.GENERAL));
                     break;
                   case 2:
-                    //Navigator.of(context).pushNamed("/receiver", arguments: ReceiverArguments(ReceiverType.REQUEST));
+                    Navigator.of(context).pushNamed("/settings_details",
+                        arguments: SettingsDetailsArguments(
+                            store, SettingsDetailsType.SECURITY));
                     break;
                   case 3:
-                    // viewInExplorer();
+                    Navigator.of(context).pushNamed("/settings_details",
+                        arguments: SettingsDetailsArguments(
+                            store, SettingsDetailsType.ADVANCED));
                     break;
                 }
               },

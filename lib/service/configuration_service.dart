@@ -30,8 +30,8 @@ abstract class IConfigurationService {
   Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
   Future<String> getPasscode();
-  Future<bool> getBiometricsFingerprint();
-  Future<bool> getBiometricsFace();
+  bool getBiometricsFingerprint();
+  bool getBiometricsFace();
   bool didSetupWallet();
   bool didBackupWallet();
   void addPendingWithdraw(dynamic pendingWithdraw);
@@ -97,13 +97,12 @@ class ConfigurationService implements IConfigurationService {
 
   @override
   Future<void> setBiometricsFingerprint(bool value) async {
-    await _secureStorage.write(
-        key: 'biometrics_fingerprint', value: value.toString());
+    await _preferences.setBool('biometrics_fingerprint', value);
   }
 
   @override
   Future<void> setBiometricsFace(bool value) async {
-    await _secureStorage.write(key: 'biometrics_face', value: value.toString());
+    await _preferences.setBool('biometrics_face', value);
   }
 
   Future<void> setExchangeRatio(double value) async {
@@ -179,13 +178,13 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  Future<bool> getBiometricsFingerprint() async {
-    return await _secureStorage.read(key: 'biometrics_fingerprint') as bool;
+  bool getBiometricsFingerprint() {
+    return _preferences.getBool("biometrics_fingerprint") ?? false;
   }
 
   @override
-  Future<bool> getBiometricsFace() async {
-    return await _secureStorage.read(key: 'biometrics_face') as bool;
+  bool getBiometricsFace() {
+    return _preferences.getBool("biometrics_face") ?? false;
   }
 
   @override

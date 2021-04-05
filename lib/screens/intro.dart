@@ -14,11 +14,11 @@ class IntroPage extends HookWidget {
     return Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
-        backgroundColor: HermezColors.mediumOrange,
+        backgroundColor: HermezColors.lightOrange,
       ),
+      backgroundColor: HermezColors.lightOrange,
       body: SafeArea(
         child: Container(
-          color: HermezColors.mediumOrange,
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -68,11 +68,12 @@ class IntroPage extends HookWidget {
                       ),
                       onPressed: () {
                         Navigator.of(context)
-                            .pushNamed("/pin", arguments: PinArguments(true))
+                            .pushNamed("/pin",
+                                arguments: PinArguments(null, true, null))
                             .then(
                           (value) async {
                             if (value.toString() == 'true') {
-                              store.generateMnemonic();
+                              await store.generateMnemonic();
                               Navigator.pushNamedAndRemoveUntil(context, "/",
                                   (Route<dynamic> route) => false);
                             }

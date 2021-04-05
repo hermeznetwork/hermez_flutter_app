@@ -8,6 +8,8 @@ import 'package:hermez/screens/intro.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/recovery_phrase_confirm.dart';
+import 'package:hermez/screens/remove_account_info.dart';
+import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
@@ -35,19 +37,22 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
-        return WalletProvider(builder: (context, store) {
-          return WalletHomePage("Hermez");
-        });
+        var configurationService = Provider.of<ConfigurationService>(context);
+        return PinPage(
+            arguments: PinArguments("Enter passcode", false, () {
+              Navigator.pushReplacementNamed(context, '/home');
+            }),
+            configurationService: configurationService);
       } else {
         return WalletSetupProvider(builder: (context, store) {
-          useEffect(() {
-            store.generateMnemonic();
-            return null;
-          }, []);
-
           return IntroPage();
         });
       }
+    },
+    '/home': (BuildContext context) {
+      return WalletProvider(builder: (context, store) {
+        return WalletHomePage("Hermez");
+      });
     },
     '/pin': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
@@ -69,12 +74,22 @@ Map<String, WidgetBuilder> getRoutes(context) {
     },
     '/recovery_phrase': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
-      return RecoveryPhrasePage(configurationService: configurationService);
+      return RecoveryPhrasePage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
     },
     '/recovery_phrase_confirm': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       return RecoveryPhraseConfirmPage(
           configurationService: configurationService);
+    },
+    '/settings_details': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return SettingsDetailsPage(
+          ModalRoute.of(context).settings.arguments, configurationService);
+    },
+    '/remove_account_info': (BuildContext context) {
+      return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);
     },
     '/activity': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);

@@ -4,9 +4,17 @@ import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
-class RecoveryPhrasePage extends StatefulWidget {
-  RecoveryPhrasePage({Key key, this.configurationService}) : super(key: key);
+class RecoveryPhraseArguments {
+  final bool isBackup;
 
+  RecoveryPhraseArguments(this.isBackup);
+}
+
+class RecoveryPhrasePage extends StatefulWidget {
+  RecoveryPhrasePage({Key key, this.arguments, this.configurationService})
+      : super(key: key);
+
+  final RecoveryPhraseArguments arguments;
   final ConfigurationService configurationService;
 
   @override
@@ -49,22 +57,24 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
               child: new Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24, top: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                          'Back up these words manually and keep '
-                          'them in a safe place.',
-                          style: TextStyle(
-                            color: HermezColors.steel,
-                            fontSize: 18,
-                            height: 1.5,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          )),
-                    ),
-                  ),
+                  widget.arguments.isBackup
+                      ? Container(
+                          margin: EdgeInsets.only(left: 24, right: 24, top: 24),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                                'Back up these words manually and keep '
+                                'them in a safe place.',
+                                style: TextStyle(
+                                  color: HermezColors.steel,
+                                  fontSize: 18,
+                                  height: 1.5,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                )),
+                          ),
+                        )
+                      : Container(),
                   SizedBox(height: 16),
                   Container(
                     height: 232,
@@ -398,70 +408,74 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                     ),
                   ),
                   SizedBox(height: 32),
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Row(children: [
-                        Checkbox(
-                          value: checked,
-                          onChanged: (value) {
-                            setState(() {
-                              checked = value;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Text(
-                              'I understand this is my only'
-                              ' key to recover my funds.',
-                              style: TextStyle(
-                                color: HermezColors.blackTwo,
-                                fontSize: 18,
-                                height: 1.5,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
-                              )),
+                  widget.arguments.isBackup
+                      ? Container(
+                          margin: EdgeInsets.only(left: 24, right: 24),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Row(children: [
+                              Checkbox(
+                                value: checked,
+                                onChanged: (value) {
+                                  setState(() {
+                                    checked = value;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                    'I understand this is my only'
+                                    ' key to recover my funds.',
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 18,
+                                      height: 1.5,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              )
+                            ]),
+                          ),
                         )
-                      ]),
-                    ),
-                  ),
+                      : Container(),
                 ],
               ),
             ),
-            Container(
-              margin: const EdgeInsets.only(
-                  left: 30.0, right: 30.0, top: 30.0, bottom: 20.0),
-              child: Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100.0),
+            widget.arguments.isBackup
+                ? Container(
+                    margin: const EdgeInsets.only(
+                        left: 30.0, right: 30.0, top: 30.0, bottom: 20.0),
+                    child: Align(
+                      alignment: FractionalOffset.bottomCenter,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FlatButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          onPressed: checked
+                              ? () {
+                                  Navigator.of(context)
+                                      .pushNamed("/recovery_phrase_confirm");
+                                }
+                              : null,
+                          padding: EdgeInsets.only(
+                              top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
+                          disabledColor: HermezColors.blueyGreyTwo,
+                          color: HermezColors.darkOrange,
+                          textColor: Colors.white,
+                          child: Text("Continue",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w700,
+                              )),
+                        ),
+                      ),
                     ),
-                    onPressed: checked
-                        ? () {
-                            Navigator.of(context)
-                                .pushNamed("/recovery_phrase_confirm");
-                          }
-                        : null,
-                    padding: EdgeInsets.only(
-                        top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
-                    disabledColor: HermezColors.blueyGreyTwo,
-                    color: HermezColors.darkOrange,
-                    textColor: Colors.white,
-                    child: Text("Continue",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
-                        )),
-                  ),
-                ),
-              ),
-            ),
+                  )
+                : Container(),
           ],
         ),
       ),

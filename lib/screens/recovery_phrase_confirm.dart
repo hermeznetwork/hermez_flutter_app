@@ -567,8 +567,10 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               widget.configurationService.backupDone(true);
                               var value = await Navigator.of(context).pushNamed(
                                   "/info",
-                                  arguments: InfoArguments("info_success.png",
-                                      false, "Backed up successfully"));
+                                  arguments: InfoArguments(
+                                      "info_backup_success.png",
+                                      false,
+                                      "Your wallet is backed up"));
                               Navigator.pushNamedAndRemoveUntil(context, "/",
                                   (Route<dynamic> route) => false);
                             } else {

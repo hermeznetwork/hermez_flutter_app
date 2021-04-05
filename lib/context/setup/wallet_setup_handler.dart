@@ -14,7 +14,7 @@ class WalletSetupHandler {
 
   WalletSetup get state => _store.state;
 
-  void generateMnemonic() async {
+  Future<void> generateMnemonic() async {
     var mnemonic = _addressService.generateMnemonic();
     await _addressService.setupFromMnemonic(mnemonic);
     _store.dispatch(WalletSetupConfirmMnemonic(mnemonic));

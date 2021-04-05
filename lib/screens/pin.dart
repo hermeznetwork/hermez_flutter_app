@@ -9,9 +9,10 @@ import 'biometrics.dart';
 import 'info.dart';
 
 class PinArguments {
+  final String title;
   final bool creatingPin;
-
-  PinArguments(this.creatingPin);
+  final Function onSuccess;
+  PinArguments(this.title, this.creatingPin, this.onSuccess);
 }
 
 class PinPage extends StatefulWidget {
@@ -42,11 +43,23 @@ class _PinPageState extends State<PinPage> {
   String pinInfoText = "";
   bool pinError = false;
 
+  bool fingerprintEnabled = false;
+  bool faceEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    checkBiometrics();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: new AppBar(
-        title: new Text("Create passcode",
+        title: new Text(
+            widget.arguments.title != null
+                ? widget.arguments.title
+                : "Create passcode",
             style: TextStyle(
                 fontFamily: 'ModernEra',
                 color: HermezColors.blackTwo,
@@ -54,11 +67,12 @@ class _PinPageState extends State<PinPage> {
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.mediumOrange,
+        backgroundColor: HermezColors.lightOrange,
       ),
+      backgroundColor: HermezColors.lightOrange,
       body: SafeArea(
         child: Container(
-          color: HermezColors.mediumOrange,
+          color: HermezColors.lightOrange,
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -253,13 +267,33 @@ class _PinPageState extends State<PinPage> {
                                 ),
                               ),
                               SizedBox(height: 20),
-                              Container(
-                                height: 60.0,
-                                width: 60.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
+                              faceEnabled || fingerprintEnabled
+                                  ? TextButton(
+                                      style: TextButton.styleFrom(
+                                        primary: Colors.black,
+                                        minimumSize: Size(60, 60),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30)),
+                                      ),
+                                      onPressed: () {
+                                        checkBiometrics();
+                                      },
+                                      child: Icon(
+                                        faceEnabled
+                                            ? Icons.face_unlock_rounded
+                                            : Icons.fingerprint,
+                                        color: Colors.black,
+                                        size: 30,
+                                      ),
+                                    )
+                                  : Container(
+                                      height: 60.0,
+                                      width: 60.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
                               SizedBox(height: 10),
                             ],
                           ),
@@ -490,7 +524,6 @@ class _PinPageState extends State<PinPage> {
   }
 
   Future<void> pinNumberSelected(int number) async {
-    final PinArguments args = ModalRoute.of(context).settings.arguments;
     if (currentPosition <= maxPosition) {
       switch (currentPosition) {
         case 1:
@@ -519,7 +552,7 @@ class _PinPageState extends State<PinPage> {
         pinString += number.toString();
       }
       if (currentPosition > maxPosition) {
-        if (args.creatingPin) {
+        if (widget.arguments.creatingPin) {
           if (!confirmingPin) {
             confirmingPin = true;
             pinInfoText = "Confirm your passcode";
@@ -530,7 +563,11 @@ class _PinPageState extends State<PinPage> {
               widget.configurationService.setPasscode(pinString);
               var value = await Navigator.of(context).pushNamed("/info",
                   arguments: InfoArguments(
-                      "info_success.png", false, "Passcode created"));
+                      "info_success.png",
+                      false,
+                      widget.arguments.title == null
+                          ? "Passcode created"
+                          : "Passcode changed"));
               if (await BiometricsUtils.canCheckBiometrics() &&
                   await BiometricsUtils.isDeviceSupported()) {
                 List<BiometricType> availableBiometrics =
@@ -556,6 +593,14 @@ class _PinPageState extends State<PinPage> {
                       Navigator.pop(context, value);
                     }
                   });
+                } else {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context, true);
+                  }
+                }
+              } else {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context, true);
                 }
               }
             } else {
@@ -567,11 +612,22 @@ class _PinPageState extends State<PinPage> {
           }
         } else {
           if (pinString == await widget.configurationService.getPasscode()) {
-            //navigator.showMain(activity!!)
-            //activity?.finish()
+            if (widget.arguments.onSuccess != null) {
+              widget.arguments.onSuccess();
+            }
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context, true);
+            }
           } else {
-            pinInfoText = "Passcode is incorrect";
-            pinError = true;
+            Navigator.of(context)
+                .pushNamed("/info",
+                    arguments: InfoArguments(
+                        "info_failure.png", false, "Invalid passcode"))
+                .then((value) {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context, false);
+              }
+            });
             clearAllSelected();
           }
         }
@@ -610,6 +666,43 @@ class _PinPageState extends State<PinPage> {
             confirmPinString.substring(0, confirmPinString.length - 1);
       } else {
         pinString = pinString.substring(0, pinString.length - 1);
+      }
+    }
+  }
+
+  Future<void> checkBiometrics() async {
+    if (!widget.arguments.creatingPin) {
+      if (await BiometricsUtils.canCheckBiometrics() &&
+          await BiometricsUtils.isDeviceSupported()) {
+        List<BiometricType> availableBiometrics =
+            await BiometricsUtils.getAvailableBiometrics();
+        if (availableBiometrics.contains(BiometricType.face)) {
+          setState(() {
+            faceEnabled = true;
+          });
+          // Face ID.
+          bool authenticated =
+              await BiometricsUtils.authenticateWithBiometrics('Scan your face'
+                  ' to authenticate');
+          if (authenticated) {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context, true);
+            }
+          }
+        } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
+          setState(() {
+            fingerprintEnabled = true;
+          });
+          // Touch ID.
+          bool authenticated = await BiometricsUtils.authenticateWithBiometrics(
+              'Scan your fingerprint'
+              ' to authenticate');
+          if (authenticated) {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context, true);
+            }
+          }
+        }
       }
     }
   }

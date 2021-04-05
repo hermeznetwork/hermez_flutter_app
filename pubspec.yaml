@@ -95,8 +95,23 @@ flutter:
     # Biometrics
     - biometrics_fingerprint.png
     - biometrics_face.png
+    - face.png
+    - fingerprint.png
     - arrow_right.png
     - backup_warning.png
+    # Backup
+    - info_backup_success.png
+    # Remove account
+    - remove_account.png
+    - remove_account_warning.png
+
+    - view_explorer.png
+    - show_recovery_phrase.png
+    - change_passcode.png
+    - force_withdrawal.png
+    - logout.png
+    - currency_conversion.png
+
 
     - TargaryenCoin.json
     - partialERC20ABI.json
@@ -133,7 +148,6 @@ flutter:
     - show_explorer.png
     - paste.png
     - disconnect.png
-    - currency_conversion.png
     - force_exit.png
     - qr_code.png
     - explorer.png
