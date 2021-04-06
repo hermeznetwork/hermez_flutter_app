@@ -23,7 +23,8 @@ class WalletAccountSelectorPage extends HookWidget {
   List<Account> _accounts;
 
   Future<List<Account>> getAccounts() {
-    if (arguments.store.state.txLevel == TransactionLevel.LEVEL1 ||
+    if ((arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
+            arguments.transactionType != TransactionType.FORCEEXIT) ||
         arguments.transactionType == TransactionType.DEPOSIT) {
       return arguments.store.getL1Accounts();
     } else {

@@ -34,9 +34,7 @@ class BackupInfoPage extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.center,
                         child: Image.asset(
-                          'assets/success.png',
-                          width: 150,
-                          height: 150,
+                          'assets/info_backup.png',
                         ),
                       ),
                     ),
@@ -49,7 +47,7 @@ class BackupInfoPage extends StatelessWidget {
                             'If you continue you will see your recovery phrase.'
                             ' This is the only key to your wallet. If your'
                             ' phone gets stolen or lost, you will only be able'
-                            ' to recover your funds with this recovery phrase',
+                            ' to recover your funds with this recovery phrase.',
                             style: TextStyle(
                               color: HermezColors.blackTwo,
                               fontSize: 20,

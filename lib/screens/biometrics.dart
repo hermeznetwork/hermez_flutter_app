@@ -36,11 +36,12 @@ class _BiometricsPageState extends State<BiometricsPage> {
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.mediumOrange,
+        backgroundColor: HermezColors.lightOrange,
       ),
+      backgroundColor: HermezColors.lightOrange,
       body: SafeArea(
         child: Container(
-          color: HermezColors.mediumOrange,
+          color: HermezColors.lightOrange,
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,

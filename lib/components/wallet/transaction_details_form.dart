@@ -116,11 +116,15 @@ class TransferSummaryForm extends HookWidget {
                         )),
                     transactionType == TransactionType.SEND ||
                             transactionType == TransactionType.WITHDRAW ||
-                            transactionType == TransactionType.EXIT
+                            transactionType == TransactionType.EXIT ||
+                            transactionType == TransactionType.FORCEEXIT
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                                store.state.txLevel == TransactionLevel.LEVEL1
+                                store.state.txLevel ==
+                                            TransactionLevel.LEVEL1 &&
+                                        transactionType !=
+                                            TransactionType.FORCEEXIT
                                     ? 'My Ethereum address'
                                     : 'My Hermez address',
                                 style: TextStyle(
@@ -133,7 +137,9 @@ class TransferSummaryForm extends HookWidget {
                         : Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              store.state.txLevel == TransactionLevel.LEVEL1
+                              store.state.txLevel == TransactionLevel.LEVEL1 &&
+                                      transactionType !=
+                                          TransactionType.FORCEEXIT
                                   ? "0x" +
                                       AddressUtils.strip0x(
                                               addressFrom.substring(0, 6))
@@ -164,11 +170,13 @@ class TransferSummaryForm extends HookWidget {
                 SizedBox(height: 7),
                 transactionType == TransactionType.SEND ||
                         transactionType == TransactionType.WITHDRAW ||
-                        transactionType == TransactionType.EXIT
+                        transactionType == TransactionType.EXIT ||
+                        transactionType == TransactionType.FORCEEXIT
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          store.state.txLevel == TransactionLevel.LEVEL1
+                          store.state.txLevel == TransactionLevel.LEVEL1 &&
+                                  transactionType != TransactionType.FORCEEXIT
                               ? "0x" +
                                   AddressUtils.strip0x(
                                           addressFrom.substring(0, 6))
@@ -192,7 +200,8 @@ class TransferSummaryForm extends HookWidget {
                           ),
                         ),
                       )
-                    : store.state.txLevel == TransactionLevel.LEVEL1 ||
+                    : (store.state.txLevel == TransactionLevel.LEVEL1 &&
+                                transactionType != TransactionType.FORCEEXIT) ||
                             transactionType == TransactionType.RECEIVE
                         ? Container()
                         : Align(
@@ -236,7 +245,8 @@ class TransferSummaryForm extends HookWidget {
                     transactionType == TransactionType.RECEIVE ||
                             transactionType == TransactionType.DEPOSIT ||
                             transactionType == TransactionType.WITHDRAW ||
-                            transactionType == TransactionType.EXIT
+                            transactionType == TransactionType.EXIT ||
+                            transactionType == TransactionType.FORCEEXIT
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(

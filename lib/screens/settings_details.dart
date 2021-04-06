@@ -10,6 +10,9 @@ import 'package:hermez_plugin/environment.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../wallet_account_selector_page.dart';
+import '../wallet_transfer_amount_page.dart';
+
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // You can pass any object to the arguments parameter.
@@ -79,35 +82,6 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
         ),
         backgroundColor: Colors.white,
         body: SafeArea(child: buildSettingsList()));
-    /*final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text("My Account",
-            style: TextStyle(
-                fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
-                fontWeight: FontWeight.w800,
-                fontSize: 20)),
-        centerTitle: true,
-        elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
-      ),
-      body: SafeArea(
-          child:
-              buildSettingsList() /*Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                color: Colors.white,
-                child: buildSettingsList(),
-              ),
-            ),
-          ],
-        ),*/
-          ),
-    );*/
   }
 
   buildSettingsList() {
@@ -274,6 +248,12 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Force withdrawal
+                      Navigator.of(context).pushNamed("/account_selector",
+                          arguments: AccountSelectorArguments(
+                            //widget.arguments.store.state.txLevel,
+                            TransactionType.FORCEEXIT,
+                            widget.arguments.store,
+                          ));
                       break;
                   }
                   break;

@@ -74,8 +74,8 @@ class IntroPage extends HookWidget {
                           (value) async {
                             if (value.toString() == 'true') {
                               await store.generateMnemonic();
-                              Navigator.pushNamedAndRemoveUntil(context, "/",
-                                  (Route<dynamic> route) => false);
+                              Navigator.pushNamedAndRemoveUntil(context,
+                                  "/home", (Route<dynamic> route) => false);
                             }
                           },
                         );
