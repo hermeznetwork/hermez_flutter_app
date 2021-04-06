@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/environment.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -28,16 +29,32 @@ class SettingsDetailsArguments {
   SettingsDetailsArguments(this.store, this.type);
 }
 
-class SettingsDetailsPage extends HookWidget {
-  SettingsDetailsPage(this.arguments, this.configurationService);
+class SettingsDetailsPage extends StatefulWidget {
+  SettingsDetailsPage({Key key, this.arguments, this.configurationService})
+      : super(key: key);
 
-  SettingsDetailsArguments arguments;
-  ConfigurationService configurationService;
+  final SettingsDetailsArguments arguments;
+  final ConfigurationService configurationService;
+
+  @override
+  _SettingsDetailsPageState createState() => _SettingsDetailsPageState();
+}
+
+class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
+  bool showBiometrics = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.arguments.type == SettingsDetailsType.SECURITY) {
+      shouldShowBiometrics();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     String title = "";
-    switch (arguments.type) {
+    switch (widget.arguments.type) {
       case SettingsDetailsType.GENERAL:
         title = 'General';
         break;
@@ -95,14 +112,13 @@ class SettingsDetailsPage extends HookWidget {
 
   buildSettingsList() {
     int count = 0;
-    switch (arguments.type) {
+    switch (widget.arguments.type) {
       case SettingsDetailsType.GENERAL:
         count = 3;
         break;
       case SettingsDetailsType.SECURITY:
         count = 2;
-        if (configurationService.getBiometricsFace() ||
-            configurationService.getBiometricsFingerprint()) {
+        if (showBiometrics) {
           count++;
         }
         break;
@@ -124,12 +140,13 @@ class SettingsDetailsPage extends HookWidget {
 
           // final index = i ~/ 2; //get the actual index excluding dividers.
           String title = "";
+          String subtitle;
           String icon = "";
 
           final index = i;
           switch (index) {
             case 0:
-              switch (arguments.type) {
+              switch (widget.arguments.type) {
                 case SettingsDetailsType.GENERAL:
                   title = "Currency conversion";
                   icon = "assets/currency_conversion.png";
@@ -140,12 +157,14 @@ class SettingsDetailsPage extends HookWidget {
                   break;
                 case SettingsDetailsType.ADVANCED:
                   title = "Force withdrawal";
+                  subtitle = "Forces the coordinator to process"
+                      " the transaction (more Gas is required).";
                   icon = "assets/force_exit.png";
                   break;
               }
               break;
             case 1:
-              switch (arguments.type) {
+              switch (widget.arguments.type) {
                 case SettingsDetailsType.GENERAL:
                   title = "View in block explorer";
                   icon = "assets/view_explorer.png";
@@ -161,15 +180,15 @@ class SettingsDetailsPage extends HookWidget {
               }
               break;
             case 2:
-              switch (arguments.type) {
+              switch (widget.arguments.type) {
                 case SettingsDetailsType.GENERAL:
                   title = "Lock wallet";
                   icon = "assets/logout.png";
                   break;
                 case SettingsDetailsType.SECURITY:
-                  title = configurationService.getBiometricsFace()
+                  title = widget.configurationService.getBiometricsFace()
                       ? "Disable Face ID"
-                      : configurationService.getBiometricsFingerprint()
+                      : widget.configurationService.getBiometricsFingerprint()
                           ? "Disable fingerprint"
                           : "Enable fingerprint";
                   icon = "assets/fingerprint.png";
@@ -193,27 +212,52 @@ class SettingsDetailsPage extends HookWidget {
                 padding: EdgeInsets.only(top: 20.0),
                 child: Image.asset("assets/arrow_right.png",
                     height: 12, color: HermezColors.blackTwo)),*/
-            title: Align(
-              alignment: Alignment(-1.3, 0),
-              child: Container(
-                padding: EdgeInsets.only(top: 30.0, bottom: 30.0),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                      color: HermezColors.black,
-                      fontFamily: 'ModernEra',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16),
-                  textAlign: TextAlign.left,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment(-1.3, 0),
+                  child: Container(
+                    padding: EdgeInsets.only(
+                        top: 30.0, bottom: subtitle != null ? 8.0 : 30.0),
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                          color: HermezColors.black,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
                 ),
-              ),
+                subtitle != null
+                    ? Align(
+                        alignment: Alignment(-100, 0),
+                        child: Container(
+                          child: Text(
+                            subtitle,
+                            style: TextStyle(
+                                color: HermezColors.blueyGreyTwo,
+                                fontFamily: 'ModernEra',
+                                height: 1.5,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      )
+                    : Container(),
+              ],
             ),
             onTap: () {
               switch (index) {
                 case 0:
-                  switch (arguments.type) {
+                  switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       //  Currency conversion
+                      Navigator.of(context).pushNamed("/currency_selector",
+                          arguments: widget.arguments.store);
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Show recovery phrase
@@ -234,7 +278,7 @@ class SettingsDetailsPage extends HookWidget {
                   }
                   break;
                 case 1:
-                  switch (arguments.type) {
+                  switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       // View in block explorer
                       viewInExplorer();
@@ -248,13 +292,13 @@ class SettingsDetailsPage extends HookWidget {
                     case SettingsDetailsType.ADVANCED:
                       // Remove account
                       Navigator.of(context).pushNamed("/remove_account_info",
-                          arguments:
-                              RemoveAccountInfoArguments(arguments.store));
+                          arguments: RemoveAccountInfoArguments(
+                              widget.arguments.store));
                       break;
                   }
                   break;
                 case 2:
-                  switch (arguments.type) {
+                  switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       // Lock wallet
                       Navigator.pushNamedAndRemoveUntil(
@@ -262,6 +306,7 @@ class SettingsDetailsPage extends HookWidget {
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Biometrics
+                      checkBiometrics();
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Nothing
@@ -280,11 +325,62 @@ class SettingsDetailsPage extends HookWidget {
   viewInExplorer() async {
     var url = getCurrentEnvironment().etherscanUrl +
         "/address/" +
-        arguments.store.state.ethereumAddress;
+        widget.arguments.store.state.ethereumAddress;
     if (await canLaunch(url))
       await launch(url);
     else
       // can't launch url, there is some error
       throw "Could not launch $url";
+  }
+
+  Future<void> checkBiometrics() async {
+    if (await BiometricsUtils.canCheckBiometrics() &&
+        await BiometricsUtils.isDeviceSupported()) {
+      List<BiometricType> availableBiometrics =
+          await BiometricsUtils.getAvailableBiometrics();
+      if (availableBiometrics.contains(BiometricType.face)) {
+        // Face ID.
+        bool authenticated =
+            await BiometricsUtils.authenticateWithBiometrics('Scan your face'
+                ' to authenticate');
+        if (authenticated) {
+          setState(() {
+            widget.configurationService.setBiometricsFace(
+                !widget.configurationService.getBiometricsFace());
+          });
+        }
+      } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
+        // Touch ID.
+        bool authenticated = await BiometricsUtils.authenticateWithBiometrics(
+            'Scan your fingerprint'
+            ' to authenticate');
+        if (authenticated) {
+          setState(() {
+            widget.configurationService.setBiometricsFingerprint(
+                !widget.configurationService.getBiometricsFingerprint());
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> shouldShowBiometrics() async {
+    if (await BiometricsUtils.canCheckBiometrics() &&
+        await BiometricsUtils.isDeviceSupported()) {
+      List<BiometricType> availableBiometrics =
+          await BiometricsUtils.getAvailableBiometrics();
+      if (availableBiometrics.contains(BiometricType.face) ||
+          availableBiometrics.contains(BiometricType.fingerprint)) {
+        setState(() {
+          showBiometrics = true;
+        });
+
+        return;
+      }
+    }
+    setState(() {
+      showBiometrics = false;
+    });
+    return;
   }
 }

@@ -86,7 +86,8 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/settings_details': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       return SettingsDetailsPage(
-          ModalRoute.of(context).settings.arguments, configurationService);
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
     },
     '/remove_account_info': (BuildContext context) {
       return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);

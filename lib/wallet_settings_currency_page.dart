@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/utils/hermez_colors.dart';
 
 import 'context/wallet/wallet_handler.dart';
 
@@ -17,30 +18,24 @@ class SettingsCurrencyPage extends StatefulWidget {
 }
 
 class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
-//class SettingsCurrencyPage extends HookWidget {
-
-  //WalletHandler store;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    //widget.store.initialise();
-  }
-
   @override
   Widget build(BuildContext context) {
-    //widget.store = useWallet(context);
-    /*useEffect(() {
-
-      return null;
-    }, []);*/
-
     final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(title: Text("Default currency"), elevation: 0),
+      appBar: new AppBar(
+        title: new Text("Currency conversion",
+            style: TextStyle(
+                fontFamily: 'ModernEra',
+                color: HermezColors.blackTwo,
+                fontWeight: FontWeight.w800,
+                fontSize: 20)),
+        centerTitle: true,
+        elevation: 0.0,
+        backgroundColor: Colors.white,
+      ),
+      backgroundColor: Colors.white,
       body: Column(
         children: <Widget>[
           buildCurrencyList(),
@@ -53,7 +48,7 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
   Widget buildCurrencyList() {
     return Expanded(
       child: Container(
-          color: Colors.grey[100],
+          color: Colors.white,
           child: ListView.builder(
               shrinkWrap: true,
               itemCount: WalletDefaultCurrency.values.length,
@@ -79,7 +74,8 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
                           element.toString().split(".").last,
                           style: TextStyle(
                               fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w800,
+                              color: HermezColors.blackTwo,
+                              fontWeight: FontWeight.w700,
                               fontSize: 16),
                           textAlign: TextAlign.left,
                         ),

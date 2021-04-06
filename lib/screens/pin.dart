@@ -676,7 +676,8 @@ class _PinPageState extends State<PinPage> {
           await BiometricsUtils.isDeviceSupported()) {
         List<BiometricType> availableBiometrics =
             await BiometricsUtils.getAvailableBiometrics();
-        if (availableBiometrics.contains(BiometricType.face)) {
+        if (availableBiometrics.contains(BiometricType.face) &&
+            widget.configurationService.getBiometricsFace()) {
           setState(() {
             faceEnabled = true;
           });
@@ -685,11 +686,15 @@ class _PinPageState extends State<PinPage> {
               await BiometricsUtils.authenticateWithBiometrics('Scan your face'
                   ' to authenticate');
           if (authenticated) {
+            if (widget.arguments.onSuccess != null) {
+              widget.arguments.onSuccess();
+            }
             if (Navigator.canPop(context)) {
               Navigator.pop(context, true);
             }
           }
-        } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
+        } else if (availableBiometrics.contains(BiometricType.fingerprint) &&
+            widget.configurationService.getBiometricsFingerprint()) {
           setState(() {
             fingerprintEnabled = true;
           });
@@ -698,6 +703,9 @@ class _PinPageState extends State<PinPage> {
               'Scan your fingerprint'
               ' to authenticate');
           if (authenticated) {
+            if (widget.arguments.onSuccess != null) {
+              widget.arguments.onSuccess();
+            }
             if (Navigator.canPop(context)) {
               Navigator.pop(context, true);
             }
