@@ -122,7 +122,7 @@ class _HomeBalanceState extends State<HomeBalance> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color.fromRGBO(249, 244, 235, 1.0),
+      color: HermezColors.lightOrange,
       child: FutureBuilder(
         future: fetchAccounts(),
         builder: (buildContext, snapshot) {
