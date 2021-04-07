@@ -513,8 +513,10 @@ class WalletHandler {
     _store.dispatch(TransactionFinished());
   }
 
-  Future<void> forceExit(BigInt amount, Account account) {
-    _hermezService.forceExit(amount, account);
+  Future<bool> forceExit(BigInt amount, Account account) {
+    _store.dispatch(TransactionStarted());
+
+    return _hermezService.forceExit(amount, account, state.ethereumPrivateKey);
   }
 
   Future<bool> exit(double amount, Account account, double fee) async {

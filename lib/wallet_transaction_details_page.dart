@@ -132,78 +132,81 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             widget.arguments.status == TransactionStatus.DRAFT
                 ? Column(children: <Widget>[
                     Container(
-                      height: 52,
-                      margin: EdgeInsets.only(
-                          left: 16.0, right: 16.0, top: 20.0, bottom: 20.0),
-                      width: double.infinity,
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.0),
-                            side: BorderSide(color: HermezColors.darkOrange)),
-                        onPressed: () async {
-                          var success = false;
-                          if (widget.arguments.wallet.state.txLevel ==
-                              TransactionLevel.LEVEL1) {
-                            success = await transferStore.transferEth(
-                                widget
-                                    .arguments.wallet.state.ethereumPrivateKey,
-                                widget.arguments.addressTo,
-                                widget.arguments.amount.toString());
-                          } else {
-                            success = await handleFormSubmit();
-                          }
+                      margin: const EdgeInsets.all(16),
+                      child: Align(
+                        alignment: FractionalOffset.bottomCenter,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100.0),
+                            ),
+                            onPressed: () async {
+                              var success = false;
+                              if (widget.arguments.wallet.state.txLevel ==
+                                  TransactionLevel.LEVEL1) {
+                                success = await transferStore.transferEth(
+                                    widget.arguments.wallet.state
+                                        .ethereumPrivateKey,
+                                    widget.arguments.addressTo,
+                                    widget.arguments.amount.toString());
+                              } else {
+                                success = await handleFormSubmit();
+                              }
 
-                          //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
-                          if (success) {
-                            Navigator.pushReplacementNamed(
-                                context, "/transaction_info",
-                                arguments: TransactionInfoArguments(
-                                    widget.arguments.wallet));
-                          } else {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                // return object of type Dialog
-                                return AlertDialog(
-                                  title: new Text("Transfer Error"),
-                                  content: new Text(
-                                      widget.arguments.wallet.state.txLevel ==
+                              //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
+                              if (success) {
+                                Navigator.pushReplacementNamed(
+                                    context, "/transaction_info",
+                                    arguments: TransactionInfoArguments(
+                                        widget.arguments.wallet));
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    // return object of type Dialog
+                                    return AlertDialog(
+                                      title: new Text("Transfer Error"),
+                                      content: new Text(widget.arguments.wallet
+                                                  .state.txLevel ==
                                               TransactionLevel.LEVEL1
                                           ? transferStore.state.errors.first
                                           : ""),
-                                  actions: <Widget>[
-                                    // usually buttons at the bottom of the dialog
-                                    new FlatButton(
-                                      textColor: HermezColors.orange,
-                                      child: new Text("Close"),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
+                                      actions: <Widget>[
+                                        // usually buttons at the bottom of the dialog
+                                        new FlatButton(
+                                          textColor: HermezColors.orange,
+                                          child: new Text("Close"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 );
-                              },
-                            );
-                            /*_scaffoldKey.currentState.showSnackBar(SnackBar(
-                            content: Text(transferStore.state.errors.first),
-                          ));*/
-                          }
-                          //this.onSubmit(
-                          //amountController.value.text,
-                          //amountController.value.text,
-                          //addressController.value.text);
-                        },
-                        disabledColor: HermezColors.blueyGreyTwo,
-                        padding: EdgeInsets.all(18.0),
-                        color: HermezColors.darkOrange,
-                        textColor: Colors.white,
-                        child: Text(getButtonLabel(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w700,
-                            )),
+                              }
+                            },
+                            padding: EdgeInsets.only(
+                                top: 18.0,
+                                bottom: 18.0,
+                                right: 24.0,
+                                left: 24.0),
+                            disabledTextColor: Colors.grey,
+                            disabledColor: Colors.blueGrey,
+                            color: HermezColors.darkOrange,
+                            textColor: Colors.white,
+                            child: Text(
+                              getButtonLabel(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ])
@@ -358,7 +361,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         break;
       case TransactionType.FORCEEXIT:
         {
-          widget.arguments.wallet.forceExit(
+          return await widget.arguments.wallet.forceExit(
               web3.EtherAmount.fromUnitAndValue(
                       web3.EtherUnit.wei,
                       (widget.arguments.amount *

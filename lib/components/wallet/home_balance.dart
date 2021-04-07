@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/model/wallet.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
@@ -23,24 +22,13 @@ import 'package:intl/intl.dart';
 import '../../wallet_transaction_details_page.dart';
 
 class HomeBalanceArguments {
-  final String address;
-  final BigInt ethBalance;
-  final Map<String, BigInt> tokensBalance;
-  final WalletDefaultCurrency defaultCurrency;
   final WalletHandler store;
   final PageController controller;
   final List<Account> cryptoList;
   final scaffoldKey;
 
   HomeBalanceArguments(
-      this.controller,
-      this.address,
-      this.ethBalance,
-      this.tokensBalance,
-      this.defaultCurrency,
-      this.store,
-      this.cryptoList,
-      this.scaffoldKey);
+      this.controller, this.store, this.cryptoList, this.scaffoldKey);
 }
 
 class HomeBalance extends StatefulWidget {
@@ -223,8 +211,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                         Clipboard.setData(ClipboardData(
                             text: widget.arguments.store.state.txLevel ==
                                     TransactionLevel.LEVEL1
-                                ? widget.arguments.address
-                                : "hez:" + widget.arguments.address));
+                                ? widget.arguments.store.state.ethereumAddress
+                                : "hez:" +
+                                    widget.arguments.store.state
+                                        .ethereumAddress));
                         widget.arguments.scaffoldKey.currentState
                             .showSnackBar(SnackBar(
                           content: Text("Copied"),
@@ -235,32 +225,32 @@ class _HomeBalanceState extends State<HomeBalance> {
                       color: HermezColors.mediumOrange,
                       textColor: HermezColors.steel,
                       child: Text(
-                          widget != null &&
-                                  widget.arguments != null &&
-                                  widget.arguments.address != null
+                          widget != null && widget.arguments != null && widget.arguments.store.state.ethereumAddress != null
                               ? (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
                                   ? "0x" +
-                                          AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
+                                          AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
                                               .toUpperCase() +
                                           " ･･･ " +
-                                          widget.arguments.address
+                                          widget.arguments.store.state.ethereumAddress
                                               .substring(
-                                                  widget.arguments.address.length -
-                                                      5,
                                                   widget
-                                                      .arguments.address.length)
+                                                          .arguments
+                                                          .store
+                                                          .state
+                                                          .ethereumAddress
+                                                          .length -
+                                                      5,
+                                                  widget.arguments.store.state
+                                                      .ethereumAddress.length)
                                               .toUpperCase() ??
                                       ""
                                   : "hez:" +
                                           "0x" +
-                                          AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
+                                          AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
                                               .toUpperCase() +
                                           " ･･･ " +
-                                          widget.arguments.address
-                                              .substring(
-                                                  widget.arguments.address.length -
-                                                      5,
-                                                  widget.arguments.address.length)
+                                          widget.arguments.store.state.ethereumAddress
+                                              .substring(widget.arguments.store.state.ethereumAddress.length - 5, widget.arguments.store.state.ethereumAddress.length)
                                               .toUpperCase() ??
                                       "")
                               : "",

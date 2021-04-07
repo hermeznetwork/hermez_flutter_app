@@ -251,7 +251,10 @@ class TransferSummaryForm extends HookWidget {
                             alignment: Alignment.centerRight,
                             child: Text(
                                 transactionType == TransactionType.WITHDRAW ||
-                                        transactionType == TransactionType.EXIT
+                                        transactionType ==
+                                            TransactionType.EXIT ||
+                                        transactionType ==
+                                            TransactionType.FORCEEXIT
                                     ? 'My Ethereum address'
                                     : 'My Hermez address',
                                 style: TextStyle(
@@ -293,7 +296,8 @@ class TransferSummaryForm extends HookWidget {
                 transactionType == TransactionType.RECEIVE ||
                         transactionType == TransactionType.DEPOSIT ||
                         transactionType == TransactionType.WITHDRAW ||
-                        transactionType == TransactionType.EXIT
+                        transactionType == TransactionType.EXIT ||
+                        transactionType == TransactionType.FORCEEXIT
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
@@ -308,7 +312,9 @@ class TransferSummaryForm extends HookWidget {
                                           addressTo.length)
                                       .toUpperCase()
                               : transactionType == TransactionType.WITHDRAW ||
-                                      transactionType == TransactionType.EXIT
+                                      transactionType == TransactionType.EXIT ||
+                                      transactionType ==
+                                          TransactionType.FORCEEXIT
                                   ? getEthereumAddress(addressFrom)
                                           .substring(0, 6) +
                                       " ･･･ " +

@@ -39,7 +39,7 @@ class AddressService implements IAddressService {
   @override
   Future<bool> setupFromMnemonic(String mnemonic) async {
     final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
-    final privateKey = getPrivateKey(cryptMnemonic);
+    final privateKey = getPrivateKey(mnemonic);
     final hermezPrivateKey = await getHermezPrivateKey(privateKey);
     final ethereumAddress = await getEthereumAddress(privateKey);
     final hermezAddress = await getHermezAddress(privateKey);

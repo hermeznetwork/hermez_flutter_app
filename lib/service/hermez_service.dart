@@ -52,7 +52,7 @@ abstract class IHermezService {
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
-  Future<void> withdraw(
+  Future<bool> withdraw(
       BigInt amount,
       Account account,
       Exit exit,
@@ -63,6 +63,8 @@ abstract class IHermezService {
       String privateKey,
       {int gasLimit = GAS_LIMIT,
       int gasMultiplier = GAS_MULTIPLIER});
+  Future<bool> forceExit(BigInt amount, Account account, String privateKey,
+      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
   Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
@@ -315,9 +317,15 @@ class HermezService implements IHermezService {
     }
   }
 
-  Future<void> forceExit(BigInt amount, Account account,
+  @override
+  Future<bool> forceExit(BigInt amount, Account account, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    tx.forceExit(amount, account.accountIndex, account.token, client);
+    return tx.forceExit(
+        HermezCompressedAmount.compressAmount(amount.toDouble()),
+        account.accountIndex,
+        account.token,
+        client,
+        privateKey);
   }
 
   @override

@@ -57,24 +57,22 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
               child: new Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  widget.arguments.isBackup
-                      ? Container(
-                          margin: EdgeInsets.only(left: 24, right: 24, top: 24),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                                'Back up these words manually and keep '
-                                'them in a safe place.',
-                                style: TextStyle(
-                                  color: HermezColors.steel,
-                                  fontSize: 18,
-                                  height: 1.5,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w500,
-                                )),
-                          ),
-                        )
-                      : Container(),
+                  Container(
+                    margin: EdgeInsets.only(left: 24, right: 24, top: 24),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                          'Back up these words manually and keep '
+                          'them in a safe place.',
+                          style: TextStyle(
+                            color: HermezColors.steel,
+                            fontSize: 18,
+                            height: 1.5,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          )),
+                    ),
+                  ),
                   SizedBox(height: 16),
                   Container(
                     height: 232,
