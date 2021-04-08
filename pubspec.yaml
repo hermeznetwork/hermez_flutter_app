@@ -39,9 +39,7 @@ dependencies:
   web3dart: ^1.2.3
   provider: ^5.0.0
   qr_flutter: ^4.0.0
-  # barcode_scan_fix: ^1.0.2
-  #flutter_barcode_scanner: ^2.0.0-nullsafety.0
-  # qr_code_scanner: ^0.4.0
+  qr_code_scanner: ^0.4.0
   bip39: ^1.0.3
   tweetnacl: ^0.3.1
   pointycastle: ^1.0.2

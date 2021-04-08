@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hermez/qrcode_reader_page.dart';
 import 'package:hermez/screens/backup_info.dart';
 import 'package:hermez/screens/biometrics.dart';
 import 'package:hermez/screens/import.dart';
@@ -10,8 +9,10 @@ import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/recovery_phrase_confirm.dart';
 import 'package:hermez/screens/remove_account_info.dart';
+import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/settings_currency.dart';
 import 'package:hermez/screens/settings_details.dart';
+import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
@@ -20,7 +21,6 @@ import 'package:hermez/wallet_amount_page.dart';
 import 'package:hermez/wallet_create_page.dart';
 import 'package:hermez/wallet_home_page.dart';
 import 'package:hermez/wallet_settings_page.dart';
-import 'package:hermez/wallet_settings_qrcode_page.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
 import 'package:hermez/wallet_transaction_info_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -120,6 +120,10 @@ Map<String, WidgetBuilder> getRoutes(context) {
         });
       return IntroPage();
     },
+    '/scanner': (BuildContext context) => QRCodeScannerPage(
+          title: "Scan QRCode",
+          onScanned: ModalRoute.of(context).settings.arguments,
+        ),
     '/qrcode': (BuildContext context) =>
         SettingsQRCodePage(ModalRoute.of(context).settings.arguments),
     /*(BuildContext context) {
@@ -180,9 +184,5 @@ Map<String, WidgetBuilder> getRoutes(context) {
           },
         ),
     '/transaction_info': (BuildContext context) => TransactionInfoPage(),
-    '/qrcode_reader': (BuildContext context) => QRCodeReaderPage(
-          title: "Scan QRCode",
-          onScanned: ModalRoute.of(context).settings.arguments,
-        )
   };
 }

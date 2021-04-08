@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/home_balance.dart';
-import 'package:hermez/qrcode_reader_page.dart';
 import 'package:hermez/screens/account_settings.dart';
+import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:provider/provider.dart';
@@ -48,7 +48,7 @@ class WalletHomePage extends HookWidget {
           _scaffoldKey,
         ),
       ),
-      QRCodeReaderPage(
+      QRCodeScannerPage(
         title: "Scan QRCode",
         onScanned: ModalRoute.of(context).settings.arguments,
       ),
