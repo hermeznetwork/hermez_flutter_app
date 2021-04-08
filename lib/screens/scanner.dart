@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez_plugin/addresses.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 typedef OnScanned = void Function(String address);
@@ -238,10 +239,18 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      setState(() {
+      if (result == null && isHermezEthereumAddress(scanData.code)) {
         result = scanData;
-      });
-    });
+        if (widget.arguments.onScanned != null) {
+          widget.arguments.onScanned(result.code);
+        }
+        if (widget.arguments.closeWhenScanned) {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
+        }
+      }
+    }, onError: null, onDone: null, cancelOnError: false);
   }
 
   @override
