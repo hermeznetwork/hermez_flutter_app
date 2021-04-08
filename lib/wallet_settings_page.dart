@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -89,8 +90,9 @@ class SettingsPage extends HookWidget {
                           borderRadius: BorderRadius.circular(56.0),
                           side: BorderSide(color: HermezColors.mediumOrange)),
                       onPressed: () {
-                        Navigator.of(context)
-                            .pushNamed("/qrcode", arguments: store);
+                        Navigator.of(context).pushNamed("/qrcode",
+                            arguments: SettingsQRCodeArguments(
+                                store: store, fromHomeScreen: false));
                       },
                       color: HermezColors.mediumOrange,
                       textColor: HermezColors.steel,

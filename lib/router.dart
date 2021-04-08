@@ -120,20 +120,12 @@ Map<String, WidgetBuilder> getRoutes(context) {
         });
       return IntroPage();
     },
-    '/scanner': (BuildContext context) => QRCodeScannerPage(
-          title: "Scan QRCode",
-          onScanned: ModalRoute.of(context).settings.arguments,
-        ),
-    '/qrcode': (BuildContext context) =>
-        SettingsQRCodePage(ModalRoute.of(context).settings.arguments),
-    /*(BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet())
-        return WalletProvider(builder: (context, store) {
-          return SettingsQRCodePage(store);
-        });
-      return IntroPage();
-    },*/
+    '/scanner': (BuildContext context) {
+      return QRCodeScannerPage(
+          arguments: ModalRoute.of(context).settings.arguments);
+    },
+    '/qrcode': (BuildContext context) => SettingsQRCodePage(
+        arguments: ModalRoute.of(context).settings.arguments),
     '/currency_selector': (BuildContext context) =>
         SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
     //(BuildContext context) {

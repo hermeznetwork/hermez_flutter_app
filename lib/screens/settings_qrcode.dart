@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -10,18 +10,24 @@ import '../wallet_transfer_amount_page.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-class SettingsQRCodePage extends HookWidget {
-  SettingsQRCodePage(this.store);
+class SettingsQRCodeArguments {
+  final WalletHandler store;
+  final bool fromHomeScreen;
+  SettingsQRCodeArguments({this.store, this.fromHomeScreen = true});
+}
 
-  WalletHandler store;
+class SettingsQRCodePage extends StatefulWidget {
+  SettingsQRCodePage({Key key, this.arguments}) : super(key: key);
+
+  final SettingsQRCodeArguments arguments;
 
   @override
+  _SettingsQRCodePageState createState() => _SettingsQRCodePageState();
+}
+
+class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
+  @override
   Widget build(BuildContext context) {
-    /*var store = useWallet(context);
-    useEffect(() {
-      store.initialise();
-      return null;
-    }, []);*/
     return Scaffold(
       backgroundColor: HermezColors.lightOrange,
       appBar: new AppBar(
@@ -49,17 +55,20 @@ class SettingsQRCodePage extends HookWidget {
                     color: Colors.black),
                 eyeStyle: QrEyeStyle(
                     eyeShape: QrEyeShape.square, color: Colors.black),
-                data: (store.state.txLevel == TransactionLevel.LEVEL2
+                data: (widget.arguments.store.state.txLevel ==
+                            TransactionLevel.LEVEL2
                         ? "hez:"
                         : "") +
-                    store.state.ethereumAddress,
+                    widget.arguments.store.state.ethereumAddress,
               ),
               SizedBox(
                 height: 33,
               ),
               Text(
-                (store.state.txLevel == TransactionLevel.LEVEL2 ? "hez:" : "") +
-                    store.state.ethereumAddress,
+                (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2
+                        ? "hez:"
+                        : "") +
+                    widget.arguments.store.state.ethereumAddress,
                 style: TextStyle(
                   color: HermezColors.blackTwo,
                   fontSize: 16,
@@ -81,7 +90,16 @@ class SettingsQRCodePage extends HookWidget {
                       borderRadius: BorderRadius.circular(30)),
                 ),
                 onPressed: () {
-                  Navigator.of(context).pushNamed("/scanner");
+                  if (widget.arguments.fromHomeScreen) {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  } else {
+                    Navigator.of(context).pushReplacementNamed("/scanner",
+                        arguments: QRCodeScannerArguments(
+                          store: widget.arguments.store,
+                        ));
+                  }
                 },
                 child: Image.asset("assets/scan.png",
                     color: HermezColors.blueyGreyTwo, height: 20),

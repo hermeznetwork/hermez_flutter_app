@@ -7,6 +7,7 @@ import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -250,17 +251,17 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             alignment: Alignment.centerLeft,
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.of(context).pushNamed(
-                                  "/qrcode_reader",
-                                  arguments: (scannedAddress) async {
-                                    setState(() {
-                                      addressController.clear();
-                                      addressController.text =
-                                          scannedAddress.toString();
-                                      addressIsValid = isAddressValid();
-                                    });
-                                  },
-                                );
+                                Navigator.of(context).pushNamed("/scanner",
+                                    arguments: QRCodeScannerArguments(
+                                        store: store,
+                                        onScanned: (scannedAddress) async {
+                                          setState(() {
+                                            addressController.clear();
+                                            addressController.text =
+                                                scannedAddress.toString();
+                                            addressIsValid = isAddressValid();
+                                          });
+                                        }));
                               }, // handle your image tap here
                               child: Image.asset(
                                 "assets/scan.png",

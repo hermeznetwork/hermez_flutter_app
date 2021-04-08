@@ -1,19 +1,28 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 typedef OnScanned = void Function(String address);
 
-class QRCodeScannerPage extends StatefulWidget {
-  QRCodeScannerPage({this.title, this.onScanned, this.closeWhenScanned = true});
+class QRCodeScannerArguments {
+  final WalletHandler store;
   final OnScanned onScanned;
   final bool closeWhenScanned;
-  final String title;
+  QRCodeScannerArguments(
+      {this.store, this.onScanned, this.closeWhenScanned = true});
+}
+
+class QRCodeScannerPage extends StatefulWidget {
+  QRCodeScannerPage({Key key, this.arguments}) : super(key: key);
+
+  final QRCodeScannerArguments arguments;
 
   @override
-  State<StatefulWidget> createState() => _QRCodeScannerPageState();
+  _QRCodeScannerPageState createState() => _QRCodeScannerPageState();
 }
 
 class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
@@ -118,7 +127,18 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                                 borderRadius: BorderRadius.circular(30)),
                           ),
                           onPressed: () {
-                            //Navigator.of(context).pushNamed('')
+                            if (Navigator.canPop(context)) {
+                              Navigator.of(context).pushReplacementNamed(
+                                  "/qrcode",
+                                  arguments: SettingsQRCodeArguments(
+                                      store: widget.arguments.store,
+                                      fromHomeScreen: false));
+                            } else {
+                              Navigator.of(context).pushNamed("/qrcode",
+                                  arguments: SettingsQRCodeArguments(
+                                      store: widget.arguments.store,
+                                      fromHomeScreen: true));
+                            }
                           },
                           child: FutureBuilder(
                             future: controller?.getFlashStatus(),

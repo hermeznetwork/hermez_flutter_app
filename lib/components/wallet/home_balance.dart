@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
@@ -356,7 +357,9 @@ class _HomeBalanceState extends State<HomeBalance> {
                       if (widget.arguments.store.state.txLevel ==
                           TransactionLevel.LEVEL1) {
                         Navigator.of(context).pushNamed("/qrcode",
-                            arguments: widget.arguments.store);
+                            arguments: SettingsQRCodeArguments(
+                                store: widget.arguments.store,
+                                fromHomeScreen: false));
                       } else {
                         Navigator.of(context).pushNamed("/account_selector",
                             arguments: AccountSelectorArguments(

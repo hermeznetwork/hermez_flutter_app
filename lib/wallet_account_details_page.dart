@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
+import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -201,8 +202,9 @@ class WalletAccountDetailsPage extends HookWidget {
                     ),
                     onPressed: () {
                       store.state.txLevel == TransactionLevel.LEVEL1
-                          ? Navigator.of(context)
-                              .pushNamed("/qrcode", arguments: store)
+                          ? Navigator.of(context).pushNamed("/qrcode",
+                              arguments: SettingsQRCodeArguments(
+                                  store: store, fromHomeScreen: false))
                           : Navigator.of(context).pushNamed("/account_selector",
                               arguments: AccountSelectorArguments(
                                 //widget.arguments.store.state.txLevel,
