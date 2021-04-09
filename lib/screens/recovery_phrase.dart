@@ -58,23 +58,13 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                     AssetImage('assets/qr_code.png'),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pushNamed("/qrcode",
-                        arguments: SettingsQRCodeArguments(
-                            message: mnemonic,
-                            store: widget.arguments.store,
-                            fromHomeScreen: false));
-                    //Navigator.of(context).pushNamed("/scanner",
-                    //    arguments: QRCodeScannerArguments(
-                    //store: store,
-                    //        type: QRCodeScannerType.RECOVERY_SEED,
-                    //         onScanned: (scannedAddress) async {
-                    /*setState(() {
-                            addressController.clear();
-                            addressController.text =
-                                scannedAddress.toString();
-                            addressIsValid = isAddressValid();
-                          });*/
-                    //        }));
+                    Navigator.of(context).pushNamed(
+                      "/qrcode",
+                      arguments: SettingsQRCodeArguments(
+                          message: mnemonic,
+                          store: widget.arguments.store,
+                          fromHomeScreen: false),
+                    );
                   },
                 ),
               ]

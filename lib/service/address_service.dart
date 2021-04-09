@@ -6,7 +6,6 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hd_key.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/hermez_wallet.dart';
-import "package:hex/hex.dart";
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/crypto.dart';
 
@@ -80,9 +79,9 @@ class AddressService implements IAddressService {
 
   @override
   String getPrivateKey(String mnemonic) {
-    String seed = bip39.mnemonicToSeedHex(mnemonic);
-    KeyData master = HDKey.getMasterKeyFromSeed(seed);
-    final privateKey = HEX.encode(master.key);
+    // TODO: ETHEREUM DEVIVATION KEY m/44'/60'/0'/0/0
+    String privateKey =
+        HDKey.mnemonicToPrivateKey(mnemonic, derivePath: "m/44'/60'/0'/0/0");
     print("ethereum private key: $privateKey");
     return privateKey;
   }

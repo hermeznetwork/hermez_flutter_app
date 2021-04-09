@@ -112,6 +112,15 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                           child: FutureBuilder(
                             future: controller?.getFlashStatus(),
                             builder: (context, snapshot) {
+                              if (snapshot.data != null) {
+                                if (snapshot.data == true) {
+                                  return Icon(Icons.flash_off);
+                                } else {
+                                  return Icon(Icons.flash_on);
+                                }
+                              } else {
+                                return Container();
+                              }
                               return Image.asset("assets/scan.png",
                                   color: HermezColors.blackTwo, height: 20);
                             },
@@ -198,13 +207,14 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                             future: controller?.getCameraInfo(),
                             builder: (context, snapshot) {
                               if (snapshot.data != null) {
-                                //return Text(
-                                //    'Camera facing ${describeEnum(snapshot.data)}');
+                                if (snapshot.data == CameraFacing.front) {
+                                  return Icon(Icons.camera_rear);
+                                } else {
+                                  return Icon(Icons.camera_front);
+                                }
                               } else {
-                                //return Text('loading');
+                                return Container();
                               }
-                              return Image.asset("assets/scan.png",
-                                  color: HermezColors.blackTwo, height: 20);
                             },
                           ),
                         ),

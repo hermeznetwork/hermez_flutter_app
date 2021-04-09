@@ -1,3 +1,5 @@
+import 'package:bip39/bip39.dart' as bip39;
+
 const WORDLIST = [
   "abandon",
   "ability",
@@ -2050,7 +2052,7 @@ const WORDLIST = [
 ];
 
 bool isValidRecoveryPhrase(String recoveryPhrase) {
-  List<String> words =
-      recoveryPhrase.replaceAll(RegExp("\\s+"), " ").split(" ");
-  return words.length == 12;
+  String trimmedRecoveryPhrase = recoveryPhrase.replaceAll(RegExp("\\s+"), " ");
+  List<String> words = trimmedRecoveryPhrase.split(" ");
+  return words.length == 12 && bip39.validateMnemonic(trimmedRecoveryPhrase);
 }
