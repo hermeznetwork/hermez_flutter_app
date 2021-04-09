@@ -6,6 +6,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/storage_service.dart';
@@ -41,7 +42,8 @@ class WalletHandler {
       this._explorerService,
       this._configurationService,
       this._storageService,
-      this._hermezService);
+      this._hermezService,
+      this._exchangeService);
 
   final Store<Wallet, WalletAction> _store;
   final AddressService _addressService;
@@ -50,6 +52,7 @@ class WalletHandler {
   final StorageService _storageService;
   final ConfigurationService _configurationService;
   final HermezService _hermezService;
+  final ExchangeService _exchangeService;
 
   Wallet get state => _store.state;
 
@@ -117,6 +120,15 @@ class WalletHandler {
 
     final defaultCurrency = await _configurationService.getDefaultCurrency();
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
+
+    final exchangeRatio =
+        await _exchangeService.getFiatExchangeRates(["EUR", "CNY"]);
+    _configurationService.setExchangeRatio(exchangeRatio);
+    _store.dispatch(ExchangeRatioUpdated(exchangeRatio[
+        (await _configurationService.getDefaultCurrency())
+            .toString()
+            .split(".")
+            .last]));
 
     //final state = await getState();
 
@@ -610,8 +622,11 @@ class WalletHandler {
     return estimatedFee;
   }
 
-  void updateDefaultCurrency(WalletDefaultCurrency defaultCurrency) {
+  Future<void> updateDefaultCurrency(
+      WalletDefaultCurrency defaultCurrency) async {
     _configurationService.setDefaultCurrency(defaultCurrency);
+    _store.dispatch(ExchangeRatioUpdated(_configurationService
+        .getExchangeRatio(defaultCurrency.toString().split(".").last)));
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
   }
 

@@ -158,6 +158,9 @@ class AccountRow extends StatelessWidget {
     if (symbol == "EUR") {
       locale = 'eu';
       symbol = '€';
+    } else if (symbol == "CNY") {
+      locale = 'en';
+      symbol = '\¥';
     } else if (symbol == "USD") {
       locale = 'en';
       symbol = '\$';

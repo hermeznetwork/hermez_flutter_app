@@ -223,6 +223,15 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         .split('.')
         .last;
 
+    String symbol = "";
+    if (currency == "EUR") {
+      symbol = "€";
+    } else if (currency == "CNY") {
+      symbol = "\¥";
+    } else {
+      symbol = "\$";
+    }
+
     // returns a row with the desired properties
     return Container(
         color: HermezColors.lightOrange,
@@ -247,16 +256,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                 margin: EdgeInsets.only(top: 15.0, bottom: 30.0),
                 child: Text(
-                  currency == "EUR"
-                      ? "€" +
-                          (widget.arguments.amount *
-                                  (widget.arguments.token.USD *
-                                      widget.arguments.wallet.state
-                                          .exchangeRatio))
-                              .toStringAsFixed(2)
-                      : '\$' +
-                          (widget.arguments.amount * widget.arguments.token.USD)
-                              .toStringAsFixed(2),
+                  symbol +
+                      (widget.arguments.amount *
+                              widget.arguments.token.USD *
+                              (currency != "USD"
+                                  ? widget.arguments.wallet.state.exchangeRatio
+                                  : 1))
+                          .toStringAsFixed(2),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: HermezColors.steel,

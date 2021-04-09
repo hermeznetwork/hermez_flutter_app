@@ -98,7 +98,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                 amountController.value.text)
                                             : double.parse(amountController
                                                     .value.text) /
-                                                (currency == "EUR"
+                                                (currency != "USD"
                                                     ? account.token.USD *
                                                         widget.store.state
                                                             .exchangeRatio
@@ -129,7 +129,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                           child: Text(
                             defaultCurrencySelected
                                 ? "Fee " +
-                                    ((currency == "EUR"
+                                    ((currency != "USD"
                                                 ? account.token.USD *
                                                     widget.store.state
                                                         .exchangeRatio
@@ -159,7 +159,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     AccountRow(
                       account.token.name,
                       account.token.symbol,
-                      currency == "EUR"
+                      currency != "USD"
                           ? account.token.USD * widget.store.state.exchangeRatio
                           : account.token.USD,
                       currency,
@@ -369,7 +369,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                         amountIsValid = value.isEmpty ||
                             double.parse(value) <=
                                 (defaultCurrencySelected
-                                    ? currency == "EUR"
+                                    ? currency != "USD"
                                         ? account.token.USD *
                                                 double.parse(account.balance) /
                                                 pow(10, 18) *
@@ -434,7 +434,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                               setState(() {
                                 amountController.clear();
                                 amountIsValid = (defaultCurrencySelected
-                                                ? currency == "EUR"
+                                                ? currency != "USD"
                                                     ? account.token.USD *
                                                             double.parse(account
                                                                 .balance) /
@@ -464,7 +464,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 if (amountIsValid) {
                                   amountController.text =
                                       defaultCurrencySelected
-                                          ? currency == "EUR"
+                                          ? currency != "USD"
                                               ? (account.token.USD *
                                                           double.parse(
                                                               account.balance) /

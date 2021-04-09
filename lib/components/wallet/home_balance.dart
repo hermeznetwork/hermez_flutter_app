@@ -588,7 +588,7 @@ class _HomeBalanceState extends State<HomeBalance> {
               return AccountRow(
                   account.token.name,
                   account.token.symbol,
-                  currency == "EUR"
+                  currency != "USD"
                       ? account.token.USD *
                           widget.arguments.store.state.exchangeRatio
                       : account.token.USD,
@@ -626,7 +626,10 @@ class _HomeBalanceState extends State<HomeBalance> {
     if (currency == "EUR") {
       locale = 'eu';
       symbol = '€';
-    } else /* if (currency == "USD")*/ {
+    } else if (currency == "CNY") {
+      locale = 'en';
+      symbol = '\¥';
+    } else {
       locale = 'en';
       symbol = '\$';
     }
@@ -634,7 +637,7 @@ class _HomeBalanceState extends State<HomeBalance> {
       for (Account account in _accounts) {
         if (account.token.USD != null) {
           double value = account.token.USD * double.parse(account.balance);
-          if (currency == "EUR") {
+          if (currency != "USD") {
             value *= widget.arguments.store.state.exchangeRatio;
           }
           resultValue = resultValue + value;

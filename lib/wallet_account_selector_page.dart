@@ -145,7 +145,7 @@ class WalletAccountSelectorPage extends HookWidget {
             return AccountRow(
                 account.token.name,
                 account.token.symbol,
-                currency == "EUR"
+                currency != "USD"
                     ? account.token.USD * arguments.store.state.exchangeRatio
                     : account.token.USD,
                 currency,

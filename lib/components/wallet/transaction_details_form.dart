@@ -301,7 +301,8 @@ class TransferSummaryForm extends HookWidget {
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          store.state.txLevel == TransactionLevel.LEVEL1
+                          store.state.txLevel == TransactionLevel.LEVEL1 &&
+                                  transactionType != TransactionType.FORCEEXIT
                               ? "0x" +
                                   AddressUtils.strip0x(
                                           addressTo.substring(0, 6))

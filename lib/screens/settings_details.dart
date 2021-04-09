@@ -6,6 +6,7 @@ import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -266,9 +267,17 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Change passcode
-                      Navigator.of(context).pushNamed("/pin",
-                          arguments:
-                              PinArguments("Change passcode", true, null));
+                      Navigator.of(context)
+                          .pushNamed("/pin",
+                              arguments: PinArguments(
+                                  "Enter old passcode", false, null))
+                          .then((value) {
+                        if (value.toString() == "true") {
+                          Navigator.of(context).pushNamed("/pin",
+                              arguments: PinArguments(
+                                  "Enter new passcode", true, null));
+                        }
+                      });
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Remove account
@@ -304,9 +313,16 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
   }
 
   viewInExplorer() async {
-    var url = getCurrentEnvironment().etherscanUrl +
-        "/address/" +
-        widget.arguments.store.state.ethereumAddress;
+    var url;
+    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
+      url = getCurrentEnvironment().etherscanUrl +
+          "/address/" +
+          widget.arguments.store.state.ethereumAddress;
+    } else {
+      url = getCurrentEnvironment().batchExplorerUrl +
+          '/user-account/' +
+          getHermezAddress(widget.arguments.store.state.ethereumAddress);
+    }
     if (await canLaunch(url))
       await launch(url);
     else

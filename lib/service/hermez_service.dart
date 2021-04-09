@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:hermez/service/network/api_exchange_rate_client.dart';
-import 'package:hermez/service/network/model/rates_request.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/api.dart' as api;
 import 'package:hermez_plugin/api.dart';
@@ -73,12 +71,8 @@ abstract class IHermezService {
 
 class HermezService implements IHermezService {
   final web3.Web3Client client;
-  String _exchangeUrl;
   IConfigurationService _configService;
-  HermezService(this.client, this._exchangeUrl, this._configService);
-
-  ApiExchangeRateClient _apiExchangeRateClient() =>
-      ApiExchangeRateClient(_exchangeUrl);
+  HermezService(this.client, this._configService);
 
   @override
   Future<StateResponse> getState() async {
@@ -326,15 +320,5 @@ class HermezService implements IHermezService {
         account.token,
         client,
         privateKey);
-  }
-
-  @override
-  Future<double> getEURUSDExchangeRatio() async {
-    final request = RatesRequest.fromJson({
-      "base": "USD",
-      "symbols": {"EUR"},
-    });
-    double response = await _apiExchangeRateClient().getExchangeRates(request);
-    return response;
   }
 }

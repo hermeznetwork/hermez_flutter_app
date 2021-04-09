@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
@@ -105,8 +107,11 @@ class ConfigurationService implements IConfigurationService {
     await _preferences.setBool('biometrics_face', value);
   }
 
-  Future<void> setExchangeRatio(double value) async {
-    await _preferences.setDouble("exchangeRatio", value);
+  Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value) async {
+    List<String> exchangeRatios = List.empty(growable: true);
+    value.forEach(
+        (key, value) => exchangeRatios.add(key + "," + value.toString()));
+    await _preferences.setStringList("exchangeRatio", exchangeRatios);
   }
 
   @override
@@ -167,6 +172,8 @@ class ConfigurationService implements IConfigurationService {
         await _secureStorage.read(key: "defaultCurrency");
     if (defaultCurrencyString == "EUR") {
       return WalletDefaultCurrency.EUR;
+    } else if (defaultCurrencyString == "CNY") {
+      return WalletDefaultCurrency.CNY;
     } else {
       return WalletDefaultCurrency.USD;
     }
@@ -188,8 +195,14 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  double getExchangeRatio() {
-    return _preferences.getDouble("exchangeRatio") ?? 0.0;
+  double getExchangeRatio(String currency) {
+    List<String> currencyRatios = _preferences.getStringList("exchangeRatio");
+    for (int i = 0; i < currencyRatios.length; i++) {
+      if (currencyRatios[i].split(",")[0] == currency) {
+        return double.parse(currencyRatios[i].split(",")[1]);
+      }
+    }
+    return 0.0;
   }
 
   @override

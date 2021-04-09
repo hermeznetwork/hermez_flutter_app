@@ -4,6 +4,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/storage_service.dart';
@@ -28,16 +29,17 @@ class WalletProvider extends ContextProviderWidget<WalletHandler> {
     final configurationService = Provider.of<ConfigurationService>(context);
     final storageService = Provider.of<StorageService>(context);
     final hermezService = Provider.of<HermezService>(context);
+    final exchangeService = Provider.of<ExchangeService>(context);
     final handler = useMemoized(
       () => WalletHandler(
-        store,
-        addressService,
-        contractService,
-        explorerService,
-        configurationService,
-        storageService,
-        hermezService,
-      ),
+          store,
+          addressService,
+          contractService,
+          explorerService,
+          configurationService,
+          storageService,
+          hermezService,
+          exchangeService),
       [addressService, store],
     );
 

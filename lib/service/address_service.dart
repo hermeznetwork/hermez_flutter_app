@@ -79,7 +79,6 @@ class AddressService implements IAddressService {
 
   @override
   String getPrivateKey(String mnemonic) {
-    // TODO: ETHEREUM DEVIVATION KEY m/44'/60'/0'/0/0
     String privateKey =
         HDKey.mnemonicToPrivateKey(mnemonic, derivePath: "m/44'/60'/0'/0/0");
     print("ethereum private key: $privateKey");

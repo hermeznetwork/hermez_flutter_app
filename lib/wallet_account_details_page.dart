@@ -291,14 +291,17 @@ class WalletAccountDetailsPage extends HookWidget {
     if (currency == "EUR") {
       locale = 'eu';
       symbol = '€';
-    } else /* if (currency == "USD")*/ {
+    } else if (currency == "CNY") {
+      locale = 'en';
+      symbol = '\¥';
+    } else {
       locale = 'en';
       symbol = '\$';
     }
     if (arguments.element.token.USD != null) {
       double value =
           arguments.element.token.USD * double.parse(arguments.element.balance);
-      if (currency == "EUR") {
+      if (currency != "USD") {
         value *= store.state.exchangeRatio;
       }
       resultValue = resultValue + value;

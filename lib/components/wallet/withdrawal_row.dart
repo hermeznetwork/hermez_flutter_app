@@ -37,6 +37,15 @@ class WithdrawalRow extends StatelessWidget {
         break;
     }
 
+    String symbol = "";
+    if (currency == "EUR") {
+      symbol = "€";
+    } else if (currency == "CNY") {
+      symbol = "\¥";
+    } else {
+      symbol = "\$";
+    }
+
     return Container(
         padding: EdgeInsets.only(bottom: 15.0),
         child: Container(
@@ -121,11 +130,11 @@ class WithdrawalRow extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
                       child: Text(
-                          (currency == "EUR" ? "€" : "\$") +
+                          symbol +
                               (double.parse(exit.balance) /
                                       pow(10, exit.token.decimals) *
                                       exit.token.USD *
-                                      (currency == "EUR" ? exchangeRatio : 1))
+                                      (currency != "USD" ? exchangeRatio : 1))
                                   .toStringAsFixed(2),
                           // On Hold, Pending
                           style: TextStyle(
@@ -233,7 +242,10 @@ class WithdrawalRow extends StatelessWidget {
     if (symbol == "EUR") {
       locale = 'eu';
       symbol = '€';
-    } else if (symbol == "USD") {
+    } else if (currency == "CNY") {
+      locale = 'en';
+      symbol = '\¥';
+    } else {
       locale = 'en';
       symbol = '\$';
     }

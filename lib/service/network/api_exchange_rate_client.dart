@@ -1,5 +1,6 @@
 library api_testing_flutter_kata;
 
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,18 +12,20 @@ import 'model/rates_response.dart';
 
 class ApiExchangeRateClient {
   final String _baseAddress;
+  final String _apiKey;
 
-  final String LATEST_URL = "/latest";
+  final String LATEST_URL = "/v1/latest";
 
-  ApiExchangeRateClient(this._baseAddress);
+  ApiExchangeRateClient(this._baseAddress, this._apiKey);
 
   // EXCHANGE RATE
 
-  Future<double> getExchangeRates(RatesRequest request) async {
+  Future<LinkedHashMap<String, dynamic>> getExchangeRates(
+      RatesRequest request) async {
     final response = await _get(LATEST_URL, request.toQueryParams());
     final RatesResponse ratesResponse =
         RatesResponse.fromJson(json.decode(response.body));
-    return ratesResponse.rates["EUR"];
+    return ratesResponse.rates;
   }
 
   Future<http2.Response> _get(

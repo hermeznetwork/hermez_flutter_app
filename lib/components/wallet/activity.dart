@@ -352,6 +352,15 @@ class _ActivityState extends State<Activity> {
                       .split('.')
                       .last;
 
+                  String symbol = "";
+                  if (currency == "EUR") {
+                    symbol = "€";
+                  } else if (currency == "CNY") {
+                    symbol = "\¥";
+                  } else {
+                    symbol = "\$";
+                  }
+
                   var amount = double.parse(value) / pow(10, 18);
                   /*EtherAmount.fromUnitAndValue(
                   EtherUnit.wei, ));*/
@@ -472,7 +481,7 @@ class _ActivityState extends State<Activity> {
                               padding: EdgeInsets.all(5.0),
                               child: Text(
                                 (isNegative ? "- " : "") +
-                                    (currency == "USD" ? "\$" : "€") +
+                                    symbol +
                                     (widget.arguments.exchangeRate * amount)
                                         .toStringAsFixed(2),
                                 style: TextStyle(

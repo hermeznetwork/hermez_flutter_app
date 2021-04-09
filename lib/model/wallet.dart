@@ -6,7 +6,7 @@ import 'package:hermez_plugin/model/account.dart';
 
 part 'wallet.g.dart';
 
-enum WalletDefaultCurrency { EUR, USD }
+enum WalletDefaultCurrency { EUR, USD, CNY }
 
 abstract class Wallet implements Built<Wallet, WalletBuilder> {
   @nullable
