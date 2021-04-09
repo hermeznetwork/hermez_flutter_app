@@ -52,14 +52,16 @@ class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
           centerTitle: true,
           elevation: 0.0,
           backgroundColor: HermezColors.lightOrange,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.share),
-              onPressed: () async {
-                shareScreenshot();
-              },
-            ),
-          ]),
+          actions: Platform.isAndroid
+              ? <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.share),
+                    onPressed: () async {
+                      shareScreenshot();
+                    },
+                  ),
+                ]
+              : null),
       body: Container(
         margin: EdgeInsets.only(left: 60.3, right: 60.3),
         child: Center(
