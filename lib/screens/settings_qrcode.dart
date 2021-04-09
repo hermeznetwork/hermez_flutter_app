@@ -11,9 +11,11 @@ import '../wallet_transfer_amount_page.dart';
 // title and message.
 
 class SettingsQRCodeArguments {
+  final String message;
   final WalletHandler store;
   final bool fromHomeScreen;
-  SettingsQRCodeArguments({this.store, this.fromHomeScreen = true});
+  SettingsQRCodeArguments(
+      {this.message, this.store, this.fromHomeScreen = true});
 }
 
 class SettingsQRCodePage extends StatefulWidget {
@@ -55,20 +57,25 @@ class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
                     color: Colors.black),
                 eyeStyle: QrEyeStyle(
                     eyeShape: QrEyeShape.square, color: Colors.black),
-                data: (widget.arguments.store.state.txLevel ==
-                            TransactionLevel.LEVEL2
-                        ? "hez:"
-                        : "") +
-                    widget.arguments.store.state.ethereumAddress,
+                data: widget.arguments.message == null
+                    ? (widget.arguments.store.state.txLevel ==
+                                TransactionLevel.LEVEL2
+                            ? "hez:"
+                            : "") +
+                        widget.arguments.store.state.ethereumAddress
+                    : widget.arguments.message,
               ),
               SizedBox(
                 height: 33,
               ),
               Text(
-                (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2
-                        ? "hez:"
-                        : "") +
-                    widget.arguments.store.state.ethereumAddress,
+                widget.arguments.message == null
+                    ? (widget.arguments.store.state.txLevel ==
+                                TransactionLevel.LEVEL2
+                            ? "hez:"
+                            : "") +
+                        widget.arguments.store.state.ethereumAddress
+                    : widget.arguments.message,
                 style: TextStyle(
                   color: HermezColors.blackTwo,
                   fontSize: 16,
@@ -97,8 +104,8 @@ class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
                   } else {
                     Navigator.of(context).pushReplacementNamed("/scanner",
                         arguments: QRCodeScannerArguments(
-                          store: widget.arguments.store,
-                        ));
+                            store: widget.arguments.store,
+                            type: QRCodeScannerType.ALL));
                   }
                 },
                 child: Image.asset("assets/scan.png",

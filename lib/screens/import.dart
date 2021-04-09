@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/setup/wallet_setup_handler.dart';
 import 'package:hermez/screens/pin.dart';
+import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class ImportWalletPage extends StatefulWidget {
@@ -53,7 +54,28 @@ class _ImportWalletState extends State<ImportWalletPage> {
                 AssetImage('assets/scan.png'),
               ),
               onPressed: () {
-                // TODO: show QR scanner
+                Navigator.of(context).pushNamed(
+                  "/scanner",
+                  arguments: QRCodeScannerArguments(
+                    //store: store,
+                    type: QRCodeScannerType.RECOVERY_SEED,
+                    onScanned: (value) async {
+                      List<String> clipboardWords =
+                          value.replaceAll(RegExp("\\s+"), " ").split(" ");
+                      setState(
+                        () {
+                          int maxLength =
+                              min(clipboardWords.length, words.length);
+                          for (int i = 0; i < maxLength; i++) {
+                            words[i] = clipboardWords[i];
+                            textEditingControllers[i].text = clipboardWords[i];
+                          }
+                          checkEnabledButton();
+                        },
+                      );
+                    },
+                  ),
+                );
               },
             ),
           ],

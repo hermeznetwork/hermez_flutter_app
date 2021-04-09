@@ -50,7 +50,9 @@ class WalletHomePage extends HookWidget {
       ),
       QRCodeScannerPage(
         arguments: QRCodeScannerArguments(
-            store: store, onScanned: ModalRoute.of(context).settings.arguments),
+            store: store,
+            type: QRCodeScannerType.ALL,
+            onScanned: ModalRoute.of(context).settings.arguments),
       ),
       /*Activity(
         address: store.state.address,

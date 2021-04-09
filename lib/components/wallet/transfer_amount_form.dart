@@ -254,6 +254,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 Navigator.of(context).pushNamed("/scanner",
                                     arguments: QRCodeScannerArguments(
                                         store: store,
+                                        type: store.state.txLevel ==
+                                                TransactionLevel.LEVEL1
+                                            ? QRCodeScannerType.ETHEREUM_ADDRESS
+                                            : QRCodeScannerType.HERMEZ_ADDRESS,
                                         onScanned: (scannedAddress) async {
                                           setState(() {
                                             addressController.clear();

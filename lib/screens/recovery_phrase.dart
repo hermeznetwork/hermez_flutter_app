@@ -1,13 +1,19 @@
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class RecoveryPhraseArguments {
   final bool isBackup;
+  final WalletHandler store;
 
-  RecoveryPhraseArguments(this.isBackup);
+  RecoveryPhraseArguments(
+    this.isBackup, {
+    this.store,
+  });
 }
 
 class RecoveryPhrasePage extends StatefulWidget {
@@ -45,6 +51,34 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
         centerTitle: true,
         elevation: 0.0,
         backgroundColor: HermezColors.lightOrange,
+        actions: widget.arguments.store != null
+            ? <Widget>[
+                IconButton(
+                  icon: ImageIcon(
+                    AssetImage('assets/qr_code.png'),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed("/qrcode",
+                        arguments: SettingsQRCodeArguments(
+                            message: mnemonic,
+                            store: widget.arguments.store,
+                            fromHomeScreen: false));
+                    //Navigator.of(context).pushNamed("/scanner",
+                    //    arguments: QRCodeScannerArguments(
+                    //store: store,
+                    //        type: QRCodeScannerType.RECOVERY_SEED,
+                    //         onScanned: (scannedAddress) async {
+                    /*setState(() {
+                            addressController.clear();
+                            addressController.text =
+                                scannedAddress.toString();
+                            addressIsValid = isAddressValid();
+                          });*/
+                    //        }));
+                  },
+                ),
+              ]
+            : null,
       ),
       backgroundColor: HermezColors.lightOrange,
       body: SafeArea(
@@ -483,8 +517,8 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
   Future<void> fetchRecoveryPhrase(
       ConfigurationService configurationService) async {
     String entropyString = await configurationService.getMnemonic();
-    String mnemonic = bip39.entropyToMnemonic(entropyString);
     setState(() {
+      mnemonic = bip39.entropyToMnemonic(entropyString);
       words = _mnemonicWords(mnemonic);
     });
   }

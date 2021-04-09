@@ -2048,3 +2048,9 @@ const WORDLIST = [
   "zone",
   "zoo"
 ];
+
+bool isValidRecoveryPhrase(String recoveryPhrase) {
+  List<String> words =
+      recoveryPhrase.replaceAll(RegExp("\\s+"), " ").split(" ");
+  return words.length == 12;
+}

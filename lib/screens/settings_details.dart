@@ -242,7 +242,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                           .then((value) {
                         if (value.toString() == "true") {
                           Navigator.of(context).pushNamed("/recovery_phrase",
-                              arguments: RecoveryPhraseArguments(false));
+                              arguments: RecoveryPhraseArguments(false,
+                                  store: widget.arguments.store));
                         }
                       });
                       break;

@@ -3,18 +3,32 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/settings_qrcode.dart';
+import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/recovery_phrase_utils.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 typedef OnScanned = void Function(String address);
 
+enum QRCodeScannerType {
+  ALL,
+  HERMEZ_ADDRESS,
+  ETHEREUM_ADDRESS,
+  RECOVERY_SEED,
+  TRANSFER
+}
+
 class QRCodeScannerArguments {
   final WalletHandler store;
+  final QRCodeScannerType type;
   final OnScanned onScanned;
   final bool closeWhenScanned;
   QRCodeScannerArguments(
-      {this.store, this.onScanned, this.closeWhenScanned = true});
+      {this.store,
+      this.type = QRCodeScannerType.ALL,
+      this.onScanned,
+      this.closeWhenScanned = true});
 }
 
 class QRCodeScannerPage extends StatefulWidget {
@@ -116,51 +130,54 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                       ],
                     ),
                     SizedBox(width: 30),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            primary: Colors.black,
-                            backgroundColor: Color(0xfff6e9d3),
-                            minimumSize: Size(60, 60),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                          ),
-                          onPressed: () {
-                            if (Navigator.canPop(context)) {
-                              Navigator.of(context).pushReplacementNamed(
-                                  "/qrcode",
-                                  arguments: SettingsQRCodeArguments(
-                                      store: widget.arguments.store,
-                                      fromHomeScreen: false));
-                            } else {
-                              Navigator.of(context).pushNamed("/qrcode",
-                                  arguments: SettingsQRCodeArguments(
-                                      store: widget.arguments.store,
-                                      fromHomeScreen: true));
-                            }
-                          },
-                          child: FutureBuilder(
-                            future: controller?.getFlashStatus(),
-                            builder: (context, snapshot) {
-                              return Image.asset("assets/qr_code.png",
-                                  color: HermezColors.blackTwo, height: 20);
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "My Code",
-                          style: TextStyle(
-                            color: HermezColors.lightOrange,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
+                    widget.arguments.type != QRCodeScannerType.RECOVERY_SEED
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  primary: Colors.black,
+                                  backgroundColor: Color(0xfff6e9d3),
+                                  minimumSize: Size(60, 60),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30)),
+                                ),
+                                onPressed: () {
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.of(context).pushReplacementNamed(
+                                        "/qrcode",
+                                        arguments: SettingsQRCodeArguments(
+                                            store: widget.arguments.store,
+                                            fromHomeScreen: false));
+                                  } else {
+                                    Navigator.of(context).pushNamed("/qrcode",
+                                        arguments: SettingsQRCodeArguments(
+                                            store: widget.arguments.store,
+                                            fromHomeScreen: true));
+                                  }
+                                },
+                                child: FutureBuilder(
+                                  future: controller?.getFlashStatus(),
+                                  builder: (context, snapshot) {
+                                    return Image.asset("assets/qr_code.png",
+                                        color: HermezColors.blackTwo,
+                                        height: 20);
+                                  },
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                "My Code",
+                                style: TextStyle(
+                                  color: HermezColors.lightOrange,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Container(),
                     SizedBox(width: 30),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -239,18 +256,33 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      if (result == null && isHermezEthereumAddress(scanData.code)) {
-        result = scanData;
-        if (widget.arguments.onScanned != null) {
-          widget.arguments.onScanned(result.code);
-        }
-        if (widget.arguments.closeWhenScanned) {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
+      if (result == null) {
+        if ((widget.arguments.type == QRCodeScannerType.ALL ||
+                widget.arguments.type == QRCodeScannerType.HERMEZ_ADDRESS) &&
+            isHermezEthereumAddress(scanData.code)) {
+          finish(scanData);
+        } else if ((widget.arguments.type == QRCodeScannerType.ALL ||
+                widget.arguments.type == QRCodeScannerType.ETHEREUM_ADDRESS) &&
+            AddressUtils.isValidEthereumAddress(scanData.code)) {
+          finish(scanData);
+        } else if ((widget.arguments.type == QRCodeScannerType.RECOVERY_SEED) &&
+            isValidRecoveryPhrase(scanData.code)) {
+          finish(scanData);
         }
       }
     }, onError: null, onDone: null, cancelOnError: false);
+  }
+
+  void finish(Barcode scanData) {
+    result = scanData;
+    if (widget.arguments.onScanned != null) {
+      widget.arguments.onScanned(result.code);
+    }
+    if (widget.arguments.closeWhenScanned) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
   }
 
   @override
