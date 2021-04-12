@@ -209,7 +209,6 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                 ),
                 subtitle != null
                     ? Align(
-                        alignment: Alignment(-100, 0),
                         child: Container(
                           child: Text(
                             subtitle,

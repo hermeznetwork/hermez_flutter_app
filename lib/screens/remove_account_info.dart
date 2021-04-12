@@ -48,8 +48,8 @@ class RemoveAccountInfoPage extends HookWidget {
                           alignment: Alignment.center,
                           child: Image.asset(
                             'assets/remove_account_warning.png',
-                            width: 200,
-                            height: 200,
+                            width: 300,
+                            height: 300,
                           ),
                         ),
                       ),

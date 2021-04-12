@@ -13,6 +13,8 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/recommended_fee.dart';
+import 'package:hermez_plugin/model/state_response.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../wallet_account_selector_page.dart';
@@ -80,47 +82,50 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   actionButtons: <Widget>[
                     Column(
                       children: <Widget>[
-                        SizedBox(
-                          height: 52,
-                          width: double.infinity,
-                          child: FlatButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14.0),
-                                side: BorderSide(
-                                    color: buttonIsEnabled()
-                                        ? HermezColors.darkOrange
-                                        : HermezColors.blueyGreyTwo)),
-                            onPressed: buttonIsEnabled()
-                                ? () {
-                                    this.onSubmit(
-                                        !defaultCurrencySelected
-                                            ? double.parse(
-                                                amountController.value.text)
-                                            : double.parse(amountController
-                                                    .value.text) /
-                                                (currency != "USD"
-                                                    ? account.token.USD *
-                                                        widget.store.state
-                                                            .exchangeRatio
-                                                    : account.token.USD),
-                                        amountController.value.text,
-                                        addressController.value.text);
-                                  }
-                                : null,
-                            disabledColor: HermezColors.blueyGreyTwo,
-                            padding: EdgeInsets.all(18.0),
-                            color: HermezColors.darkOrange,
-                            textColor: Colors.white,
-                            child: Text(
-                                amountType == TransactionType.DEPOSIT
-                                    ? "Continue"
-                                    : "Next",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w700,
-                                )),
+                        Container(
+                          child: Align(
+                            alignment: FractionalOffset.bottomCenter,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: FlatButton(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100.0),
+                                ),
+                                onPressed: buttonIsEnabled()
+                                    ? () {
+                                        this.onSubmit(
+                                            !defaultCurrencySelected
+                                                ? double.parse(
+                                                    amountController.value.text)
+                                                : double.parse(amountController
+                                                        .value.text) /
+                                                    (currency != "USD"
+                                                        ? account.token.USD *
+                                                            widget.store.state
+                                                                .exchangeRatio
+                                                        : account.token.USD),
+                                            amountController.value.text,
+                                            addressController.value.text);
+                                      }
+                                    : null,
+                                padding: EdgeInsets.only(
+                                    top: 18.0,
+                                    bottom: 18.0,
+                                    right: 24.0,
+                                    left: 24.0),
+                                disabledColor: HermezColors.blueyGreyTwo,
+                                color: HermezColors.darkOrange,
+                                textColor: Colors.white,
+                                disabledTextColor: Colors.grey,
+                                child: Text("Continue",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w700,
+                                    )),
+                              ),
+                            ),
                           ),
                         ),
                         Container(
@@ -593,31 +598,36 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   Future<BigInt> getEstimatedFee() async {
-    double amount = 0;
-    if (amountController.value.text.isNotEmpty) {
-      amount = !defaultCurrencySelected
-          ? double.parse(amountController.value.text)
-          : double.parse(amountController.value.text) /
-              /*(currency == "EUR"
+    if (store.state.txLevel == TransactionLevel.LEVEL2) {
+      StateResponse state = await store.getState();
+      RecommendedFee fees = state.recommendedFee;
+    } else {
+      double amount = 0;
+      if (amountController.value.text.isNotEmpty) {
+        amount = !defaultCurrencySelected
+            ? double.parse(amountController.value.text)
+            : double.parse(amountController.value.text) /
+                /*(currency == "EUR"
                 ? account.USD * widget.store.state.exchangeRatio*
                 :*/
-              account.token.USD /*)*/;
-    }
-    String addressFrom;
-    String addressTo;
-    if (store.state.ethBalance.toDouble() > 0) {
-      if (AddressUtils.isValidEthereumAddress(store.state.ethereumAddress)) {
-        addressFrom = store.state.ethereumAddress;
+                account.token.USD /*)*/;
       }
-      if (AddressUtils.isValidEthereumAddress(addressController.value.text)) {
-        addressTo = addressController.value.text;
+      String addressFrom;
+      String addressTo;
+      if (store.state.ethBalance.toDouble() > 0) {
+        if (AddressUtils.isValidEthereumAddress(store.state.ethereumAddress)) {
+          addressFrom = store.state.ethereumAddress;
+        }
+        if (AddressUtils.isValidEthereumAddress(addressController.value.text)) {
+          addressTo = addressController.value.text;
+        }
+        BigInt estimatedFee = await store.getEstimatedFee(
+            addressFrom, addressTo, BigInt.from(amount));
+        return estimatedFee;
+      } else {
+        return BigInt.zero;
+        // TODO handle showing error
       }
-      BigInt estimatedFee = await store.getEstimatedFee(
-          addressFrom, addressTo, BigInt.from(amount));
-      return estimatedFee;
-    } else {
-      return BigInt.zero;
-      // TODO handle showing error
     }
   }
 

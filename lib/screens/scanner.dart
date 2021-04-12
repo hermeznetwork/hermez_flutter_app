@@ -97,36 +97,38 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                     FutureBuilder(
                         future: controller?.getFlashStatus(),
                         builder: (context, snapshot) {
-                          if (snapshot.data != null && snapshot.data == true) {
-                            return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  TextButton(
-                                      style: TextButton.styleFrom(
-                                        primary: Colors.black,
-                                        backgroundColor: Color(0xfff6e9d3),
-                                        minimumSize: Size(60, 60),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(30)),
-                                      ),
-                                      onPressed: () async {
-                                        await controller?.toggleFlash();
-                                        setState(() {});
-                                      },
-                                      child: snapshot.data == true
-                                          ? Icon(Icons.flash_off)
-                                          : Icon(Icons.flash_on)),
-                                  SizedBox(height: 8),
-                                  Text("Flash",
-                                      style: TextStyle(
-                                        color: HermezColors.lightOrange,
-                                        fontSize: 16,
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: FontWeight.w700,
-                                      )),
-                                  SizedBox(width: 30),
-                                ]);
+                          if (snapshot.data != null) {
+                            return Row(children: [
+                              Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    TextButton(
+                                        style: TextButton.styleFrom(
+                                          primary: Colors.black,
+                                          backgroundColor: Color(0xfff6e9d3),
+                                          minimumSize: Size(60, 60),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(30)),
+                                        ),
+                                        onPressed: () async {
+                                          await controller?.toggleFlash();
+                                          setState(() {});
+                                        },
+                                        child: snapshot.data == true
+                                            ? Icon(Icons.flash_off)
+                                            : Icon(Icons.flash_on)),
+                                    SizedBox(height: 8),
+                                    Text("Flash",
+                                        style: TextStyle(
+                                          color: HermezColors.lightOrange,
+                                          fontSize: 16,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w700,
+                                        )),
+                                  ]),
+                              SizedBox(width: 30),
+                            ]);
                           } else {
                             return Container();
                           }

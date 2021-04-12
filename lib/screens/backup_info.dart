@@ -35,8 +35,8 @@ class BackupInfoPage extends StatelessWidget {
                           alignment: Alignment.center,
                           child: Image.asset(
                             'assets/info_backup.png',
-                            width: 200,
-                            height: 200,
+                            width: 300,
+                            height: 300,
                           ),
                         ),
                       ),

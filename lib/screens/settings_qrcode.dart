@@ -77,7 +77,7 @@ class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
                         RepaintBoundary(
                           key: _globalKey,
                           child: QrImage(
-                            size: 200,
+                            size: 300,
                             padding: EdgeInsets.all(0),
                             dataModuleStyle: QrDataModuleStyle(
                                 dataModuleShape: QrDataModuleShape.square,
@@ -95,7 +95,7 @@ class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
                           ),
                         ),
                         QrImage(
-                          size: 200,
+                          size: 300,
                           padding: EdgeInsets.all(0),
                           dataModuleStyle: QrDataModuleStyle(
                               dataModuleShape: QrDataModuleShape.square,
@@ -116,7 +116,7 @@ class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
                       height: 33,
                     ),
                     Container(
-                      width: 200,
+                      width: 300,
                       child: Text(
                         widget.arguments.message == null
                             ? (widget.arguments.store.state.txLevel ==

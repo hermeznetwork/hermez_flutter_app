@@ -387,7 +387,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                     )),
           ),
           SizedBox(width: 20.0),
-          _accounts != null &&
+          /*_accounts != null &&
                   _accounts.length > 0 &&
                   widget.arguments.store.state.txLevel ==
                       TransactionLevel.LEVEL2 &&
@@ -424,14 +424,14 @@ class _HomeBalanceState extends State<HomeBalance> {
                             ],
                           )),
                 )
-              : Container(),
-          _accounts != null &&
+              : Container(),*/
+          /*_accounts != null &&
                   _accounts.length > 0 &&
                   widget.arguments.store.state.txLevel ==
                       TransactionLevel.LEVEL2 &&
                   _exits.length == 0
               ? SizedBox(width: 20.0)
-              : Container(),
+              : Container(),*/
         ]);
   }
 
