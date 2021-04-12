@@ -37,39 +37,41 @@ class RemoveAccountInfoPage extends HookWidget {
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: new Center(
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(left: 65, right: 65),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Image.asset(
-                          'assets/remove_account_warning.png',
+              child: SingleChildScrollView(
+                child: new Center(
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.only(left: 65, right: 65),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'assets/remove_account_warning.png',
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 32),
-                    Container(
-                      margin: EdgeInsets.only(left: 24, right: 24),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                            'This will remove your account from this device. '
-                            'If you didn’t make a backup and saved your '
-                            'recovery phrase, you won’t be able to '
-                            'restore your account after that.',
-                            style: TextStyle(
-                              color: HermezColors.blackTwo,
-                              fontSize: 20,
-                              height: 1.5,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
-                            )),
+                      SizedBox(height: 32),
+                      Container(
+                        margin: EdgeInsets.only(left: 24, right: 24),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                              'This will remove your account from this device. '
+                              'If you didn’t make a backup and saved your '
+                              'recovery phrase, you won’t be able to '
+                              'restore your account after that.',
+                              style: TextStyle(
+                                color: HermezColors.blackTwo,
+                                fontSize: 20,
+                                height: 1.5,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w500,
+                              )),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

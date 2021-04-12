@@ -29,7 +29,7 @@ android {
     def config = rootProject.extensions.getByName("ext")
 
     def pathKeystoreDebugProperties = 'sign/keystore_debug.properties'
-    def pathKeystoreReleaseProperties = 'sign/keystore_prod.properties'
+    def pathKeystoreReleaseProperties = 'sign/hermez_release.properties'
 
     compileSdkVersion config["compile_sdk"]
     buildToolsVersion config["build_tools"]
@@ -112,7 +112,7 @@ android {
             shrinkResources true
             minifyEnabled true
             signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            //proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 

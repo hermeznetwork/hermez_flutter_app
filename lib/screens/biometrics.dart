@@ -48,11 +48,12 @@ class _BiometricsPageState extends State<BiometricsPage> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Expanded(
-                  flex: 1,
+                flex: 1,
+                child: SingleChildScrollView(
                   child: new Center(
-                      child: new Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
+                    child: new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
                         Image.asset(
                           widget.arguments.isFingerprint
                               ? 'assets/biometrics_fingerprint.png'
@@ -79,7 +80,11 @@ class _BiometricsPageState extends State<BiometricsPage> {
                             ),
                           ),
                         )
-                      ]))),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               Container(
                 margin: const EdgeInsets.only(
                     left: 30.0, right: 30.0, top: 30.0, bottom: 0.0),

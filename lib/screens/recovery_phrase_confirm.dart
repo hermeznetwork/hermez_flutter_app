@@ -57,496 +57,498 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: new Column(
-                //mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24, top: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                          'Select the words according to your'
-                          ' recovery phrase.',
-                          style: TextStyle(
-                            color: HermezColors.steel,
-                            fontSize: 18,
-                            height: 1.5,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          )),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(left: 24, right: 24, top: 24),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                            'Select the words according to your'
+                            ' recovery phrase.',
+                            style: TextStyle(
+                              color: HermezColors.steel,
+                              fontSize: 18,
+                              height: 1.5,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            )),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: 24, right: 24, top: 20, bottom: 15),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Select word #' + positions[0].toString(),
-                          style: TextStyle(
-                            color: HermezColors.black,
-                            fontSize: 18,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          )),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: 24, right: 24, top: 20, bottom: 15),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Select word #' + positions[0].toString(),
+                            style: TextStyle(
+                              color: HermezColors.black,
+                              fontSize: 18,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            )),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Row(children: [
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[0] == 1
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[0] == 1
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[0] = 1;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[0] == 1
-                                  ? words[positions[0] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                    Container(
+                      margin: EdgeInsets.only(left: 24, right: 24),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Row(children: [
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[0] == 1
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[0] == 1
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[0] == 2
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[0] == 2
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
+                              onPressed: () {
                                 setState(() {
-                                  selectedCombination[0] = 2;
+                                  selectedCombination[0] = 1;
                                 });
-                              });
-                            },
-                            child: Text(
-                              correctCombination[0] == 2
-                                  ? words[positions[0] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                              },
+                              child: Text(
+                                correctCombination[0] == 1
+                                    ? words[positions[0] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[0] == 3
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[0] == 3
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[0] = 3;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[0] == 3
-                                  ? words[positions[0] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[0] == 2
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[0] == 2
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  setState(() {
+                                    selectedCombination[0] = 2;
+                                  });
+                                });
+                              },
+                              child: Text(
+                                correctCombination[0] == 2
+                                    ? words[positions[0] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                      ]),
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[0] == 3
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[0] == 3
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[0] = 3;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[0] == 3
+                                    ? words[positions[0] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ]),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: 24, right: 24, top: 20, bottom: 15),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Select word #' + positions[1].toString(),
-                          style: TextStyle(
-                            color: HermezColors.black,
-                            fontSize: 18,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          )),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: 24, right: 24, top: 20, bottom: 15),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Select word #' + positions[1].toString(),
+                            style: TextStyle(
+                              color: HermezColors.black,
+                              fontSize: 18,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            )),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Row(children: [
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[1] == 1
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[1] == 1
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[1] = 1;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[1] == 1
-                                  ? words[positions[1] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                    Container(
+                      margin: EdgeInsets.only(left: 24, right: 24),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Row(children: [
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[1] == 1
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[1] == 1
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[1] = 1;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[1] == 1
+                                    ? words[positions[1] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[1] == 2
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[1] == 2
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[1] = 2;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[1] == 2
-                                  ? words[positions[1] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[1] == 2
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[1] == 2
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[1] = 2;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[1] == 2
+                                    ? words[positions[1] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[1] == 3
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[1] == 3
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[1] = 3;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[1] == 3
-                                  ? words[positions[1] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[1] == 3
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[1] == 3
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[1] = 3;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[1] == 3
+                                    ? words[positions[1] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                      ]),
+                        ]),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: 24, right: 24, top: 20, bottom: 15),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Select word #' + positions[2].toString(),
-                          style: TextStyle(
-                            color: HermezColors.black,
-                            fontSize: 18,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          )),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: 24, right: 24, top: 20, bottom: 15),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Select word #' + positions[2].toString(),
+                            style: TextStyle(
+                              color: HermezColors.black,
+                              fontSize: 18,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            )),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Row(children: [
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[2] == 1
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[2] == 1
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[2] = 1;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[2] == 1
-                                  ? words[positions[2] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                    Container(
+                      margin: EdgeInsets.only(left: 24, right: 24),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Row(children: [
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[2] == 1
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[2] == 1
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[2] = 1;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[2] == 1
+                                    ? words[positions[2] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[2] == 2
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[2] == 2
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[2] = 2;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[2] == 2
-                                  ? words[positions[2] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[2] == 2
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[2] == 2
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[2] = 2;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[2] == 2
+                                    ? words[positions[2] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[2] == 3
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[2] == 3
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[2] = 3;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[2] == 3
-                                  ? words[positions[2] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[2] == 3
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[2] == 3
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[2] = 3;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[2] == 3
+                                    ? words[positions[2] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                      ]),
+                        ]),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: 24, right: 24, top: 20, bottom: 15),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Select word #' + positions[3].toString(),
-                          style: TextStyle(
-                            color: HermezColors.black,
-                            fontSize: 18,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          )),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: 24, right: 24, top: 20, bottom: 15),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Select word #' + positions[3].toString(),
+                            style: TextStyle(
+                              color: HermezColors.black,
+                              fontSize: 18,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            )),
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Row(children: [
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[3] == 1
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[3] == 1
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[3] = 1;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[3] == 1
-                                  ? words[positions[3] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                    Container(
+                      margin: EdgeInsets.only(left: 24, right: 24),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Row(children: [
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[3] == 1
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[3] == 1
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[3] = 1;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[3] == 1
+                                    ? words[positions[3] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[3] == 2
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[3] == 2
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[3] = 2;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[3] == 2
-                                  ? words[positions[3] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[3] == 2
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[3] == 2
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[3] = 2;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[3] == 2
+                                    ? words[positions[3] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              primary: selectedCombination[3] == 3
-                                  ? Colors.white
-                                  : HermezColors.blackTwo,
-                              backgroundColor: selectedCombination[3] == 3
-                                  ? Colors.black
-                                  : Colors.white,
-                              minimumSize: Size(50, 50),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                selectedCombination[3] = 3;
-                              });
-                            },
-                            child: Text(
-                              correctCombination[3] == 3
-                                  ? words[positions[3] - 1]
-                                  : fakeWords[fakeIndex++],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                primary: selectedCombination[3] == 3
+                                    ? Colors.white
+                                    : HermezColors.blackTwo,
+                                backgroundColor: selectedCombination[3] == 3
+                                    ? Colors.black
+                                    : Colors.white,
+                                minimumSize: Size(50, 50),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              textAlign: TextAlign.center,
+                              onPressed: () {
+                                setState(() {
+                                  selectedCombination[3] = 3;
+                                });
+                              },
+                              child: Text(
+                                correctCombination[3] == 3
+                                    ? words[positions[3] - 1]
+                                    : fakeWords[fakeIndex++],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
-                        ),
-                      ]),
+                        ]),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Container(

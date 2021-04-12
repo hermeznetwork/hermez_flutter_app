@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hermez/app_config.dart';
+import 'package:hermez/constants.dart';
+import 'package:hermez/secrets/keys.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
@@ -15,8 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:web_socket_channel/io.dart';
 
-Future<List<SingleChildWidget>> createProviders(
-    AppConfigParams params, EnvParams hermezParams) async {
+Future<List<SingleChildWidget>> createProviders(EnvParams hermezParams) async {
   final client = Web3Client(hermezParams.baseWeb3Url, Client(),
       enableBackgroundIsolate: true, socketConnector: () {
     return IOWebSocketChannel.connect(hermezParams.baseWeb3RdpUrl)
@@ -31,9 +31,9 @@ Future<List<SingleChildWidget>> createProviders(
   final addressService = AddressService(configurationService);
   final hermezService = HermezService(client, configurationService);
   final exchangeService =
-      ExchangeService(params.exchangeHttpUrl, params.exchangeApiKey);
+      ExchangeService(FIAT_EXCHANGE_RATES_API_URL, EXCHANGE_RATES_API_KEY);
   final contractService =
-      ContractService(client, configurationService, params.ethGasPriceHttpUrl);
+      ContractService(client, configurationService, ETH_GAS_PRICE_URL);
   final explorerService = ExplorerService(
       hermezParams.etherscanApiUrl, hermezParams.etherscanApiKey);
 

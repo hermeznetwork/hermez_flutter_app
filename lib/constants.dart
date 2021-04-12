@@ -3,7 +3,9 @@
   'DEFAULT_PREFERRED_CURRENCY' : CurrencySymbol.USD.code;
 };*/
 
-//const FIAT_EXCHANGE_RATES_API_URL = 'https://api.exchangeratesapi.io';
+const FIAT_EXCHANGE_RATES_API_URL = 'api.exchangeratesapi.io';
+
+const ETH_GAS_PRICE_URL = "ethgasstation.info";
 
 //const ACCOUNT_INDEX_SEPARATOR = ':';
 

@@ -25,39 +25,41 @@ class BackupInfoPage extends StatelessWidget {
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: new Center(
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(left: 65, right: 65),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Image.asset(
-                          'assets/info_backup.png',
+              child: SingleChildScrollView(
+                child: new Center(
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.only(left: 65, right: 65),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'assets/info_backup.png',
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 32),
-                    Container(
-                      margin: EdgeInsets.only(left: 24, right: 24),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                            'If you continue you will see your recovery phrase.'
-                            ' This is the only key to your wallet. If your'
-                            ' phone gets stolen or lost, you will only be able'
-                            ' to recover your funds with this recovery phrase.',
-                            style: TextStyle(
-                              color: HermezColors.blackTwo,
-                              fontSize: 20,
-                              height: 1.5,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
-                            )),
+                      SizedBox(height: 32),
+                      Container(
+                        margin: EdgeInsets.only(left: 24, right: 24),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                              'If you continue you will see your recovery phrase.'
+                              ' This is the only key to your wallet. If your'
+                              ' phone gets stolen or lost, you will only be able'
+                              ' to recover your funds with this recovery phrase.',
+                              style: TextStyle(
+                                color: HermezColors.blackTwo,
+                                fontSize: 20,
+                                height: 1.5,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w500,
+                              )),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
