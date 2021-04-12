@@ -62,111 +62,123 @@ class _SettingsQRCodePageState extends State<SettingsQRCodePage> {
                   ),
                 ]
               : null),
-      body: Container(
-        margin: EdgeInsets.only(left: 60.3, right: 60.3),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Stack(
-                children: [
-                  RepaintBoundary(
-                    key: _globalKey,
-                    child: QrImage(
-                      padding: EdgeInsets.all(0),
-                      dataModuleStyle: QrDataModuleStyle(
-                          dataModuleShape: QrDataModuleShape.square,
-                          color: Colors.white),
-                      eyeStyle: QrEyeStyle(
-                          eyeShape: QrEyeShape.square, color: Colors.white),
-                      data: widget.arguments.message == null
-                          ? (widget.arguments.store.state.txLevel ==
-                                      TransactionLevel.LEVEL2
-                                  ? "hez:"
-                                  : "") +
-                              widget.arguments.store.state.ethereumAddress
-                          : widget.arguments.message,
+      body: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: new Center(
+              child: SingleChildScrollView(
+                child: new Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Stack(
+                      children: [
+                        RepaintBoundary(
+                          key: _globalKey,
+                          child: QrImage(
+                            size: 200,
+                            padding: EdgeInsets.all(0),
+                            dataModuleStyle: QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.square,
+                                color: Colors.white),
+                            eyeStyle: QrEyeStyle(
+                                eyeShape: QrEyeShape.square,
+                                color: Colors.white),
+                            data: widget.arguments.message == null
+                                ? (widget.arguments.store.state.txLevel ==
+                                            TransactionLevel.LEVEL2
+                                        ? "hez:"
+                                        : "") +
+                                    widget.arguments.store.state.ethereumAddress
+                                : widget.arguments.message,
+                          ),
+                        ),
+                        QrImage(
+                          size: 200,
+                          padding: EdgeInsets.all(0),
+                          dataModuleStyle: QrDataModuleStyle(
+                              dataModuleShape: QrDataModuleShape.square,
+                              color: Colors.black),
+                          eyeStyle: QrEyeStyle(
+                              eyeShape: QrEyeShape.square, color: Colors.black),
+                          data: widget.arguments.message == null
+                              ? (widget.arguments.store.state.txLevel ==
+                                          TransactionLevel.LEVEL2
+                                      ? "hez:"
+                                      : "") +
+                                  widget.arguments.store.state.ethereumAddress
+                              : widget.arguments.message,
+                        ),
+                      ],
                     ),
-                  ),
-                  QrImage(
-                    padding: EdgeInsets.all(0),
-                    dataModuleStyle: QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.square,
-                        color: Colors.black),
-                    eyeStyle: QrEyeStyle(
-                        eyeShape: QrEyeShape.square, color: Colors.black),
-                    data: widget.arguments.message == null
-                        ? (widget.arguments.store.state.txLevel ==
-                                    TransactionLevel.LEVEL2
-                                ? "hez:"
-                                : "") +
-                            widget.arguments.store.state.ethereumAddress
-                        : widget.arguments.message,
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 33,
-              ),
-              Text(
-                widget.arguments.message == null
-                    ? (widget.arguments.store.state.txLevel ==
-                                TransactionLevel.LEVEL2
-                            ? "hez:"
-                            : "") +
-                        widget.arguments.store.state.ethereumAddress
-                    : widget.arguments.message,
-                style: TextStyle(
-                  color: HermezColors.blackTwo,
-                  fontSize: 16,
-                  height: 1.5,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.justify,
-              ),
-              SizedBox(
-                height: 44,
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  primary: Colors.black,
-                  backgroundColor: Color(0xfff6e9d3),
-                  minimumSize: Size(60, 60),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                ),
-                onPressed: () {
-                  if (widget.arguments.fromHomeScreen) {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  } else {
-                    Navigator.of(context).pushReplacementNamed("/scanner",
-                        arguments: QRCodeScannerArguments(
-                            store: widget.arguments.store,
-                            type: QRCodeScannerType.ALL));
-                  }
-                },
-                child: Image.asset("assets/scan.png",
-                    color: HermezColors.blueyGreyTwo, height: 20),
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              Text(
-                "Scan",
-                style: TextStyle(
-                  color: HermezColors.blackTwo,
-                  fontSize: 16,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w700,
+                    SizedBox(
+                      height: 33,
+                    ),
+                    Container(
+                      width: 200,
+                      child: Text(
+                        widget.arguments.message == null
+                            ? (widget.arguments.store.state.txLevel ==
+                                        TransactionLevel.LEVEL2
+                                    ? "hez:"
+                                    : "") +
+                                widget.arguments.store.state.ethereumAddress
+                            : widget.arguments.message,
+                        style: TextStyle(
+                          color: HermezColors.blackTwo,
+                          fontSize: 16,
+                          height: 1.5,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 44,
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        primary: Colors.black,
+                        backgroundColor: Color(0xfff6e9d3),
+                        minimumSize: Size(60, 60),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                      ),
+                      onPressed: () {
+                        if (widget.arguments.fromHomeScreen) {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        } else {
+                          Navigator.of(context).pushReplacementNamed("/scanner",
+                              arguments: QRCodeScannerArguments(
+                                  store: widget.arguments.store,
+                                  type: QRCodeScannerType.ALL));
+                        }
+                      },
+                      child: Image.asset("assets/scan.png",
+                          color: HermezColors.blackTwo, height: 20),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text(
+                      "Scan",
+                      style: TextStyle(
+                        color: HermezColors.blackTwo,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

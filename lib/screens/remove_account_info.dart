@@ -37,8 +37,8 @@ class RemoveAccountInfoPage extends HookWidget {
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: SingleChildScrollView(
-                child: new Center(
+              child: Center(
+                child: new SingleChildScrollView(
                   child: new Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -48,12 +48,14 @@ class RemoveAccountInfoPage extends HookWidget {
                           alignment: Alignment.center,
                           child: Image.asset(
                             'assets/remove_account_warning.png',
+                            width: 200,
+                            height: 200,
                           ),
                         ),
                       ),
                       SizedBox(height: 32),
                       Container(
-                        margin: EdgeInsets.only(left: 24, right: 24),
+                        margin: EdgeInsets.only(left: 30, right: 30),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(

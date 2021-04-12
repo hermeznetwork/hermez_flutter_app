@@ -191,7 +191,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Align(
-                  alignment: Alignment(-1.3, 0),
+                  alignment: Alignment.centerLeft,
+                  //alignment: Alignment(-1.3, 0),
                   child: Container(
                     padding: EdgeInsets.only(
                         top: 30.0, bottom: subtitle != null ? 8.0 : 30.0),

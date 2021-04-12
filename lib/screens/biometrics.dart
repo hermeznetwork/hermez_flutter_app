@@ -49,8 +49,8 @@ class _BiometricsPageState extends State<BiometricsPage> {
             children: <Widget>[
               Expanded(
                 flex: 1,
-                child: SingleChildScrollView(
-                  child: new Center(
+                child: Center(
+                  child: new SingleChildScrollView(
                     child: new Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[

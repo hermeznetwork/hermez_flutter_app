@@ -27,31 +27,34 @@ class IntroPage extends HookWidget {
               Expanded(
                 flex: 1,
                 child: new Center(
-                  child: new Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/intro_hermez_logo.png',
-                        width: 120,
-                        height: 120,
-                      ),
-                      SizedBox(height: 20),
-                      Padding(
-                        padding: EdgeInsets.all(30.0),
-                        child: Text(
-                          'Secure wallet for low-cost\n token transfers',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: HermezColors.steel,
-                            fontSize: 18,
-                            height: 1.8,
-                            decoration: TextDecoration.none,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          ),
+                  child: SingleChildScrollView(
+                    child: new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/intro_hermez_logo.png',
+                          width: 120,
+                          height: 120,
                         ),
-                      )
-                    ],
+                        SizedBox(height: 20),
+                        Padding(
+                          padding: EdgeInsets.all(30.0),
+                          child: Text(
+                            'Secure wallet for low-cost\n token transfers',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: HermezColors.steel,
+                              fontSize: 18,
+                              height: 1.8,
+                              decoration: TextDecoration.none,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -79,108 +79,123 @@ class _PinPageState extends State<PinPage> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 80),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          height: 15.0,
-                          width: 15.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: position1Selected ? Colors.black : null,
-                            border: Border.all(color: Colors.black, width: 1.0),
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          height: 15.0,
-                          width: 15.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: position2Selected ? Colors.black : null,
-                            border: Border.all(color: Colors.black, width: 1.0),
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          height: 15.0,
-                          width: 15.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: position3Selected ? Colors.black : null,
-                            border: Border.all(color: Colors.black, width: 1.0),
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          height: 15.0,
-                          width: 15.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: position4Selected ? Colors.black : null,
-                            border: Border.all(color: Colors.black, width: 1.0),
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          height: 15.0,
-                          width: 15.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: position5Selected ? Colors.black : null,
-                            border: Border.all(color: Colors.black, width: 1.0),
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          height: 15.0,
-                          width: 15.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: position6Selected ? Colors.black : null,
-                            border: Border.all(color: Colors.black, width: 1.0),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 40),
-                    Container(
-                      child: RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyText2,
-                          children: [
-                            WidgetSpan(
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 5.0),
-                                child: pinError
-                                    ? Image.asset("assets/info.png",
-                                        width: 17,
-                                        height: 17,
-                                        color: HermezColors.redError)
-                                    : null,
-                              ),
+                flex: 1,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 80),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            height: 15.0,
+                            width: 15.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: position1Selected ? Colors.black : null,
+                              border:
+                                  Border.all(color: Colors.black, width: 1.0),
                             ),
-                            TextSpan(
-                              text: pinInfoText,
-                              style: TextStyle(
-                                color: pinError
-                                    ? HermezColors.redError
-                                    : HermezColors.steel,
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
-                              ),
+                          ),
+                          Container(
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            height: 15.0,
+                            width: 15.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: position2Selected ? Colors.black : null,
+                              border:
+                                  Border.all(color: Colors.black, width: 1.0),
                             ),
-                          ],
+                          ),
+                          Container(
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            height: 15.0,
+                            width: 15.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: position3Selected ? Colors.black : null,
+                              border:
+                                  Border.all(color: Colors.black, width: 1.0),
+                            ),
+                          ),
+                          Container(
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            height: 15.0,
+                            width: 15.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: position4Selected ? Colors.black : null,
+                              border:
+                                  Border.all(color: Colors.black, width: 1.0),
+                            ),
+                          ),
+                          Container(
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            height: 15.0,
+                            width: 15.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: position5Selected ? Colors.black : null,
+                              border:
+                                  Border.all(color: Colors.black, width: 1.0),
+                            ),
+                          ),
+                          Container(
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            height: 15.0,
+                            width: 15.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: position6Selected ? Colors.black : null,
+                              border:
+                                  Border.all(color: Colors.black, width: 1.0),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 40),
+                      Container(
+                        child: RichText(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodyText2,
+                            children: [
+                              WidgetSpan(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 5.0),
+                                  child: pinError
+                                      ? Image.asset("assets/info.png",
+                                          width: 17,
+                                          height: 17,
+                                          color: HermezColors.redError)
+                                      : null,
+                                ),
+                              ),
+                              TextSpan(
+                                text: pinInfoText,
+                                style: TextStyle(
+                                  color: pinError
+                                      ? HermezColors.redError
+                                      : HermezColors.steel,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Container(

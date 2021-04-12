@@ -25,25 +25,26 @@ class BackupInfoPage extends StatelessWidget {
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: SingleChildScrollView(
-                child: new Center(
+              child: Center(
+                child: new SingleChildScrollView(
                   child: new Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Container(
-                        margin: EdgeInsets.only(left: 65, right: 65),
                         child: Align(
                           alignment: Alignment.center,
                           child: Image.asset(
                             'assets/info_backup.png',
+                            width: 200,
+                            height: 200,
                           ),
                         ),
                       ),
                       SizedBox(height: 32),
                       Container(
-                        margin: EdgeInsets.only(left: 24, right: 24),
+                        margin: EdgeInsets.only(left: 30, right: 30),
                         child: Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: Alignment.center,
                           child: Text(
                               'If you continue you will see your recovery phrase.'
                               ' This is the only key to your wallet. If your'

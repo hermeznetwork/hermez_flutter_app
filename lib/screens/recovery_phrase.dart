@@ -78,389 +78,391 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: new Column(
-                //mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 24, right: 24, top: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                          'Back up these words manually and keep '
-                          'them in a safe place.',
-                          style: TextStyle(
-                            color: HermezColors.steel,
-                            fontSize: 18,
-                            height: 1.5,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          )),
+              child: SingleChildScrollView(
+                child: new Column(
+                  //mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(left: 24, right: 24, top: 24),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                            'Back up these words manually and keep '
+                            'them in a safe place.',
+                            style: TextStyle(
+                              color: HermezColors.steel,
+                              fontSize: 18,
+                              height: 1.5,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            )),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Container(
-                    height: 232,
-                    margin: EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                    ),
-                    padding: EdgeInsets.only(
-                        top: 24, bottom: 24, left: 32, right: 32),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0xfff8ecd6),
-                          offset: Offset(0, 4),
-                          blurRadius: 8,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Row(children: [
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('1',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Text(words[0],
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 18,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('7',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(words[6],
-                                    style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontSize: 18,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w500,
-                                    )),
-                              ),
-                            ),
-                          ]),
-                        ),
-                        Expanded(
-                          child: Row(children: [
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('2',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Text(words[1],
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 18,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('8',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(words[7],
-                                    style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontSize: 18,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w500,
-                                    )),
-                              ),
-                            ),
-                          ]),
-                        ),
-                        Expanded(
-                          child: Row(children: [
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('3',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Text(words[2],
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 18,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('9',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(words[8],
-                                    style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontSize: 18,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w500,
-                                    )),
-                              ),
-                            ),
-                          ]),
-                        ),
-                        Expanded(
-                          child: Row(children: [
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('4',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Text(words[3],
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 18,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('10',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(words[9],
-                                    style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontSize: 18,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w500,
-                                    )),
-                              ),
-                            ),
-                          ]),
-                        ),
-                        Expanded(
-                          child: Row(children: [
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('5',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Text(words[4],
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 18,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('11',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(words[10],
-                                    style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontSize: 18,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w500,
-                                    )),
-                              ),
-                            ),
-                          ]),
-                        ),
-                        Expanded(
-                          child: Row(children: [
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('6',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Text(words[5],
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 18,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text('12',
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 14,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(words[11],
-                                    style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontSize: 18,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w500,
-                                    )),
-                              ),
-                            ),
-                          ]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  widget.arguments.isBackup
-                      ? Container(
-                          margin: EdgeInsets.only(left: 24, right: 24),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
+                    SizedBox(height: 16),
+                    Container(
+                      height: 232,
+                      margin: EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                      ),
+                      padding: EdgeInsets.only(
+                          top: 24, bottom: 24, left: 32, right: 32),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xfff8ecd6),
+                            offset: Offset(0, 4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Expanded(
                             child: Row(children: [
-                              Checkbox(
-                                value: checked,
-                                onChanged: (value) {
-                                  setState(() {
-                                    checked = value;
-                                  });
-                                },
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('1',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
                               ),
                               Expanded(
-                                child: Text(
-                                    'I understand this is my only'
-                                    ' key to recover my funds.',
+                                child: Text(words[0],
                                     style: TextStyle(
                                       color: HermezColors.blackTwo,
                                       fontSize: 18,
-                                      height: 1.5,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
                                     )),
-                              )
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('7',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(words[6],
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                ),
+                              ),
                             ]),
                           ),
-                        )
-                      : Container(),
-                ],
+                          Expanded(
+                            child: Row(children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('2',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Text(words[1],
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 18,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('8',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(words[7],
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          Expanded(
+                            child: Row(children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('3',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Text(words[2],
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 18,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('9',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(words[8],
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          Expanded(
+                            child: Row(children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('4',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Text(words[3],
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 18,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('10',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(words[9],
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          Expanded(
+                            child: Row(children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('5',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Text(words[4],
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 18,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('11',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(words[10],
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                ),
+                              ),
+                            ]),
+                          ),
+                          Expanded(
+                            child: Row(children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('6',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Text(words[5],
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 18,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Text('12',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 14,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(words[11],
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                ),
+                              ),
+                            ]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 32),
+                    widget.arguments.isBackup
+                        ? Container(
+                            margin: EdgeInsets.only(left: 24, right: 24),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Row(children: [
+                                Checkbox(
+                                  value: checked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      checked = value;
+                                    });
+                                  },
+                                ),
+                                Expanded(
+                                  child: Text(
+                                      'I understand this is my only'
+                                      ' key to recover my funds.',
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        height: 1.5,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w500,
+                                      )),
+                                )
+                              ]),
+                            ),
+                          )
+                        : Container(),
+                  ],
+                ),
               ),
             ),
             widget.arguments.isBackup

@@ -26,7 +26,8 @@ class BackupRow extends StatelessWidget {
               child: Image.asset("assets/arrow_right.png",
                   height: 12, color: Colors.white)),
           title: Align(
-            alignment: Alignment(-1.6, 0),
+            alignment: Alignment.centerLeft,
+            //alignment: Alignment(-1.6, 0),
             child: Container(
               padding: EdgeInsets.only(top: 30.0, bottom: 30.0),
               child: Text(
