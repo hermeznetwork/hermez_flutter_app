@@ -107,6 +107,8 @@ flutter:
     # Remove account
     - remove_account.png
     - remove_account_warning.png
+    # Home
+    - receive2.png
 
     - view_explorer.png
     - show_recovery_phrase.png
@@ -116,12 +118,10 @@ flutter:
     - currency_conversion.png
 
 
-    - TargaryenCoin.json
     - partialERC20ABI.json
     - ERC20ABI.json
     - HermezABI.json
     - WithdrawalDelayerABI.json
-    - hermes.png
     - account.png
     - wallet.png
     - search.png

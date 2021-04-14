@@ -614,20 +614,20 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       }
       String addressFrom;
       String addressTo;
-      if (store.state.ethBalance.toDouble() > 0) {
-        if (AddressUtils.isValidEthereumAddress(store.state.ethereumAddress)) {
-          addressFrom = store.state.ethereumAddress;
-        }
-        if (AddressUtils.isValidEthereumAddress(addressController.value.text)) {
-          addressTo = addressController.value.text;
-        }
-        BigInt estimatedFee = await store.getEstimatedFee(
-            addressFrom, addressTo, BigInt.from(amount));
-        return estimatedFee;
-      } else {
+      //if (account.balance. > 0) {
+      if (AddressUtils.isValidEthereumAddress(store.state.ethereumAddress)) {
+        addressFrom = store.state.ethereumAddress;
+      }
+      if (AddressUtils.isValidEthereumAddress(addressController.value.text)) {
+        addressTo = addressController.value.text;
+      }
+      BigInt estimatedFee = await store.getEstimatedFee(
+          addressFrom, addressTo, BigInt.from(amount));
+      return estimatedFee;
+      /*} else {
         return BigInt.zero;
         // TODO handle showing error
-      }
+      }*/
     }
   }
 
