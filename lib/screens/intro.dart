@@ -4,13 +4,21 @@ import 'package:hermez/context/setup/wallet_setup_provider.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
-class IntroPage extends HookWidget {
-  IntroPage();
+import 'info.dart';
+
+/*class IntroPage extends StatefulWidget {
+  IntroPage({Key key, this.store}) : super(key: key);
+
+  WalletSetupHandler store;
 
   @override
-  Widget build(BuildContext context) {
-    var store = useWalletSetup(context);
+  _IntroPageState createState() => _IntroPageState();
+}*/
 
+class IntroPage extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    final store = useWalletSetup(context);
     return Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
@@ -71,17 +79,27 @@ class IntroPage extends HookWidget {
                       ),
                       onPressed: () {
                         Navigator.of(context)
-                            .pushNamed("/pin",
-                                arguments: PinArguments(null, true, null))
-                            .then(
-                          (value) async {
-                            if (value.toString() == 'true') {
-                              await store.generateMnemonic();
-                              Navigator.pushNamedAndRemoveUntil(context,
-                                  "/home", (Route<dynamic> route) => false);
-                            }
-                          },
-                        );
+                            .pushNamed(
+                          "/pin",
+                          arguments: PinArguments(null, true, null),
+                        )
+                            .then((value) async {
+                          if (value.toString() == 'true') {
+                            String mnemonic = await store.generateMnemonic();
+                            Navigator.of(context)
+                                .pushNamed("/info",
+                                    arguments: InfoArguments(
+                                        "info_backup_success.png",
+                                        false,
+                                        "Your wallet has been created",
+                                        iconSize: 300))
+                                .then((value) =>
+                                    Navigator.pushNamedAndRemoveUntil(
+                                        context,
+                                        "/home",
+                                        (Route<dynamic> route) => false));
+                          }
+                        });
                       },
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

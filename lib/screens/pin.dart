@@ -575,14 +575,14 @@ class _PinPageState extends State<PinPage> {
             clearAllSelected();
           } else {
             if (pinString == confirmPinString) {
-              widget.configurationService.setPasscode(pinString);
-              var value = await Navigator.of(context).pushNamed("/info",
+              await widget.configurationService.setPasscode(pinString);
+              /*var value = await Navigator.of(context).pushNamed("/info",
                   arguments: InfoArguments(
                       "info_success.png",
                       false,
                       widget.arguments.title == null
                           ? "Passcode created"
-                          : "Passcode changed"));
+                          : "Passcode changed"));*/
               if (await BiometricsUtils.canCheckBiometrics() &&
                   await BiometricsUtils.isDeviceSupported()) {
                 List<BiometricType> availableBiometrics =
@@ -590,30 +590,42 @@ class _PinPageState extends State<PinPage> {
                 if (availableBiometrics.contains(BiometricType.face)) {
                   // Face ID.
                   Navigator.of(context)
-                      .pushNamed("/biometrics",
+                      .pushReplacementNamed("/biometrics",
                           arguments: BiometricsArguments(false))
                       .then((value) {
+                    if (widget.arguments.onSuccess != null) {
+                      widget.arguments.onSuccess();
+                    }
                     if (Navigator.canPop(context)) {
-                      Navigator.pop(context, value);
+                      Navigator.pop(context, true);
                     }
                   });
                 } else if (availableBiometrics
                     .contains(BiometricType.fingerprint)) {
                   // Touch ID.
                   Navigator.of(context)
-                      .pushNamed("/biometrics",
+                      .pushReplacementNamed("/biometrics",
                           arguments: BiometricsArguments(true))
                       .then((value) {
+                    if (widget.arguments.onSuccess != null) {
+                      widget.arguments.onSuccess();
+                    }
                     if (Navigator.canPop(context)) {
-                      Navigator.pop(context, value);
+                      Navigator.pop(context, true);
                     }
                   });
                 } else {
+                  if (widget.arguments.onSuccess != null) {
+                    widget.arguments.onSuccess();
+                  }
                   if (Navigator.canPop(context)) {
                     Navigator.pop(context, true);
                   }
                 }
               } else {
+                if (widget.arguments.onSuccess != null) {
+                  widget.arguments.onSuccess();
+                }
                 if (Navigator.canPop(context)) {
                   Navigator.pop(context, true);
                 }

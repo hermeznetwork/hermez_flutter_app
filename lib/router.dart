@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/screens/backup_info.dart';
 import 'package:hermez/screens/biometrics.dart';
+import 'package:hermez/screens/home.dart';
 import 'package:hermez/screens/import.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/intro.dart';
@@ -19,8 +20,6 @@ import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_activity_page.dart';
 import 'package:hermez/wallet_amount_page.dart';
 import 'package:hermez/wallet_create_page.dart';
-import 'package:hermez/wallet_home_page.dart';
-import 'package:hermez/wallet_settings_page.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
 import 'package:hermez/wallet_transaction_info_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -37,7 +36,6 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
-        var configurationService = Provider.of<ConfigurationService>(context);
         return PinPage(
             arguments: PinArguments("Enter passcode", false, () {
               Navigator.pushReplacementNamed(context, '/home');
@@ -51,7 +49,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
     },
     '/home': (BuildContext context) {
       return WalletProvider(builder: (context, store) {
-        return WalletHomePage("Hermez");
+        return HomePage();
       });
     },
     '/pin': (BuildContext context) {
@@ -99,7 +97,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
           return WalletActivityPage("Hermez");
         });
 
-      return IntroPage();
+      return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+      });
     },
     '/account_details': (BuildContext context) {
       // Cast the arguments to the correct type: ScreenArguments.
@@ -110,15 +110,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
         return WalletProvider(builder: (context, store) {
           return WalletAccountDetailsPage(args);
         });
-      return IntroPage();
-    },
-    '/settings': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet())
-        return WalletProvider(builder: (context, store) {
-          return SettingsPage(store);
-        });
-      return IntroPage();
+      return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+      });
     },
     '/scanner': (BuildContext context) {
       return QRCodeScannerPage(
@@ -160,7 +154,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
           return WalletAccountSelectorPage(
               ModalRoute.of(context).settings.arguments);
         });
-      return IntroPage();
+      return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+      });
     },
     '/transfer': (BuildContext context) => WalletTransferProvider(
           builder: (context, store) {

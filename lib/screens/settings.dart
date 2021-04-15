@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/backup_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/settings_details.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/service/configuration_service.dart';
-import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -16,8 +12,8 @@ import 'package:hermez/wallet_transfer_amount_page.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-class AccountSettingsPage extends HookWidget {
-  AccountSettingsPage(this.store, this.configurationService);
+class SettingsPage extends HookWidget {
+  SettingsPage(this.store, this.configurationService);
 
   WalletHandler store;
   ConfigurationService configurationService;
@@ -29,7 +25,7 @@ class AccountSettingsPage extends HookWidget {
     return Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text("My Account",
+        title: new Text("Settings",
             style: TextStyle(
                 fontFamily: 'ModernEra',
                 color: HermezColors.blackTwo,
@@ -37,12 +33,11 @@ class AccountSettingsPage extends HookWidget {
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
       ),
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            Container(
+            /*Container(
               color: HermezColors.lightOrange,
               child: Align(
                 alignment: Alignment.center,
@@ -170,7 +165,7 @@ class AccountSettingsPage extends HookWidget {
                     trailing: Icon(Icons.content_copy),
                   ),
                 ),*/
-                ),
+                ),*/
             Expanded(
               child: Container(
                 color: Colors.white,

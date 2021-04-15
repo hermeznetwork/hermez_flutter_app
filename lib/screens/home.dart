@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/home_balance.dart';
-import 'package:hermez/screens/account_settings.dart';
+import 'package:hermez/model/tab_navigation_item.dart';
 import 'package:hermez/screens/scanner.dart';
+import 'package:hermez/screens/settings.dart';
 import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:provider/provider.dart';
 
-import 'context/wallet/wallet_handler.dart';
-import 'context/wallet/wallet_provider.dart';
+import '../context/wallet/wallet_handler.dart';
+import '../context/wallet/wallet_provider.dart';
 
-class WalletHomePage extends HookWidget {
-  WalletHomePage(this.title);
-
-  final String title;
-
+class HomePage extends HookWidget {
   WalletHandler store;
 
   ValueNotifier _currentIndex;
-
-  PageController controller = PageController(initialPage: 1);
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -38,7 +34,7 @@ class WalletHomePage extends HookWidget {
       return null;
     }, [store]);
 
-    final _children = <Widget>[
+    /*final _children = <Widget>[
       settingsPage(context),
       HomeBalance(
         arguments: HomeBalanceArguments(
@@ -59,10 +55,62 @@ class WalletHomePage extends HookWidget {
         defaultCurrency: store.state.defaultCurrency,
         cryptoList: store.state.cryptoList,
       ),*/
+    ];*/
+
+    List<TabNavigationItem> items = [
+      TabNavigationItem(
+        page: HomeBalance(
+          arguments: HomeBalanceArguments(
+            store,
+            null,
+            _scaffoldKey,
+          ),
+        ),
+        icon: ImageIcon(
+          AssetImage('assets/home_tab_item.png'),
+        ),
+        title: "Home",
+      ),
+      TabNavigationItem(
+        page: QRCodeScannerPage(
+          arguments: QRCodeScannerArguments(
+              store: store,
+              type: QRCodeScannerType.ALL,
+              onScanned: ModalRoute.of(context).settings.arguments),
+        ),
+        icon: ImageIcon(
+          AssetImage('assets/scan.png'),
+        ),
+        title: "QR Scan",
+      ),
+      TabNavigationItem(
+        page: settingsPage(context),
+        icon: ImageIcon(
+          AssetImage('assets/settings2.png'),
+        ),
+        title: "Settings",
+      ),
     ];
 
     return Scaffold(
       key: _scaffoldKey,
+      body: IndexedStack(
+        index: _currentIndex.value,
+        children: [
+          for (final tabItem in items) tabItem.page,
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+          selectedItemColor: HermezColors.blackTwo,
+          unselectedItemColor: HermezColors.blueyGreyTwo,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          currentIndex: _currentIndex.value,
+          onTap: (int index) => onTabTapped(index),
+          items: [
+            for (final tabItem in items)
+              BottomNavigationBarItem(icon: tabItem.icon, label: tabItem.title)
+          ]),
       /*appBar: AppBar(
         //title: Text(_currentIndex.value == 2 ? "Activity" : title),
         //backgroundColor: _currentIndex.value == 2 ? Colors.white : Color.fromRGBO(249, 244, 235, 1.0),
@@ -85,11 +133,11 @@ class WalletHomePage extends HookWidget {
           /*,
         ],*/
       ),*/
-      body: PageView(
+      /*body: PageView(
         controller: controller,
         children: _children,
         onPageChanged: (index) => {},
-      ),
+      ),*/
     );
   }
 
@@ -103,7 +151,7 @@ class WalletHomePage extends HookWidget {
     var configurationService = Provider.of<ConfigurationService>(context);
     /*if (configurationService.didSetupWallet())
       return WalletProvider(builder: (context, store) {*/
-    return AccountSettingsPage(store, configurationService);
+    return SettingsPage(store, configurationService);
     //});
   }
 }

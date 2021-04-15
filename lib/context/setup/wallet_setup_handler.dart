@@ -14,10 +14,14 @@ class WalletSetupHandler {
 
   WalletSetup get state => _store.state;
 
-  Future<void> generateMnemonic() async {
-    var mnemonic = _addressService.generateMnemonic();
-    await _addressService.setupFromMnemonic(mnemonic);
+  Future<String> generateMnemonic() async {
+    String mnemonic = _addressService.generateMnemonic();
     _store.dispatch(WalletSetupConfirmMnemonic(mnemonic));
+    try {
+      return await _addressService.setupFromMnemonic(mnemonic);
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   Future<bool> confirmMnemonic(String mnemonic) async {
@@ -43,8 +47,10 @@ class WalletSetupHandler {
 
       if (_validateMnemonic(mnemonic)) {
         final normalisedMnemonic = _mnemonicNormalise(mnemonic);
-        await _addressService.setupFromMnemonic(normalisedMnemonic);
-        return true;
+        return await _addressService.setupFromMnemonic(normalisedMnemonic) !=
+            null;
+      } else {
+        return false;
       }
     } catch (e) {
       _store.dispatch(WalletSetupAddError(e.toString()));

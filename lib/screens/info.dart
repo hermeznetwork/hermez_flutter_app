@@ -7,8 +7,9 @@ class InfoArguments {
   final String imagePath;
   final bool showButton;
   final String message;
+  final double iconSize;
 
-  InfoArguments(this.imagePath, this.showButton, this.message);
+  InfoArguments(this.imagePath, this.showButton, this.message, {this.iconSize = 150});
 }
 
 class InfoPage extends StatefulWidget {
@@ -41,8 +42,8 @@ class _InfoPageState extends State<InfoPage> {
               alignment: Alignment.center,
               child: Image.asset(
                 'assets/' + args.imagePath,
-                width: 150,
-                height: 150,
+                width: args.iconSize,
+                height: args.iconSize,
               ),
             ),
           ),

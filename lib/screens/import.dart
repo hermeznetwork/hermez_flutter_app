@@ -843,12 +843,14 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                     mnemonic = mnemonic.replaceAll("[", "");
                                     mnemonic = mnemonic.replaceAll("]", "");
                                     mnemonic = mnemonic.replaceAll("\"", "");
-                                    await widget.store
+                                    bool imported = await widget.store
                                         .importFromMnemonic(mnemonic);
-                                    Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        "/home",
-                                        (Route<dynamic> route) => false);
+                                    if (imported) {
+                                      Navigator.pushNamedAndRemoveUntil(
+                                          context,
+                                          "/home",
+                                          (Route<dynamic> route) => false);
+                                    } else {}
                                   }
                                 },
                               );
