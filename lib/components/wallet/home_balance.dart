@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
@@ -20,6 +19,7 @@ import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../wallet_transaction_details_page.dart';
 
@@ -355,8 +355,17 @@ class _HomeBalanceState extends State<HomeBalance> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
-                    onPressed: () {
-                      if (widget.arguments.store.state.txLevel ==
+                    onPressed: () async {
+                      //Platform
+                      String url2 =
+                          "wc:2ae4c51c-da58-4f9d-b718-1b1c8daffbe1@1?bridge=https%3A%2F%2Fbridge.walletconnect.org&key=e488ca1c0d9f532cb0af152d96722de8d6de5c0efccc2ac1634064530e40f027";
+                      if (await canLaunch(url2)) {
+                        await launch(url2);
+                      }
+                      String url =
+                          "https://example.wallet/wc?uri=wc:00e46b69-d0cc-4b3e-b6a2-cee442f97188@1?bridge=https%3A%2F%2Fbridge.walletconnect.org&key=91303dedf64285cbbaf9120f6e9d160a5c8aa3deb67017a3874cd272323f48ae";
+                      //_launchUniversalLinkIos(url);
+                      /*if (widget.arguments.store.state.txLevel ==
                           TransactionLevel.LEVEL1) {
                         Navigator.of(context).pushNamed("/qrcode",
                             arguments: SettingsQRCodeArguments(
@@ -369,7 +378,7 @@ class _HomeBalanceState extends State<HomeBalance> {
                               TransactionType.DEPOSIT,
                               widget.arguments.store,
                             ));
-                      }
+                      }*/
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -653,5 +662,21 @@ class _HomeBalanceState extends State<HomeBalance> {
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));
     return result;
+  }
+
+  Future<void> _launchUniversalLinkIos(String url) async {
+    if (await canLaunch(url)) {
+      final bool nativeAppLaunchSucceeded = await launch(
+        url,
+        forceSafariVC: false,
+        universalLinksOnly: true,
+      );
+      if (!nativeAppLaunchSucceeded) {
+        await launch(
+          url,
+          forceSafariVC: true,
+        );
+      }
+    }
   }
 }
