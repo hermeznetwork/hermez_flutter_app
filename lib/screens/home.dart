@@ -4,6 +4,7 @@ import 'package:hermez/components/wallet/home_balance.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/settings.dart';
+import 'package:hermez/screens/wallet_selector.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
@@ -34,38 +35,18 @@ class HomePage extends HookWidget {
       return null;
     }, [store]);
 
-    /*final _children = <Widget>[
-      settingsPage(context),
-      HomeBalance(
-        arguments: HomeBalanceArguments(
-          controller,
-          store,
-          null,
-          _scaffoldKey,
-        ),
-      ),
-      QRCodeScannerPage(
-        arguments: QRCodeScannerArguments(
-            store: store,
-            type: QRCodeScannerType.ALL,
-            onScanned: ModalRoute.of(context).settings.arguments),
-      ),
-      /*Activity(
-        address: store.state.address,
-        defaultCurrency: store.state.defaultCurrency,
-        cryptoList: store.state.cryptoList,
-      ),*/
-    ];*/
-
     List<TabNavigationItem> items = [
       TabNavigationItem(
-        page: HomeBalance(
+        page: WalletSelectorPage(
+          store: store,
+        ) /*HomeBalance(
           arguments: HomeBalanceArguments(
             store,
             null,
             _scaffoldKey,
           ),
-        ),
+        )*/
+        ,
         icon: ImageIcon(
           AssetImage('assets/home_tab_item.png'),
         ),
@@ -94,12 +75,26 @@ class HomePage extends HookWidget {
 
     return Scaffold(
       key: _scaffoldKey,
-      body: IndexedStack(
+      body: Navigator(onGenerateRoute: (settings) {
+        Widget page = WalletSelectorPage(
+          store: store,
+        );
+        if (settings.name == 'home')
+          page = HomeBalance(
+            arguments: HomeBalanceArguments(
+              store,
+              null,
+              _scaffoldKey,
+            ),
+          );
+        return MaterialPageRoute(builder: (_) => page);
+      }),
+      /* IndexedStack(
         index: _currentIndex.value,
         children: [
           for (final tabItem in items) tabItem.page,
         ],
-      ),
+      ),*/
       bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: HermezColors.blackTwo,
           unselectedItemColor: HermezColors.blueyGreyTwo,
@@ -111,33 +106,6 @@ class HomePage extends HookWidget {
             for (final tabItem in items)
               BottomNavigationBarItem(icon: tabItem.icon, label: tabItem.title)
           ]),
-      /*appBar: AppBar(
-        //title: Text(_currentIndex.value == 2 ? "Activity" : title),
-        //backgroundColor: _currentIndex.value == 2 ? Colors.white : Color.fromRGBO(249, 244, 235, 1.0),
-        elevation: 0,
-        //actions: [
-          /*Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: !store.state.loading
-                  ? () async {
-                      await store.fetchOwnBalance();
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        content: Text("Balance updated"),
-                        duration: Duration(milliseconds: 800),
-                      ));
-                    }
-                  : null,
-            ),
-          ),*/
-          /*,
-        ],*/
-      ),*/
-      /*body: PageView(
-        controller: controller,
-        children: _children,
-        onPageChanged: (index) => {},
-      ),*/
     );
   }
 
