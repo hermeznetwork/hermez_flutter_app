@@ -13,17 +13,18 @@ import 'package:hermez/utils/hermez_colors.dart';
 // title and message.
 
 class SettingsPage extends HookWidget {
-  SettingsPage(this.store, this.configurationService);
+  SettingsPage(this.store, this.configurationService, this.parentContext);
 
   WalletHandler store;
   ConfigurationService configurationService;
+  BuildContext parentContext;
 
   @override
   Widget build(BuildContext context) {
-    final _scaffoldKey = GlobalKey<ScaffoldState>();
+    //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text("Settings",
             style: TextStyle(
@@ -204,7 +205,7 @@ class SettingsPage extends HookWidget {
 
           if (!configurationService.didBackupWallet() && i == 0) {
             return BackupRow(() {
-              Navigator.of(context).pushNamed("/backup_info");
+              Navigator.of(parentContext).pushNamed("/backup_info");
             });
           } else {
             String title = "";
@@ -245,19 +246,19 @@ class SettingsPage extends HookWidget {
               onTap: () {
                 switch (index) {
                   case 1:
-                    Navigator.of(context).pushNamed("/settings_details",
+                    Navigator.of(context).pushNamed("settings_details",
                         arguments: SettingsDetailsArguments(
-                            store, SettingsDetailsType.GENERAL));
+                            store, parentContext, SettingsDetailsType.GENERAL));
                     break;
                   case 2:
-                    Navigator.of(context).pushNamed("/settings_details",
-                        arguments: SettingsDetailsArguments(
-                            store, SettingsDetailsType.SECURITY));
+                    Navigator.of(context).pushNamed("settings_details",
+                        arguments: SettingsDetailsArguments(store,
+                            parentContext, SettingsDetailsType.SECURITY));
                     break;
                   case 3:
-                    Navigator.of(context).pushNamed("/settings_details",
-                        arguments: SettingsDetailsArguments(
-                            store, SettingsDetailsType.ADVANCED));
+                    Navigator.of(context).pushNamed("settings_details",
+                        arguments: SettingsDetailsArguments(store,
+                            parentContext, SettingsDetailsType.ADVANCED));
                     break;
                 }
               },

@@ -48,9 +48,16 @@ Map<String, WidgetBuilder> getRoutes(context) {
       }
     },
     '/home': (BuildContext context) {
-      return WalletProvider(builder: (context, store) {
-        return HomePage();
-      });
+      var configurationService = Provider.of<ConfigurationService>(context);
+      if (configurationService.didSetupWallet()) {
+        return WalletProvider(builder: (context, store) {
+          return HomePage(store);
+        });
+      } else {
+        return WalletSetupProvider(builder: (context, store) {
+          return IntroPage();
+        });
+      }
     },
     '/pin': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);

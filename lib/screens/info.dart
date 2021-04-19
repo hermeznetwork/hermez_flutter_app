@@ -9,7 +9,8 @@ class InfoArguments {
   final String message;
   final double iconSize;
 
-  InfoArguments(this.imagePath, this.showButton, this.message, {this.iconSize = 150});
+  InfoArguments(this.imagePath, this.showButton, this.message,
+      {this.iconSize = 150});
 }
 
 class InfoPage extends StatefulWidget {
@@ -24,6 +25,12 @@ class InfoPage extends StatefulWidget {
 Timer timer;
 
 class _InfoPageState extends State<InfoPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final InfoArguments args = ModalRoute.of(context).settings.arguments;

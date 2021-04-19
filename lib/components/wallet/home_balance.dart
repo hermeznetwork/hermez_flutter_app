@@ -25,10 +25,10 @@ import '../../wallet_transaction_details_page.dart';
 
 class HomeBalanceArguments {
   final WalletHandler store;
-  final List<Account> cryptoList;
+  final TransactionLevel transactionLevel;
   final scaffoldKey;
 
-  HomeBalanceArguments(this.store, this.cryptoList, this.scaffoldKey);
+  HomeBalanceArguments(this.store, this.transactionLevel, this.scaffoldKey);
 }
 
 class HomeBalance extends StatefulWidget {
@@ -49,7 +49,7 @@ class _HomeBalanceState extends State<HomeBalance> {
 
   @override
   void initState() {
-    fetchAccounts();
+    //fetchAccounts();
     super.initState();
   }
 
@@ -124,14 +124,51 @@ class _HomeBalanceState extends State<HomeBalance> {
                   floating: true,
                   pinned: true,
                   snap: false,
-                  //collapsedHeight: kToolbarHeight,
+                  collapsedHeight: kToolbarHeight,
                   expandedHeight: 340.0,
                   title: Container(
+                    padding: EdgeInsets.all(20),
+                    color: HermezColors.lightOrange,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/' +
+                              (widget.arguments.store.state.txLevel ==
+                                      TransactionLevel.LEVEL1
+                                  ? "ethereum_logo"
+                                  : "hermez_logo") +
+                              '.png',
+                          width: 30,
+                          height: 30,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        new Text(
+                            widget.arguments.store.state.txLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? "Ethereum Wallet"
+                                : "Hermez Wallet",
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                color: HermezColors.blackTwo,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20)),
+                        SizedBox(
+                          width: 60,
+                        ),
+                      ],
+                    ),
+                  ),
+                  centerTitle: true,
+                  elevation: 0.0,
+                  /*Container(
                     color: HermezColors.lightOrange,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                        Expanded(
+                        /*Expanded(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
@@ -178,10 +215,10 @@ class _HomeBalanceState extends State<HomeBalance> {
                               )
                             ],
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
-                  ),
+                  ),*/
                   flexibleSpace: FlexibleSpaceBar(
                     // here the desired height*/
                     background: Column(

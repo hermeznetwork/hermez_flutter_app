@@ -48,10 +48,10 @@ class AddressService implements IAddressService {
       await _configService.setMnemonic(cryptMnemonic);
       await _configService.setPrivateKey(privateKey);
       await _configService.setHermezPrivateKey(hermezPrivateKey);
-      await _configService.setBabyJubJubHex(babyJubJubHex);
-      await _configService.setBabyJubJubBase64(babyJubJubBase64);
       await _configService.setEthereumAddress(ethereumAddress);
       await _configService.setHermezAddress(hermezAddress);
+      await _configService.setBabyJubJubHex(babyJubJubHex);
+      await _configService.setBabyJubJubBase64(babyJubJubBase64);
       await _configService.setupDone(true);
 
       print("Config: ${_configService.getEthereumAddress()}");

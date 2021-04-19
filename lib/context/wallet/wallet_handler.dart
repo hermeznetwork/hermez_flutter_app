@@ -630,8 +630,8 @@ class WalletHandler {
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
   }
 
-  void updateLevel(TransactionLevel txLevel) {
-    _configurationService.setLevelSelected(txLevel);
+  void updateLevel(TransactionLevel txLevel) async {
+    await _configurationService.setLevelSelected(txLevel);
     _store.dispatch(LevelUpdated(txLevel));
   }
 

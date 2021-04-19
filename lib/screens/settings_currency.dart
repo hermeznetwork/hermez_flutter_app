@@ -20,10 +20,10 @@ class SettingsCurrencyPage extends StatefulWidget {
 class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
   @override
   Widget build(BuildContext context) {
-    final _scaffoldKey = GlobalKey<ScaffoldState>();
+    //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text("Currency conversion",
             style: TextStyle(

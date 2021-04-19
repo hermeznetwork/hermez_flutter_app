@@ -28,9 +28,10 @@ enum SettingsDetailsType {
 
 class SettingsDetailsArguments {
   final WalletHandler store;
+  final BuildContext parentContext;
   final SettingsDetailsType type;
 
-  SettingsDetailsArguments(this.store, this.type);
+  SettingsDetailsArguments(this.store, this.parentContext, this.type);
 }
 
 class SettingsDetailsPage extends StatefulWidget {
@@ -231,31 +232,33 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       //  Currency conversion
-                      Navigator.of(context).pushNamed("/currency_selector",
+                      Navigator.of(context).pushNamed("currency_selector",
                           arguments: widget.arguments.store);
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Show recovery phrase
-                      Navigator.of(context)
+                      Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/pin",
                               arguments: PinArguments(
                                   "Show Recovery Phrase", false, null))
                           .then((value) {
                         if (value.toString() == "true") {
-                          Navigator.of(context).pushNamed("/recovery_phrase",
-                              arguments: RecoveryPhraseArguments(false,
-                                  store: widget.arguments.store));
+                          Navigator.of(widget.arguments.parentContext)
+                              .pushNamed("/recovery_phrase",
+                                  arguments: RecoveryPhraseArguments(false,
+                                      store: widget.arguments.store));
                         }
                       });
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Force withdrawal
-                      Navigator.of(context).pushNamed("/account_selector",
-                          arguments: AccountSelectorArguments(
-                            //widget.arguments.store.state.txLevel,
-                            TransactionType.FORCEEXIT,
-                            widget.arguments.store,
-                          ));
+                      Navigator.of(widget.arguments.parentContext)
+                          .pushNamed("/account_selector",
+                              arguments: AccountSelectorArguments(
+                                //widget.arguments.store.state.txLevel,
+                                TransactionType.FORCEEXIT,
+                                widget.arguments.store,
+                              ));
                       break;
                   }
                   break;
@@ -267,21 +270,23 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Change passcode
-                      Navigator.of(context)
+                      Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/pin",
                               arguments: PinArguments(
                                   "Enter old passcode", false, null))
                           .then((value) {
                         if (value.toString() == "true") {
-                          Navigator.of(context).pushNamed("/pin",
-                              arguments: PinArguments(
-                                  "Enter new passcode", true, null));
+                          Navigator.of(widget.arguments.parentContext)
+                              .pushNamed("/pin",
+                                  arguments: PinArguments(
+                                      "Enter new passcode", true, null));
                         }
                       });
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Remove account
-                      Navigator.of(context).pushNamed("/remove_account_info",
+                      Navigator.of(widget.arguments.parentContext).pushNamed(
+                          "/remove_account_info",
                           arguments: RemoveAccountInfoArguments(
                               widget.arguments.store));
                       break;
@@ -292,7 +297,9 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                     case SettingsDetailsType.GENERAL:
                       // Lock wallet
                       Navigator.pushNamedAndRemoveUntil(
-                          context, "/", (Route<dynamic> route) => false);
+                          widget.arguments.parentContext,
+                          "/",
+                          (Route<dynamic> route) => false);
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Biometrics
