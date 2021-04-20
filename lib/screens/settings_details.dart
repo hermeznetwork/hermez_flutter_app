@@ -255,7 +255,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/account_selector",
                               arguments: AccountSelectorArguments(
-                                //widget.arguments.store.state.txLevel,
+                                TransactionLevel.LEVEL2,
                                 TransactionType.FORCEEXIT,
                                 widget.arguments.store,
                               ));

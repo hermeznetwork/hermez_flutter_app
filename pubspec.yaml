@@ -114,6 +114,9 @@ flutter:
     - move.png
     - hermez_logo.png
     - ethereum_logo.png
+    - move2.png
+    - change_move_enable.png
+    - change_move_disable.png
 
     - view_explorer.png
     - show_recovery_phrase.png

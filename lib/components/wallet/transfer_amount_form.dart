@@ -6,6 +6,7 @@ import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
+import 'package:hermez/components/wallet/move_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -24,6 +25,7 @@ class TransferAmountForm extends StatefulWidget {
       {Key key,
       this.account,
       this.amount,
+      this.txLevel,
       this.store,
       this.amountType,
       @required this.onSubmit})
@@ -31,21 +33,23 @@ class TransferAmountForm extends StatefulWidget {
 
   final Account account;
   final double amount;
+  final TransactionLevel txLevel;
   final WalletHandler store;
   final TransactionType amountType;
   final void Function(double amount, String token, String addressTo) onSubmit;
 
   @override
-  _TransferAmountFormState createState() =>
-      _TransferAmountFormState(account, amount, store, amountType, onSubmit);
+  _TransferAmountFormState createState() => _TransferAmountFormState(
+      account, amount, txLevel, store, amountType, onSubmit);
 }
 
 class _TransferAmountFormState extends State<TransferAmountForm> {
-  _TransferAmountFormState(
-      this.account, this.amount, this.store, this.amountType, this.onSubmit);
+  _TransferAmountFormState(this.account, this.amount, this.txLevel, this.store,
+      this.amountType, this.onSubmit);
 
   final Account account;
   final double amount;
+  TransactionLevel txLevel;
   final WalletHandler store;
   final TransactionType amountType;
   final void Function(double amount, String token, String addressTo) onSubmit;
@@ -161,6 +165,19 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     ),
                   ],
                   children: <Widget>[
+                    amountType != TransactionType.SEND &&
+                            amountType != TransactionType.RECEIVE
+                        ? MoveRow(
+                            txLevel,
+                            () async {
+                              setState(() {
+                                txLevel = txLevel == TransactionLevel.LEVEL1
+                                    ? TransactionLevel.LEVEL2
+                                    : TransactionLevel.LEVEL1;
+                              });
+                            },
+                          )
+                        : Container(),
                     AccountRow(
                       account.token.name,
                       account.token.symbol,
@@ -173,11 +190,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                       defaultCurrencySelected,
                       false,
                       (token, amount) async {
-                        Navigator.of(context)
-                            .pushReplacementNamed("/account_selector",
-                                arguments: AccountSelectorArguments(
-                                    /*txLevel,*/ amountType,
-                                    widget.store));
+                        Navigator.of(context).pushReplacementNamed(
+                            "/account_selector",
+                            arguments: AccountSelectorArguments(
+                                widget.txLevel, amountType, widget.store));
                       },
                     ),
                     _buildAmountRow(
@@ -601,6 +617,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
     if (store.state.txLevel == TransactionLevel.LEVEL2) {
       StateResponse state = await store.getState();
       RecommendedFee fees = state.recommendedFee;
+      return BigInt.from(fees.createAccount);
     } else {
       double amount = 0;
       if (amountController.value.text.isNotEmpty) {

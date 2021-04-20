@@ -148,12 +148,13 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                                 onPressed: () {
                                   if (Navigator.canPop(context)) {
                                     Navigator.of(context).pushReplacementNamed(
-                                        "/qrcode",
+                                        "/settings_qrcode",
                                         arguments: SettingsQRCodeArguments(
                                             store: widget.arguments.store,
                                             fromHomeScreen: false));
                                   } else {
-                                    Navigator.of(context).pushNamed("/qrcode",
+                                    Navigator.of(context).pushNamed(
+                                        "/settings_qrcode",
                                         arguments: SettingsQRCodeArguments(
                                             store: widget.arguments.store,
                                             fromHomeScreen: true));

@@ -7,6 +7,7 @@ import 'package:hermez/screens/import.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/intro.dart';
 import 'package:hermez/screens/pin.dart';
+import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/recovery_phrase_confirm.dart';
 import 'package:hermez/screens/remove_account_info.dart';
@@ -125,7 +126,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
       return QRCodeScannerPage(
           arguments: ModalRoute.of(context).settings.arguments);
     },
-    '/qrcode': (BuildContext context) => SettingsQRCodePage(
+    '/qrcode': (BuildContext context) =>
+        QRCodePage(arguments: ModalRoute.of(context).settings.arguments),
+    '/settings_qrcode': (BuildContext context) => SettingsQRCodePage(
         arguments: ModalRoute.of(context).settings.arguments),
     '/currency_selector': (BuildContext context) =>
         SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),

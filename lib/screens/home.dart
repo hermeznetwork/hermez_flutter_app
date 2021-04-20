@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/components/wallet/home_balance.dart';
+import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/settings.dart';
@@ -11,11 +12,11 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:provider/provider.dart';
 
 import '../context/wallet/wallet_handler.dart';
+import '../wallet_account_details_page.dart';
+import '../wallet_transaction_details_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(this.store);
-
-  //HomePage({Key key, this.arguments}) : super(key: key);
 
   final WalletHandler store;
 
@@ -26,7 +27,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   ValueNotifier _currentIndex;
   List<Widget> children;
-  //WalletHandler store;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -38,32 +38,14 @@ class _HomePageState extends State<HomePage> {
     _currentIndex = ValueNotifier(0);
     items = [
       TabNavigationItem(
-        page: /*WalletProvider(builder: (context, store) {
-          return */
-            WalletSelectorPage(widget
-                .store) /*;
-        })   HomeBalance(
-          arguments: HomeBalanceArguments(
-            store,
-            null,
-            _scaffoldKey,
-          ),
-        )*/
-        ,
+        page: WalletSelectorPage(widget.store, context),
         icon: ImageIcon(
           AssetImage('assets/home_tab_item.png'),
         ),
         title: "Home",
       ),
       TabNavigationItem(
-        page:
-            Container() /*QRCodeScannerPage(
-          arguments: QRCodeScannerArguments(
-              store: store,
-              type: QRCodeScannerType.ALL,
-              onScanned: ModalRoute.of(context).settings.arguments),
-        )*/
-        ,
+        page: Container(),
         icon: ImageIcon(
           AssetImage('assets/scan.png'),
         ),
@@ -93,6 +75,15 @@ class _HomePageState extends State<HomePage> {
                 configurationService: configurationService);
           } else if (settings.name == 'currency_selector') {
             page = SettingsCurrencyPage(store: widget.store);
+          } else if (settings.name == 'account_details') {
+            final WalletAccountDetailsArguments args = settings.arguments;
+            page = WalletAccountDetailsPage(args);
+          } else if (settings.name == 'transaction_details') {
+            page = WalletTransferProvider(
+              builder: (context, store) {
+                return TransactionDetailsPage(arguments: settings.arguments);
+              },
+            );
           }
           return MaterialPageRoute(builder: (_) => page);
         }),
@@ -165,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                 onGenerateRoute: (settings) {
                   Widget page;
                   if (index == 0) {
-                    page = WalletSelectorPage(widget.store);
+                    page = WalletSelectorPage(widget.store, context);
                   } else if (index == 2) {
                     page = settingsPage(context);
                   }
@@ -182,6 +173,17 @@ class _HomePageState extends State<HomePage> {
                         configurationService: configurationService);
                   } else if (settings.name == 'currency_selector') {
                     page = SettingsCurrencyPage(store: widget.store);
+                  } else if (settings.name == 'account_details') {
+                    final WalletAccountDetailsArguments args =
+                        settings.arguments;
+                    page = WalletAccountDetailsPage(args);
+                  } else if (settings.name == 'transaction_details') {
+                    page = WalletTransferProvider(
+                      builder: (context, store) {
+                        return TransactionDetailsPage(
+                            arguments: settings.arguments);
+                      },
+                    );
                   }
                   return MaterialPageRoute(builder: (_) => page);
                 }));

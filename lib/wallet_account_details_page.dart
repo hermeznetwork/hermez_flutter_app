@@ -7,6 +7,7 @@ import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 
@@ -19,12 +20,12 @@ import 'context/wallet/wallet_provider.dart';
 
 class WalletAccountDetailsArguments {
   final Account element;
+  BuildContext parentContext;
   //WalletHandler store;
 
-  WalletAccountDetailsArguments(
-    this.element,
-    /*this.store*/
-  );
+  WalletAccountDetailsArguments(this.element, this.parentContext
+      /*this.store*/
+      );
 }
 
 class WalletAccountDetailsPage extends HookWidget {
@@ -33,12 +34,10 @@ class WalletAccountDetailsPage extends HookWidget {
 
   WalletHandler store;
 
-  BuildContext context;
-
   @override
   Widget build(BuildContext context) {
     store = useWallet(context);
-    this.context = context;
+    //this.context = context;
     //store.state = arguments.store.state;
     //_currentIndex = useState(0);
 
@@ -82,6 +81,22 @@ class WalletAccountDetailsPage extends HookWidget {
               )),
               Container(
                 decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    color: HermezColors.steel),
+                padding:
+                    EdgeInsets.only(left: 12.0, right: 12.0, top: 4, bottom: 4),
+                child: Text(
+                  store.state.txLevel == TransactionLevel.LEVEL1 ? "L1" : "L2",
+                  style: TextStyle(
+                    color: HermezColors.lightOrange,
+                    fontSize: 15,
+                    fontFamily: 'ModernEra',
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              /*Container(
+                decoration: BoxDecoration(
                     color: Color.fromRGBO(51, 51, 51, 1.0),
                     border: Border.all(
                       color: Color.fromRGBO(51, 51, 51, 1.0),
@@ -90,16 +105,14 @@ class WalletAccountDetailsPage extends HookWidget {
                 padding:
                     EdgeInsets.only(left: 10, right: 10, top: 7, bottom: 5),
                 child: Text(
-                    store.state.txLevel == TransactionLevel.LEVEL1
-                        ? "L1"
-                        : "L2",
+                    ,
                     style: TextStyle(
                         fontFamily: 'ModernEra',
                         color: HermezColors.lightOrange,
                         backgroundColor: Color.fromRGBO(51, 51, 51, 1.0),
                         fontWeight: FontWeight.w800,
                         fontSize: 18)),
-              )
+              )*/
             ],
           ),
           backgroundColor: HermezColors.lightOrange,
@@ -169,12 +182,11 @@ class WalletAccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      Navigator.of(context).pushNamed("/account_selector",
-                          arguments: AccountSelectorArguments(
-                            //widget.arguments.store.state.txLevel,
-                            TransactionType.SEND,
-                            store,
-                          ));
+                      //Account account = l2Accounts[0];
+                      Navigator.pushNamed(
+                          arguments.parentContext, "/transfer_amount",
+                          arguments: AmountArguments(store, store.state.txLevel,
+                              TransactionType.SEND, arguments.element));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -202,24 +214,31 @@ class WalletAccountDetailsPage extends HookWidget {
                     ),
                     onPressed: () {
                       store.state.txLevel == TransactionLevel.LEVEL1
-                          ? Navigator.of(context).pushNamed("/qrcode",
+                          ? Navigator.of(arguments.parentContext).pushNamed(
+                              "/settings_qrcode",
                               arguments: SettingsQRCodeArguments(
-                                  store: store, fromHomeScreen: false))
-                          : Navigator.of(context).pushNamed("/account_selector",
-                              arguments: AccountSelectorArguments(
-                                //widget.arguments.store.state.txLevel,
-                                TransactionType.DEPOSIT,
-                                store,
-                              ));
+                                  message: store.state.ethereumAddress,
+                                  store: store,
+                                  fromHomeScreen: false))
+                          : Navigator.of(arguments.parentContext).pushNamed(
+                              "/settings_qrcode",
+                              arguments: SettingsQRCodeArguments(
+                                  message: getHermezAddress(
+                                      store.state.ethereumAddress),
+                                  store: store,
+                                  fromHomeScreen: false));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
                     textColor: HermezColors.blackTwo,
                     child: Column(
                       children: <Widget>[
-                        Image.asset("assets/deposit2.png"),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Image.asset("assets/receive2.png"),
                         Text(
-                          'Deposit',
+                          'Receive',
                           style: TextStyle(
                             color: HermezColors.blackTwo,
                             fontFamily: 'ModernEra',
@@ -229,40 +248,39 @@ class WalletAccountDetailsPage extends HookWidget {
                       ],
                     )),
           ),
-          store.state.txLevel == TransactionLevel.LEVEL1
-              ? Container()
-              : Expanded(
-                  child:
-                      // takes in an object and color and returns a circle avatar with first letter and required color
-                      FlatButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+          Expanded(
+            child:
+                // takes in an object and color and returns a circle avatar with first letter and required color
+                FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    onPressed: () {
+                      Navigator.of(arguments.parentContext)
+                          .pushNamed("/account_selector",
+                              arguments: AccountSelectorArguments(
+                                store.state.txLevel,
+                                TransactionType.EXIT,
+                                store,
+                              ));
+                    },
+                    padding: EdgeInsets.all(10.0),
+                    color: Colors.transparent,
+                    textColor: HermezColors.blackTwo,
+                    child: Column(
+                      children: <Widget>[
+                        Image.asset("assets/move2.png"),
+                        Text(
+                          'Move',
+                          style: TextStyle(
+                            color: HermezColors.blackTwo,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
                           ),
-                          onPressed: () {
-                            Navigator.of(context).pushNamed("/account_selector",
-                                arguments: AccountSelectorArguments(
-                                  //widget.arguments.store.state.txLevel,
-                                  TransactionType.EXIT,
-                                  store,
-                                ));
-                          },
-                          padding: EdgeInsets.all(10.0),
-                          color: Colors.transparent,
-                          textColor: HermezColors.blackTwo,
-                          child: Column(
-                            children: <Widget>[
-                              Image.asset("assets/withdraw2.png"),
-                              Text(
-                                'Withdraw',
-                                style: TextStyle(
-                                  color: HermezColors.blackTwo,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          )),
-                ),
+                        ),
+                      ],
+                    )),
+          ),
           SizedBox(width: 20.0),
         ]);
   }

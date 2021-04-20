@@ -10,10 +10,11 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/token.dart';
 
 class AccountSelectorArguments {
+  final TransactionLevel txLevel;
   final TransactionType transactionType;
   final WalletHandler store;
 
-  AccountSelectorArguments(this.transactionType, this.store);
+  AccountSelectorArguments(this.txLevel, this.transactionType, this.store);
 }
 
 class WalletAccountSelectorPage extends HookWidget {
@@ -23,7 +24,7 @@ class WalletAccountSelectorPage extends HookWidget {
   List<Account> _accounts;
 
   Future<List<Account>> getAccounts() {
-    if ((arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
+    if ((arguments.txLevel == TransactionLevel.LEVEL1 &&
             arguments.transactionType != TransactionType.FORCEEXIT) ||
         arguments.transactionType == TransactionType.DEPOSIT) {
       return arguments.store.getL1Accounts();
@@ -38,9 +39,16 @@ class WalletAccountSelectorPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    String operation;
+    if (arguments.transactionType == TransactionType.SEND) {
+      operation = "send";
+    } else if (arguments.transactionType == TransactionType.MOVE) {
+      operation = "move";
+    }
+
     return Scaffold(
       appBar: new AppBar(
-        title: new Text('Token',
+        title: new Text(operation[0].toUpperCase() + operation.substring(1),
             style: TextStyle(
                 fontFamily: 'ModernEra',
                 color: HermezColors.blackTwo,
@@ -65,7 +73,49 @@ class WalletAccountSelectorPage extends HookWidget {
               Expanded(
                 child: Container(
                   color: Colors.white,
-                  child: handleAccountsList(snapshot),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Available tokens to ' + operation,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: HermezColors.blackTwo,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16.0),
+                                color: HermezColors.blueyGreyTwo),
+                            padding: EdgeInsets.only(
+                                left: 12.0, right: 12.0, top: 4, bottom: 4),
+                            child: Text(
+                              arguments.txLevel == TransactionLevel.LEVEL1
+                                  ? "L1"
+                                  : "L2",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      handleAccountsList(snapshot)
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -157,7 +207,10 @@ class WalletAccountSelectorPage extends HookWidget {
                   await arguments.store.getTokenById(account.token.id);
               Navigator.pushReplacementNamed(context, "/transfer_amount",
                   arguments: AmountArguments(
-                      arguments.store, arguments.transactionType, account));
+                      arguments.store,
+                      arguments.store.state.txLevel,
+                      arguments.transactionType,
+                      account));
             }); //iterate through indexes and get the next colour
             //return _buildRow(context, element, color); //build the row widget
           },

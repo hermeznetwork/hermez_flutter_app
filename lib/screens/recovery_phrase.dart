@@ -59,7 +59,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                   ),
                   onPressed: () {
                     Navigator.of(context).pushNamed(
-                      "/qrcode",
+                      "/settings_qrcode",
                       arguments: SettingsQRCodeArguments(
                           message: mnemonic,
                           store: widget.arguments.store,

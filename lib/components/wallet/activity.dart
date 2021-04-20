@@ -197,7 +197,7 @@ class _ActivityState extends State<Activity> {
 
                   return WithdrawalRow(exit, 2, currency,
                       widget.arguments.store.state.exchangeRatio, () async {
-                    Navigator.of(context).pushNamed("/transaction_details",
+                    Navigator.of(context).pushNamed("transaction_details",
                         arguments: TransactionDetailsArguments(
                           wallet: widget.arguments.store,
                           transactionType: TransactionType.WITHDRAW,
@@ -497,7 +497,7 @@ class _ActivityState extends State<Activity> {
                             ),
                           ]),
                       onTap: () async {
-                        Navigator.pushNamed(context, "/transaction_details",
+                        Navigator.pushNamed(context, "transaction_details",
                             arguments: TransactionDetailsArguments(
                                 wallet: widget.arguments.store,
                                 transactionType: txType,

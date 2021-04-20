@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/home_balance.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
+import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/utils/address_utils.dart';
+import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
@@ -18,340 +20,399 @@ import '../wallet_transfer_amount_page.dart';
 // title and message.
 
 class WalletSelectorPage extends HookWidget {
-  WalletSelectorPage(this.store /*this.scaffoldKey*/);
+  WalletSelectorPage(this.store, this.parentContext /*this.scaffoldKey*/);
   WalletHandler store;
+  BuildContext parentContext;
   //GlobalKey<ScaffoldState> scaffoldKey;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Account> l1Accounts;
+  List<Account> l2Accounts;
+
+  Future<void> fetchData() async {
+    await store.initialise();
+    l1Accounts = await store.getL1Accounts();
+    l2Accounts = await store.getAccounts();
+  }
 
   @override
   Widget build(BuildContext context) {
     //store = useWallet(context);
     final width = MediaQuery.of(context).size.width;
 
-    useEffect(() {
+    /*useEffect(() {
       //store.initialise();
       return null;
-    }, [store]);
+    }, []);*/
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: HermezColors.lightOrange,
-      body: SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(16),
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                flex: 4,
-                child: Center(
-                  child: new GestureDetector(
-                    onTap: () {
-                      store.updateLevel(TransactionLevel.LEVEL2);
-                      Navigator.pushNamed(context, 'home',
-                          arguments: HomeBalanceArguments(
-                            store,
-                            TransactionLevel.LEVEL2,
-                            _scaffoldKey,
-                          ));
-                    },
-                    child: Container(
-                      height: width * 0.58,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.0),
-                          color: HermezColors.darkOrange),
-                      padding: EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Hermez wallet',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    color: HermezColors.orange),
-                                padding: EdgeInsets.only(
-                                    left: 12.0, right: 12.0, top: 6, bottom: 6),
-                                child: Text(
-                                  'L2',
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 15,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                          Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+      body: FutureBuilder(
+          future: fetchData(),
+          builder: (context, snapshot) {
+            return SafeArea(
+              child: Container(
+                margin: EdgeInsets.all(16),
+                child: Column(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 4,
+                      child: Center(
+                        child: new GestureDetector(
+                          onTap: () {
+                            store.updateLevel(TransactionLevel.LEVEL2);
+                            Navigator.pushNamed(context, 'home',
+                                arguments: HomeBalanceArguments(
+                                  store,
+                                  TransactionLevel.LEVEL2,
+                                  parentContext,
+                                ));
+                          },
+                          child: Container(
+                            height: width * 0.58,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16.0),
+                                color: HermezColors.darkOrange),
+                            padding: EdgeInsets.all(24.0),
+                            child: Column(
                               children: [
-                                FutureBuilder(
-                                    future: store.getAccounts(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return Text(totalBalance(snapshot.data),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 32,
-                                              fontFamily: 'ModernEra',
-                                              fontWeight: FontWeight.w700,
-                                            ));
-                                      } else {
-                                        return Text(totalBalance(null),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 32,
-                                              fontFamily: 'ModernEra',
-                                              fontWeight: FontWeight.w700,
-                                            ));
-                                      }
-                                    })
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Hermez wallet',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                          color: HermezColors.orange),
+                                      padding: EdgeInsets.only(
+                                          left: 12.0,
+                                          right: 12.0,
+                                          top: 6,
+                                          bottom: 6),
+                                      child: Text(
+                                        'L2',
+                                        style: TextStyle(
+                                          color: HermezColors.blackTwo,
+                                          fontSize: 15,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      l2Accounts != null
+                                          ? Text(totalBalance(l2Accounts),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 32,
+                                                fontFamily: 'ModernEra',
+                                                fontWeight: FontWeight.w700,
+                                              ))
+                                          : BlinkingTextAnimation()
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "hez:" +
+                                            "0x" +
+                                            (store.state.ethereumAddress != null
+                                                ? AddressUtils.strip0x(store
+                                                        .state.ethereumAddress
+                                                        .substring(0, 6))
+                                                    .toUpperCase()
+                                                : "") +
+                                            " ･･･ " +
+                                            (store.state.ethereumAddress != null
+                                                ? store.state.ethereumAddress
+                                                    .substring(
+                                                        store
+                                                                .state
+                                                                .ethereumAddress
+                                                                .length -
+                                                            4,
+                                                        store
+                                                            .state
+                                                            .ethereumAddress
+                                                            .length)
+                                                    .toUpperCase()
+                                                : ""),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                        icon: ImageIcon(
+                                          AssetImage('assets/qr_code.png'),
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(parentContext).pushNamed(
+                                            "/qrcode",
+                                            arguments: QRCodeArguments(
+                                                qrCodeType: QRCodeType.HERMEZ,
+                                                code: getHermezAddress(store
+                                                    .state.ethereumAddress),
+                                                store: store),
+                                          );
+                                        })
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  "hez:" +
-                                      "0x" +
-                                      (store.state.ethereumAddress != null
-                                          ? AddressUtils.strip0x(store
-                                                  .state.ethereumAddress
-                                                  .substring(0, 6))
-                                              .toUpperCase()
-                                          : "") +
-                                      " ･･･ " +
-                                      (store.state.ethereumAddress != null
-                                          ? store.state.ethereumAddress
-                                              .substring(
-                                                  store.state.ethereumAddress
-                                                          .length -
-                                                      4,
-                                                  store.state.ethereumAddress
-                                                      .length)
-                                              .toUpperCase()
-                                          : ""),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                  icon: ImageIcon(
-                                    AssetImage('assets/qr_code.png'),
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context).pushNamed(
-                                      "/qrcode",
-                                      arguments: SettingsQRCodeArguments(
-                                          message: getHermezAddress(
-                                              store.state.ethereumAddress),
-                                          store: store,
-                                          fromHomeScreen: false),
-                                    );
-                                  })
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Center(
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      primary: Colors.white,
-                      padding: EdgeInsets.only(
-                          left: 23, right: 23, bottom: 16, top: 16),
-                      backgroundColor: HermezColors.blackTwo,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                    ),
-                    onPressed: () {},
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Move',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            primary: Colors.white,
+                            padding: EdgeInsets.only(
+                                left: 23, right: 23, bottom: 16, top: 16),
+                            backgroundColor: HermezColors.blackTwo,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
                           ),
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        ImageIcon(
-                          AssetImage('assets/move.png'),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: Center(
-                  child: new GestureDetector(
-                    onTap: () {
-                      store.updateLevel(TransactionLevel.LEVEL1);
-                      Navigator.pushNamed(context, 'home',
-                          arguments: HomeBalanceArguments(
-                            store,
-                            TransactionLevel.LEVEL1,
-                            _scaffoldKey,
-                          ));
-                    },
-                    child: Container(
-                      height: width * 0.58,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.0),
-                          color: HermezColors.blueyGreyTwo),
-                      padding: EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          Row(
+                          onPressed: () {
+                            if (l1Accounts != null) {
+                              store.updateLevel(TransactionLevel.LEVEL1);
+                              if (l1Accounts.length > 1) {
+                                Navigator.of(parentContext)
+                                    .pushNamed("/account_selector",
+                                        arguments: AccountSelectorArguments(
+                                          TransactionLevel.LEVEL1,
+                                          TransactionType.MOVE,
+                                          store,
+                                        ));
+                              } else {
+                                Account account = l1Accounts[0];
+                                Navigator.pushNamed(
+                                    parentContext, "/transfer_amount",
+                                    arguments: AmountArguments(
+                                        store,
+                                        TransactionLevel.LEVEL1,
+                                        TransactionType.MOVE,
+                                        account));
+                              }
+                            } else if (l2Accounts != null) {
+                              store.updateLevel(TransactionLevel.LEVEL2);
+                              if (l2Accounts.length > 1) {
+                                Navigator.of(parentContext)
+                                    .pushNamed("/account_selector",
+                                        arguments: AccountSelectorArguments(
+                                          TransactionLevel.LEVEL2,
+                                          TransactionType.MOVE,
+                                          store,
+                                        ));
+                              } else {
+                                Account account = l2Accounts[0];
+                                Navigator.pushNamed(
+                                    parentContext, "/transfer_amount",
+                                    arguments: AmountArguments(
+                                        store,
+                                        TransactionLevel.LEVEL2,
+                                        TransactionType.MOVE,
+                                        account));
+                              }
+                            } else {
+                              store.updateLevel(TransactionLevel.LEVEL1);
+                              Navigator.of(parentContext)
+                                  .pushNamed("/account_selector",
+                                      arguments: AccountSelectorArguments(
+                                        TransactionLevel.LEVEL1,
+                                        TransactionType.MOVE,
+                                        store,
+                                      ));
+                            }
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(
-                                child: Text(
-                                  'Ethereum wallet',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    color: Colors.white),
-                                padding: EdgeInsets.only(
-                                    left: 12.0, right: 12.0, top: 6, bottom: 6),
-                                child: Text(
-                                  'L1',
-                                  style: TextStyle(
-                                    color: HermezColors.blackTwo,
-                                    fontSize: 15,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                          Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                FutureBuilder(
-                                    future: store.getL1Accounts(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return Text(totalBalance(snapshot.data),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 32,
-                                              fontFamily: 'ModernEra',
-                                              fontWeight: FontWeight.w700,
-                                            ));
-                                      } else {
-                                        return Text(totalBalance(null),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 32,
-                                              fontFamily: 'ModernEra',
-                                              fontWeight: FontWeight.w700,
-                                            ));
-                                      }
-                                    })
-                              ],
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  "0x" +
-                                      (store.state.ethereumAddress != null
-                                          ? AddressUtils.strip0x(store
-                                                  .state.ethereumAddress
-                                                  .substring(0, 6))
-                                              .toUpperCase()
-                                          : "") +
-                                      " ･･･ " +
-                                      (store.state.ethereumAddress != null
-                                          ? store.state.ethereumAddress
-                                              .substring(
-                                                  store.state.ethereumAddress
-                                                          .length -
-                                                      4,
-                                                  store.state.ethereumAddress
-                                                      .length)
-                                              .toUpperCase()
-                                          : ""),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                icon: ImageIcon(
-                                  AssetImage('assets/qr_code.png'),
+                              Text(
+                                'Move',
+                                style: TextStyle(
                                   color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
                                 ),
-                                onPressed: () {
-                                  Navigator.of(context).pushNamed(
-                                    "/qrcode",
-                                    arguments: SettingsQRCodeArguments(
-                                        message: store.state.ethereumAddress,
-                                        store: store,
-                                        fromHomeScreen: false),
-                                  );
-                                  //Navigator.pushNamed(context, 'home');
-                                },
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              ImageIcon(
+                                AssetImage('assets/move.png'),
                               )
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                    Expanded(
+                      flex: 4,
+                      child: Center(
+                        child: new GestureDetector(
+                          onTap: () {
+                            store.updateLevel(TransactionLevel.LEVEL1);
+                            Navigator.pushNamed(context, 'home',
+                                arguments: HomeBalanceArguments(
+                                  store,
+                                  TransactionLevel.LEVEL1,
+                                  parentContext,
+                                ));
+                          },
+                          child: Container(
+                            height: width * 0.58,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16.0),
+                                color: HermezColors.blueyGreyTwo),
+                            padding: EdgeInsets.all(24.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Ethereum wallet',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                          color: Colors.white),
+                                      padding: EdgeInsets.only(
+                                          left: 12.0,
+                                          right: 12.0,
+                                          top: 6,
+                                          bottom: 6),
+                                      child: Text(
+                                        'L1',
+                                        style: TextStyle(
+                                          color: HermezColors.blackTwo,
+                                          fontSize: 15,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      l1Accounts != null
+                                          ? Text(totalBalance(l1Accounts),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 32,
+                                                fontFamily: 'ModernEra',
+                                                fontWeight: FontWeight.w700,
+                                              ))
+                                          : BlinkingTextAnimation()
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "0x" +
+                                            (store.state.ethereumAddress != null
+                                                ? AddressUtils.strip0x(store
+                                                        .state.ethereumAddress
+                                                        .substring(0, 6))
+                                                    .toUpperCase()
+                                                : "") +
+                                            " ･･･ " +
+                                            (store.state.ethereumAddress != null
+                                                ? store.state.ethereumAddress
+                                                    .substring(
+                                                        store
+                                                                .state
+                                                                .ethereumAddress
+                                                                .length -
+                                                            4,
+                                                        store
+                                                            .state
+                                                            .ethereumAddress
+                                                            .length)
+                                                    .toUpperCase()
+                                                : ""),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: ImageIcon(
+                                        AssetImage('assets/qr_code.png'),
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(parentContext).pushNamed(
+                                          "/qrcode",
+                                          arguments: QRCodeArguments(
+                                            qrCodeType: QRCodeType.ETHEREUM,
+                                            code: store.state.ethereumAddress,
+                                            store: store,
+                                          ),
+                                        );
+                                        //Navigator.pushNamed(context, 'home');
+                                      },
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ), //buildCurrencyList(),
+                  ],
                 ),
-              ), //buildCurrencyList(),
-            ],
-          ),
-        ),
-      ),
+              ),
+            );
+          }),
     );
   }
 

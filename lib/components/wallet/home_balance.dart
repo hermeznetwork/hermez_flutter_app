@@ -15,6 +15,7 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/wallet_account_details_page.dart';
 import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
@@ -26,9 +27,9 @@ import '../../wallet_transaction_details_page.dart';
 class HomeBalanceArguments {
   final WalletHandler store;
   final TransactionLevel transactionLevel;
-  final scaffoldKey;
+  final BuildContext parentContext;
 
-  HomeBalanceArguments(this.store, this.transactionLevel, this.scaffoldKey);
+  HomeBalanceArguments(this.store, this.transactionLevel, this.parentContext);
 }
 
 class HomeBalance extends StatefulWidget {
@@ -244,55 +245,90 @@ class _HomeBalanceState extends State<HomeBalance> {
                                       : "hez:" +
                                           widget.arguments.store.state
                                               .ethereumAddress));
-                              widget.arguments.scaffoldKey.currentState
-                                  .showSnackBar(SnackBar(
-                                content: Text("Copied"),
-                              ));
+                              final snackBar =
+                                  SnackBar(content: Text('Copied'));
+                              ScaffoldMessenger.of(
+                                      widget.arguments.parentContext)
+                                  .showSnackBar(snackBar);
                             },
                             padding: EdgeInsets.only(
                                 left: 20.0,
-                                right: 20.0,
-                                top: 12.0,
-                                bottom: 12.0),
+                                right: 10.0,
+                                top: 10.0,
+                                bottom: 10.0),
                             color: HermezColors.mediumOrange,
                             textColor: HermezColors.steel,
-                            child: Text(
-                                widget != null && widget.arguments != null && widget.arguments.store.state.ethereumAddress != null
-                                    ? (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
-                                        ? "0x" +
-                                                AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
-                                                    .toUpperCase() +
-                                                " ･･･ " +
-                                                widget.arguments.store.state.ethereumAddress
-                                                    .substring(
-                                                        widget.arguments.store.state.ethereumAddress.length -
-                                                            5,
-                                                        widget
-                                                            .arguments
-                                                            .store
-                                                            .state
-                                                            .ethereumAddress
-                                                            .length)
-                                                    .toUpperCase() ??
-                                            ""
-                                        : "hez:" +
-                                                "0x" +
-                                                AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
-                                                    .toUpperCase() +
-                                                " ･･･ " +
-                                                widget.arguments.store.state.ethereumAddress
-                                                    .substring(widget.arguments.store.state.ethereumAddress.length - 5, widget.arguments.store.state.ethereumAddress.length)
-                                                    .toUpperCase() ??
-                                            "")
-                                    : "",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: HermezColors.steel,
-                                  fontSize: 16,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w500,
-                                )),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  widget != null && widget.arguments != null && widget.arguments.store.state.ethereumAddress != null
+                                      ? (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                                          ? "0x" +
+                                                  AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
+                                                      .toUpperCase() +
+                                                  " ･･･ " +
+                                                  widget.arguments.store.state.ethereumAddress
+                                                      .substring(
+                                                          widget
+                                                                  .arguments
+                                                                  .store
+                                                                  .state
+                                                                  .ethereumAddress
+                                                                  .length -
+                                                              5,
+                                                          widget
+                                                              .arguments
+                                                              .store
+                                                              .state
+                                                              .ethereumAddress
+                                                              .length)
+                                                      .toUpperCase() ??
+                                              ""
+                                          : "hez:" +
+                                                  "0x" +
+                                                  AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
+                                                      .toUpperCase() +
+                                                  " ･･･ " +
+                                                  widget.arguments.store.state.ethereumAddress
+                                                      .substring(widget.arguments.store.state.ethereumAddress.length - 5, widget.arguments.store.state.ethereumAddress.length)
+                                                      .toUpperCase() ??
+                                              "")
+                                      : "",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: HermezColors.steel,
+                                    fontSize: 16,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      color: HermezColors.steel),
+                                  padding: EdgeInsets.only(
+                                      left: 12.0,
+                                      right: 12.0,
+                                      top: 4,
+                                      bottom: 4),
+                                  child: Text(
+                                    widget.arguments.store.state.txLevel ==
+                                            TransactionLevel.LEVEL1
+                                        ? "L1"
+                                        : "L2",
+                                    style: TextStyle(
+                                      color: HermezColors.mediumOrange,
+                                      fontSize: 15,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         SizedBox(height: 30),
@@ -355,12 +391,24 @@ class _HomeBalanceState extends State<HomeBalance> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           onPressed: () async {
-                            Navigator.of(context).pushNamed("/account_selector",
-                                arguments: AccountSelectorArguments(
-                                  //widget.arguments.store.state.txLevel,
-                                  TransactionType.SEND,
-                                  widget.arguments.store,
-                                ));
+                            if (_accounts.length > 1) {
+                              Navigator.of(widget.arguments.parentContext)
+                                  .pushNamed("/account_selector",
+                                      arguments: AccountSelectorArguments(
+                                        widget.arguments.store.state.txLevel,
+                                        TransactionType.SEND,
+                                        widget.arguments.store,
+                                      ));
+                            } else {
+                              Navigator.pushNamed(
+                                  widget.arguments.parentContext,
+                                  "/transfer_amount",
+                                  arguments: AmountArguments(
+                                      widget.arguments.store,
+                                      widget.arguments.store.state.txLevel,
+                                      TransactionType.SEND,
+                                      _accounts[0]));
+                            }
                           },
                           padding: EdgeInsets.all(10.0),
                           color: Colors.transparent,
@@ -395,17 +443,28 @@ class _HomeBalanceState extends State<HomeBalance> {
                     onPressed: () {
                       if (widget.arguments.store.state.txLevel ==
                           TransactionLevel.LEVEL1) {
-                        Navigator.of(context).pushNamed("/qrcode",
+                        Navigator.of(widget.arguments.parentContext).pushNamed(
+                            "/settings_qrcode",
                             arguments: SettingsQRCodeArguments(
+                                message: widget
+                                    .arguments.store.state.ethereumAddress,
                                 store: widget.arguments.store,
                                 fromHomeScreen: false));
                       } else {
-                        Navigator.of(context).pushNamed("/account_selector",
-                            arguments: AccountSelectorArguments(
-                              //widget.arguments.store.state.txLevel,
-                              TransactionType.DEPOSIT,
-                              widget.arguments.store,
-                            ));
+                        Navigator.of(widget.arguments.parentContext).pushNamed(
+                            "/settings_qrcode",
+                            arguments: SettingsQRCodeArguments(
+                                message: getHermezAddress(widget
+                                    .arguments.store.state.ethereumAddress),
+                                store: widget.arguments.store,
+                                fromHomeScreen: false));
+                        /*Navigator.of(widget.arguments.parentContext)
+                            .pushNamed("/account_selector",
+                                arguments: AccountSelectorArguments(
+                                  //widget.arguments.store.state.txLevel,
+                                  TransactionType.DEPOSIT,
+                                  widget.arguments.store,
+                                ));*/
                       }
                     },
                     padding: EdgeInsets.all(10.0),
@@ -414,12 +473,12 @@ class _HomeBalanceState extends State<HomeBalance> {
                     child: Column(
                       children: <Widget>[
                         Image.asset(
-                          "assets/deposit2.png",
+                          "assets/receive2.png",
                           width: 80,
                           height: 80,
                         ),
                         Text(
-                          'Deposit',
+                          'Receive',
                           style: TextStyle(
                             color: HermezColors.blackTwo,
                             fontFamily: 'ModernEra',
@@ -575,7 +634,7 @@ class _HomeBalanceState extends State<HomeBalance> {
               return WithdrawalRow(
                   exit, 2, currency, widget.arguments.store.state.exchangeRatio,
                   () async {
-                Navigator.of(context).pushNamed("/transaction_details",
+                Navigator.of(context).pushNamed("transaction_details",
                     arguments: TransactionDetailsArguments(
                       wallet: widget.arguments.store,
                       transactionType: TransactionType.WITHDRAW,
@@ -640,8 +699,9 @@ class _HomeBalanceState extends State<HomeBalance> {
                   true,
                   isPendingDeposit, (token, amount) async {
                 Navigator.of(context)
-                    .pushNamed("/account_details",
-                        arguments: WalletAccountDetailsArguments(account))
+                    .pushNamed("account_details",
+                        arguments: WalletAccountDetailsArguments(
+                            account, widget.arguments.parentContext))
                     .then((value) => _onRefresh());
               }); //iterate through indexes and get the next colour
             }

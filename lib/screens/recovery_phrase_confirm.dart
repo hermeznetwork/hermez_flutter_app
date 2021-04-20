@@ -573,8 +573,8 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                                       "info_backup_success.png",
                                       false,
                                       "Your wallet is backed up"));
-                              Navigator.pushNamedAndRemoveUntil(context, "/",
-                                  (Route<dynamic> route) => false);
+                              Navigator.pushNamedAndRemoveUntil(context,
+                                  "/home", (Route<dynamic> route) => false);
                             } else {
                               var value = await Navigator.of(context).pushNamed(
                                   "/info",

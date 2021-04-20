@@ -9,18 +9,20 @@ import 'context/wallet/wallet_handler.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
-enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT }
+enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT, MOVE }
 
 enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 
 class AmountArguments {
   final WalletHandler store;
+  final TransactionLevel txLevel;
   final TransactionType amountType;
   final Account account;
   //final Token token;
 
   AmountArguments(
     this.store,
+    this.txLevel,
     this.amountType,
     this.account,
     //this.token,
@@ -45,7 +47,10 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: new AppBar(
-        title: new Text('Amount',
+        title: new Text(
+            widget.arguments.amountType == TransactionType.MOVE
+                ? 'Move'
+                : 'Amount',
             style: TextStyle(
                 fontFamily: 'ModernEra',
                 color: HermezColors.blackTwo,
@@ -64,6 +69,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
         account: widget.arguments.account,
         store: widget.arguments.store,
         amountType: widget.arguments.amountType,
+        txLevel: widget.arguments.txLevel,
         onSubmit: (amount, token, address) async {
           String addressTo;
           if (widget.arguments.amountType == TransactionType.EXIT &&
@@ -74,7 +80,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
             addressTo = address;
           }
           //var success = await transferStore.transfer(address, amount);
-          Navigator.pushReplacementNamed(context, "/transaction_details",
+          Navigator.pushReplacementNamed(context, "transaction_details",
               arguments: TransactionDetailsArguments(
                 wallet: widget.arguments.store,
                 transactionType: widget.arguments.amountType,
