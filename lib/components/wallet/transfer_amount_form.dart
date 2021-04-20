@@ -169,13 +169,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             amountType != TransactionType.RECEIVE
                         ? MoveRow(
                             txLevel,
-                            () async {
+                            /*() async {
                               setState(() {
                                 txLevel = txLevel == TransactionLevel.LEVEL1
                                     ? TransactionLevel.LEVEL2
                                     : TransactionLevel.LEVEL1;
                               });
-                            },
+                            }*/
+                            null,
                           )
                         : Container(),
                     AccountRow(

@@ -5,7 +5,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
 import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
@@ -182,7 +181,6 @@ class WalletAccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      //Account account = l2Accounts[0];
                       Navigator.pushNamed(
                           arguments.parentContext, "/transfer_amount",
                           arguments: AmountArguments(store, store.state.txLevel,
@@ -256,13 +254,12 @@ class WalletAccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      Navigator.of(arguments.parentContext)
-                          .pushNamed("/account_selector",
-                              arguments: AccountSelectorArguments(
-                                store.state.txLevel,
-                                TransactionType.EXIT,
-                                store,
-                              ));
+                      Navigator.pushNamed(
+                        arguments.parentContext,
+                        "/transfer_amount",
+                        arguments: AmountArguments(store, store.state.txLevel,
+                            TransactionType.MOVE, arguments.element),
+                      );
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,

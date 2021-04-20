@@ -69,29 +69,49 @@ class _QRCodePageState extends State<QRCodePage> {
                   ),
                 ]
               : null),
-      body: Column(
-        children: [
-          Expanded(
-              flex: 1,
-              child: new Center(
-                child: SingleChildScrollView(
-                  child: new Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Stack(
-                        children: [
-                          RepaintBoundary(
-                            key: _globalKey,
-                            child: QrImage(
-                              size: 300,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+                flex: 1,
+                child: new Center(
+                  child: SingleChildScrollView(
+                    child: new Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Stack(
+                          children: [
+                            RepaintBoundary(
+                              key: _globalKey,
+                              child: QrImage(
+                                size: 200,
+                                padding: EdgeInsets.all(0),
+                                dataModuleStyle: QrDataModuleStyle(
+                                    dataModuleShape: QrDataModuleShape.square,
+                                    color: Colors.white),
+                                eyeStyle: QrEyeStyle(
+                                    eyeShape: QrEyeShape.square,
+                                    color: Colors.white),
+                                data: widget.arguments.code == null
+                                    ? (widget.arguments.store.state.txLevel ==
+                                                TransactionLevel.LEVEL2
+                                            ? "hez:"
+                                            : "") +
+                                        widget.arguments.store.state
+                                            .ethereumAddress
+                                    : widget.arguments.code,
+                              ),
+                            ),
+                            QrImage(
+                              size: 200,
                               padding: EdgeInsets.all(0),
                               dataModuleStyle: QrDataModuleStyle(
                                   dataModuleShape: QrDataModuleShape.square,
-                                  color: Colors.white),
+                                  color: Colors.black),
                               eyeStyle: QrEyeStyle(
                                   eyeShape: QrEyeShape.square,
-                                  color: Colors.white),
+                                  color: Colors.black),
                               data: widget.arguments.code == null
                                   ? (widget.arguments.store.state.txLevel ==
                                               TransactionLevel.LEVEL2
@@ -101,118 +121,99 @@ class _QRCodePageState extends State<QRCodePage> {
                                           .arguments.store.state.ethereumAddress
                                   : widget.arguments.code,
                             ),
-                          ),
-                          QrImage(
-                            size: 300,
-                            padding: EdgeInsets.all(0),
-                            dataModuleStyle: QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.square,
-                                color: Colors.black),
-                            eyeStyle: QrEyeStyle(
-                                eyeShape: QrEyeShape.square,
-                                color: Colors.black),
-                            data: widget.arguments.code == null
+                          ],
+                        ),
+                        SizedBox(
+                          height: 33,
+                        ),
+                        Container(
+                          width: 205,
+                          child: Text(
+                            widget.arguments.code == null
                                 ? (widget.arguments.store.state.txLevel ==
                                             TransactionLevel.LEVEL2
                                         ? "hez:"
                                         : "") +
                                     widget.arguments.store.state.ethereumAddress
                                 : widget.arguments.code,
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 33,
-                      ),
-                      Container(
-                        width: 300,
-                        child: Text(
-                          widget.arguments.code == null
-                              ? (widget.arguments.store.state.txLevel ==
-                                          TransactionLevel.LEVEL2
-                                      ? "hez:"
-                                      : "") +
-                                  widget.arguments.store.state.ethereumAddress
-                              : widget.arguments.code,
-                          style: TextStyle(
-                            color: HermezColors.blackTwo,
-                            fontSize: 16,
-                            height: 1.5,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.justify,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 44,
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                        ),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15.0),
-                            color: HermezColors.mediumOrange),
-                        padding: EdgeInsets.all(20.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset("assets/info.png",
-                                color: HermezColors.blackTwo,
-                                alignment: Alignment.topLeft,
-                                height: 20),
-                            SizedBox(
-                              width: 20,
+                            style: TextStyle(
+                              color: HermezColors.blackTwo,
+                              fontSize: 16,
+                              height: 1.5,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w500,
                             ),
-                            Expanded(
-                                child: Column(
-                              children: [
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Container(
-                                    child: Text(
-                                      widget.arguments.qrCodeType ==
-                                              QRCodeType.HERMEZ
-                                          ? "From Hermez to Hermez"
-                                          : "From Ethereum to Hermez",
-                                      style: TextStyle(
-                                          color: HermezColors.blackTwo,
-                                          fontFamily: 'ModernEra',
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    widget.arguments.qrCodeType ==
-                                            QRCodeType.HERMEZ
-                                        ? "Use this code to transfer tokens from another Hermez account."
-                                        : "Transfer tokens to your Ethereum wallet first and then move them to your Hermez wallet.",
-                                    style: TextStyle(
-                                        color: HermezColors.blackTwo,
-                                        fontFamily: 'ModernEra',
-                                        height: 1.5,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ),
-                              ],
-                            ))
-                          ],
+                            textAlign: TextAlign.justify,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 44,
+                        ),
+                      ],
+                    ),
+                  ),
+                )),
+            Container(
+              margin: EdgeInsets.only(
+                left: 16,
+                right: 16,
+              ),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15.0),
+                  color: HermezColors.mediumOrange),
+              padding: EdgeInsets.all(20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset("assets/info.png",
+                      color: HermezColors.blackTwo,
+                      alignment: Alignment.topLeft,
+                      height: 20),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                      child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Container(
+                          child: Text(
+                            widget.arguments.qrCodeType == QRCodeType.HERMEZ
+                                ? "From Hermez to Hermez"
+                                : "From Ethereum to Hermez",
+                            style: TextStyle(
+                                color: HermezColors.blackTwo,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          widget.arguments.qrCodeType == QRCodeType.HERMEZ
+                              ? "Use this code to transfer tokens from another Hermez account."
+                              : "Transfer tokens to your Ethereum wallet first and then move them to your Hermez wallet.",
+                          style: TextStyle(
+                              color: HermezColors.blackTwo,
+                              fontFamily: 'ModernEra',
+                              height: 1.5,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16),
+                          textAlign: TextAlign.left,
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ))
-        ],
+                  ))
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

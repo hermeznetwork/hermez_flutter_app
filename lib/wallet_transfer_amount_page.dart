@@ -16,14 +16,14 @@ enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 class AmountArguments {
   final WalletHandler store;
   final TransactionLevel txLevel;
-  final TransactionType amountType;
+  final TransactionType transactionType;
   final Account account;
   //final Token token;
 
   AmountArguments(
     this.store,
     this.txLevel,
-    this.amountType,
+    this.transactionType,
     this.account,
     //this.token,
   );
@@ -41,16 +41,18 @@ class WalletAmountPage extends StatefulWidget {
 class _WalletAmountPageState extends State<WalletAmountPage> {
   @override
   Widget build(BuildContext context) {
-    //var transferStore = useWalletTransfer(context);
-    //var qrcodeAddress = useState();
+    String operation;
+    if (widget.arguments.transactionType == TransactionType.SEND) {
+      operation = "send";
+    } else if (widget.arguments.transactionType == TransactionType.MOVE ||
+        widget.arguments.transactionType == TransactionType.FORCEEXIT) {
+      operation = "move";
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: new AppBar(
-        title: new Text(
-            widget.arguments.amountType == TransactionType.MOVE
-                ? 'Move'
-                : 'Amount',
+        title: new Text(operation[0].toUpperCase() + operation.substring(1),
             style: TextStyle(
                 fontFamily: 'ModernEra',
                 color: HermezColors.blackTwo,
@@ -68,11 +70,11 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
       body: TransferAmountForm(
         account: widget.arguments.account,
         store: widget.arguments.store,
-        amountType: widget.arguments.amountType,
+        amountType: widget.arguments.transactionType,
         txLevel: widget.arguments.txLevel,
         onSubmit: (amount, token, address) async {
           String addressTo;
-          if (widget.arguments.amountType == TransactionType.EXIT &&
+          if (widget.arguments.transactionType == TransactionType.EXIT &&
               address.isEmpty) {
             addressTo =
                 getEthereumAddress(widget.arguments.account.hezEthereumAddress);
@@ -83,7 +85,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
           Navigator.pushReplacementNamed(context, "transaction_details",
               arguments: TransactionDetailsArguments(
                 wallet: widget.arguments.store,
-                transactionType: widget.arguments.amountType,
+                transactionType: widget.arguments.transactionType,
                 status: TransactionStatus.DRAFT,
                 account: widget.arguments.account,
                 token: widget.arguments.account.token,

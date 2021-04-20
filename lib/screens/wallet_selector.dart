@@ -201,8 +201,9 @@ class WalletSelectorPage extends HookWidget {
                                 borderRadius: BorderRadius.circular(30)),
                           ),
                           onPressed: () {
-                            if (l1Accounts != null) {
+                            if (l1Accounts != null && l1Accounts.length > 0) {
                               store.updateLevel(TransactionLevel.LEVEL1);
+
                               if (l1Accounts.length > 1) {
                                 Navigator.of(parentContext)
                                     .pushNamed("/account_selector",
@@ -221,7 +222,8 @@ class WalletSelectorPage extends HookWidget {
                                         TransactionType.MOVE,
                                         account));
                               }
-                            } else if (l2Accounts != null) {
+                            } else if (l2Accounts != null &&
+                                l2Accounts.length > 0) {
                               store.updateLevel(TransactionLevel.LEVEL2);
                               if (l2Accounts.length > 1) {
                                 Navigator.of(parentContext)
