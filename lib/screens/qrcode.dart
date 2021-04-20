@@ -154,10 +154,7 @@ class _QRCodePageState extends State<QRCodePage> {
                   ),
                 )),
             Container(
-              margin: EdgeInsets.only(
-                left: 16,
-                right: 16,
-              ),
+              margin: EdgeInsets.all(20),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
                   color: HermezColors.mediumOrange),

@@ -107,9 +107,12 @@ class _HomePageState extends State<HomePage> {
         index: _currentIndex.value,
         children: children,
       ),
+      extendBody: true,
       bottomNavigationBar: BottomNavigationBar(
+          elevation: 0,
           selectedItemColor: HermezColors.blackTwo,
           unselectedItemColor: HermezColors.blueyGreyTwo,
+          backgroundColor: Colors.transparent, // transparent
           showSelectedLabels: false,
           showUnselectedLabels: false,
           currentIndex: _currentIndex.value,
