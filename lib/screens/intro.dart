@@ -78,13 +78,9 @@ class IntroPage extends HookWidget {
                         borderRadius: BorderRadius.circular(100.0),
                       ),
                       onPressed: () {
-                        Navigator.of(context)
-                            .pushNamed(
+                        Navigator.of(context).pushNamed(
                           "/pin",
-                          arguments: PinArguments(null, true, null),
-                        )
-                            .then((value) async {
-                          if (value.toString() == 'true') {
+                          arguments: PinArguments(null, true, () async {
                             String mnemonic = await store.generateMnemonic();
                             Navigator.of(context)
                                 .pushNamed("/info",
@@ -98,8 +94,13 @@ class IntroPage extends HookWidget {
                                         context,
                                         "/home",
                                         (Route<dynamic> route) => false));
+                          }),
+                        );
+                        /*  .then((value) async {
+                          if (value.toString() == 'true') {
+
                           }
-                        });
+                        });*/
                       },
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

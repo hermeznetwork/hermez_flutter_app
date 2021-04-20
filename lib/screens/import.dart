@@ -832,12 +832,8 @@ class _ImportWalletState extends State<ImportWalletPage> {
                       ),
                       onPressed: buttonEnabled
                           ? () {
-                              Navigator.of(context)
-                                  .pushNamed("/pin",
-                                      arguments: PinArguments(null, true, null))
-                                  .then(
-                                (value) async {
-                                  if (value.toString() == 'true') {
+                              Navigator.of(context).pushNamed("/pin",
+                                  arguments: PinArguments(null, true, () async {
                                     String mnemonic = json.encode(words);
                                     mnemonic = mnemonic.replaceAll(",", " ");
                                     mnemonic = mnemonic.replaceAll("[", "");
@@ -851,9 +847,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                           "/home",
                                           (Route<dynamic> route) => false);
                                     } else {}
-                                  }
-                                },
-                              );
+                                  }));
                             }
                           : null,
                       padding: EdgeInsets.only(

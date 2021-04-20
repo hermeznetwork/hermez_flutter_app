@@ -189,19 +189,22 @@ class _QRCodePageState extends State<QRCodePage> {
                           ),
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          widget.arguments.qrCodeType == QRCodeType.HERMEZ
-                              ? "Use this code to transfer tokens from another Hermez account."
-                              : "Transfer tokens to your Ethereum wallet first and then move them to your Hermez wallet.",
-                          style: TextStyle(
-                              color: HermezColors.blackTwo,
-                              fontFamily: 'ModernEra',
-                              height: 1.5,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16),
-                          textAlign: TextAlign.left,
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Container(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            widget.arguments.qrCodeType == QRCodeType.HERMEZ
+                                ? "Use this code to transfer tokens from another Hermez account."
+                                : "Transfer tokens to your Ethereum wallet first and then move them to your Hermez wallet.",
+                            style: TextStyle(
+                                color: HermezColors.blackTwo,
+                                fontFamily: 'ModernEra',
+                                height: 1.5,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
                       ),
                     ],

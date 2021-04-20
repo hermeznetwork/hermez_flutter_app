@@ -35,6 +35,7 @@ class SettingsPage extends HookWidget {
         centerTitle: true,
         elevation: 0.0,
       ),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: <Widget>[

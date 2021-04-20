@@ -193,7 +193,6 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
-                  //alignment: Alignment(-1.3, 0),
                   child: Container(
                     padding: EdgeInsets.only(
                         top: 30.0, bottom: subtitle != null ? 8.0 : 30.0),
@@ -210,6 +209,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                 ),
                 subtitle != null
                     ? Align(
+                        alignment: Alignment.centerLeft,
                         child: Container(
                           child: Text(
                             subtitle,
