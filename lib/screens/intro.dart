@@ -92,15 +92,10 @@ class IntroPage extends HookWidget {
                                 .then((value) =>
                                     Navigator.pushNamedAndRemoveUntil(
                                         context,
-                                        "/home",
+                                        "/first_deposit",
                                         (Route<dynamic> route) => false));
                           }),
                         );
-                        /*  .then((value) async {
-                          if (value.toString() == 'true') {
-
-                          }
-                        });*/
                       },
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

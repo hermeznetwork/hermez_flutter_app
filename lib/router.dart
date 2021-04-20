@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/screens/backup_info.dart';
 import 'package:hermez/screens/biometrics.dart';
+import 'package:hermez/screens/first_deposit.dart';
 import 'package:hermez/screens/home.dart';
 import 'package:hermez/screens/import.dart';
 import 'package:hermez/screens/info.dart';
@@ -132,6 +133,18 @@ Map<String, WidgetBuilder> getRoutes(context) {
         arguments: ModalRoute.of(context).settings.arguments),
     '/currency_selector': (BuildContext context) =>
         SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
+    '/first_deposit': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      if (configurationService.didSetupWallet()) {
+        return WalletProvider(builder: (context, store) {
+          return FirstDepositPage(store: store);
+        });
+      }
+      return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+      });
+    },
+
     //(BuildContext context) {
     /*var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())
