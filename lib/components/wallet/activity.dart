@@ -26,9 +26,10 @@ class ActivityArguments {
   final String symbol;
   final double exchangeRate;
   final WalletDefaultCurrency defaultCurrency;
+  final BuildContext parentContext;
 
   ActivityArguments(this.store, this.account, this.address, this.symbol,
-      this.exchangeRate, this.defaultCurrency);
+      this.exchangeRate, this.defaultCurrency, this.parentContext);
 }
 
 class Activity extends StatefulWidget {
@@ -197,19 +198,20 @@ class _ActivityState extends State<Activity> {
 
                   return WithdrawalRow(exit, 2, currency,
                       widget.arguments.store.state.exchangeRatio, () async {
-                    Navigator.of(context).pushNamed("transaction_details",
-                        arguments: TransactionDetailsArguments(
-                          wallet: widget.arguments.store,
-                          transactionType: TransactionType.WITHDRAW,
-                          status: TransactionStatus.DRAFT,
-                          token: exit.token,
-                          //account: widget.arguments.account,
-                          exit: exit,
-                          amount: double.parse(exit.balance) /
-                              pow(10, exit.token.decimals),
-                          addressFrom: exit.hezEthereumAddress,
-                          //addressTo: address,
-                        ));
+                    Navigator.of(widget.arguments.parentContext)
+                        .pushNamed("/transaction_details",
+                            arguments: TransactionDetailsArguments(
+                              wallet: widget.arguments.store,
+                              transactionType: TransactionType.WITHDRAW,
+                              status: TransactionStatus.DRAFT,
+                              token: exit.token,
+                              //account: widget.arguments.account,
+                              exit: exit,
+                              amount: double.parse(exit.balance) /
+                                  pow(10, exit.token.decimals),
+                              addressFrom: exit.hezEthereumAddress,
+                              //addressTo: address,
+                            ));
                   });
                 } else if (i == 0 &&
                     pendingExits.length > 0 &&

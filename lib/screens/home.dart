@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   ValueNotifier _currentIndex;
   List<Widget> children;
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<TabNavigationItem> items;
 
@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
     }, [store]);*/
 
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       body: IndexedStack(
         index: _currentIndex.value,
         children: children,

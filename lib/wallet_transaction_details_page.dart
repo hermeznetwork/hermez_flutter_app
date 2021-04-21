@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/screens/info.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transaction_info_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
@@ -15,6 +15,7 @@ import 'package:hermez_plugin/utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'components/wallet/transaction_details_form.dart';
+import 'constants.dart';
 import 'context/transfer/wallet_transfer_provider.dart';
 
 class TransactionDetailsArguments {
@@ -116,11 +117,12 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       widget.arguments.wallet.state.ethereumPrivateKey,
                       address,
                       amount);
-                  //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
+
                   if (success) {
-                    Navigator.pushReplacementNamed(context, "/transaction_info",
-                        arguments:
-                            TransactionInfoArguments(widget.arguments.wallet));
+                    Navigator.of(context).pushReplacementNamed("/info",
+                        arguments: InfoArguments("success.png", true,
+                            "Your transaction is awaiting verification.",
+                            iconSize: 300));
                   } else {
                     Scaffold.of(context).showSnackBar(SnackBar(
                       content: Text(transferStore.state.errors.first),
@@ -144,22 +146,55 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                             onPressed: () async {
                               var success = false;
                               if (widget.arguments.wallet.state.txLevel ==
-                                  TransactionLevel.LEVEL1) {
-                                success = await transferStore.transferEth(
-                                    widget.arguments.wallet.state
-                                        .ethereumPrivateKey,
-                                    widget.arguments.addressTo,
-                                    widget.arguments.amount.toString());
+                                      TransactionLevel.LEVEL1 &&
+                                  widget.arguments.transactionType !=
+                                      TransactionType.DEPOSIT) {
+                                if (widget.arguments.token.id == 0) {
+                                  success = await transferStore.transferEth(
+                                      widget.arguments.wallet.state
+                                          .ethereumPrivateKey,
+                                      widget.arguments.addressTo,
+                                      widget.arguments.amount.toString());
+                                } else {
+                                  success = await transferStore.transfer(
+                                      widget.arguments.addressTo,
+                                      widget.arguments.amount.toString(),
+                                      CONTRACT_ADDRESSES["Rinkeby"]
+                                          [widget.arguments.token.symbol],
+                                      widget.arguments.token.symbol);
+                                }
                               } else {
                                 success = await handleFormSubmit();
                               }
 
-                              //Navigator.pushNamedAndRemoveUntil(context, "/", (Route<dynamic> route) => false);
                               if (success) {
-                                Navigator.pushReplacementNamed(
-                                    context, "/transaction_info",
-                                    arguments: TransactionInfoArguments(
-                                        widget.arguments.wallet));
+                                if (widget.arguments.transactionType ==
+                                    TransactionType.EXIT) {
+                                  Navigator.of(context).pushReplacementNamed(
+                                      "/info",
+                                      arguments: InfoArguments(
+                                          "success.png",
+                                          true,
+                                          "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
+                                          iconSize: 300));
+                                } else if (widget.arguments.transactionType ==
+                                    TransactionType.WITHDRAW) {
+                                  Navigator.of(context).pushReplacementNamed(
+                                      "/info",
+                                      arguments: InfoArguments(
+                                          "success.png",
+                                          true,
+                                          "Your withdrawal is awaiting verification.",
+                                          iconSize: 300));
+                                } else {
+                                  Navigator.of(context).pushReplacementNamed(
+                                      "/info",
+                                      arguments: InfoArguments(
+                                          "success.png",
+                                          true,
+                                          "Your transaction is awaiting verification.",
+                                          iconSize: 300));
+                                }
                               } else {
                                 showDialog(
                                   context: context,

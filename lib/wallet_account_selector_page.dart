@@ -45,8 +45,10 @@ class WalletAccountSelectorPage extends HookWidget {
     String operation;
     if (arguments.transactionType == TransactionType.SEND) {
       operation = "send";
-    } else if (arguments.transactionType == TransactionType.MOVE ||
-        arguments.transactionType == TransactionType.FORCEEXIT) {
+    } else if (arguments.transactionType == TransactionType.EXIT ||
+        arguments.transactionType == TransactionType.FORCEEXIT ||
+        arguments.transactionType == TransactionType.DEPOSIT ||
+        arguments.transactionType == TransactionType.WITHDRAW) {
       operation = "move";
     }
 
@@ -232,8 +234,10 @@ class WalletAccountSelectorPage extends HookWidget {
     String operation;
     if (arguments.transactionType == TransactionType.SEND) {
       operation = "send";
-    } else if (arguments.transactionType == TransactionType.MOVE ||
-        arguments.transactionType == TransactionType.FORCEEXIT) {
+    } else if (arguments.transactionType == TransactionType.EXIT ||
+        arguments.transactionType == TransactionType.FORCEEXIT ||
+        arguments.transactionType == TransactionType.DEPOSIT ||
+        arguments.transactionType == TransactionType.WITHDRAW) {
       operation = "move";
     }
 

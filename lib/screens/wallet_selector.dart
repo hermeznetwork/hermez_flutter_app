@@ -25,7 +25,7 @@ class WalletSelectorPage extends HookWidget {
   BuildContext parentContext;
   //GlobalKey<ScaffoldState> scaffoldKey;
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  //final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Account> l1Accounts;
   List<Account> l2Accounts;
 
@@ -46,7 +46,7 @@ class WalletSelectorPage extends HookWidget {
     }, []);*/
 
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       backgroundColor: HermezColors.lightOrange,
       body: FutureBuilder(
           future: fetchData(),
@@ -209,7 +209,7 @@ class WalletSelectorPage extends HookWidget {
                                     .pushNamed("/account_selector",
                                         arguments: AccountSelectorArguments(
                                           TransactionLevel.LEVEL1,
-                                          TransactionType.MOVE,
+                                          TransactionType.DEPOSIT,
                                           store,
                                         ));
                               } else {
@@ -219,7 +219,7 @@ class WalletSelectorPage extends HookWidget {
                                     arguments: AmountArguments(
                                         store,
                                         TransactionLevel.LEVEL1,
-                                        TransactionType.MOVE,
+                                        TransactionType.DEPOSIT,
                                         account));
                               }
                             } else if (l2Accounts != null &&
@@ -230,7 +230,7 @@ class WalletSelectorPage extends HookWidget {
                                     .pushNamed("/account_selector",
                                         arguments: AccountSelectorArguments(
                                           TransactionLevel.LEVEL2,
-                                          TransactionType.MOVE,
+                                          TransactionType.EXIT,
                                           store,
                                         ));
                               } else {
@@ -240,7 +240,7 @@ class WalletSelectorPage extends HookWidget {
                                     arguments: AmountArguments(
                                         store,
                                         TransactionLevel.LEVEL2,
-                                        TransactionType.MOVE,
+                                        TransactionType.EXIT,
                                         account));
                               }
                             } else {
@@ -249,7 +249,7 @@ class WalletSelectorPage extends HookWidget {
                                   .pushNamed("/account_selector",
                                       arguments: AccountSelectorArguments(
                                         TransactionLevel.LEVEL1,
-                                        TransactionType.MOVE,
+                                        TransactionType.DEPOSIT,
                                         store,
                                       ));
                             }

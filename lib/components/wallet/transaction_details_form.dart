@@ -254,7 +254,11 @@ class TransferSummaryForm extends HookWidget {
                                         transactionType ==
                                             TransactionType.EXIT ||
                                         transactionType ==
-                                            TransactionType.FORCEEXIT
+                                            TransactionType.FORCEEXIT ||
+                                        (transactionType ==
+                                                TransactionType.RECEIVE &&
+                                            store.state.txLevel ==
+                                                TransactionLevel.LEVEL1)
                                     ? 'My Ethereum address'
                                     : 'My Hermez address',
                                 style: TextStyle(
@@ -267,22 +271,12 @@ class TransferSummaryForm extends HookWidget {
                         : Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              store.state.txLevel == TransactionLevel.LEVEL1
-                                  ? "0x" +
-                                      AddressUtils.strip0x(
-                                              addressFrom.substring(0, 6))
-                                          .toUpperCase() +
-                                      " ･･･ " +
-                                      addressFrom
-                                          .substring(addressFrom.length - 5,
-                                              addressFrom.length)
-                                          .toUpperCase()
-                                  : addressTo.substring(0, 6) +
-                                      " ･･･ " +
-                                      addressTo
-                                          .substring(addressTo.length - 5,
-                                              addressTo.length)
-                                          .toUpperCase(),
+                              addressTo.substring(0, 6) +
+                                  " ･･･ " +
+                                  addressTo
+                                      .substring(addressTo.length - 5,
+                                          addressTo.length)
+                                      .toUpperCase(),
                               style: TextStyle(
                                 color: HermezColors.black,
                                 fontSize: 16,
@@ -301,39 +295,44 @@ class TransferSummaryForm extends HookWidget {
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          store.state.txLevel == TransactionLevel.LEVEL1 &&
-                                  transactionType != TransactionType.FORCEEXIT
+                          (transactionType == TransactionType.RECEIVE &&
+                                  store.state.txLevel ==
+                                      TransactionLevel.LEVEL1)
                               ? "0x" +
-                                  AddressUtils.strip0x(
-                                          addressTo.substring(0, 6))
+                                  AddressUtils.strip0x(addressTo.substring(0, 6))
                                       .toUpperCase() +
                                   " ･･･ " +
                                   addressTo
                                       .substring(addressTo.length - 5,
                                           addressTo.length)
                                       .toUpperCase()
-                              : transactionType == TransactionType.WITHDRAW ||
-                                      transactionType == TransactionType.EXIT ||
-                                      transactionType ==
-                                          TransactionType.FORCEEXIT
-                                  ? getEthereumAddress(addressFrom)
-                                          .substring(0, 6) +
+                              : (transactionType == TransactionType.RECEIVE &&
+                                      store.state.txLevel ==
+                                          TransactionLevel.LEVEL2)
+                                  ? "hez:0x" +
+                                      AddressUtils.strip0x(addressFrom.substring(0, 6))
+                                          .toUpperCase() +
                                       " ･･･ " +
-                                      getEthereumAddress(addressFrom)
-                                          .substring(
-                                              getEthereumAddress(addressFrom)
-                                                      .length -
-                                                  5,
-                                              getEthereumAddress(addressFrom)
-                                                  .length)
+                                      addressTo
+                                          .substring(addressTo.length - 5,
+                                              addressTo.length)
                                           .toUpperCase()
-                                  : transactionType == TransactionType.RECEIVE
-                                      ? (addressTo.substring(0, 6))
-                                              .toUpperCase() +
+                                  : transactionType ==
+                                              TransactionType.WITHDRAW ||
+                                          transactionType ==
+                                              TransactionType.EXIT ||
+                                          transactionType ==
+                                              TransactionType.FORCEEXIT
+                                      ? getEthereumAddress(addressFrom)
+                                              .substring(0, 6) +
                                           " ･･･ " +
-                                          addressTo
-                                              .substring(addressTo.length - 5,
-                                                  addressTo.length)
+                                          getEthereumAddress(addressFrom)
+                                              .substring(
+                                                  getEthereumAddress(addressFrom)
+                                                          .length -
+                                                      5,
+                                                  getEthereumAddress(addressFrom)
+                                                      .length)
                                               .toUpperCase()
                                       : "hez:0x" +
                                           AddressUtils.strip0x(

@@ -49,7 +49,7 @@ class WalletAccountDetailsPage extends HookWidget {
       }
       return null;
     }, [store]);*/
-    final _scaffoldKey = GlobalKey<ScaffoldState>();
+    //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     useEffect(() {
       store.initialise();
@@ -61,7 +61,7 @@ class WalletAccountDetailsPage extends HookWidget {
         store.state.defaultCurrency.toString().split('.').last;
 
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       appBar: AppBar(
           title: Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -151,16 +151,21 @@ class WalletAccountDetailsPage extends HookWidget {
             Expanded(
               child: Activity(
                 arguments: ActivityArguments(
-                  store,
-                  arguments.element,
-                  store.state.ethereumAddress,
-                  arguments.element.token.symbol,
-                  currency == "USD"
-                      ? arguments.element.token.USD
-                      : arguments.element.token.USD * store.state.exchangeRatio,
-                  store.state.defaultCurrency,
-                ),
+                    store,
+                    arguments.element,
+                    store.state.ethereumAddress,
+                    arguments.element.token.symbol,
+                    currency == "USD"
+                        ? arguments.element.token.USD
+                        : arguments.element.token.USD *
+                            store.state.exchangeRatio,
+                    store.state.defaultCurrency,
+                    arguments.parentContext),
               ),
+            ),
+            Container(
+              height: 90,
+              color: Colors.white,
             ),
           ],
         ),
@@ -257,8 +262,13 @@ class WalletAccountDetailsPage extends HookWidget {
                       Navigator.pushNamed(
                         arguments.parentContext,
                         "/transfer_amount",
-                        arguments: AmountArguments(store, store.state.txLevel,
-                            TransactionType.MOVE, arguments.element),
+                        arguments: AmountArguments(
+                            store,
+                            store.state.txLevel,
+                            store.state.txLevel == TransactionLevel.LEVEL1
+                                ? TransactionType.DEPOSIT
+                                : TransactionType.EXIT,
+                            arguments.element),
                       );
                     },
                     padding: EdgeInsets.all(10.0),

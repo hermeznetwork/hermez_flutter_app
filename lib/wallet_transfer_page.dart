@@ -12,12 +12,12 @@ class WalletTransferPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _scaffoldKey = GlobalKey<ScaffoldState>();
+    //final _scaffoldKey = GlobalKey<ScaffoldState>();
     var transferStore = useWalletTransfer(context);
     var qrcodeAddress = useState();
 
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       appBar: AppBar(
         title: Text(title),
         actions: <Widget>[
@@ -50,9 +50,9 @@ class WalletTransferPage extends HookWidget {
                 if (success) {
                   Navigator.popUntil(context, ModalRoute.withName('/'));
                 } else {
-                  _scaffoldKey.currentState.showSnackBar(SnackBar(
+                  /*_scaffoldKey.currentState.showSnackBar(SnackBar(
                     content: Text(transferStore.state.errors.first),
-                  ));
+                  ));*/
                 }
               },
             ),

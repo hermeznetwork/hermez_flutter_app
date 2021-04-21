@@ -24,10 +24,10 @@ class WalletActivityPage extends HookWidget {
       return null;
     }, []);
 
-    final _scaffoldKey = GlobalKey<ScaffoldState>();
+    //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       appBar: AppBar(title: Text(title), elevation: 0),
       body: Column(
         children: <Widget>[

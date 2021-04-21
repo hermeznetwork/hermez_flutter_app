@@ -39,60 +39,63 @@ class _InfoPageState extends State<InfoPage> {
     }
     return Scaffold(
       backgroundColor: HermezColors.lightOrange,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(left: 65, right: 65),
-            child: Align(
-              alignment: Alignment.center,
-              child: Image.asset(
-                'assets/' + args.imagePath,
-                width: args.iconSize,
-                height: args.iconSize,
-              ),
-            ),
-          ),
-          SizedBox(height: 32),
-          Align(
-            alignment: Alignment.center,
-            child: Text(args.message,
-                style: TextStyle(
-                  color: HermezColors.black,
-                  fontSize: 20,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w700,
-                )),
-          ),
-          SizedBox(height: 72),
-          args.showButton
-              ? Align(
+      body: Container(
+          margin: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                child: Align(
                   alignment: Alignment.center,
-                  child: FlatButton(
-                    minWidth: 152.0,
-                    height: 56,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                        side: BorderSide(color: HermezColors.darkOrange)),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    padding: EdgeInsets.all(15.0),
-                    color: HermezColors.darkOrange,
-                    textColor: Colors.white,
-                    child: Text("Done",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
-                        )),
+                  child: Image.asset(
+                    'assets/' + args.imagePath,
+                    width: args.iconSize,
+                    height: args.iconSize,
                   ),
-                )
-              : Container()
-        ],
-      ),
+                ),
+              ),
+              SizedBox(height: 16),
+              Align(
+                alignment: Alignment.center,
+                child: Text(args.message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: HermezColors.black,
+                      fontSize: 20,
+                      height: 1.5,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w700,
+                    )),
+              ),
+              SizedBox(height: 72),
+              args.showButton
+                  ? Align(
+                      alignment: Alignment.center,
+                      child: FlatButton(
+                        minWidth: 152.0,
+                        height: 56,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50.0),
+                            side: BorderSide(color: HermezColors.darkOrange)),
+                        onPressed: () {
+                          route();
+                        },
+                        padding: EdgeInsets.all(15.0),
+                        color: HermezColors.darkOrange,
+                        textColor: Colors.white,
+                        child: Text("Done",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w700,
+                            )),
+                      ),
+                    )
+                  : Container()
+            ],
+          )),
     );
   }
 

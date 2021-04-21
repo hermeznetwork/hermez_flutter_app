@@ -9,7 +9,7 @@ import 'context/wallet/wallet_handler.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
-enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT, MOVE }
+enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT }
 
 enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 
@@ -44,8 +44,10 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
     String operation;
     if (widget.arguments.transactionType == TransactionType.SEND) {
       operation = "send";
-    } else if (widget.arguments.transactionType == TransactionType.MOVE ||
-        widget.arguments.transactionType == TransactionType.FORCEEXIT) {
+    } else if (widget.arguments.transactionType == TransactionType.EXIT ||
+        widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT ||
+        widget.arguments.transactionType == TransactionType.WITHDRAW) {
       operation = "move";
     }
 
@@ -82,7 +84,7 @@ class _WalletAmountPageState extends State<WalletAmountPage> {
             addressTo = address;
           }
           //var success = await transferStore.transfer(address, amount);
-          Navigator.pushReplacementNamed(context, "transaction_details",
+          Navigator.pushReplacementNamed(context, "/transaction_details",
               arguments: TransactionDetailsArguments(
                 wallet: widget.arguments.store,
                 transactionType: widget.arguments.transactionType,

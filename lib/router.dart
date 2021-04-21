@@ -23,7 +23,6 @@ import 'package:hermez/wallet_activity_page.dart';
 import 'package:hermez/wallet_amount_page.dart';
 import 'package:hermez/wallet_create_page.dart';
 import 'package:hermez/wallet_transaction_details_page.dart';
-import 'package:hermez/wallet_transaction_info_page.dart';
 import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez/wallet_transfer_page.dart';
 import 'package:provider/provider.dart';
@@ -194,6 +193,5 @@ Map<String, WidgetBuilder> getRoutes(context) {
                 arguments: ModalRoute.of(context).settings.arguments);
           },
         ),
-    '/transaction_info': (BuildContext context) => TransactionInfoPage(),
   };
 }

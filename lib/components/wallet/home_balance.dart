@@ -634,19 +634,20 @@ class _HomeBalanceState extends State<HomeBalance> {
               return WithdrawalRow(
                   exit, 2, currency, widget.arguments.store.state.exchangeRatio,
                   () async {
-                Navigator.of(context).pushNamed("transaction_details",
-                    arguments: TransactionDetailsArguments(
-                      wallet: widget.arguments.store,
-                      transactionType: TransactionType.WITHDRAW,
-                      status: TransactionStatus.DRAFT,
-                      token: exit.token,
-                      //account: widget.arguments.account,
-                      exit: exit,
-                      amount: double.parse(exit.balance) /
-                          pow(10, exit.token.decimals),
-                      addressFrom: exit.hezEthereumAddress,
-                      //addressTo: address,
-                    ));
+                Navigator.of(widget.arguments.parentContext)
+                    .pushNamed("/transaction_details",
+                        arguments: TransactionDetailsArguments(
+                          wallet: widget.arguments.store,
+                          transactionType: TransactionType.WITHDRAW,
+                          status: TransactionStatus.DRAFT,
+                          token: exit.token,
+                          //account: widget.arguments.account,
+                          exit: exit,
+                          amount: double.parse(exit.balance) /
+                              pow(10, exit.token.decimals),
+                          addressFrom: exit.hezEthereumAddress,
+                          //addressTo: address,
+                        ));
               });
             } // final index = i ~/ 2; //get the actual index excluding dividers.
             else if (i == 0 && _poolTxs.length > 0 && i < _poolTxs.length) {

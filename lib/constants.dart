@@ -1,7 +1,8 @@
-/*const MY_ACCOUNT = {
-  'PREFERRED_CURRENCY_KEY' : 'preferredCurrency',
-  'DEFAULT_PREFERRED_CURRENCY' : CurrencySymbol.USD.code;
-};*/
+const CONTRACT_ADDRESSES = {
+  'Rinkeby': {
+    'HEZ': '0x2521bc90b4f5fb9a8d61278197e5ff5cdbc4fbf2',
+  }
+};
 
 const FIAT_EXCHANGE_RATES_API_URL = 'api.exchangeratesapi.io';
 
