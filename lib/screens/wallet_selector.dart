@@ -394,10 +394,9 @@ class WalletSelectorPage extends HookWidget {
                                         Navigator.of(parentContext).pushNamed(
                                           "/qrcode",
                                           arguments: QRCodeArguments(
-                                            qrCodeType: QRCodeType.ETHEREUM,
-                                            code: store.state.ethereumAddress,
-                                            store: store,
-                                          ),
+                                              qrCodeType: QRCodeType.ETHEREUM,
+                                              code: store.state.ethereumAddress,
+                                              store: store),
                                         );
                                         //Navigator.pushNamed(context, 'home');
                                       },

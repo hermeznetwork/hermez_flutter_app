@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
+import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
@@ -219,18 +219,22 @@ class AccountDetailsPage extends HookWidget {
                     onPressed: () {
                       store.state.txLevel == TransactionLevel.LEVEL1
                           ? Navigator.of(arguments.parentContext).pushNamed(
-                              "/settings_qrcode",
-                              arguments: SettingsQRCodeArguments(
-                                  message: store.state.ethereumAddress,
+                              "/qrcode",
+                              arguments: QRCodeArguments(
+                                  qrCodeType: QRCodeType.ETHEREUM,
+                                  code: store.state.ethereumAddress,
                                   store: store,
-                                  fromHomeScreen: false))
+                                  isReceive: true),
+                            )
                           : Navigator.of(arguments.parentContext).pushNamed(
-                              "/settings_qrcode",
-                              arguments: SettingsQRCodeArguments(
-                                  message: getHermezAddress(
+                              "/qrcode",
+                              arguments: QRCodeArguments(
+                                  qrCodeType: QRCodeType.HERMEZ,
+                                  code: getHermezAddress(
                                       store.state.ethereumAddress),
                                   store: store,
-                                  fromHomeScreen: false));
+                                  isReceive: true),
+                            );
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,

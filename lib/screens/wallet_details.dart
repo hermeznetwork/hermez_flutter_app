@@ -10,7 +10,7 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/account_selector.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
+import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -383,20 +383,24 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       if (widget.arguments.store.state.txLevel ==
                           TransactionLevel.LEVEL1) {
                         Navigator.of(widget.arguments.parentContext).pushNamed(
-                            "/settings_qrcode",
-                            arguments: SettingsQRCodeArguments(
-                                message: widget
-                                    .arguments.store.state.ethereumAddress,
-                                store: widget.arguments.store,
-                                fromHomeScreen: false));
+                          "/qrcode",
+                          arguments: QRCodeArguments(
+                              qrCodeType: QRCodeType.ETHEREUM,
+                              code:
+                                  widget.arguments.store.state.ethereumAddress,
+                              store: widget.arguments.store,
+                              isReceive: true),
+                        );
                       } else {
                         Navigator.of(widget.arguments.parentContext).pushNamed(
-                            "/settings_qrcode",
-                            arguments: SettingsQRCodeArguments(
-                                message: getHermezAddress(widget
-                                    .arguments.store.state.ethereumAddress),
-                                store: widget.arguments.store,
-                                fromHomeScreen: false));
+                          "/qrcode",
+                          arguments: QRCodeArguments(
+                              qrCodeType: QRCodeType.HERMEZ,
+                              code: getHermezAddress(
+                                  widget.arguments.store.state.ethereumAddress),
+                              store: widget.arguments.store,
+                              isReceive: true),
+                        );
                       }
                     },
                     padding: EdgeInsets.all(10.0),
