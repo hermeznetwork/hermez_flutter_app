@@ -455,65 +455,37 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             onPressed: () {
                               setState(() {
                                 amountController.clear();
-                                amountIsValid = (defaultCurrencySelected
-                                                ? currency != "USD"
-                                                    ? account.token.USD *
-                                                            double.parse(account
-                                                                .balance) /
-                                                            pow(10, 18) *
-                                                            widget.store.state
-                                                                .exchangeRatio -
-                                                        (account.token.USD *
-                                                            widget.store.state
-                                                                .exchangeRatio *
-                                                            estimatedFee
-                                                                .toDouble() /
-                                                            pow(10, 18))
-                                                    : account.token.USD *
-                                                            double.parse(account
-                                                                .balance) /
-                                                            pow(10, 18) -
-                                                        (account.token.USD *
-                                                            estimatedFee
-                                                                .toDouble() /
-                                                            pow(10, 18))
-                                                : double.parse(
-                                                    account.balance)) /
-                                            pow(10, 18) -
-                                        (estimatedFee.toDouble() /
-                                            pow(10, 18)) >
-                                    0;
+                                amountIsValid = false;
+                                double amount = 0;
+                                if (defaultCurrencySelected) {
+                                  if (currency != 'USD') {
+                                    amount = account.token.USD *
+                                            double.parse(account.balance) /
+                                            pow(10, account.token.decimals) *
+                                            widget.store.state.exchangeRatio -
+                                        (account.token.USD *
+                                            widget.store.state.exchangeRatio *
+                                            estimatedFee.toDouble() /
+                                            pow(10, account.token.decimals));
+                                  } else {
+                                    amount = account.token.USD *
+                                            (double.parse(account.balance) /
+                                                pow(10,
+                                                    account.token.decimals)) -
+                                        (account.token.USD *
+                                            (estimatedFee.toDouble() /
+                                                pow(10,
+                                                    account.token.decimals)));
+                                  }
+                                } else {
+                                  amount = ((double.parse(account.balance) /
+                                          pow(10, account.token.decimals)) -
+                                      (estimatedFee.toDouble() /
+                                          pow(10, account.token.decimals)));
+                                }
+                                amountIsValid = amount > 0;
                                 if (amountIsValid) {
-                                  amountController.text =
-                                      defaultCurrencySelected
-                                          ? currency != "USD"
-                                              ? (account.token.USD *
-                                                          double.parse(
-                                                              account.balance) /
-                                                          pow(10, 18) *
-                                                          widget.store.state
-                                                              .exchangeRatio -
-                                                      (account.token.USD *
-                                                          widget.store.state
-                                                              .exchangeRatio *
-                                                          estimatedFee
-                                                              .toDouble() /
-                                                          pow(10, 18)))
-                                                  .toStringAsFixed(2)
-                                              : (account.token.USD *
-                                                          double.parse(
-                                                              account.balance) /
-                                                          pow(10, 18) -
-                                                      (account.token.USD *
-                                                          estimatedFee
-                                                              .toDouble() /
-                                                          pow(10, 18)))
-                                                  .toStringAsFixed(2)
-                                          : (double.parse(account.balance) /
-                                                      pow(10, 18) -
-                                                  (estimatedFee.toDouble() /
-                                                      pow(10, 18)))
-                                              .toString();
+                                  amountController.text = amount.toString();
                                 }
                               });
                             },
