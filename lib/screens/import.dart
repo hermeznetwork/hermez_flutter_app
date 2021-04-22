@@ -9,6 +9,8 @@ import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
+import 'info.dart';
+
 class ImportWalletPage extends StatefulWidget {
   ImportWalletPage({Key key, this.store}) : super(key: key);
 
@@ -842,10 +844,19 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                     bool imported = await widget.store
                                         .importFromMnemonic(mnemonic);
                                     if (imported) {
-                                      Navigator.pushNamedAndRemoveUntil(
-                                          context,
-                                          "/home",
-                                          (Route<dynamic> route) => false);
+                                      Navigator.of(context).pushNamed(
+                                        "/info",
+                                        arguments: InfoArguments(
+                                            "info_success.png",
+                                            false,
+                                            "Wallet imported successfully",
+                                            onFinished: () {
+                                          Navigator.pushNamedAndRemoveUntil(
+                                              context,
+                                              "/home",
+                                              (Route<dynamic> route) => false);
+                                        }),
+                                      );
                                     } else {}
                                   }));
                             }

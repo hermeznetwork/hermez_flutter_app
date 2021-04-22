@@ -595,8 +595,7 @@ class _PinPageState extends State<PinPage> {
                       .then((value) {
                     if (widget.arguments.onSuccess != null) {
                       widget.arguments.onSuccess();
-                    }
-                    if (Navigator.canPop(context)) {
+                    } else if (Navigator.canPop(context)) {
                       Navigator.pop(context, true);
                     }
                   });
@@ -609,24 +608,21 @@ class _PinPageState extends State<PinPage> {
                       .then((value) {
                     if (widget.arguments.onSuccess != null) {
                       widget.arguments.onSuccess();
-                    }
-                    if (Navigator.canPop(context)) {
+                    } else if (Navigator.canPop(context)) {
                       Navigator.pop(context, true);
                     }
                   });
                 } else {
                   if (widget.arguments.onSuccess != null) {
                     widget.arguments.onSuccess();
-                  }
-                  if (Navigator.canPop(context)) {
+                  } else if (Navigator.canPop(context)) {
                     Navigator.pop(context, true);
                   }
                 }
               } else {
                 if (widget.arguments.onSuccess != null) {
                   widget.arguments.onSuccess();
-                }
-                if (Navigator.canPop(context)) {
+                } else if (Navigator.canPop(context)) {
                   Navigator.pop(context, true);
                 }
               }
@@ -641,8 +637,7 @@ class _PinPageState extends State<PinPage> {
           if (pinString == await widget.configurationService.getPasscode()) {
             if (widget.arguments.onSuccess != null) {
               widget.arguments.onSuccess();
-            }
-            if (Navigator.canPop(context)) {
+            } else if (Navigator.canPop(context)) {
               Navigator.pop(context, true);
             }
           } else {

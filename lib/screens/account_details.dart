@@ -47,7 +47,7 @@ class AccountDetailsPage extends HookWidget {
     return Scaffold(
         body: NestedScrollView(
       body: Container(
-        color: HermezColors.lightOrange,
+        color: Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -66,9 +66,13 @@ class AccountDetailsPage extends HookWidget {
                     arguments.parentContext),
               ),
             ),
-            Container(
-              height: kBottomNavigationBarHeight,
-              color: Colors.white,
+            SafeArea(
+              top: false,
+              bottom: true,
+              child: Container(
+                //height: kBottomNavigationBarHeight,
+                color: Colors.white,
+              ),
             ),
           ],
         ),

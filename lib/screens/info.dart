@@ -8,9 +8,10 @@ class InfoArguments {
   final bool showButton;
   final String message;
   final double iconSize;
+  final Function onFinished;
 
   InfoArguments(this.imagePath, this.showButton, this.message,
-      {this.iconSize = 150});
+      {this.iconSize = 150, this.onFinished});
 }
 
 class InfoPage extends StatefulWidget {
@@ -105,7 +106,9 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   route() {
-    if (Navigator.canPop(context)) {
+    if (widget.arguments.onFinished != null) {
+      widget.arguments.onFinished();
+    } else if (Navigator.canPop(context)) {
       Navigator.pop(context, true);
     }
   }

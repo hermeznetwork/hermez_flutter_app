@@ -440,7 +440,25 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         if (snapshot.hasData && (snapshot.data as List).length > 0) {
           // data loaded:
           _accounts = snapshot.data;
-          buildAccountsList();
+          return Container(
+            color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: buildAccountsList(),
+                ),
+                SafeArea(
+                  top: false,
+                  bottom: true,
+                  child: Container(
+                    //height: kBottomNavigationBarHeight,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          );
         } else {
           return Container(
               width: double.infinity,

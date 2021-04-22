@@ -82,18 +82,17 @@ class IntroPage extends HookWidget {
                           "/pin",
                           arguments: PinArguments(null, true, () async {
                             String mnemonic = await store.generateMnemonic();
-                            Navigator.of(context)
-                                .pushNamed("/info",
-                                    arguments: InfoArguments(
-                                        "info_backup_success.png",
-                                        false,
-                                        "Your wallet has been created",
-                                        iconSize: 300))
-                                .then((value) =>
-                                    Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        "/first_deposit",
-                                        (Route<dynamic> route) => false));
+                            Navigator.of(context).pushNamed("/info",
+                                arguments: InfoArguments(
+                                    "info_backup_success.png",
+                                    false,
+                                    "Your wallet has been created",
+                                    iconSize: 300, onFinished: () {
+                                  Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      "/first_deposit",
+                                      (Route<dynamic> route) => false);
+                                }));
                           }),
                         );
                       },
