@@ -6,8 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/qrcode.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/token.dart';
@@ -20,8 +20,8 @@ class AccountSelectorArguments {
   AccountSelectorArguments(this.txLevel, this.transactionType, this.store);
 }
 
-class WalletAccountSelectorPage extends HookWidget {
-  WalletAccountSelectorPage(this.arguments);
+class AccountSelectorPage extends HookWidget {
+  AccountSelectorPage(this.arguments);
 
   final AccountSelectorArguments arguments;
   List<Account> _accounts;
@@ -315,8 +315,8 @@ class WalletAccountSelectorPage extends HookWidget {
                   false, (String token, String amount) async {
                 final Token supportedToken =
                     await arguments.store.getTokenById(account.token.id);
-                Navigator.pushReplacementNamed(context, "/transfer_amount",
-                    arguments: AmountArguments(arguments.store,
+                Navigator.pushReplacementNamed(context, "/transaction_amount",
+                    arguments: TransactionAmountArguments(arguments.store,
                         arguments.txLevel, arguments.transactionType, account));
               }); //iterate through indexes and get the next colour
               //return _buildRow(context, element, color); //build the row widget

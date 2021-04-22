@@ -1,5 +1,5 @@
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 
 abstract class WalletAction {}
 

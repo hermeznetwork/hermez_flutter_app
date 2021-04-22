@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/info.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
@@ -14,9 +14,9 @@ import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
-import 'components/wallet/transaction_details_form.dart';
-import 'constants.dart';
-import 'context/transfer/wallet_transfer_provider.dart';
+import '../components/wallet/transaction_details_form.dart';
+import '../constants.dart';
+import '../context/transfer/wallet_transfer_provider.dart';
 
 class TransactionDetailsArguments {
   final WalletHandler wallet;

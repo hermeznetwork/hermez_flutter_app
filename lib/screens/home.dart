@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:hermez/components/wallet/home_balance.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/settings.dart';
 import 'package:hermez/screens/settings_currency.dart';
 import 'package:hermez/screens/settings_details.dart';
+import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/screens/wallet_selector.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:provider/provider.dart';
 
 import '../context/wallet/wallet_handler.dart';
-import '../wallet_account_details_page.dart';
-import '../wallet_transaction_details_page.dart';
+import 'account_details.dart';
+import 'transaction_details.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(this.store);
@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
         Navigator(onGenerateRoute: (settings) {
           Widget page = tabItem.page;
           if (settings.name == 'home') {
-            page = HomeBalance(
+            page = WalletDetailsPage(
               arguments: settings.arguments,
             );
           } else if (settings.name == 'settings_details') {
@@ -76,8 +76,8 @@ class _HomePageState extends State<HomePage> {
           } else if (settings.name == 'currency_selector') {
             page = SettingsCurrencyPage(store: widget.store);
           } else if (settings.name == 'account_details') {
-            final WalletAccountDetailsArguments args = settings.arguments;
-            page = WalletAccountDetailsPage(args);
+            final AccountDetailsArguments args = settings.arguments;
+            page = AccountDetailsPage(args);
           } else if (settings.name == 'transaction_details') {
             page = WalletTransferProvider(
               builder: (context, store) {
@@ -164,7 +164,7 @@ class _HomePageState extends State<HomePage> {
                     page = settingsPage(context);
                   }
                   if (settings.name == 'home') {
-                    page = HomeBalance(
+                    page = WalletDetailsPage(
                       arguments: settings.arguments,
                     );
                   } else if (settings.name == 'settings_details') {
@@ -177,9 +177,8 @@ class _HomePageState extends State<HomePage> {
                   } else if (settings.name == 'currency_selector') {
                     page = SettingsCurrencyPage(store: widget.store);
                   } else if (settings.name == 'account_details') {
-                    final WalletAccountDetailsArguments args =
-                        settings.arguments;
-                    page = WalletAccountDetailsPage(args);
+                    final AccountDetailsArguments args = settings.arguments;
+                    page = AccountDetailsPage(args);
                   } else if (settings.name == 'transaction_details') {
                     page = WalletTransferProvider(
                       builder: (context, store) {

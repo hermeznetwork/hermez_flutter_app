@@ -4,150 +4,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
 import 'package:hermez/screens/settings_qrcode.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 
-import 'context/wallet/wallet_handler.dart';
-import 'context/wallet/wallet_provider.dart';
+import '../context/wallet/wallet_handler.dart';
+import '../context/wallet/wallet_provider.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable
 // title and message.
 
-class WalletAccountDetailsArguments {
+class AccountDetailsArguments {
   final Account element;
   BuildContext parentContext;
   //WalletHandler store;
 
-  WalletAccountDetailsArguments(this.element, this.parentContext
+  AccountDetailsArguments(this.element, this.parentContext
       /*this.store*/
       );
 }
 
-class WalletAccountDetailsPage extends HookWidget {
-  WalletAccountDetailsPage(this.arguments);
-  final WalletAccountDetailsArguments arguments;
+class AccountDetailsPage extends HookWidget {
+  AccountDetailsPage(this.arguments);
+  final AccountDetailsArguments arguments;
 
   WalletHandler store;
 
   @override
   Widget build(BuildContext context) {
     store = useWallet(context);
-    //this.context = context;
-    //store.state = arguments.store.state;
-    //_currentIndex = useState(0);
-
-    /*useEffect(() {
-      store.initialise();
-      if (store.state.txLevel == TransactionLevel.LEVEL1) {
-        store.fetchOwnL1Balance();
-      } else {
-        store.fetchOwnL2Balance();
-      }
-      return null;
-    }, [store]);*/
-    //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
     useEffect(() {
       store.initialise();
-      //fetchState();
       return null;
     }, [store]);
 
     final String currency =
         store.state.defaultCurrency.toString().split('.').last;
-
     return Scaffold(
-      //key: _scaffoldKey,
-      appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Expanded(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(arguments.element.token.name, // name
-                      style: TextStyle(
-                          fontFamily: 'ModernEra',
-                          color: HermezColors.blackTwo,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20))
-                ],
-              )),
-              Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0),
-                    color: HermezColors.steel),
-                padding:
-                    EdgeInsets.only(left: 12.0, right: 12.0, top: 4, bottom: 4),
-                child: Text(
-                  store.state.txLevel == TransactionLevel.LEVEL1 ? "L1" : "L2",
-                  style: TextStyle(
-                    color: HermezColors.lightOrange,
-                    fontSize: 15,
-                    fontFamily: 'ModernEra',
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              /*Container(
-                decoration: BoxDecoration(
-                    color: Color.fromRGBO(51, 51, 51, 1.0),
-                    border: Border.all(
-                      color: Color.fromRGBO(51, 51, 51, 1.0),
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(5))),
-                padding:
-                    EdgeInsets.only(left: 10, right: 10, top: 7, bottom: 5),
-                child: Text(
-                    ,
-                    style: TextStyle(
-                        fontFamily: 'ModernEra',
-                        color: HermezColors.lightOrange,
-                        backgroundColor: Color.fromRGBO(51, 51, 51, 1.0),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18)),
-              )*/
-            ],
-          ),
-          backgroundColor: HermezColors.lightOrange,
-          elevation: 0),
+        body: NestedScrollView(
       body: Container(
         color: HermezColors.lightOrange,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            SizedBox(height: 40),
-            SizedBox(
-                width: double.infinity,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                          formatAmount(
-                              double.parse(arguments.element.balance) /
-                                  pow(10, 18),
-                              arguments.element.token.symbol),
-                          style: TextStyle(
-                              color: HermezColors.blackTwo,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 32)),
-                    ])),
-            SizedBox(height: 10),
-            Text(accountBalance(),
-                style: TextStyle(
-                    fontFamily: 'ModernEra',
-                    fontWeight: FontWeight.w500,
-                    color: HermezColors.steel,
-                    fontSize: 18)),
-            SizedBox(height: 20),
-            buildButtonsRow(context),
-            SizedBox(height: 20),
             Expanded(
               child: Activity(
                 arguments: ActivityArguments(
@@ -164,13 +67,104 @@ class WalletAccountDetailsPage extends HookWidget {
               ),
             ),
             Container(
-              height: 90,
+              height: kBottomNavigationBarHeight,
               color: Colors.white,
             ),
           ],
         ),
       ),
-    );
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        return <Widget>[
+          SliverAppBar(
+            floating: true,
+            pinned: true,
+            snap: false,
+            collapsedHeight: kToolbarHeight,
+            expandedHeight: 340.0,
+            backgroundColor: HermezColors.lightOrange,
+            elevation: 0,
+            title: Container(
+              padding: EdgeInsets.only(bottom: 20, top: 20),
+              color: HermezColors.lightOrange,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(
+                      child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(arguments.element.token.name, // name
+                          style: TextStyle(
+                              fontFamily: 'ModernEra',
+                              color: HermezColors.blackTwo,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20))
+                    ],
+                  )),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16.0),
+                        color: HermezColors.steel),
+                    padding: EdgeInsets.only(
+                        left: 12.0, right: 12.0, top: 4, bottom: 4),
+                    child: Text(
+                      store.state.txLevel == TransactionLevel.LEVEL1
+                          ? "L1"
+                          : "L2",
+                      style: TextStyle(
+                        color: HermezColors.lightOrange,
+                        fontSize: 15,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            centerTitle: true,
+            flexibleSpace: FlexibleSpaceBar(
+              // here the desired height*/
+              background: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(
+                      height: MediaQuery.of(context).padding.top +
+                          kToolbarHeight +
+                          40),
+                  SizedBox(
+                      width: double.infinity,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                                formatAmount(
+                                    double.parse(arguments.element.balance) /
+                                        pow(10, 18),
+                                    arguments.element.token.symbol),
+                                style: TextStyle(
+                                    color: HermezColors.blackTwo,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 32)),
+                          ])),
+                  SizedBox(height: 10),
+                  Text(accountBalance(),
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w500,
+                          color: HermezColors.steel,
+                          fontSize: 18)),
+                  SizedBox(height: 30),
+                  buildButtonsRow(context),
+                  SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ];
+      },
+    ));
   }
 
   buildButtonsRow(BuildContext context) {
@@ -187,9 +181,12 @@ class WalletAccountDetailsPage extends HookWidget {
                     ),
                     onPressed: () {
                       Navigator.pushNamed(
-                          arguments.parentContext, "/transfer_amount",
-                          arguments: AmountArguments(store, store.state.txLevel,
-                              TransactionType.SEND, arguments.element));
+                          arguments.parentContext, "/transaction_amount",
+                          arguments: TransactionAmountArguments(
+                              store,
+                              store.state.txLevel,
+                              TransactionType.SEND,
+                              arguments.element));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -261,8 +258,8 @@ class WalletAccountDetailsPage extends HookWidget {
                     onPressed: () {
                       Navigator.pushNamed(
                         arguments.parentContext,
-                        "/transfer_amount",
-                        arguments: AmountArguments(
+                        "/transaction_amount",
+                        arguments: TransactionAmountArguments(
                             store,
                             store.state.txLevel,
                             store.state.txLevel == TransactionLevel.LEVEL1

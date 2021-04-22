@@ -2,18 +2,18 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hermez/components/wallet/home_balance.dart';
+import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode.dart';
+import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_account_selector_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 
 import '../context/wallet/wallet_handler.dart';
-import '../wallet_transfer_amount_page.dart';
+import 'transaction_amount.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable
@@ -63,7 +63,7 @@ class WalletSelectorPage extends HookWidget {
                           onTap: () {
                             store.updateLevel(TransactionLevel.LEVEL2);
                             Navigator.pushNamed(context, 'home',
-                                arguments: HomeBalanceArguments(
+                                arguments: WalletDetailsArguments(
                                   store,
                                   TransactionLevel.LEVEL2,
                                   parentContext,
@@ -215,8 +215,8 @@ class WalletSelectorPage extends HookWidget {
                               } else {
                                 Account account = l1Accounts[0];
                                 Navigator.pushNamed(
-                                    parentContext, "/transfer_amount",
-                                    arguments: AmountArguments(
+                                    parentContext, "/transaction_amount",
+                                    arguments: TransactionAmountArguments(
                                         store,
                                         TransactionLevel.LEVEL1,
                                         TransactionType.DEPOSIT,
@@ -236,8 +236,8 @@ class WalletSelectorPage extends HookWidget {
                               } else {
                                 Account account = l2Accounts[0];
                                 Navigator.pushNamed(
-                                    parentContext, "/transfer_amount",
-                                    arguments: AmountArguments(
+                                    parentContext, "/transaction_amount",
+                                    arguments: TransactionAmountArguments(
                                         store,
                                         TransactionLevel.LEVEL2,
                                         TransactionType.EXIT,
@@ -284,7 +284,7 @@ class WalletSelectorPage extends HookWidget {
                           onTap: () {
                             store.updateLevel(TransactionLevel.LEVEL1);
                             Navigator.pushNamed(context, 'home',
-                                arguments: HomeBalanceArguments(
+                                arguments: WalletDetailsArguments(
                                   store,
                                   TransactionLevel.LEVEL1,
                                   parentContext,

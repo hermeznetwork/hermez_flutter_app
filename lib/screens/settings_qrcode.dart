@@ -13,7 +13,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share/share.dart';
 
 import '../context/wallet/wallet_handler.dart';
-import '../wallet_transfer_amount_page.dart';
+import 'transaction_amount.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable

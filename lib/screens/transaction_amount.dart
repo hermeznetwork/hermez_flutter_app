@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transaction_details_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 
-import 'components/wallet/transfer_amount_form.dart';
-import 'context/wallet/wallet_handler.dart';
+import '../components/wallet/transfer_amount_form.dart';
+import '../context/wallet/wallet_handler.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
@@ -13,14 +13,14 @@ enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT }
 
 enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 
-class AmountArguments {
+class TransactionAmountArguments {
   final WalletHandler store;
   final TransactionLevel txLevel;
   final TransactionType transactionType;
   final Account account;
   //final Token token;
 
-  AmountArguments(
+  TransactionAmountArguments(
     this.store,
     this.txLevel,
     this.transactionType,
@@ -29,16 +29,16 @@ class AmountArguments {
   );
 }
 
-class WalletAmountPage extends StatefulWidget {
-  WalletAmountPage({Key key, this.arguments}) : super(key: key);
+class TransactionAmountPage extends StatefulWidget {
+  TransactionAmountPage({Key key, this.arguments}) : super(key: key);
 
-  final AmountArguments arguments;
+  final TransactionAmountArguments arguments;
 
   @override
-  _WalletAmountPageState createState() => _WalletAmountPageState();
+  _TransactionAmountPageState createState() => _TransactionAmountPageState();
 }
 
-class _WalletAmountPageState extends State<WalletAmountPage> {
+class _TransactionAmountPageState extends State<TransactionAmountPage> {
   @override
   Widget build(BuildContext context) {
     String operation;

@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
@@ -17,7 +17,7 @@ import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:intl/intl.dart';
 
-import '../../wallet_transaction_details_page.dart';
+import '../../screens/transaction_details.dart';
 
 class ActivityArguments {
   final WalletHandler store;

@@ -11,8 +11,8 @@ import 'package:hermez_plugin/environment.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../wallet_account_selector_page.dart';
-import '../wallet_transfer_amount_page.dart';
+import 'account_selector.dart';
+import 'transaction_amount.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

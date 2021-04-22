@@ -9,16 +9,16 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/move_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/scanner.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
 import 'package:web3dart/web3dart.dart';
 
-import '../../wallet_account_selector_page.dart';
+import '../../screens/account_selector.dart';
 
 class TransferAmountForm extends StatefulWidget {
   TransferAmountForm(

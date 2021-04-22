@@ -9,12 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/settings_qrcode.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/wallet_account_details_page.dart';
-import 'package:hermez/wallet_account_selector_page.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
@@ -22,26 +21,27 @@ import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:intl/intl.dart';
 
-import '../../wallet_transaction_details_page.dart';
+import 'account_details.dart';
+import 'transaction_details.dart';
 
-class HomeBalanceArguments {
+class WalletDetailsArguments {
   final WalletHandler store;
   final TransactionLevel transactionLevel;
   final BuildContext parentContext;
 
-  HomeBalanceArguments(this.store, this.transactionLevel, this.parentContext);
+  WalletDetailsArguments(this.store, this.transactionLevel, this.parentContext);
 }
 
-class HomeBalance extends StatefulWidget {
-  HomeBalance({Key key, this.arguments}) : super(key: key);
+class WalletDetailsPage extends StatefulWidget {
+  WalletDetailsPage({Key key, this.arguments}) : super(key: key);
 
-  final HomeBalanceArguments arguments;
+  final WalletDetailsArguments arguments;
 
   @override
-  _HomeBalanceState createState() => _HomeBalanceState();
+  _WalletDetailsPageState createState() => _WalletDetailsPageState();
 }
 
-class _HomeBalanceState extends State<HomeBalance> {
+class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<Account> _accounts;
   List<Exit> _exits = [];
   List<dynamic> _poolTxs = [];
@@ -116,256 +116,195 @@ class _HomeBalanceState extends State<HomeBalance> {
         future: fetchAccounts(),
         builder: (buildContext, snapshot) {
           return Scaffold(
-              body: NestedScrollView(
-            body: handleAccountsList(snapshot),
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverAppBar(
-                  floating: true,
-                  pinned: true,
-                  snap: false,
-                  collapsedHeight: kToolbarHeight,
-                  expandedHeight: 340.0,
-                  title: Container(
-                    padding: EdgeInsets.all(20),
-                    color: HermezColors.lightOrange,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Image.asset(
-                          'assets/' +
-                              (widget.arguments.store.state.txLevel ==
-                                      TransactionLevel.LEVEL1
-                                  ? "ethereum_logo"
-                                  : "hermez_logo") +
-                              '.png',
-                          width: 30,
-                          height: 30,
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        new Text(
-                            widget.arguments.store.state.txLevel ==
-                                    TransactionLevel.LEVEL1
-                                ? "Ethereum Wallet"
-                                : "Hermez Wallet",
-                            style: TextStyle(
-                                fontFamily: 'ModernEra',
-                                color: HermezColors.blackTwo,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 20)),
-                        SizedBox(
-                          width: 60,
-                        ),
-                      ],
-                    ),
-                  ),
-                  centerTitle: true,
-                  elevation: 0.0,
-                  /*Container(
-                    color: HermezColors.lightOrange,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        /*Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              ToggleButtons(
-                                children: <Widget>[
-                                  Text(
-                                    "L1",
-                                    style: TextStyle(
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 20),
-                                  ),
-                                  Text(
-                                    "L2",
-                                    style: TextStyle(
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 20),
-                                  ),
-                                ],
-                                fillColor: Color.fromRGBO(51, 51, 51, 1.0),
-                                selectedColor:
-                                    Color.fromRGBO(249, 244, 235, 1.0),
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderColor: Color.fromRGBO(51, 51, 51, 1.0),
-                                selectedBorderColor:
-                                    Color.fromRGBO(51, 51, 51, 1.0),
-                                borderWidth: 2,
-                                isSelected: [
-                                  widget.arguments.store.state.txLevel ==
-                                      TransactionLevel.LEVEL1,
-                                  widget.arguments.store.state.txLevel ==
-                                      TransactionLevel.LEVEL2
-                                ],
-                                onPressed: (int index) {
-                                  setState(() {
-                                    widget.arguments.store.updateLevel(
-                                        index == 1
-                                            ? TransactionLevel.LEVEL2
-                                            : TransactionLevel.LEVEL1);
-                                    //index == 1 ? _accounts = [] : fetchAccounts();
-                                  });
-                                },
-                              )
-                            ],
+            body: NestedScrollView(
+              body: handleAccountsList(snapshot),
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverAppBar(
+                    floating: true,
+                    pinned: true,
+                    snap: false,
+                    collapsedHeight: kToolbarHeight,
+                    expandedHeight: 340.0,
+                    title: Container(
+                      padding: EdgeInsets.all(20),
+                      color: HermezColors.lightOrange,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Image.asset(
+                            'assets/' +
+                                (widget.arguments.store.state.txLevel ==
+                                        TransactionLevel.LEVEL1
+                                    ? "ethereum_logo"
+                                    : "hermez_logo") +
+                                '.png',
+                            width: 30,
+                            height: 30,
                           ),
-                        ),*/
-                      ],
+                          SizedBox(
+                            width: 8,
+                          ),
+                          new Text(
+                              widget.arguments.store.state.txLevel ==
+                                      TransactionLevel.LEVEL1
+                                  ? "Ethereum Wallet"
+                                  : "Hermez Wallet",
+                              style: TextStyle(
+                                  fontFamily: 'ModernEra',
+                                  color: HermezColors.blackTwo,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 20)),
+                          SizedBox(
+                            width: 60,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),*/
-                  flexibleSpace: FlexibleSpaceBar(
-                    // here the desired height*/
-                    background: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                            height: MediaQuery.of(context).padding.top +
-                                kToolbarHeight +
-                                20),
-                        Container(
-                          margin: EdgeInsets.only(left: 40, right: 40),
-                          child: FlatButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(56.0),
-                                side: BorderSide(
-                                    color: HermezColors.mediumOrange)),
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(
-                                  text: widget.arguments.store.state.txLevel ==
-                                          TransactionLevel.LEVEL1
-                                      ? widget
-                                          .arguments.store.state.ethereumAddress
-                                      : "hez:" +
-                                          widget.arguments.store.state
-                                              .ethereumAddress));
-                              final snackBar =
-                                  SnackBar(content: Text('Copied'));
-                              ScaffoldMessenger.of(
-                                      widget.arguments.parentContext)
-                                  .showSnackBar(snackBar);
-                            },
-                            padding: EdgeInsets.only(
-                                left: 20.0,
-                                right: 10.0,
-                                top: 10.0,
-                                bottom: 10.0),
-                            color: HermezColors.mediumOrange,
-                            textColor: HermezColors.steel,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  widget != null && widget.arguments != null && widget.arguments.store.state.ethereumAddress != null
-                                      ? (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
-                                          ? "0x" +
-                                                  AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
-                                                      .toUpperCase() +
-                                                  " ･･･ " +
-                                                  widget.arguments.store.state.ethereumAddress
-                                                      .substring(
-                                                          widget
-                                                                  .arguments
-                                                                  .store
-                                                                  .state
-                                                                  .ethereumAddress
-                                                                  .length -
-                                                              5,
-                                                          widget
-                                                              .arguments
-                                                              .store
-                                                              .state
-                                                              .ethereumAddress
-                                                              .length)
-                                                      .toUpperCase() ??
-                                              ""
-                                          : "hez:" +
-                                                  "0x" +
-                                                  AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
-                                                      .toUpperCase() +
-                                                  " ･･･ " +
-                                                  widget.arguments.store.state.ethereumAddress
-                                                      .substring(widget.arguments.store.state.ethereumAddress.length - 5, widget.arguments.store.state.ethereumAddress.length)
-                                                      .toUpperCase() ??
-                                              "")
-                                      : "",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: HermezColors.steel,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(width: 16),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16.0),
-                                      color: HermezColors.steel),
-                                  padding: EdgeInsets.only(
-                                      left: 12.0,
-                                      right: 12.0,
-                                      top: 4,
-                                      bottom: 4),
-                                  child: Text(
-                                    widget.arguments.store.state.txLevel ==
-                                            TransactionLevel.LEVEL1
-                                        ? "L1"
-                                        : "L2",
+                    centerTitle: true,
+                    elevation: 0.0,
+                    flexibleSpace: FlexibleSpaceBar(
+                      // here the desired height*/
+                      background: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                              height: MediaQuery.of(context).padding.top +
+                                  kToolbarHeight +
+                                  20),
+                          Container(
+                            margin: EdgeInsets.only(left: 40, right: 40),
+                            child: FlatButton(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(56.0),
+                                  side: BorderSide(
+                                      color: HermezColors.mediumOrange)),
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(
+                                    text:
+                                        widget.arguments.store.state.txLevel ==
+                                                TransactionLevel.LEVEL1
+                                            ? widget.arguments.store.state
+                                                .ethereumAddress
+                                            : "hez:" +
+                                                widget.arguments.store.state
+                                                    .ethereumAddress));
+                                final snackBar =
+                                    SnackBar(content: Text('Copied'));
+                                ScaffoldMessenger.of(
+                                        widget.arguments.parentContext)
+                                    .showSnackBar(snackBar);
+                              },
+                              padding: EdgeInsets.only(
+                                  left: 20.0,
+                                  right: 10.0,
+                                  top: 10.0,
+                                  bottom: 10.0),
+                              color: HermezColors.mediumOrange,
+                              textColor: HermezColors.steel,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    widget != null && widget.arguments != null && widget.arguments.store.state.ethereumAddress != null
+                                        ? (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                                            ? "0x" +
+                                                    AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
+                                                        .toUpperCase() +
+                                                    " ･･･ " +
+                                                    widget.arguments.store.state
+                                                        .ethereumAddress
+                                                        .substring(
+                                                            widget.arguments.store.state.ethereumAddress.length -
+                                                                5,
+                                                            widget
+                                                                .arguments
+                                                                .store
+                                                                .state
+                                                                .ethereumAddress
+                                                                .length)
+                                                        .toUpperCase() ??
+                                                ""
+                                            : "hez:" +
+                                                    "0x" +
+                                                    AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
+                                                        .toUpperCase() +
+                                                    " ･･･ " +
+                                                    widget.arguments.store.state
+                                                        .ethereumAddress
+                                                        .substring(widget.arguments.store.state.ethereumAddress.length - 5, widget.arguments.store.state.ethereumAddress.length)
+                                                        .toUpperCase() ??
+                                                "")
+                                        : "",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      color: HermezColors.mediumOrange,
-                                      fontSize: 15,
+                                      color: HermezColors.steel,
+                                      fontSize: 16,
                                       fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 30),
-                        SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Text(
+                                  SizedBox(width: 16),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(16.0),
+                                        color: HermezColors.steel),
+                                    padding: EdgeInsets.only(
+                                        left: 12.0,
+                                        right: 12.0,
+                                        top: 4,
+                                        bottom: 4),
+                                    child: Text(
                                       widget.arguments.store.state.txLevel ==
                                               TransactionLevel.LEVEL1
-                                          ? totalBalance(snapshot)
-                                          : totalBalance(snapshot),
-                                      //"\$${EthAmountFormatter(tokenBalance).format()}",
+                                          ? "L1"
+                                          : "L2",
                                       style: TextStyle(
-                                        color: HermezColors.black,
-                                        fontSize: 32,
+                                        color: HermezColors.mediumOrange,
+                                        fontSize: 15,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w800,
-                                      )),
-                                ])),
-                        SizedBox(height: 16),
-                        buildButtonsRow(context, snapshot),
-                        SizedBox(height: 20),
-                      ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30),
+                          SizedBox(
+                              width: double.infinity,
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                        widget.arguments.store.state.txLevel ==
+                                                TransactionLevel.LEVEL1
+                                            ? totalBalance(snapshot)
+                                            : totalBalance(snapshot),
+                                        //"\$${EthAmountFormatter(tokenBalance).format()}",
+                                        style: TextStyle(
+                                          color: HermezColors.black,
+                                          fontSize: 32,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w800,
+                                        )),
+                                  ])),
+                          SizedBox(height: 16),
+                          buildButtonsRow(context, snapshot),
+                          SizedBox(height: 20),
+                        ],
+                      ),
                     ),
+                    backgroundColor: HermezColors.lightOrange,
                   ),
-
-                  //collapsedHeight: 100.0,
-                  /*flexibleSpace: FlexibleSpaceBar(
-                  title: Text('Collapsing Header'),
-                ),*/
-                  backgroundColor: HermezColors.lightOrange,
-                ),
-              ];
-            },
-          ));
+                ];
+              },
+            ),
+          );
         },
       ),
     );
@@ -402,8 +341,8 @@ class _HomeBalanceState extends State<HomeBalance> {
                             } else {
                               Navigator.pushNamed(
                                   widget.arguments.parentContext,
-                                  "/transfer_amount",
-                                  arguments: AmountArguments(
+                                  "/transaction_amount",
+                                  arguments: TransactionAmountArguments(
                                       widget.arguments.store,
                                       widget.arguments.store.state.txLevel,
                                       TransactionType.SEND,
@@ -458,13 +397,6 @@ class _HomeBalanceState extends State<HomeBalance> {
                                     .arguments.store.state.ethereumAddress),
                                 store: widget.arguments.store,
                                 fromHomeScreen: false));
-                        /*Navigator.of(widget.arguments.parentContext)
-                            .pushNamed("/account_selector",
-                                arguments: AccountSelectorArguments(
-                                  //widget.arguments.store.state.txLevel,
-                                  TransactionType.DEPOSIT,
-                                  widget.arguments.store,
-                                ));*/
                       }
                     },
                     padding: EdgeInsets.all(10.0),
@@ -489,51 +421,6 @@ class _HomeBalanceState extends State<HomeBalance> {
                     )),
           ),
           SizedBox(width: 20.0),
-          /*_accounts != null &&
-                  _accounts.length > 0 &&
-                  widget.arguments.store.state.txLevel ==
-                      TransactionLevel.LEVEL2 &&
-                  _exits.length == 0
-              ? Expanded(
-                  child:
-                      // takes in an object and color and returns a circle avatar with first letter and required color
-                      FlatButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          onPressed: () async {
-                            Navigator.of(context).pushNamed("/account_selector",
-                                arguments: AccountSelectorArguments(
-                                  //widget.arguments.store.state.txLevel,
-                                  TransactionType.EXIT,
-                                  widget.arguments.store,
-                                ));
-                          },
-                          padding: EdgeInsets.all(10.0),
-                          color: Colors.transparent,
-                          textColor: HermezColors.blackTwo,
-                          child: Column(
-                            children: <Widget>[
-                              Image.asset("assets/withdraw2.png"),
-                              Text(
-                                'Withdraw',
-                                style: TextStyle(
-                                  color: HermezColors.blackTwo,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          )),
-                )
-              : Container(),*/
-          /*_accounts != null &&
-                  _accounts.length > 0 &&
-                  widget.arguments.store.state.txLevel ==
-                      TransactionLevel.LEVEL2 &&
-                  _exits.length == 0
-              ? SizedBox(width: 20.0)
-              : Container(),*/
         ]);
   }
 
@@ -584,9 +471,6 @@ class _HomeBalanceState extends State<HomeBalance> {
       child: RefreshIndicator(
         child: ListView.builder(
           shrinkWrap: true,
-          // To make listView scrollable
-          // even if there is only a single item.
-          //physics: const AlwaysScrollableScrollPhysics(),
           itemCount: (_poolTxs.isNotEmpty ||
                       _exits.isNotEmpty ||
                       _pendingWithdraws.isNotEmpty
@@ -701,12 +585,11 @@ class _HomeBalanceState extends State<HomeBalance> {
                   isPendingDeposit, (token, amount) async {
                 Navigator.of(context)
                     .pushNamed("account_details",
-                        arguments: WalletAccountDetailsArguments(
+                        arguments: AccountDetailsArguments(
                             account, widget.arguments.parentContext))
                     .then((value) => _onRefresh());
               }); //iterate through indexes and get the next colour
             }
-            //return _buildRow(context, element, color); //build the row widget
           },
         ),
         onRefresh: _onRefresh,
@@ -747,7 +630,6 @@ class _HomeBalanceState extends State<HomeBalance> {
         }
       }
     }
-    //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));
     return result;
