@@ -15,7 +15,6 @@ import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/settings_currency.dart';
 import 'package:hermez/screens/settings_details.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/service/configuration_service.dart';
@@ -110,8 +109,6 @@ Map<String, WidgetBuilder> getRoutes(context) {
     },
     '/qrcode': (BuildContext context) =>
         QRCodePage(arguments: ModalRoute.of(context).settings.arguments),
-    '/settings_qrcode': (BuildContext context) => SettingsQRCodePage(
-        arguments: ModalRoute.of(context).settings.arguments),
     '/currency_selector': (BuildContext context) =>
         SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
     '/first_deposit': (BuildContext context) {

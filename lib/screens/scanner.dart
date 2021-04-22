@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/recovery_phrase_utils.dart';
@@ -133,56 +132,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                             return Container();
                           }
                         }),
-                    widget.arguments.type != QRCodeScannerType.RECOVERY_SEED
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  backgroundColor: Color(0xfff6e9d3),
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.of(context).pushReplacementNamed(
-                                        "/settings_qrcode",
-                                        arguments: SettingsQRCodeArguments(
-                                            store: widget.arguments.store,
-                                            fromHomeScreen: false));
-                                  } else {
-                                    Navigator.of(context).pushNamed(
-                                        "/settings_qrcode",
-                                        arguments: SettingsQRCodeArguments(
-                                            store: widget.arguments.store,
-                                            fromHomeScreen: true));
-                                  }
-                                },
-                                child: FutureBuilder(
-                                  future: controller?.getFlashStatus(),
-                                  builder: (context, snapshot) {
-                                    return Image.asset("assets/qr_code.png",
-                                        color: HermezColors.blackTwo,
-                                        height: 20);
-                                  },
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                "My Code",
-                                style: TextStyle(
-                                  color: HermezColors.lightOrange,
-                                  fontSize: 16,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          )
-                        : Container(),
-                    SizedBox(width: 30),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[

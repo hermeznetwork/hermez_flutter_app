@@ -2,7 +2,7 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/settings_qrcode.dart';
+import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
@@ -59,11 +59,11 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                   ),
                   onPressed: () {
                     Navigator.of(context).pushNamed(
-                      "/settings_qrcode",
-                      arguments: SettingsQRCodeArguments(
-                          message: mnemonic,
-                          store: widget.arguments.store,
-                          fromHomeScreen: false),
+                      "/qrcode",
+                      arguments: QRCodeArguments(
+                          qrCodeType: QRCodeType.RECOVERY_PHRASE,
+                          code: mnemonic,
+                          store: widget.arguments.store),
                     );
                   },
                 ),

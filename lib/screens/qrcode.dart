@@ -19,10 +19,7 @@ import 'transaction_amount.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-enum QRCodeType {
-  HERMEZ,
-  ETHEREUM,
-}
+enum QRCodeType { HERMEZ, ETHEREUM, RECOVERY_PHRASE }
 
 class QRCodeArguments {
   final QRCodeType qrCodeType;
@@ -51,13 +48,18 @@ class _QRCodePageState extends State<QRCodePage> {
   static GlobalKey _globalKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
+    String title;
+    if (widget.arguments.qrCodeType == QRCodeType.RECOVERY_PHRASE) {
+      title = "Recovery phrase";
+    } else if (widget.arguments.qrCodeType == QRCodeType.HERMEZ) {
+      title = "Your Hermez Wallet";
+    } else {
+      title = "Your Ethereum Wallet";
+    }
     return Scaffold(
       backgroundColor: HermezColors.lightOrange,
       appBar: new AppBar(
-          title: new Text(
-              widget.arguments.qrCodeType == QRCodeType.HERMEZ
-                  ? "Your Hermez Wallet"
-                  : "Your Ethereum Wallet",
+          title: new Text(title,
               style: TextStyle(
                   fontFamily: 'ModernEra',
                   color: HermezColors.blackTwo,
@@ -163,7 +165,8 @@ class _QRCodePageState extends State<QRCodePage> {
                     ),
                   ),
                 )),
-            widget.arguments.isReceive
+            widget.arguments.isReceive ||
+                    widget.arguments.qrCodeType == QRCodeType.RECOVERY_PHRASE
                 ? Container()
                 : Container(
                     margin: EdgeInsets.all(20),
@@ -226,7 +229,8 @@ class _QRCodePageState extends State<QRCodePage> {
                       ],
                     ),
                   ),
-            widget.arguments.isReceive
+            widget.arguments.isReceive &&
+                    widget.arguments.qrCodeType != QRCodeType.RECOVERY_PHRASE
                 ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 30.0, bottom: 0.0),
@@ -278,7 +282,8 @@ class _QRCodePageState extends State<QRCodePage> {
                     ),
                   )
                 : Container(),
-            widget.arguments.isReceive
+            widget.arguments.isReceive &&
+                    widget.arguments.qrCodeType != QRCodeType.RECOVERY_PHRASE
                 ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 20.0, bottom: 20.0),
