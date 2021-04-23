@@ -220,7 +220,7 @@ class WalletSelectorPage extends HookWidget {
                                         store,
                                         TransactionLevel.LEVEL1,
                                         TransactionType.DEPOSIT,
-                                        account));
+                                        account: account));
                               }
                             } else if (l2Accounts != null &&
                                 l2Accounts.length > 0) {
@@ -241,7 +241,7 @@ class WalletSelectorPage extends HookWidget {
                                         store,
                                         TransactionLevel.LEVEL2,
                                         TransactionType.EXIT,
-                                        account));
+                                        account: account));
                               }
                             } else {
                               store.updateLevel(TransactionLevel.LEVEL1);

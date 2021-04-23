@@ -3,9 +3,11 @@ import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/token.dart';
 
 import '../components/wallet/transfer_amount_form.dart';
 import '../context/wallet/wallet_handler.dart';
+import 'qrcode.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
@@ -14,19 +16,23 @@ enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT }
 enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 
 class TransactionAmountArguments {
-  final WalletHandler store;
   final TransactionLevel txLevel;
   final TransactionType transactionType;
   final Account account;
-  //final Token token;
+  final Token token;
+  final double amount;
+  final String addressTo;
+  final WalletHandler store;
 
   TransactionAmountArguments(
     this.store,
     this.txLevel,
-    this.transactionType,
+    this.transactionType, {
     this.account,
-    //this.token,
-  );
+    this.token,
+    this.amount,
+    this.addressTo,
+  });
 }
 
 class TransactionAmountPage extends StatefulWidget {
@@ -41,15 +47,7 @@ class TransactionAmountPage extends StatefulWidget {
 class _TransactionAmountPageState extends State<TransactionAmountPage> {
   @override
   Widget build(BuildContext context) {
-    String operation;
-    if (widget.arguments.transactionType == TransactionType.SEND) {
-      operation = "send";
-    } else if (widget.arguments.transactionType == TransactionType.EXIT ||
-        widget.arguments.transactionType == TransactionType.FORCEEXIT ||
-        widget.arguments.transactionType == TransactionType.DEPOSIT ||
-        widget.arguments.transactionType == TransactionType.WITHDRAW) {
-      operation = "move";
-    }
+    String operation = getTitle();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -70,36 +68,63 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
         ],
       ),
       body: TransferAmountForm(
-        account: widget.arguments.account,
-        store: widget.arguments.store,
-        amountType: widget.arguments.transactionType,
         txLevel: widget.arguments.txLevel,
+        transactionType: widget.arguments.transactionType,
+        account: widget.arguments.account,
+        token: widget.arguments.token,
+        amount: widget.arguments.amount,
+        addressTo: widget.arguments.addressTo,
+        store: widget.arguments.store,
         onSubmit: (amount, token, address) async {
-          String addressTo;
-          if (widget.arguments.transactionType == TransactionType.EXIT &&
-              address.isEmpty) {
-            addressTo =
-                getEthereumAddress(widget.arguments.account.hezEthereumAddress);
+          if (widget.arguments.transactionType == TransactionType.RECEIVE) {
+            Navigator.of(context).pushReplacementNamed("/qrcode",
+                arguments: QRCodeArguments(
+                    qrCodeType: QRCodeType.REQUEST_PAYMENT,
+                    code: widget.arguments.txLevel == TransactionLevel.LEVEL1
+                        ? widget.arguments.store.state.ethereumAddress
+                        : getHermezAddress(
+                            widget.arguments.store.state.ethereumAddress),
+                    store: widget.arguments.store,
+                    isReceive: true));
           } else {
-            addressTo = address;
+            String addressTo;
+            if (widget.arguments.transactionType == TransactionType.EXIT &&
+                address.isEmpty) {
+              addressTo = getEthereumAddress(
+                  widget.arguments.account.hezEthereumAddress);
+            } else {
+              addressTo = address;
+            }
+            //var success = await transferStore.transfer(address, amount);
+            Navigator.pushReplacementNamed(context, "/transaction_details",
+                arguments: TransactionDetailsArguments(
+                  wallet: widget.arguments.store,
+                  transactionType: widget.arguments.transactionType,
+                  status: TransactionStatus.DRAFT,
+                  account: widget.arguments.account,
+                  token: widget.arguments.account.token,
+                  amount: amount,
+                  addressFrom: widget.arguments.account.hezEthereumAddress,
+                  addressTo: addressTo,
+                ));
           }
-          //var success = await transferStore.transfer(address, amount);
-          Navigator.pushReplacementNamed(context, "/transaction_details",
-              arguments: TransactionDetailsArguments(
-                wallet: widget.arguments.store,
-                transactionType: widget.arguments.transactionType,
-                status: TransactionStatus.DRAFT,
-                account: widget.arguments.account,
-                token: widget.arguments.account.token,
-                amount: amount,
-                addressFrom: widget.arguments.account.hezEthereumAddress,
-                addressTo: addressTo,
-              ));
-          //if (success) {
-          //Navigator.popUntil(context, ModalRoute.withName('/'));
-          //}
         },
       ),
     );
+  }
+
+  String getTitle() {
+    String operation = "amount";
+    if (widget.arguments.transactionType == TransactionType.SEND) {
+      operation = "send";
+    } else if (widget.arguments.transactionType == TransactionType.EXIT ||
+        widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT ||
+        widget.arguments.transactionType == TransactionType.WITHDRAW) {
+      operation = "move";
+    } else if (widget.arguments.transactionType == TransactionType.RECEIVE) {
+      operation = "receive";
+    }
+    return operation;
   }
 }

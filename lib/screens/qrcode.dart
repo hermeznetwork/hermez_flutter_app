@@ -19,7 +19,7 @@ import 'transaction_amount.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-enum QRCodeType { HERMEZ, ETHEREUM, RECOVERY_PHRASE }
+enum QRCodeType { HERMEZ, ETHEREUM, RECOVERY_PHRASE, REQUEST_PAYMENT }
 
 class QRCodeArguments {
   final QRCodeType qrCodeType;
@@ -53,8 +53,10 @@ class _QRCodePageState extends State<QRCodePage> {
       title = "Recovery phrase";
     } else if (widget.arguments.qrCodeType == QRCodeType.HERMEZ) {
       title = "Your Hermez Wallet";
-    } else {
+    } else if (widget.arguments.qrCodeType == QRCodeType.ETHEREUM) {
       title = "Your Ethereum Wallet";
+    } else {
+      title = "Request payment";
     }
     return Scaffold(
       backgroundColor: HermezColors.lightOrange,
@@ -282,8 +284,14 @@ class _QRCodePageState extends State<QRCodePage> {
                     ),
                   )
                 : Container(),
-            widget.arguments.isReceive &&
-                    widget.arguments.qrCodeType != QRCodeType.RECOVERY_PHRASE
+            (widget.arguments.isReceive &&
+                        widget.arguments.qrCodeType !=
+                            QRCodeType.RECOVERY_PHRASE &&
+                        widget.arguments.qrCodeType !=
+                            QRCodeType.REQUEST_PAYMENT) ||
+                    (widget.arguments.qrCodeType ==
+                            QRCodeType.REQUEST_PAYMENT &&
+                        Platform.isAndroid)
                 ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 20.0, bottom: 20.0),
@@ -295,7 +303,17 @@ class _QRCodePageState extends State<QRCodePage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(100.0),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            widget.arguments.qrCodeType ==
+                                    QRCodeType.REQUEST_PAYMENT
+                                ? shareScreenshot()
+                                : Navigator.pushReplacementNamed(
+                                    context, "/transaction_amount",
+                                    arguments: TransactionAmountArguments(
+                                        widget.arguments.store,
+                                        widget.arguments.store.state.txLevel,
+                                        TransactionType.RECEIVE));
+                          },
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                           textColor: HermezColors.steel,
@@ -303,10 +321,19 @@ class _QRCodePageState extends State<QRCodePage> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset("assets/deposit.png",
-                                    color: HermezColors.steel, height: 20),
+                                Image.asset(
+                                    widget.arguments.qrCodeType ==
+                                            QRCodeType.REQUEST_PAYMENT
+                                        ? "assets/share.png"
+                                        : "assets/deposit.png",
+                                    color: HermezColors.steel,
+                                    height: 20),
                                 SizedBox(width: 8),
-                                Text("Request payment",
+                                Text(
+                                    widget.arguments.qrCodeType ==
+                                            QRCodeType.REQUEST_PAYMENT
+                                        ? "Share payment link"
+                                        : "Request payment",
                                     style: TextStyle(
                                       color: HermezColors.steel,
                                       fontSize: 16,

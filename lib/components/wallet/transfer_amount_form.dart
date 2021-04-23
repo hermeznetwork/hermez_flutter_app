@@ -16,6 +16,7 @@ import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
+import 'package:hermez_plugin/model/token.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../screens/account_selector.dart';
@@ -23,35 +24,41 @@ import '../../screens/account_selector.dart';
 class TransferAmountForm extends StatefulWidget {
   TransferAmountForm(
       {Key key,
+      @required this.txLevel,
+      @required this.transactionType,
       this.account,
+      this.token,
       this.amount,
-      this.txLevel,
-      this.store,
-      this.amountType,
+      this.addressTo,
+      @required this.store,
       @required this.onSubmit})
       : super(key: key);
 
-  final Account account;
-  final double amount;
   final TransactionLevel txLevel;
+  final TransactionType transactionType;
+  final Account account;
+  final Token token;
+  final double amount;
+  final String addressTo;
   final WalletHandler store;
-  final TransactionType amountType;
   final void Function(double amount, String token, String addressTo) onSubmit;
 
   @override
-  _TransferAmountFormState createState() => _TransferAmountFormState(
-      account, amount, txLevel, store, amountType, onSubmit);
+  _TransferAmountFormState createState() => _TransferAmountFormState(txLevel,
+      transactionType, account, token, amount, addressTo, store, onSubmit);
 }
 
 class _TransferAmountFormState extends State<TransferAmountForm> {
-  _TransferAmountFormState(this.account, this.amount, this.txLevel, this.store,
-      this.amountType, this.onSubmit);
+  _TransferAmountFormState(this.txLevel, this.transactionType, this.account,
+      this.token, this.amount, this.addressTo, this.store, this.onSubmit);
 
+  final TransactionLevel txLevel;
+  final TransactionType transactionType;
   final Account account;
+  final Token token;
   final double amount;
-  TransactionLevel txLevel;
+  final String addressTo;
   final WalletHandler store;
-  final TransactionType amountType;
   final void Function(double amount, String token, String addressTo) onSubmit;
   bool amountIsValid = true;
   bool addressIsValid = true;
@@ -132,41 +139,44 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             ),
                           ),
                         ),
-                        Container(
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.only(top: 20.0),
-                          child: Text(
-                            defaultCurrencySelected
-                                ? "Fee " +
-                                    ((currency != "USD"
-                                                ? account.token.USD *
-                                                    widget.store.state
-                                                        .exchangeRatio
-                                                : account.token.USD) *
-                                            (estimatedFee.toDouble() /
-                                                pow(10, 18)))
-                                        .toString() +
-                                    " " +
-                                    currency
-                                : "Fee " +
-                                    (estimatedFee.toDouble() / pow(10, 18))
-                                        .toString() +
-                                    " ETH",
-                            style: TextStyle(
-                              color: HermezColors.blueyGreyTwo,
-                              fontSize: 16,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
+                        transactionType != TransactionType.RECEIVE
+                            ? Container(
+                                alignment: Alignment.center,
+                                margin: EdgeInsets.only(top: 20.0),
+                                child: Text(
+                                  defaultCurrencySelected
+                                      ? "Fee " +
+                                          ((currency != "USD"
+                                                      ? account.token.USD *
+                                                          widget.store.state
+                                                              .exchangeRatio
+                                                      : account.token.USD) *
+                                                  (estimatedFee.toDouble() /
+                                                      pow(10, 18)))
+                                              .toString() +
+                                          " " +
+                                          currency
+                                      : "Fee " +
+                                          (estimatedFee.toDouble() /
+                                                  pow(10, 18))
+                                              .toString() +
+                                          " ETH",
+                                  style: TextStyle(
+                                    color: HermezColors.blueyGreyTwo,
+                                    fontSize: 16,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : Container(),
                       ],
                     ),
                   ],
                   children: <Widget>[
-                    amountType != TransactionType.SEND &&
-                            amountType != TransactionType.RECEIVE
+                    transactionType != TransactionType.SEND &&
+                            transactionType != TransactionType.RECEIVE
                         ? MoveRow(
                             txLevel,
                             /*() async {
@@ -179,27 +189,82 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             null,
                           )
                         : Container(),
-                    AccountRow(
-                      account.token.name,
-                      account.token.symbol,
-                      currency != "USD"
-                          ? account.token.USD * widget.store.state.exchangeRatio
-                          : account.token.USD,
-                      currency,
-                      double.parse(account.balance) / pow(10, 18),
-                      true,
-                      defaultCurrencySelected,
-                      false,
-                      (token, amount) async {
-                        Navigator.of(context).pushReplacementNamed(
-                            "/account_selector",
-                            arguments: AccountSelectorArguments(
-                                widget.txLevel, amountType, widget.store));
-                      },
-                    ),
+                    account != null || token != null
+                        ? AccountRow(
+                            account != null ? account.token.name : token.name,
+                            account != null
+                                ? account.token.symbol
+                                : token.symbol,
+                            currency != "USD"
+                                ? (account != null
+                                        ? account.token.USD
+                                        : token.USD) *
+                                    widget.store.state.exchangeRatio
+                                : account != null
+                                    ? account.token.USD
+                                    : token.USD,
+                            currency,
+                            account != null
+                                ? double.parse(account.balance) /
+                                    pow(10, account.token.decimals)
+                                : 0,
+                            true,
+                            defaultCurrencySelected,
+                            false,
+                            token != null,
+                            (token, amount) async {
+                              Navigator.of(context).pushReplacementNamed(
+                                  "/account_selector",
+                                  arguments: AccountSelectorArguments(
+                                      widget.txLevel,
+                                      transactionType,
+                                      widget.store));
+                            },
+                          )
+                        : Container(
+                            padding: EdgeInsets.only(bottom: 15.0),
+                            child: FlatButton(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  side: BorderSide(
+                                      color: HermezColors.lightGrey)),
+                              onPressed: () {
+                                Navigator.of(context).pushReplacementNamed(
+                                    "/account_selector",
+                                    arguments: AccountSelectorArguments(
+                                        txLevel, transactionType, store));
+                              },
+                              padding: EdgeInsets.all(20.0),
+                              color: HermezColors.lightGrey,
+                              textColor: HermezColors.blackTwo,
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            'Select token',
+                                            style: TextStyle(
+                                              color: HermezColors.blackTwo,
+                                              fontSize: 16,
+                                              fontFamily: 'ModernEra',
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ), //title to be name of the crypto
+                            )),
                     _buildAmountRow(
                         context, null, amountController, estimatedFee),
-                    amountType == TransactionType.SEND
+                    transactionType == TransactionType.SEND
                         ? addressRow()
                         : Container()
                   ],
@@ -208,7 +273,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             );
           } else {
             // We can show the loading view until the data comes back.
-            debugPrint('Step 1, build loading widget');
+            //debugPrint('Step 1, build loading widget');
             return new Center(
               child: new CircularProgressIndicator(),
             );
@@ -374,7 +439,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
               children: <Widget>[
                 Container(
                   child: Text(
-                    defaultCurrencySelected ? currency : account.token.symbol,
+                    defaultCurrencySelected || account == null && token == null
+                        ? currency
+                        : account != null
+                            ? account.token.symbol
+                            : token.symbol,
                     style: TextStyle(
                       color: HermezColors.black,
                       fontSize: 16,
@@ -389,148 +458,179 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     onChanged: (value) {
                       setState(() {
                         amountIsValid = value.isEmpty ||
-                            double.parse(value) <=
-                                (defaultCurrencySelected
-                                    ? currency != "USD"
-                                        ? account.token.USD *
-                                                double.parse(account.balance) /
-                                                pow(10, 18) *
-                                                widget
-                                                    .store.state.exchangeRatio -
-                                            (account.token.USD *
+                            (account != null
+                                ? (double.parse(value) <=
+                                    (defaultCurrencySelected
+                                        ? currency != "USD"
+                                            ? account.token.USD *
+                                                    double.parse(
+                                                        account.balance) /
+                                                    pow(
+                                                        10,
+                                                        account
+                                                            .token.decimals) *
                                                     widget.store.state
-                                                        .exchangeRatio) *
-                                                (estimatedFee.toDouble() /
-                                                    pow(10, 18))
-                                        : account.token.USD *
-                                                double.parse(account.balance) /
-                                                pow(10, 18) -
-                                            (account.token.USD *
-                                                estimatedFee.toDouble() /
-                                                pow(10, 18))
-                                    : double.parse(account.balance) /
-                                            pow(10, 18) -
-                                        (estimatedFee.toDouble() /
-                                            pow(10, 18)));
+                                                        .exchangeRatio -
+                                                (account.token.USD *
+                                                        widget.store.state
+                                                            .exchangeRatio) *
+                                                    (estimatedFee.toDouble() /
+                                                        pow(
+                                                            10,
+                                                            account.token
+                                                                .decimals))
+                                            : account.token.USD * double.parse(account.balance) / pow(10, account.token.decimals) -
+                                                (account.token.USD *
+                                                    estimatedFee.toDouble() /
+                                                    pow(10,
+                                                        account.token.decimals))
+                                        : double.parse(account.balance) /
+                                                pow(10, account.token.decimals) -
+                                            (estimatedFee.toDouble() / pow(10, account.token.decimals))))
+                                : true);
                       });
                     },
                     controller: amountController,
                   ),
                 ),
                 SizedBox(
-                  height: 16.0,
+                  height: account != null || token != null ? 16.0 : 25,
                 ),
-                Divider(
-                  color: HermezColors.blueyGreyThree,
-                  height: 2,
-                  thickness: 2,
-                ),
+                account != null || token != null
+                    ? Divider(
+                        color: HermezColors.blueyGreyThree,
+                        height: 2,
+                        thickness: 2,
+                      )
+                    : Container(),
                 Container(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            border: Border(
-                                top: BorderSide.none,
-                                right: BorderSide(
-                                    color: HermezColors.blueyGreyThree,
-                                    width: 1),
-                                bottom: BorderSide.none,
-                                left: BorderSide.none),
-                          ),
-                          child: FlatButton(
-                            child: Text(
-                              "Send All",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: HermezColors.blueyGreyTwo,
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                amountController.clear();
-                                amountIsValid = false;
-                                double amount = 0;
-                                if (defaultCurrencySelected) {
-                                  if (currency != 'USD') {
-                                    amount = account.token.USD *
-                                            double.parse(account.balance) /
-                                            pow(10, account.token.decimals) *
-                                            widget.store.state.exchangeRatio -
-                                        (account.token.USD *
-                                            widget.store.state.exchangeRatio *
-                                            estimatedFee.toDouble() /
-                                            pow(10, account.token.decimals));
-                                  } else {
-                                    amount = account.token.USD *
-                                            (double.parse(account.balance) /
+                      transactionType != TransactionType.RECEIVE
+                          ? Expanded(
+                              child: Container(
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                      top: BorderSide.none,
+                                      right: BorderSide(
+                                          color: HermezColors.blueyGreyThree,
+                                          width: 1),
+                                      bottom: BorderSide.none,
+                                      left: BorderSide.none),
+                                ),
+                                child: FlatButton(
+                                  child: Text(
+                                    "Send All",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      amountController.clear();
+                                      amountIsValid = false;
+                                      double amount = 0;
+                                      if (defaultCurrencySelected) {
+                                        if (currency != 'USD') {
+                                          amount = account.token.USD *
+                                                  double.parse(
+                                                      account.balance) /
+                                                  pow(10,
+                                                      account.token.decimals) *
+                                                  widget.store.state
+                                                      .exchangeRatio -
+                                              (account.token.USD *
+                                                  widget.store.state
+                                                      .exchangeRatio *
+                                                  estimatedFee.toDouble() /
+                                                  pow(10,
+                                                      account.token.decimals));
+                                        } else {
+                                          amount = account.token.USD *
+                                                  (double.parse(
+                                                          account.balance) /
+                                                      pow(
+                                                          10,
+                                                          account.token
+                                                              .decimals)) -
+                                              (account.token.USD *
+                                                  (estimatedFee.toDouble() /
+                                                      pow(
+                                                          10,
+                                                          account.token
+                                                              .decimals)));
+                                        }
+                                      } else {
+                                        amount = ((double.parse(
+                                                    account.balance) /
                                                 pow(10,
                                                     account.token.decimals)) -
-                                        (account.token.USD *
                                             (estimatedFee.toDouble() /
                                                 pow(10,
                                                     account.token.decimals)));
-                                  }
-                                } else {
-                                  amount = ((double.parse(account.balance) /
-                                          pow(10, account.token.decimals)) -
-                                      (estimatedFee.toDouble() /
-                                          pow(10, account.token.decimals)));
-                                }
-                                amountIsValid = amount > 0;
-                                if (amountIsValid) {
-                                  amountController.text = amount.toString();
-                                }
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            border: Border(
-                                top: BorderSide.none,
-                                right: BorderSide.none,
-                                bottom: BorderSide.none,
-                                left: BorderSide(
-                                    color: HermezColors.blueyGreyThree,
-                                    width: 1)),
-                          ),
-                          child: FlatButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                amountController.clear();
-                                defaultCurrencySelected =
-                                    !defaultCurrencySelected;
-                              });
-                            },
-                            icon: Image.asset(
-                              "assets/arrows_up_down.png",
-                              color: HermezColors.blueyGreyTwo,
-                            ),
-                            label: Text(
-                              defaultCurrencySelected
-                                  ? account.token.symbol
-                                  : currency,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: HermezColors.blueyGreyTwo,
-                                fontSize: 16,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w700,
+                                      }
+                                      amountIsValid = amount > 0;
+                                      if (amountIsValid) {
+                                        amountController.text =
+                                            amount.toString();
+                                      }
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
+                            )
+                          : Container(),
+                      account != null || token != null
+                          ? Expanded(
+                              child: Container(
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                      top: BorderSide.none,
+                                      right: BorderSide.none,
+                                      bottom: BorderSide.none,
+                                      left: BorderSide(
+                                          color: HermezColors.blueyGreyThree,
+                                          width: 1)),
+                                ),
+                                child: FlatButton.icon(
+                                  onPressed: () {
+                                    if (account != null || token != null) {
+                                      setState(() {
+                                        amountController.clear();
+                                        defaultCurrencySelected =
+                                            !defaultCurrencySelected;
+                                      });
+                                    }
+                                  },
+                                  icon: Image.asset(
+                                    "assets/arrows_up_down.png",
+                                    color: HermezColors.blueyGreyTwo,
+                                  ),
+                                  label: Text(
+                                    defaultCurrencySelected
+                                        ? account != null
+                                            ? account.token.symbol
+                                            : token.symbol
+                                        : currency,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Container(),
                     ],
                   ),
                 ),
@@ -622,7 +722,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   bool buttonIsEnabled() {
-    if (amountType == TransactionType.SEND) {
+    if (transactionType == TransactionType.SEND) {
       return amountIsValid &&
           amountController.value.text.isNotEmpty &&
           addressIsValid &&

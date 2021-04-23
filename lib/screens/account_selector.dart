@@ -25,6 +25,7 @@ class AccountSelectorPage extends HookWidget {
 
   final AccountSelectorArguments arguments;
   List<Account> _accounts;
+  List<Token> _tokens;
 
   Future<List<Account>> getAccounts() {
     if ((arguments.txLevel == TransactionLevel.LEVEL1 &&
@@ -34,6 +35,10 @@ class AccountSelectorPage extends HookWidget {
     } else {
       return arguments.store.getAccounts();
     }
+  }
+
+  Future<List<Token>> getTokens() {
+    return arguments.store.getTokens();
   }
 
   Future<void> _onRefresh() async {
@@ -50,6 +55,8 @@ class AccountSelectorPage extends HookWidget {
         arguments.transactionType == TransactionType.DEPOSIT ||
         arguments.transactionType == TransactionType.WITHDRAW) {
       operation = "move";
+    } else if (arguments.transactionType == TransactionType.RECEIVE) {
+      operation = "receive";
     }
 
     return Scaffold(
@@ -70,9 +77,11 @@ class AccountSelectorPage extends HookWidget {
         ],
         leading: new Container(),
       ),
-      body: FutureBuilder<List<Account>>(
-        future: getAccounts(),
-        builder: (BuildContext context, AsyncSnapshot<List<Account>> snapshot) {
+      body: FutureBuilder<List<dynamic>>(
+        future: arguments.transactionType == TransactionType.RECEIVE
+            ? getTokens()
+            : getAccounts(),
+        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
@@ -105,8 +114,12 @@ class AccountSelectorPage extends HookWidget {
       } else {
         if (snapshot.hasData && (snapshot.data as List).length > 0) {
           // data loaded:
-          _accounts = snapshot.data;
-          buildAccountsList();
+          if (arguments.transactionType == TransactionType.RECEIVE) {
+            _tokens = snapshot.data;
+          } else {
+            _accounts = snapshot.data;
+            buildAccountsList();
+          }
         } else {
           return Container(
             margin: EdgeInsets.all(20.0),
@@ -239,92 +252,136 @@ class AccountSelectorPage extends HookWidget {
         arguments.transactionType == TransactionType.DEPOSIT ||
         arguments.transactionType == TransactionType.WITHDRAW) {
       operation = "move";
+    } else if (arguments.transactionType == TransactionType.RECEIVE) {
+      operation = "receive";
     }
 
-    return Column(children: [
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Available tokens to ' + operation,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: HermezColors.blackTwo,
-              fontSize: 16,
-              fontFamily: 'ModernEra',
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(width: 8),
-          Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                color: HermezColors.blueyGreyTwo),
-            padding:
-                EdgeInsets.only(left: 12.0, right: 12.0, top: 4, bottom: 4),
-            child: Text(
-              arguments.txLevel == TransactionLevel.LEVEL1 ? "L1" : "L2",
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Available tokens to ' + operation,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
+                color: HermezColors.blackTwo,
+                fontSize: 16,
                 fontFamily: 'ModernEra',
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-        ],
-      ),
-      SizedBox(
-        height: 16,
-      ),
-      Container(
-        color: Colors.white,
-        child: RefreshIndicator(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _accounts.length,
-            //set the item count so that index won't be out of range
-            padding: const EdgeInsets.all(16.0),
-            //add some padding to make it look good
-            itemBuilder: (context, i) {
-              //item builder returns a row for each index i=0,1,2,3,4
-              // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
-
-              // final index = i ~/ 2; //get the actual index excluding dividers.
-              final index = i;
-              final Account account = _accounts[index];
-
-              final String currency = arguments.store.state.defaultCurrency
-                  .toString()
-                  .split('.')
-                  .last;
-              //final Color color = _colors[index %
-              //    _colors.length];
-              return AccountRow(
-                  account.token.name,
-                  account.token.symbol,
-                  currency != "USD"
-                      ? account.token.USD * arguments.store.state.exchangeRatio
-                      : account.token.USD,
-                  currency,
-                  double.parse(account.balance) /
-                      pow(10, account.token.decimals),
-                  false,
-                  true,
-                  false, (String token, String amount) async {
-                final Token supportedToken =
-                    await arguments.store.getTokenById(account.token.id);
-                Navigator.pushReplacementNamed(context, "/transaction_amount",
-                    arguments: TransactionAmountArguments(arguments.store,
-                        arguments.txLevel, arguments.transactionType, account));
-              }); //iterate through indexes and get the next colour
-              //return _buildRow(context, element, color); //build the row widget
-            },
-          ),
-          onRefresh: _onRefresh,
+            SizedBox(width: 8),
+            Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0),
+                  color: HermezColors.blueyGreyTwo),
+              padding:
+                  EdgeInsets.only(left: 12.0, right: 12.0, top: 4, bottom: 4),
+              child: Text(
+                arguments.txLevel == TransactionLevel.LEVEL1 ? "L1" : "L2",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
-    ]);
+        SizedBox(
+          height: 16,
+        ),
+        Expanded(
+          child: Container(
+            color: Colors.white,
+            child: RefreshIndicator(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: arguments.transactionType == TransactionType.RECEIVE
+                    ? _tokens.length
+                    : _accounts.length,
+                //set the item count so that index won't be out of range
+                padding: const EdgeInsets.all(16.0),
+                //add some padding to make it look good
+                itemBuilder: (context, i) {
+                  //item builder returns a row for each index i=0,1,2,3,4
+                  // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+
+                  // final index = i ~/ 2; //get the actual index excluding dividers.
+                  final index = i;
+                  final String currency = arguments.store.state.defaultCurrency
+                      .toString()
+                      .split('.')
+                      .last;
+                  if (arguments.transactionType == TransactionType.RECEIVE) {
+                    final Token token = _tokens[index];
+                    return AccountRow(
+                        token.name,
+                        token.symbol,
+                        currency != "USD"
+                            ? token.USD * arguments.store.state.exchangeRatio
+                            : token.USD,
+                        currency,
+                        0
+                        /*double.parse(account.balance) /
+                pow(10, account.token.decimals)*/
+                        ,
+                        false,
+                        true,
+                        false,
+                        true, (String tokenId, String amount) async {
+                      Navigator.pushReplacementNamed(
+                          context, "/transaction_amount",
+                          arguments: TransactionAmountArguments(arguments.store,
+                              arguments.txLevel, arguments.transactionType,
+                              token: token));
+                      /*final Token supportedToken =
+                await arguments.store.getTokenById(account.token.id);
+                Navigator.pushReplacementNamed(context, "/transaction_amount",
+                arguments: TransactionAmountArguments(arguments.store,
+                arguments.txLevel, arguments.transactionType, account));
+                */
+                    });
+                  } else {
+                    final Account account = _accounts[index];
+                    return AccountRow(
+                        account.token.name,
+                        account.token.symbol,
+                        currency != "USD"
+                            ? account.token.USD *
+                                arguments.store.state.exchangeRatio
+                            : account.token.USD,
+                        currency,
+                        double.parse(account.balance) /
+                            pow(10, account.token.decimals),
+                        false,
+                        true,
+                        false,
+                        false, (String token, String amount) async {
+                      final Token supportedToken =
+                          await arguments.store.getTokenById(account.token.id);
+                      Navigator.pushReplacementNamed(
+                          context, "/transaction_amount",
+                          arguments: TransactionAmountArguments(arguments.store,
+                              arguments.txLevel, arguments.transactionType,
+                              account: account));
+                    });
+                  }
+
+                  //final Color color = _colors[index %
+                  //    _colors.length];
+                  //iterate through indexes and get the next colour
+                  //return _buildRow(context, element, color); //build the row widget
+                },
+              ),
+              onRefresh: _onRefresh,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

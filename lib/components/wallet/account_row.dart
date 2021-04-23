@@ -12,6 +12,7 @@ class AccountRow extends StatelessWidget {
       this.simplified,
       this.currencyFirst,
       this.pendingDeposit,
+      this.isToken,
       this.onPressed);
 
   final String name;
@@ -22,6 +23,7 @@ class AccountRow extends StatelessWidget {
   final bool simplified;
   final bool currencyFirst;
   final bool pendingDeposit;
+  final bool isToken;
   final void Function(String token, String amount) onPressed;
 
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class AccountRow extends StatelessWidget {
               side: BorderSide(
                   color: pendingDeposit
                       ? HermezColors.blackTwo
-                      : HermezColors.lightOrange)),
+                      : HermezColors.lightGrey)),
           onPressed: () {
             this.onPressed(
               symbol,
@@ -101,51 +103,55 @@ class AccountRow extends StatelessWidget {
                   ],
                 ),
               ),
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Container(
-                      child: Text(
-                        simplified
-                            ? formatAmount(
-                                currencyFirst
-                                    ? (this.price * this.amount)
-                                    : this.amount,
-                                currencyFirst ? defaultCurrency : this.symbol)
-                            : formatAmount(
-                                currencyFirst ? this.amount : this.price,
-                                this.symbol),
-                        style: TextStyle(
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w600,
-                            color: pendingDeposit
-                                ? Colors.white
-                                : HermezColors.blackTwo,
-                            fontSize: 16),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    simplified
-                        ? Container()
-                        : Container(
-                            padding: EdgeInsets.only(top: 15.0),
+              isToken == false
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                          Container(
                             child: Text(
-                              formatAmount(
-                                  currencyFirst
-                                      ? (this.price * this.amount)
-                                      : this.amount,
-                                  currencyFirst
-                                      ? defaultCurrency
-                                      : this.symbol),
+                              simplified
+                                  ? formatAmount(
+                                      currencyFirst
+                                          ? (this.price * this.amount)
+                                          : this.amount,
+                                      currencyFirst
+                                          ? defaultCurrency
+                                          : this.symbol)
+                                  : formatAmount(
+                                      currencyFirst ? this.amount : this.price,
+                                      this.symbol),
                               style: TextStyle(
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
-                                color: HermezColors.blueyGreyTwo,
-                              ),
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w600,
+                                  color: pendingDeposit
+                                      ? Colors.white
+                                      : HermezColors.blackTwo,
+                                  fontSize: 16),
                               textAlign: TextAlign.right,
                             ),
                           ),
-                  ]),
+                          simplified
+                              ? Container()
+                              : Container(
+                                  padding: EdgeInsets.only(top: 15.0),
+                                  child: Text(
+                                    formatAmount(
+                                        currencyFirst
+                                            ? (this.price * this.amount)
+                                            : this.amount,
+                                        currencyFirst
+                                            ? defaultCurrency
+                                            : this.symbol),
+                                    style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                      color: HermezColors.blueyGreyTwo,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                        ])
+                  : Container(),
             ],
           ), //title to be name of the crypto
         ));

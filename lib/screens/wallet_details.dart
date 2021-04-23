@@ -346,7 +346,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                       widget.arguments.store,
                                       widget.arguments.store.state.txLevel,
                                       TransactionType.SEND,
-                                      _accounts[0]));
+                                      account: _accounts[0]));
                             }
                           },
                           padding: EdgeInsets.all(10.0),
@@ -604,7 +604,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       pow(10, account.token.decimals),
                   false,
                   true,
-                  isPendingDeposit, (token, amount) async {
+                  isPendingDeposit,
+                  false, (token, amount) async {
                 Navigator.of(context)
                     .pushNamed("account_details",
                         arguments: AccountDetailsArguments(

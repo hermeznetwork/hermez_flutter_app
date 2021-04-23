@@ -49,11 +49,16 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
     return Expanded(
       child: Container(
           color: Colors.white,
-          child: ListView.builder(
+          child: ListView.separated(
               shrinkWrap: true,
               itemCount: WalletDefaultCurrency.values.length,
               padding: const EdgeInsets.all(
                   16.0), //add some padding to make it look good
+              separatorBuilder: (BuildContext context, int index) {
+                return Container(
+                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                    child: Divider(color: HermezColors.steel));
+              },
               itemBuilder: (context, i) {
                 //item builder returns a row for each index i=0,1,2,3,4
                 // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
@@ -75,20 +80,33 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
                           style: TextStyle(
                               fontFamily: 'ModernEra',
                               color: HermezColors.blackTwo,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               fontSize: 16),
                           textAlign: TextAlign.left,
                         ),
                       ),
                     ),
                     trailing: widget.store.state.defaultCurrency == element
-                        ? Container(
-                            padding: EdgeInsets.only(
-                              right: 10.0,
-                              top: 10.0,
-                            ),
-                            child: Icon(Icons.check))
-                        : null,
+                        ? Radio(
+                            groupValue: null,
+                            activeColor: HermezColors.blackTwo,
+                            value: null,
+                            onChanged: (value) {
+                              setState(() {
+                                widget.store.updateDefaultCurrency(element);
+                              });
+                            },
+                          )
+                        : Radio(
+                            groupValue: null,
+                            value: element.toString().split(".").last,
+                            activeColor: HermezColors.blackTwo,
+                            onChanged: (value) {
+                              setState(() {
+                                widget.store.updateDefaultCurrency(element);
+                              });
+                            },
+                          ),
                     onTap: () {
                       setState(() {
                         widget.store.updateDefaultCurrency(element);

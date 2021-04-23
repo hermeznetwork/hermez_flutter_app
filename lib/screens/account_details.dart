@@ -187,10 +187,8 @@ class AccountDetailsPage extends HookWidget {
                       Navigator.pushNamed(
                           arguments.parentContext, "/transaction_amount",
                           arguments: TransactionAmountArguments(
-                              store,
-                              store.state.txLevel,
-                              TransactionType.SEND,
-                              arguments.element));
+                              store, store.state.txLevel, TransactionType.SEND,
+                              account: arguments.element));
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -273,7 +271,7 @@ class AccountDetailsPage extends HookWidget {
                             store.state.txLevel == TransactionLevel.LEVEL1
                                 ? TransactionType.DEPOSIT
                                 : TransactionType.EXIT,
-                            arguments.element),
+                            account: arguments.element),
                       );
                     },
                     padding: EdgeInsets.all(10.0),
