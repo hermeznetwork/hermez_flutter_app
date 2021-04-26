@@ -58,6 +58,19 @@ class _QRCodePageState extends State<QRCodePage> {
     } else {
       title = "Request payment";
     }
+
+    String code = "";
+    if (widget.arguments.qrCodeType == QRCodeType.RECOVERY_PHRASE) {
+      List<String> words = widget.arguments.code.split(" ");
+      for (int i = 0; i < words.length; i++) {
+        code += words[i];
+        if (i % 4 == 3) {
+          code += "\n";
+        } else {
+          code += " ";
+        }
+      }
+    }
     return Scaffold(
       backgroundColor: HermezColors.lightOrange,
       appBar: new AppBar(
@@ -99,7 +112,7 @@ class _QRCodePageState extends State<QRCodePage> {
                             RepaintBoundary(
                               key: _globalKey,
                               child: QrImage(
-                                size: 200,
+                                size: 250,
                                 padding: EdgeInsets.all(0),
                                 dataModuleStyle: QrDataModuleStyle(
                                     dataModuleShape: QrDataModuleShape.square,
@@ -118,7 +131,7 @@ class _QRCodePageState extends State<QRCodePage> {
                               ),
                             ),
                             QrImage(
-                              size: 200,
+                              size: 250,
                               padding: EdgeInsets.all(0),
                               dataModuleStyle: QrDataModuleStyle(
                                   dataModuleShape: QrDataModuleShape.square,
@@ -141,23 +154,41 @@ class _QRCodePageState extends State<QRCodePage> {
                           height: 33,
                         ),
                         Container(
-                          width: 205,
-                          child: Text(
-                            widget.arguments.code == null
-                                ? (widget.arguments.store.state.txLevel ==
-                                            TransactionLevel.LEVEL2
-                                        ? "hez:"
-                                        : "") +
-                                    widget.arguments.store.state.ethereumAddress
-                                : widget.arguments.code,
-                            style: TextStyle(
-                              color: HermezColors.blackTwo,
-                              fontSize: 16,
-                              height: 1.5,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
+                          width: 250,
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Text(
+                              widget.arguments.code == null
+                                  ? (widget.arguments.store.state.txLevel ==
+                                              TransactionLevel.LEVEL2
+                                          ? "hez:"
+                                          : "") +
+                                      widget.arguments.store.state
+                                          .ethereumAddress +
+                                      "\n" +
+                                      widget
+                                          .arguments.store.state.ethereumAddress
+                                  : widget.arguments.qrCodeType ==
+                                          QRCodeType.RECOVERY_PHRASE
+                                      ? code
+                                      : widget.arguments.code.substring(
+                                              0,
+                                              (widget.arguments.code.length / 2)
+                                                  .floor()) +
+                                          "\n" +
+                                          widget.arguments.code.substring(
+                                              (widget.arguments.code.length / 2)
+                                                  .floor(),
+                                              widget.arguments.code.length),
+                              style: TextStyle(
+                                color: HermezColors.blackTwo,
+                                fontSize: 16,
+                                height: 1.5,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                            textAlign: TextAlign.justify,
                           ),
                         ),
                         SizedBox(

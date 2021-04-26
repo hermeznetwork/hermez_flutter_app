@@ -96,84 +96,39 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                     FutureBuilder(
                         future: controller?.getFlashStatus(),
                         builder: (context, snapshot) {
-                          if (snapshot.data != null) {
-                            return Row(children: [
-                              Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    TextButton(
-                                        style: TextButton.styleFrom(
-                                          primary: Colors.black,
-                                          backgroundColor: Color(0xfff6e9d3),
-                                          minimumSize: Size(60, 60),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(30)),
-                                        ),
-                                        onPressed: () async {
-                                          await controller?.toggleFlash();
-                                          setState(() {});
-                                        },
-                                        child: snapshot.data == true
-                                            ? Icon(Icons.flash_off)
-                                            : Icon(Icons.flash_on)),
-                                    SizedBox(height: 8),
-                                    Text("Flash",
-                                        style: TextStyle(
-                                          color: HermezColors.lightOrange,
-                                          fontSize: 16,
-                                          fontFamily: 'ModernEra',
-                                          fontWeight: FontWeight.w700,
-                                        )),
-                                  ]),
-                              SizedBox(width: 30),
-                            ]);
+                          if (snapshot.hasError == null &&
+                              snapshot.data != null) {
+                            return Row(
+                              children: [
+                                IconButton(
+                                    iconSize: 56,
+                                    padding: EdgeInsets.all(0),
+                                    icon: Image.asset(
+                                        snapshot.data == true
+                                            ? "assets/flash_on.png"
+                                            : "assets/flash_off.png",
+                                        width: 56,
+                                        height: 56),
+                                    onPressed: () async {
+                                      await controller?.toggleFlash();
+                                      setState(() {});
+                                    }),
+                                SizedBox(width: 56),
+                              ],
+                            );
                           } else {
                             return Container();
                           }
                         }),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            primary: Colors.black,
-                            backgroundColor: Color(0xfff6e9d3),
-                            minimumSize: Size(60, 60),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                          ),
-                          onPressed: () async {
-                            await controller?.flipCamera();
-                            setState(() {});
-                          },
-                          child: FutureBuilder(
-                            future: controller?.getCameraInfo(),
-                            builder: (context, snapshot) {
-                              if (snapshot.data != null) {
-                                if (snapshot.data == CameraFacing.front) {
-                                  return Icon(Icons.camera_rear);
-                                } else {
-                                  return Icon(Icons.camera_front);
-                                }
-                              } else {
-                                return Container();
-                              }
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Switch",
-                          style: TextStyle(
-                            color: HermezColors.lightOrange,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
+                    IconButton(
+                        iconSize: 56,
+                        padding: EdgeInsets.all(0),
+                        icon: Image.asset("assets/switch_camera.png",
+                            width: 56, height: 56),
+                        onPressed: () async {
+                          await controller?.flipCamera();
+                          setState(() {});
+                        })
                   ],
                 ),
                 SizedBox(height: 50)

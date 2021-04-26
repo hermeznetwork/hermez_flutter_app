@@ -121,6 +121,10 @@ flutter:
     - hermez_logo_white.png
     - share.png
 
+    - switch_camera.png
+    - flash_on.png
+    - flash_off.png
+
     - view_explorer.png
     - show_recovery_phrase.png
     - change_passcode.png

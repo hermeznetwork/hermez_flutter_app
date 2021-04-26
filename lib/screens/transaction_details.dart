@@ -20,22 +20,24 @@ import '../context/transfer/wallet_transfer_provider.dart';
 
 class TransactionDetailsArguments {
   final WalletHandler wallet;
-  final bool isTransactionBeingSigned;
   final TransactionType transactionType;
+  final TransactionStatus status;
+  final double amount;
+  final String addressFrom;
+  final String addressTo;
+  final bool isTransactionBeingSigned;
   final WalletDefaultCurrency preferredCurrency;
   final List<int> fiatExchangeRates;
   final Account account;
   final Token token;
   final Exit exit;
-  final String addressFrom;
-  final String addressTo;
-  final double amount;
+
   final int fee;
   final bool instantWithdrawal;
   final bool completeDelayedWithdrawal;
   final String transactionId;
   final String transactionHash;
-  final TransactionStatus status;
+
   final DateTime transactionDate;
 
   TransactionDetailsArguments(

@@ -17,7 +17,6 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
-import 'package:web3dart/web3dart.dart';
 
 import '../../screens/account_selector.dart';
 
@@ -62,10 +61,20 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   final void Function(double amount, String token, String addressTo) onSubmit;
   bool amountIsValid = true;
   bool addressIsValid = true;
-  bool defaultCurrencySelected = false;
+  bool defaultCurrencySelected;
+  Token ethereumToken;
+  Account ethereumAccount;
+  bool enoughGas;
+  BigInt estimatedFee;
 
   final TextEditingController amountController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    defaultCurrencySelected = false;
+  }
 
   @override
   void dispose() {
@@ -80,8 +89,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             BigInt estimatedFee = snapshot.data;
-            EtherAmount fee =
-                EtherAmount.fromUnitAndValue(EtherUnit.wei, estimatedFee);
+            /*EtherAmount fee =
+                EtherAmount.fromUnitAndValue(EtherUnit.wei, estimatedFee);*/
             final String currency =
                 widget.store.state.defaultCurrency.toString().split('.').last;
 
@@ -108,13 +117,19 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                             !defaultCurrencySelected
                                                 ? double.parse(
                                                     amountController.value.text)
-                                                : double.parse(amountController
-                                                        .value.text) /
-                                                    (currency != "USD"
-                                                        ? account.token.USD *
-                                                            widget.store.state
-                                                                .exchangeRatio
-                                                        : account.token.USD),
+                                                : double.parse((double.parse(
+                                                            amountController
+                                                                .value.text) /
+                                                        (currency != "USD"
+                                                            ? account
+                                                                    .token.USD *
+                                                                widget
+                                                                    .store
+                                                                    .state
+                                                                    .exchangeRatio
+                                                            : account
+                                                                .token.USD))
+                                                    .toStringAsFixed(6)),
                                             amountController.value.text,
                                             addressController.value.text);
                                       }
@@ -147,19 +162,23 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                   defaultCurrencySelected
                                       ? "Fee " +
                                           ((currency != "USD"
-                                                      ? account.token.USD *
+                                                      ? ethereumToken.USD *
                                                           widget.store.state
                                                               .exchangeRatio
-                                                      : account.token.USD) *
+                                                      : ethereumToken.USD) *
                                                   (estimatedFee.toDouble() /
-                                                      pow(10, 18)))
-                                              .toString() +
+                                                      pow(
+                                                          10,
+                                                          ethereumToken
+                                                              .decimals)))
+                                              .toStringAsFixed(2) +
                                           " " +
                                           currency
                                       : "Fee " +
                                           (estimatedFee.toDouble() /
-                                                  pow(10, 18))
-                                              .toString() +
+                                                  pow(10,
+                                                      ethereumToken.decimals))
+                                              .toStringAsFixed(6) +
                                           " ETH",
                                   style: TextStyle(
                                     color: HermezColors.blueyGreyTwo,
@@ -426,7 +445,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: amountIsValid
+              color: amountIsValid && enoughGas
                   ? HermezColors.blueyGreyThree
                   : HermezColors.redError,
               width: 2,
@@ -456,41 +475,46 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   margin: EdgeInsets.only(top: 10.0),
                   child: AmountInput(
                     onChanged: (value) {
-                      setState(() {
-                        amountIsValid = value.isEmpty ||
-                            (account != null
-                                ? (double.parse(value) <=
-                                    (defaultCurrencySelected
-                                        ? currency != "USD"
-                                            ? account.token.USD *
-                                                    double.parse(
-                                                        account.balance) /
-                                                    pow(
-                                                        10,
-                                                        account
-                                                            .token.decimals) *
-                                                    widget.store.state
-                                                        .exchangeRatio -
-                                                (account.token.USD *
-                                                        widget.store.state
-                                                            .exchangeRatio) *
-                                                    (estimatedFee.toDouble() /
-                                                        pow(
-                                                            10,
-                                                            account.token
-                                                                .decimals))
-                                            : account.token.USD * double.parse(account.balance) / pow(10, account.token.decimals) -
-                                                (account.token.USD *
-                                                    estimatedFee.toDouble() /
-                                                    pow(10,
-                                                        account.token.decimals))
-                                        : double.parse(account.balance) /
-                                                pow(10, account.token.decimals) -
-                                            (estimatedFee.toDouble() / pow(10, account.token.decimals))))
-                                : true);
-                      });
+                      setState(
+                        () {
+                          amountIsValid = value.isEmpty ||
+                              (account != null
+                                  ? (double.parse(value) <=
+                                      (defaultCurrencySelected
+                                          ? currency != "USD"
+                                              ? account.token.USD *
+                                                      double.parse(
+                                                          account.balance) /
+                                                      pow(
+                                                          10,
+                                                          account
+                                                              .token.decimals) *
+                                                      widget.store.state
+                                                          .exchangeRatio -
+                                                  (account.token.USD *
+                                                          widget.store.state
+                                                              .exchangeRatio) *
+                                                      (estimatedFee.toDouble() /
+                                                          pow(
+                                                              10,
+                                                              account.token
+                                                                  .decimals))
+                                              : account.token.USD * double.parse(account.balance) / pow(10, account.token.decimals) -
+                                                  (account.token.USD *
+                                                      estimatedFee.toDouble() /
+                                                      pow(
+                                                          10,
+                                                          account
+                                                              .token.decimals))
+                                          : double.parse(account.balance) /
+                                                  pow(10, account.token.decimals) -
+                                              (estimatedFee.toDouble() / pow(10, account.token.decimals))))
+                                  : true);
+                        },
+                      );
                     },
                     controller: amountController,
+                    decimals: defaultCurrencySelected ? 2 : 6,
                   ),
                 ),
                 SizedBox(
@@ -538,47 +562,89 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                       double amount = 0;
                                       if (defaultCurrencySelected) {
                                         if (currency != 'USD') {
-                                          amount = account.token.USD *
-                                                  double.parse(
-                                                      account.balance) /
-                                                  pow(10,
-                                                      account.token.decimals) *
-                                                  widget.store.state
-                                                      .exchangeRatio -
-                                              (account.token.USD *
-                                                  widget.store.state
-                                                      .exchangeRatio *
-                                                  estimatedFee.toDouble() /
-                                                  pow(10,
-                                                      account.token.decimals));
+                                          if (account.token.id == 0) {
+                                            amount = account.token.USD *
+                                                    double.parse(
+                                                        account.balance) /
+                                                    pow(
+                                                        10,
+                                                        account
+                                                            .token.decimals) *
+                                                    widget.store.state
+                                                        .exchangeRatio -
+                                                (account.token.USD *
+                                                    widget.store.state
+                                                        .exchangeRatio *
+                                                    estimatedFee.toDouble() /
+                                                    pow(
+                                                        10,
+                                                        account
+                                                            .token.decimals));
+                                          } else {
+                                            amount = account.token.USD *
+                                                double.parse(account.balance) /
+                                                pow(10,
+                                                    account.token.decimals) *
+                                                widget
+                                                    .store.state.exchangeRatio;
+                                          }
                                         } else {
-                                          amount = account.token.USD *
-                                                  (double.parse(
-                                                          account.balance) /
-                                                      pow(
-                                                          10,
-                                                          account.token
-                                                              .decimals)) -
-                                              (account.token.USD *
-                                                  (estimatedFee.toDouble() /
-                                                      pow(
-                                                          10,
-                                                          account.token
-                                                              .decimals)));
+                                          if (account.token.id == 0) {
+                                            amount = account.token.USD *
+                                                    (double.parse(
+                                                            account.balance) /
+                                                        pow(
+                                                            10,
+                                                            account.token
+                                                                .decimals)) -
+                                                (account.token.USD *
+                                                    (estimatedFee.toDouble() /
+                                                        pow(
+                                                            10,
+                                                            account.token
+                                                                .decimals)));
+                                          } else {
+                                            amount = account.token.USD *
+                                                (double.parse(account.balance) /
+                                                    pow(
+                                                        10,
+                                                        account
+                                                            .token.decimals));
+                                          }
                                         }
                                       } else {
-                                        amount = ((double.parse(
-                                                    account.balance) /
-                                                pow(10,
-                                                    account.token.decimals)) -
-                                            (estimatedFee.toDouble() /
-                                                pow(10,
-                                                    account.token.decimals)));
+                                        if (account.token.id == 0) {
+                                          amount = ((double.parse(
+                                                      account.balance) /
+                                                  pow(10,
+                                                      account.token.decimals)) -
+                                              (estimatedFee.toDouble() /
+                                                  pow(10,
+                                                      account.token.decimals)));
+                                        } else {
+                                          amount = (double.parse(
+                                                  account.balance) /
+                                              pow(10, account.token.decimals));
+                                        }
                                       }
                                       amountIsValid = amount > 0;
                                       if (amountIsValid) {
                                         amountController.text =
-                                            amount.toString();
+                                            amount.toStringAsFixed(
+                                                defaultCurrencySelected
+                                                    ? amount.truncateToDouble() ==
+                                                            amount
+                                                        ? 0
+                                                        : 2
+                                                    : amount.truncateToDouble() ==
+                                                            amount
+                                                        ? 0
+                                                        : 6);
+                                        amountController.selection =
+                                            TextSelection.fromPosition(
+                                                TextPosition(
+                                                    offset: amountController
+                                                        .text.length));
                                       }
                                     });
                                   },
@@ -638,7 +704,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             ), //title to be name of the crypto
           ),
         ),
-        amountIsValid
+        amountIsValid && enoughGas
             ? SizedBox(
                 height: 40,
               )
@@ -667,7 +733,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                       ),
                     ),
                     Text(
-                      'You don’t have enough funds.',
+                      enoughGas
+                          ? 'You don’t have enough funds.'
+                          : 'You don’t have enough funds to pay gas',
                       style: TextStyle(
                         color: HermezColors.redError,
                         fontFamily: 'ModernEra',
@@ -711,9 +779,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       if (AddressUtils.isValidEthereumAddress(addressController.value.text)) {
         addressTo = addressController.value.text;
       }
-      BigInt estimatedFee = await store.getEstimatedFee(
+      BigInt fee = await store.getEstimatedFee(
           addressFrom, addressTo, BigInt.from(amount));
-      return estimatedFee;
+      estimatedFee = fee;
+      ethereumToken = await getEthereumToken();
+      ethereumAccount = await getEthereumAccount();
+      enoughGas = await isEnoughGas();
+
+      return fee;
       /*} else {
         return BigInt.zero;
         // TODO handle showing error
@@ -722,13 +795,27 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   bool buttonIsEnabled() {
-    if (transactionType == TransactionType.SEND) {
-      return amountIsValid &&
-          amountController.value.text.isNotEmpty &&
-          addressIsValid &&
-          addressController.value.text.isNotEmpty;
+    if (txLevel == TransactionLevel.LEVEL1) {
+      if (transactionType == TransactionType.SEND) {
+        return amountIsValid &&
+            enoughGas &&
+            amountController.value.text.isNotEmpty &&
+            addressIsValid &&
+            addressController.value.text.isNotEmpty;
+      } else {
+        return amountIsValid &&
+            enoughGas &&
+            amountController.value.text.isNotEmpty;
+      }
     } else {
-      return amountIsValid && amountController.value.text.isNotEmpty;
+      if (transactionType == TransactionType.SEND) {
+        return amountIsValid &&
+            amountController.value.text.isNotEmpty &&
+            addressIsValid &&
+            addressController.value.text.isNotEmpty;
+      } else {
+        return amountIsValid && amountController.value.text.isNotEmpty;
+      }
     }
   }
 
@@ -756,5 +843,36 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       assert(false, e.toString());
       return true;
     }*/
+  }
+
+  Future<bool> isEnoughGas() async {
+    if (txLevel == TransactionLevel.LEVEL1) {
+      if (ethereumAccount != null) {
+        return double.parse(ethereumAccount.balance) >= estimatedFee.toDouble();
+      }
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  Future<Token> getEthereumToken() async {
+    return await widget.store.getTokenById(0);
+  }
+
+  Future<Account> getEthereumAccount() async {
+    List<Account> accounts = await widget.store.getL1Accounts();
+    Account ethereumAccount;
+    for (Account account in accounts) {
+      if (account.token.id == 0) {
+        ethereumAccount = account;
+        break;
+      }
+    }
+    return ethereumAccount;
+  }
+
+  String removeDecimalZeroFormat(double n) {
+    return n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 1);
   }
 }

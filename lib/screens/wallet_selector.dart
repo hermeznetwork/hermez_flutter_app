@@ -74,7 +74,11 @@ class WalletSelectorPage extends HookWidget {
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16.0),
                                 color: HermezColors.darkOrange),
-                            padding: EdgeInsets.all(24.0),
+                            padding: EdgeInsets.only(
+                                left: 24.0,
+                                top: 16.0,
+                                right: 16.0,
+                                bottom: 16.0),
                             child: Column(
                               children: [
                                 Row(
@@ -177,7 +181,8 @@ class WalletSelectorPage extends HookWidget {
                                                 qrCodeType: QRCodeType.HERMEZ,
                                                 code: getHermezAddress(store
                                                     .state.ethereumAddress),
-                                                store: store),
+                                                store: store,
+                                                isReceive: true),
                                           );
                                         })
                                   ],
@@ -295,7 +300,11 @@ class WalletSelectorPage extends HookWidget {
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16.0),
                                 color: HermezColors.blueyGreyTwo),
-                            padding: EdgeInsets.all(24.0),
+                            padding: EdgeInsets.only(
+                                left: 24.0,
+                                top: 16.0,
+                                right: 16.0,
+                                bottom: 16.0),
                             child: Column(
                               children: [
                                 Row(
@@ -396,7 +405,8 @@ class WalletSelectorPage extends HookWidget {
                                           arguments: QRCodeArguments(
                                               qrCodeType: QRCodeType.ETHEREUM,
                                               code: store.state.ethereumAddress,
-                                              store: store),
+                                              store: store,
+                                              isReceive: true),
                                         );
                                         //Navigator.pushNamed(context, 'home');
                                       },
