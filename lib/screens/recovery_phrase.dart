@@ -83,22 +83,25 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                 child: new Column(
                   //mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(left: 24, right: 24, top: 24),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                            'Back up these words manually and keep '
-                            'them in a safe place.',
-                            style: TextStyle(
-                              color: HermezColors.steel,
-                              fontSize: 18,
-                              height: 1.5,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
-                            )),
-                      ),
-                    ),
+                    widget.arguments.isBackup
+                        ? Container(
+                            margin:
+                                EdgeInsets.only(left: 24, right: 24, top: 24),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                  'Back up these words manually and keep '
+                                  'them in a safe place.',
+                                  style: TextStyle(
+                                    color: HermezColors.steel,
+                                    fontSize: 18,
+                                    height: 1.5,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                            ),
+                          )
+                        : Container(),
                     SizedBox(height: 16),
                     Container(
                       height: 232,
@@ -463,7 +466,24 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   ))
                                 ]),
                           )
-                        : Container(),
+                        : Container(
+                            margin: EdgeInsets.only(left: 24, right: 24),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                  'Do not share your recovery phrase'
+                                  ' with anyone. This phrase gives access'
+                                  ' to your wallet and could be used to'
+                                  ' steal your funds.',
+                                  style: TextStyle(
+                                    color: HermezColors.blackTwo,
+                                    fontSize: 18,
+                                    height: 1.5,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                            ),
+                          ),
                   ],
                 ),
               ),

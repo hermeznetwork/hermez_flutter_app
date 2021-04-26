@@ -320,16 +320,9 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
   }
 
   viewInExplorer() async {
-    var url;
-    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
-      url = getCurrentEnvironment().etherscanUrl +
-          "/address/" +
-          widget.arguments.store.state.ethereumAddress;
-    } else {
-      url = getCurrentEnvironment().batchExplorerUrl +
-          '/user-account/' +
-          getHermezAddress(widget.arguments.store.state.ethereumAddress);
-    }
+    var url = getCurrentEnvironment().batchExplorerUrl +
+        '/user-account/' +
+        getHermezAddress(widget.arguments.store.state.ethereumAddress);
     if (await canLaunch(url))
       await launch(url);
     else
