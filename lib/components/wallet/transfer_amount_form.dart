@@ -581,59 +581,39 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                       amountIsValid = false;
                                       double amount = 0;
                                       if (defaultCurrencySelected) {
-                                        if (currency != 'USD') {
-                                          if (account.token.id == 0) {
-                                            amount = account.token.USD *
-                                                    double.parse(
-                                                        account.balance) /
-                                                    pow(
-                                                        10,
-                                                        account
-                                                            .token.decimals) *
-                                                    widget.store.state
-                                                        .exchangeRatio -
-                                                (account.token.USD *
-                                                    widget.store.state
-                                                        .exchangeRatio *
-                                                    estimatedFee.toDouble() /
-                                                    pow(
-                                                        10,
-                                                        account
-                                                            .token.decimals));
-                                          } else {
-                                            amount = account.token.USD *
-                                                double.parse(account.balance) /
-                                                pow(10,
-                                                    account.token.decimals) *
-                                                widget
-                                                    .store.state.exchangeRatio;
-                                          }
+                                        if (account.token.id == 0 ||
+                                            widget.store.state.txLevel ==
+                                                TransactionLevel.LEVEL2) {
+                                          amount = account.token.USD *
+                                                  double.parse(
+                                                      account.balance) /
+                                                  pow(10,
+                                                      account.token.decimals) *
+                                                  (currency != 'USD'
+                                                      ? widget.store.state
+                                                          .exchangeRatio
+                                                      : 1) -
+                                              (account.token.USD *
+                                                  (currency != 'USD'
+                                                      ? widget.store.state
+                                                          .exchangeRatio
+                                                      : 1) *
+                                                  estimatedFee.toDouble() /
+                                                  pow(10,
+                                                      account.token.decimals));
                                         } else {
-                                          if (account.token.id == 0) {
-                                            amount = account.token.USD *
-                                                    (double.parse(
-                                                            account.balance) /
-                                                        pow(
-                                                            10,
-                                                            account.token
-                                                                .decimals)) -
-                                                (account.token.USD *
-                                                    (estimatedFee.toDouble() /
-                                                        pow(
-                                                            10,
-                                                            account.token
-                                                                .decimals)));
-                                          } else {
-                                            amount = account.token.USD *
-                                                (double.parse(account.balance) /
-                                                    pow(
-                                                        10,
-                                                        account
-                                                            .token.decimals));
-                                          }
+                                          amount = account.token.USD *
+                                              double.parse(account.balance) /
+                                              pow(10, account.token.decimals) *
+                                              (currency != 'USD'
+                                                  ? widget
+                                                      .store.state.exchangeRatio
+                                                  : 1);
                                         }
                                       } else {
-                                        if (account.token.id == 0) {
+                                        if (account.token.id == 0 ||
+                                            widget.store.state.txLevel ==
+                                                TransactionLevel.LEVEL2) {
                                           amount = ((double.parse(
                                                       account.balance) /
                                                   pow(10,
