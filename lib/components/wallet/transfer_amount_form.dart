@@ -40,7 +40,8 @@ class TransferAmountForm extends StatefulWidget {
   final double amount;
   final String addressTo;
   final WalletHandler store;
-  final void Function(double amount, String token, String addressTo) onSubmit;
+  final void Function(double amount, Token token, double fee, Token feeToken,
+      String addressTo) onSubmit;
 
   @override
   _TransferAmountFormState createState() => _TransferAmountFormState(txLevel,
@@ -58,7 +59,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   final double amount;
   final String addressTo;
   final WalletHandler store;
-  final void Function(double amount, String token, String addressTo) onSubmit;
+  final void Function(double amount, Token token, double fee, Token feeToken,
+      String addressTo) onSubmit;
   bool amountIsValid = true;
   bool addressIsValid = true;
   bool defaultCurrencySelected;
@@ -120,17 +122,17 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                 : double.parse((double.parse(
                                                             amountController
                                                                 .value.text) /
+                                                        account.token.USD *
                                                         (currency != "USD"
-                                                            ? account
-                                                                    .token.USD *
-                                                                widget
-                                                                    .store
-                                                                    .state
-                                                                    .exchangeRatio
-                                                            : account
-                                                                .token.USD))
+                                                            ? widget.store.state
+                                                                .exchangeRatio
+                                                            : 1))
                                                     .toStringAsFixed(6)),
-                                            amountController.value.text,
+                                            account.token,
+                                            estimatedFee.toDouble(),
+                                            txLevel == TransactionLevel.LEVEL1
+                                                ? ethereumToken
+                                                : account.token,
                                             addressController.value.text);
                                       }
                                     : null,

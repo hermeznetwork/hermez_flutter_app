@@ -25,39 +25,40 @@ class TransactionDetailsArguments {
   final double amount;
   final String addressFrom;
   final String addressTo;
+  final double fee;
+  final Token feeToken;
+  final DateTime transactionDate;
+
   final bool isTransactionBeingSigned;
   final WalletDefaultCurrency preferredCurrency;
   final List<int> fiatExchangeRates;
   final Account account;
   final Token token;
   final Exit exit;
-
-  final int fee;
   final bool instantWithdrawal;
   final bool completeDelayedWithdrawal;
   final String transactionId;
   final String transactionHash;
 
-  final DateTime transactionDate;
-
   TransactionDetailsArguments(
       {this.wallet,
-      this.isTransactionBeingSigned,
       this.transactionType,
+      this.status,
+      this.amount,
+      this.fee,
+      this.feeToken,
+      this.addressFrom,
+      this.addressTo,
+      this.isTransactionBeingSigned,
       this.preferredCurrency,
       this.fiatExchangeRates,
       this.account,
       this.token,
       this.exit,
-      this.addressFrom,
-      this.addressTo,
-      this.amount,
-      this.fee,
       this.instantWithdrawal,
       this.completeDelayedWithdrawal,
       this.transactionId,
       this.transactionHash,
-      this.status,
       this.transactionDate});
 }
 
@@ -73,12 +74,13 @@ class TransactionDetailsPage extends StatefulWidget {
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   @override
   Widget build(BuildContext context) {
-    // final amountController = useTextEditingController();
     final _scaffoldKey = GlobalKey<ScaffoldState>();
-
     var transferStore = useWalletTransfer(context);
 
-    //var qrcodeAddress = useState();
+    final String currency = widget.arguments.wallet.state.defaultCurrency
+        .toString()
+        .split('.')
+        .last;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -113,6 +115,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 status: widget.arguments.status,
                 addressFrom: widget.arguments.addressFrom,
                 addressTo: widget.arguments.addressTo,
+                fee: widget.arguments.fee,
+                feeToken: widget.arguments.feeToken,
+                currency: currency,
                 transactionDate: widget.arguments.transactionDate,
                 onSubmit: (address, amount) async {
                   var success = await transferStore.transferEth(
@@ -324,16 +329,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         title = "Send";
         break;
       case TransactionType.DEPOSIT:
-        title = "Deposit";
+        title = "Move";
         break;
       case TransactionType.WITHDRAW:
-        title = "Withdraw";
+        title = "Move";
         break;
       case TransactionType.EXIT:
-        title = 'Withdraw';
+        title = 'Move';
         break;
       case TransactionType.FORCEEXIT:
-        title = 'Withdraw';
+        title = 'Move';
         break;
       case TransactionType.RECEIVE:
         title = "Receive";
@@ -348,15 +353,15 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   String getButtonLabel() {
     switch (widget.arguments.transactionType) {
       case TransactionType.DEPOSIT:
-        return 'Deposit';
+        return 'Move';
       case TransactionType.SEND:
         return 'Send';
       case TransactionType.EXIT:
-        return 'Withdraw';
+        return 'Move';
       case TransactionType.WITHDRAW:
-        return 'Withdraw';
+        return 'Move';
       case TransactionType.FORCEEXIT:
-        return 'Force Withdrawal';
+        return 'Move';
       default:
         return '';
     }

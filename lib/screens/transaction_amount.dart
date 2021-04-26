@@ -75,7 +75,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
         amount: widget.arguments.amount,
         addressTo: widget.arguments.addressTo,
         store: widget.arguments.store,
-        onSubmit: (amount, token, address) async {
+        onSubmit: (amount, token, fee, feeToken, address) async {
           if (widget.arguments.transactionType == TransactionType.RECEIVE) {
             Navigator.of(context).pushReplacementNamed("/qrcode",
                 arguments: QRCodeArguments(
@@ -98,15 +98,16 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
             //var success = await transferStore.transfer(address, amount);
             Navigator.pushReplacementNamed(context, "/transaction_details",
                 arguments: TransactionDetailsArguments(
-                  wallet: widget.arguments.store,
-                  transactionType: widget.arguments.transactionType,
-                  status: TransactionStatus.DRAFT,
-                  account: widget.arguments.account,
-                  token: widget.arguments.account.token,
-                  amount: amount,
-                  addressFrom: widget.arguments.account.hezEthereumAddress,
-                  addressTo: addressTo,
-                ));
+                    wallet: widget.arguments.store,
+                    transactionType: widget.arguments.transactionType,
+                    status: TransactionStatus.DRAFT,
+                    account: widget.arguments.account,
+                    token: widget.arguments.account.token,
+                    amount: amount,
+                    addressFrom: widget.arguments.account.hezEthereumAddress,
+                    addressTo: addressTo,
+                    fee: fee,
+                    feeToken: feeToken));
           }
         },
       ),

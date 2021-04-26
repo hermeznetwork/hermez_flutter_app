@@ -1,6 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -8,18 +9,21 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/token.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TransferSummaryForm extends HookWidget {
   TransferSummaryForm({
     this.store,
-    this.account,
-    this.amount,
     this.status,
+    this.transactionType,
+    this.account,
+    this.fee,
+    this.feeToken,
+    this.currency,
     this.transactionId,
     this.transactionHash,
-    this.transactionType,
     this.transactionDate,
     this.addressFrom,
     this.addressTo,
@@ -28,7 +32,9 @@ class TransferSummaryForm extends HookWidget {
 
   final WalletHandler store;
   final Account account;
-  final int amount;
+  final double fee;
+  final Token feeToken;
+  final String currency;
   final String transactionId;
   final String transactionHash;
   final TransactionType transactionType;
@@ -40,11 +46,6 @@ class TransferSummaryForm extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    //final toController = useTextEditingController(text: token);
-    final addressController = useTextEditingController();
-    final amountController = useTextEditingController();
-    final transferStore = useWalletTransfer(context);
-
     var format = DateFormat('dd/MM/yyyy, hh:mm:ss a');
     var date = "";
     if (transactionDate != null) {
@@ -117,7 +118,8 @@ class TransferSummaryForm extends HookWidget {
                     transactionType == TransactionType.SEND ||
                             transactionType == TransactionType.WITHDRAW ||
                             transactionType == TransactionType.EXIT ||
-                            transactionType == TransactionType.FORCEEXIT
+                            transactionType == TransactionType.FORCEEXIT ||
+                            transactionType == TransactionType.DEPOSIT
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(
@@ -171,7 +173,8 @@ class TransferSummaryForm extends HookWidget {
                 transactionType == TransactionType.SEND ||
                         transactionType == TransactionType.WITHDRAW ||
                         transactionType == TransactionType.EXIT ||
-                        transactionType == TransactionType.FORCEEXIT
+                        transactionType == TransactionType.FORCEEXIT ||
+                        transactionType == TransactionType.DEPOSIT
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
@@ -374,7 +377,16 @@ class TransferSummaryForm extends HookWidget {
                               )),
                           Align(
                             alignment: Alignment.centerRight,
-                            child: Text('€0.1',
+                            child: Text(
+                                (feeToken.USD *
+                                            (currency != "USD"
+                                                ? store.state.exchangeRatio
+                                                : 1) *
+                                            (fee.toDouble() /
+                                                pow(10, feeToken.decimals)))
+                                        .toStringAsFixed(2) +
+                                    " " +
+                                    currency,
                                 style: TextStyle(
                                   color: HermezColors.black,
                                   fontSize: 16,
@@ -388,7 +400,10 @@ class TransferSummaryForm extends HookWidget {
                       Align(
                           alignment: Alignment.centerRight,
                           child: Text(
-                            '0.119231 ETH',
+                            (fee.toDouble() / pow(10, feeToken.decimals))
+                                    .toStringAsFixed(6) +
+                                " " +
+                                feeToken.symbol,
                             style: TextStyle(
                               color: HermezColors.blueyGreyTwo,
                               fontSize: 16,
