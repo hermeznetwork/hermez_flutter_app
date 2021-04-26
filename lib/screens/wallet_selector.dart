@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/wallet_details.dart';
@@ -19,31 +18,39 @@ import 'transaction_amount.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-class WalletSelectorPage extends HookWidget {
-  WalletSelectorPage(this.store, this.parentContext /*this.scaffoldKey*/);
+class WalletSelectorPage extends StatefulWidget {
+  WalletSelectorPage({Key key, this.store, this.parentContext})
+      : super(key: key);
+
   WalletHandler store;
   BuildContext parentContext;
+
+  @override
+  _WalletSelectorPageState createState() => _WalletSelectorPageState();
+}
+
+class _WalletSelectorPageState extends State<WalletSelectorPage> {
   //GlobalKey<ScaffoldState> scaffoldKey;
 
   //final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Account> l1Accounts;
   List<Account> l2Accounts;
 
+  @override
+  initState() {
+    super.initState();
+    widget.store.initialise();
+  }
+
   Future<void> fetchData() async {
-    await store.initialise();
-    l1Accounts = await store.getL1Accounts();
-    l2Accounts = await store.getAccounts();
+    l1Accounts = await widget.store.getL1Accounts();
+    l2Accounts = await widget.store.getAccounts();
   }
 
   @override
   Widget build(BuildContext context) {
     //store = useWallet(context);
     final width = MediaQuery.of(context).size.width;
-
-    /*useEffect(() {
-      //store.initialise();
-      return null;
-    }, []);*/
 
     return Scaffold(
       //key: _scaffoldKey,
@@ -61,13 +68,21 @@ class WalletSelectorPage extends HookWidget {
                       child: Center(
                         child: new GestureDetector(
                           onTap: () {
-                            store.updateLevel(TransactionLevel.LEVEL2);
-                            Navigator.pushNamed(context, 'home',
-                                arguments: WalletDetailsArguments(
-                                  store,
-                                  TransactionLevel.LEVEL2,
-                                  parentContext,
-                                ));
+                            widget.store.updateLevel(TransactionLevel.LEVEL2);
+                            Future.delayed(const Duration(milliseconds: 500),
+                                () {
+                              Navigator.pushNamed(context, 'home',
+                                  arguments: WalletDetailsArguments(
+                                    widget.store,
+                                    TransactionLevel.LEVEL2,
+                                    widget.parentContext,
+                                  )).then((value) {
+                                setState(() {
+                                  l1Accounts = null;
+                                  l2Accounts = null;
+                                });
+                              });
+                            });
                           },
                           child: Container(
                             height: width * 0.58,
@@ -140,22 +155,30 @@ class WalletSelectorPage extends HookWidget {
                                       child: Text(
                                         "hez:" +
                                             "0x" +
-                                            (store.state.ethereumAddress != null
-                                                ? AddressUtils.strip0x(store
-                                                        .state.ethereumAddress
-                                                        .substring(0, 6))
+                                            (widget.store.state
+                                                        .ethereumAddress !=
+                                                    null
+                                                ? AddressUtils.strip0x(
+                                                        widget.store.state
+                                                            .ethereumAddress
+                                                            .substring(0, 6))
                                                     .toUpperCase()
                                                 : "") +
                                             " ･･･ " +
-                                            (store.state.ethereumAddress != null
-                                                ? store.state.ethereumAddress
+                                            (widget.store.state
+                                                        .ethereumAddress !=
+                                                    null
+                                                ? widget
+                                                    .store.state.ethereumAddress
                                                     .substring(
-                                                        store
+                                                        widget
+                                                                .store
                                                                 .state
                                                                 .ethereumAddress
                                                                 .length -
                                                             4,
-                                                        store
+                                                        widget
+                                                            .store
                                                             .state
                                                             .ethereumAddress
                                                             .length)
@@ -175,13 +198,16 @@ class WalletSelectorPage extends HookWidget {
                                           color: Colors.white,
                                         ),
                                         onPressed: () {
-                                          Navigator.of(parentContext).pushNamed(
+                                          Navigator.of(widget.parentContext)
+                                              .pushNamed(
                                             "/qrcode",
                                             arguments: QRCodeArguments(
                                                 qrCodeType: QRCodeType.HERMEZ,
-                                                code: getHermezAddress(store
-                                                    .state.ethereumAddress),
-                                                store: store,
+                                                code: getHermezAddress(widget
+                                                    .store
+                                                    .state
+                                                    .ethereumAddress),
+                                                store: widget.store,
                                                 isReceive: true),
                                           );
                                         })
@@ -207,55 +233,55 @@ class WalletSelectorPage extends HookWidget {
                           ),
                           onPressed: () {
                             if (l1Accounts != null && l1Accounts.length > 0) {
-                              store.updateLevel(TransactionLevel.LEVEL1);
+                              widget.store.updateLevel(TransactionLevel.LEVEL1);
 
                               if (l1Accounts.length > 1) {
-                                Navigator.of(parentContext)
+                                Navigator.of(widget.parentContext)
                                     .pushNamed("/account_selector",
                                         arguments: AccountSelectorArguments(
                                           TransactionLevel.LEVEL1,
                                           TransactionType.DEPOSIT,
-                                          store,
+                                          widget.store,
                                         ));
                               } else {
                                 Account account = l1Accounts[0];
                                 Navigator.pushNamed(
-                                    parentContext, "/transaction_amount",
+                                    widget.parentContext, "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                        store,
+                                        widget.store,
                                         TransactionLevel.LEVEL1,
                                         TransactionType.DEPOSIT,
                                         account: account));
                               }
                             } else if (l2Accounts != null &&
                                 l2Accounts.length > 0) {
-                              store.updateLevel(TransactionLevel.LEVEL2);
+                              widget.store.updateLevel(TransactionLevel.LEVEL2);
                               if (l2Accounts.length > 1) {
-                                Navigator.of(parentContext)
+                                Navigator.of(widget.parentContext)
                                     .pushNamed("/account_selector",
                                         arguments: AccountSelectorArguments(
                                           TransactionLevel.LEVEL2,
                                           TransactionType.EXIT,
-                                          store,
+                                          widget.store,
                                         ));
                               } else {
                                 Account account = l2Accounts[0];
                                 Navigator.pushNamed(
-                                    parentContext, "/transaction_amount",
+                                    widget.parentContext, "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                        store,
+                                        widget.store,
                                         TransactionLevel.LEVEL2,
                                         TransactionType.EXIT,
                                         account: account));
                               }
                             } else {
-                              store.updateLevel(TransactionLevel.LEVEL1);
-                              Navigator.of(parentContext)
+                              widget.store.updateLevel(TransactionLevel.LEVEL1);
+                              Navigator.of(widget.parentContext)
                                   .pushNamed("/account_selector",
                                       arguments: AccountSelectorArguments(
                                         TransactionLevel.LEVEL1,
                                         TransactionType.DEPOSIT,
-                                        store,
+                                        widget.store,
                                       ));
                             }
                           },
@@ -287,13 +313,21 @@ class WalletSelectorPage extends HookWidget {
                       child: Center(
                         child: new GestureDetector(
                           onTap: () {
-                            store.updateLevel(TransactionLevel.LEVEL1);
-                            Navigator.pushNamed(context, 'home',
-                                arguments: WalletDetailsArguments(
-                                  store,
-                                  TransactionLevel.LEVEL1,
-                                  parentContext,
-                                ));
+                            widget.store.updateLevel(TransactionLevel.LEVEL1);
+                            Future.delayed(const Duration(milliseconds: 500),
+                                () {
+                              Navigator.pushNamed(context, 'home',
+                                  arguments: WalletDetailsArguments(
+                                    widget.store,
+                                    TransactionLevel.LEVEL1,
+                                    widget.parentContext,
+                                  )).then((value) {
+                                setState(() {
+                                  l1Accounts = null;
+                                  l2Accounts = null;
+                                });
+                              });
+                            });
                           },
                           child: Container(
                             height: width * 0.58,
@@ -365,22 +399,30 @@ class WalletSelectorPage extends HookWidget {
                                     Expanded(
                                       child: Text(
                                         "0x" +
-                                            (store.state.ethereumAddress != null
-                                                ? AddressUtils.strip0x(store
-                                                        .state.ethereumAddress
-                                                        .substring(0, 6))
+                                            (widget.store.state
+                                                        .ethereumAddress !=
+                                                    null
+                                                ? AddressUtils.strip0x(
+                                                        widget.store.state
+                                                            .ethereumAddress
+                                                            .substring(0, 6))
                                                     .toUpperCase()
                                                 : "") +
                                             " ･･･ " +
-                                            (store.state.ethereumAddress != null
-                                                ? store.state.ethereumAddress
+                                            (widget.store.state
+                                                        .ethereumAddress !=
+                                                    null
+                                                ? widget
+                                                    .store.state.ethereumAddress
                                                     .substring(
-                                                        store
+                                                        widget
+                                                                .store
                                                                 .state
                                                                 .ethereumAddress
                                                                 .length -
                                                             4,
-                                                        store
+                                                        widget
+                                                            .store
                                                             .state
                                                             .ethereumAddress
                                                             .length)
@@ -400,12 +442,14 @@ class WalletSelectorPage extends HookWidget {
                                         color: Colors.white,
                                       ),
                                       onPressed: () {
-                                        Navigator.of(parentContext).pushNamed(
+                                        Navigator.of(widget.parentContext)
+                                            .pushNamed(
                                           "/qrcode",
                                           arguments: QRCodeArguments(
                                               qrCodeType: QRCodeType.ETHEREUM,
-                                              code: store.state.ethereumAddress,
-                                              store: store,
+                                              code: widget
+                                                  .store.state.ethereumAddress,
+                                              store: widget.store,
                                               isReceive: true),
                                         );
                                         //Navigator.pushNamed(context, 'home');
@@ -433,7 +477,7 @@ class WalletSelectorPage extends HookWidget {
     String locale = "";
     String symbol = "";
     final String currency =
-        store.state.defaultCurrency.toString().split('.').last;
+        widget.store.state.defaultCurrency.toString().split('.').last;
     if (currency == "EUR") {
       locale = 'eu';
       symbol = '€';
@@ -449,7 +493,7 @@ class WalletSelectorPage extends HookWidget {
         if (account.token.USD != null) {
           double value = account.token.USD * double.parse(account.balance);
           if (currency != "USD") {
-            value *= store.state.exchangeRatio;
+            value *= widget.store.state.exchangeRatio;
           }
           resultValue = resultValue + value;
         }

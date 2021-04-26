@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
     _currentIndex = ValueNotifier(0);
     items = [
       TabNavigationItem(
-        page: WalletSelectorPage(widget.store, context),
+        page: WalletSelectorPage(store: widget.store, parentContext: context),
         icon: ImageIcon(
           AssetImage('assets/home_tab_item.png'),
         ),
@@ -159,7 +159,8 @@ class _HomePageState extends State<HomePage> {
                 onGenerateRoute: (settings) {
                   Widget page;
                   if (index == 0) {
-                    page = WalletSelectorPage(widget.store, context);
+                    page = WalletSelectorPage(
+                        store: widget.store, parentContext: context);
                   } else if (index == 2) {
                     page = settingsPage(context);
                   }
