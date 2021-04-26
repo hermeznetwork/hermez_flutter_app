@@ -1,4 +1,5 @@
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
@@ -430,35 +431,37 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: 25),
                     widget.arguments.isBackup
                         ? Container(
                             margin: EdgeInsets.only(left: 24, right: 24),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(children: [
-                                Checkbox(
-                                  value: checked,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      checked = value;
-                                    });
-                                  },
-                                ),
-                                Expanded(
-                                  child: Text(
-                                      'I understand this is my only'
-                                      ' key to recover my funds.',
-                                      style: TextStyle(
-                                        color: HermezColors.blackTwo,
-                                        fontSize: 18,
-                                        height: 1.5,
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: FontWeight.w500,
-                                      )),
-                                )
-                              ]),
-                            ),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Checkbox(
+                                    value: checked,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        checked = value;
+                                      });
+                                    },
+                                  ),
+                                  Expanded(
+                                      child: Container(
+                                    padding: EdgeInsets.only(top: 8),
+                                    child: Text(
+                                        'I understand this is my only'
+                                        ' key to recover my funds.',
+                                        style: TextStyle(
+                                          color: HermezColors.blackTwo,
+                                          fontSize: 18,
+                                          height: 1.5,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: FontWeight.w500,
+                                        )),
+                                  ))
+                                ]),
                           )
                         : Container(),
                   ],

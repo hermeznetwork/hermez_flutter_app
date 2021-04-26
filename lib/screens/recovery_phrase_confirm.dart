@@ -198,7 +198,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                     ),
                     Container(
                       margin: EdgeInsets.only(
-                          left: 24, right: 24, top: 20, bottom: 15),
+                          left: 24, right: 24, top: 28, bottom: 15),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text('Select word #' + positions[1].toString(),
@@ -315,7 +315,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                     ),
                     Container(
                       margin: EdgeInsets.only(
-                          left: 24, right: 24, top: 20, bottom: 15),
+                          left: 24, right: 24, top: 28, bottom: 15),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text('Select word #' + positions[2].toString(),
@@ -432,7 +432,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                     ),
                     Container(
                       margin: EdgeInsets.only(
-                          left: 24, right: 24, top: 20, bottom: 15),
+                          left: 24, right: 24, top: 28, bottom: 15),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text('Select word #' + positions[3].toString(),
@@ -572,7 +572,8 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                                   arguments: InfoArguments(
                                       "info_backup_success.png",
                                       false,
-                                      "Your wallet is backed up"));
+                                      "Your wallet is backed up",
+                                      iconSize: 300));
                               Navigator.pushNamedAndRemoveUntil(context,
                                   "/home", (Route<dynamic> route) => false);
                             } else {
