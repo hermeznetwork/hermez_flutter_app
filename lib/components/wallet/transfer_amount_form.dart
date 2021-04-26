@@ -76,6 +76,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   void initState() {
     super.initState();
     defaultCurrencySelected = false;
+    enoughGas = true;
   }
 
   @override
@@ -163,25 +164,42 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 child: Text(
                                   defaultCurrencySelected
                                       ? "Fee " +
-                                          ((currency != "USD"
-                                                      ? ethereumToken.USD *
-                                                          widget.store.state
-                                                              .exchangeRatio
-                                                      : ethereumToken.USD) *
+                                          ((txLevel == TransactionLevel.LEVEL1
+                                                      ? ethereumToken.USD
+                                                      : account.token.USD) *
+                                                  (currency != "USD"
+                                                      ? widget.store.state
+                                                          .exchangeRatio
+                                                      : 1) *
                                                   (estimatedFee.toDouble() /
                                                       pow(
                                                           10,
-                                                          ethereumToken
-                                                              .decimals)))
+                                                          (txLevel ==
+                                                                  TransactionLevel
+                                                                      .LEVEL1
+                                                              ? ethereumToken
+                                                                  .decimals
+                                                              : account.token
+                                                                  .decimals))))
                                               .toStringAsFixed(2) +
                                           " " +
                                           currency
                                       : "Fee " +
                                           (estimatedFee.toDouble() /
-                                                  pow(10,
-                                                      ethereumToken.decimals))
+                                                  pow(
+                                                      10,
+                                                      (txLevel ==
+                                                              TransactionLevel
+                                                                  .LEVEL1
+                                                          ? ethereumToken
+                                                              .decimals
+                                                          : account
+                                                              .token.decimals)))
                                               .toStringAsFixed(6) +
-                                          " ETH",
+                                          " " +
+                                          (txLevel == TransactionLevel.LEVEL1
+                                              ? ethereumToken.symbol
+                                              : account.token.symbol),
                                   style: TextStyle(
                                     color: HermezColors.blueyGreyTwo,
                                     fontSize: 16,
@@ -760,7 +778,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
     if (store.state.txLevel == TransactionLevel.LEVEL2) {
       StateResponse state = await store.getState();
       RecommendedFee fees = state.recommendedFee;
-      return BigInt.from(fees.createAccount);
+      estimatedFee = BigInt.from(fees.existingAccount /
+          account.token.USD *
+          pow(10, account.token.decimals));
+      return estimatedFee;
     } else {
       double amount = 0;
       if (amountController.value.text.isNotEmpty) {
