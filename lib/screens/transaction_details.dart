@@ -15,7 +15,6 @@ import 'package:hermez_plugin/utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import '../components/wallet/transaction_details_form.dart';
-import '../constants.dart';
 import '../context/transfer/wallet_transfer_provider.dart';
 
 class TransactionDetailsArguments {
@@ -166,8 +165,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                   success = await transferStore.transfer(
                                       widget.arguments.addressTo,
                                       widget.arguments.amount.toString(),
-                                      CONTRACT_ADDRESSES["Rinkeby"]
-                                          [widget.arguments.token.symbol],
+                                      widget.arguments.token.ethereumAddress,
                                       widget.arguments.token.symbol);
                                 }
                               } else {
