@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
+import 'package:hermez/constants.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode.dart';
@@ -190,11 +192,35 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                             : "hez:" +
                                                 widget.arguments.store.state
                                                     .ethereumAddress));
-                                final snackBar =
-                                    SnackBar(content: Text('Copied'));
-                                ScaffoldMessenger.of(
-                                        widget.arguments.parentContext)
-                                    .showSnackBar(snackBar);
+                                Flushbar(
+                                  messageText: Text(
+                                    'Copied',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  boxShadows: [
+                                    BoxShadow(
+                                      color: HermezColors.blueyGreyTwo
+                                          .withAlpha(64),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 16,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                  borderColor:
+                                      HermezColors.blueyGreyTwo.withAlpha(64),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12)),
+                                  backgroundColor: Colors.white,
+                                  margin: EdgeInsets.all(16.0),
+                                  duration: Duration(
+                                      seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+                                ).show(context);
                               },
                               padding: EdgeInsets.only(
                                   left: 20.0,

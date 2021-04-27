@@ -67,6 +67,7 @@ dependencies:
   local_auth: ^1.1.1
   flutter_windowmanager: ^0.0.2
   clipboard: ^0.1.3
+  another_flushbar: ^1.10.20
 
   http: ^0.12.0+1
 
@@ -121,6 +122,12 @@ flutter:
     - hermez_logo_white.png
     - share.png
 
+    # Account Details
+    - tx_send.png
+    - tx_receive.png
+    - tx_withdraw.png
+    - tx_move.png
+
     - switch_camera.png
     - flash_on.png
     - flash_off.png
@@ -159,9 +166,7 @@ flutter:
     - scan.png
     - withdraw.png
     - withdraw2.png
-    - tx_send.png
-    - tx_receive.png
-    - tx_withdraw.png
+
     - tx_deposit.png
     - show_explorer.png
     - paste.png

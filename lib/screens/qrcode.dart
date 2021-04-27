@@ -3,10 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:hermez/constants.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -285,10 +287,35 @@ class _QRCodePageState extends State<QRCodePage> {
                                           widget.arguments.store.state
                                               .ethereumAddress
                                       : widget.arguments.code));
-                              final snackBar =
-                                  SnackBar(content: Text('Copied'));
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
+                              Flushbar(
+                                messageText: Text(
+                                  'Copied',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: HermezColors.blackTwo,
+                                    fontSize: 16,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                boxShadows: [
+                                  BoxShadow(
+                                    color:
+                                        HermezColors.blueyGreyTwo.withAlpha(64),
+                                    offset: Offset(0, 4),
+                                    blurRadius: 16,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                                borderColor:
+                                    HermezColors.blueyGreyTwo.withAlpha(64),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                                backgroundColor: Colors.white,
+                                margin: EdgeInsets.all(16.0),
+                                duration: Duration(
+                                    seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+                              ).show(context);
                             },
                             padding: EdgeInsets.only(
                                 top: 18.0,

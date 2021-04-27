@@ -4,7 +4,7 @@ const ETH_GAS_PRICE_URL = "ethgasstation.info";
 
 //const ACCOUNT_INDEX_SEPARATOR = ':';
 
-//const SNACKBAR_AUTO_HIDE_DURATION = 5000;
+const FLUSHBAR_AUTO_HIDE_DURATION = 2;
 
 const AUTH_MESSAGE =
     "Hermez Network account access.\n\nSign this message if you are in a trusted application only.";
