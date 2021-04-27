@@ -405,12 +405,7 @@ class _ActivityState extends State<Activity> {
 
                   return Container(
                     child: ListTile(
-                      leading: _getLeadingWidget(
-                          icon,
-                          //element['status'] == 'invalid'
-                          /*? Color.fromRGBO(255, 239, 241, 1.0)
-                          :*/
-                          /*Colors.grey[100]*/ null),
+                      leading: _getLeadingWidget(icon, null),
                       title: Container(
                         padding: EdgeInsets.only(bottom: 10.0),
                         child: Text(

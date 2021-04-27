@@ -28,8 +28,15 @@ class AddressUtils {
   }
 
   static String strip0x(String address) {
-    if (address.startsWith("0x") || address.startsWith("0X")) {
+    if (address.toLowerCase().startsWith("0x")) {
       return address.substring(2);
+    }
+    return address;
+  }
+
+  static String stripHez0x(String address) {
+    if (address.toLowerCase().startsWith("hez:0x")) {
+      return address.substring(6);
     }
     return address;
   }

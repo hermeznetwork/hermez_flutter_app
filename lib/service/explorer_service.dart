@@ -77,42 +77,44 @@ class ExplorerService implements IExplorerService {
       if (resp['message'] == 'OK' && resp['status'] == '1') {
         List transfers = [];
         for (dynamic transferEvent in resp['result']) {
-          String type;
-          if (transferEvent["to"].toString().toLowerCase() ==
-              getCurrentEnvironment()
-                  .contracts['Hermez']
-                  .toString()
-                  .toLowerCase()) {
-            type = 'DEPOSIT';
-          } else if (transferEvent["from"].toString().toLowerCase() ==
-              getCurrentEnvironment()
-                  .contracts['Hermez']
-                  .toString()
-                  .toLowerCase()) {
-            type = 'WITHDRAW';
-          } else if (transferEvent["from"].toString().toLowerCase() ==
-              address.toLowerCase()) {
-            type = 'SEND';
-          } else if (transferEvent["to"].toString().toLowerCase() ==
-              address.toLowerCase()) {
-            type = 'RECEIVE';
+          if (double.parse(transferEvent['value']) > 0) {
+            String type;
+            if (transferEvent["to"].toString().toLowerCase() ==
+                getCurrentEnvironment()
+                    .contracts['Hermez']
+                    .toString()
+                    .toLowerCase()) {
+              type = 'WITHDRAW';
+            } else if (transferEvent["from"].toString().toLowerCase() ==
+                getCurrentEnvironment()
+                    .contracts['Hermez']
+                    .toString()
+                    .toLowerCase()) {
+              type = 'DEPOSIT';
+            } else if (transferEvent["from"].toString().toLowerCase() ==
+                address.toLowerCase()) {
+              type = 'SEND';
+            } else if (transferEvent["to"].toString().toLowerCase() ==
+                address.toLowerCase()) {
+              type = 'RECEIVE';
+            }
+            transfers.add({
+              'blockNumber': num.parse(transferEvent['blockNumber']),
+              'txHash': transferEvent['hash'],
+              'to': transferEvent['to'],
+              'from': transferEvent["from"],
+              'status': "CONFIRMED",
+              'timestamp': DateTime.fromMillisecondsSinceEpoch(
+                      DateTime.fromMillisecondsSinceEpoch(
+                                  int.parse(transferEvent['timeStamp']))
+                              .millisecondsSinceEpoch *
+                          1000)
+                  .millisecondsSinceEpoch,
+              'value': transferEvent['value'],
+              'tokenAddress': transferEvent['contractAddress'],
+              'type': type,
+            });
           }
-          transfers.add({
-            'blockNumber': num.parse(transferEvent['blockNumber']),
-            'txHash': transferEvent['hash'],
-            'to': transferEvent['to'],
-            'from': transferEvent["from"],
-            'status': "CONFIRMED",
-            'timestamp': DateTime.fromMillisecondsSinceEpoch(
-                    DateTime.fromMillisecondsSinceEpoch(
-                                int.parse(transferEvent['timeStamp']))
-                            .millisecondsSinceEpoch *
-                        1000)
-                .millisecondsSinceEpoch,
-            'value': transferEvent['value'],
-            'tokenAddress': transferEvent['contractAddress'],
-            'type': type,
-          });
         }
         return transfers;
       } else {
@@ -137,13 +139,13 @@ class ExplorerService implements IExplorerService {
                   .contracts['Hermez']
                   .toString()
                   .toLowerCase()) {
-            type = 'DEPOSIT';
+            type = 'WITHDRAW';
           } else if (transferEvent["from"].toString().toLowerCase() ==
               getCurrentEnvironment()
                   .contracts['Hermez']
                   .toString()
                   .toLowerCase()) {
-            type = 'WITHDRAW';
+            type = 'DEPOSIT';
           } else if (transferEvent["from"].toString().toLowerCase() ==
               address.toLowerCase()) {
             type = 'SEND';
