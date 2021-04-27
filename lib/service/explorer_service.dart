@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:hermez_plugin/environment.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -76,6 +77,26 @@ class ExplorerService implements IExplorerService {
       if (resp['message'] == 'OK' && resp['status'] == '1') {
         List transfers = [];
         for (dynamic transferEvent in resp['result']) {
+          String type;
+          if (transferEvent["to"].toString().toLowerCase() ==
+              getCurrentEnvironment()
+                  .contracts['Hermez']
+                  .toString()
+                  .toLowerCase()) {
+            type = 'DEPOSIT';
+          } else if (transferEvent["from"].toString().toLowerCase() ==
+              getCurrentEnvironment()
+                  .contracts['Hermez']
+                  .toString()
+                  .toLowerCase()) {
+            type = 'WITHDRAW';
+          } else if (transferEvent["from"].toString().toLowerCase() ==
+              address.toLowerCase()) {
+            type = 'SEND';
+          } else if (transferEvent["to"].toString().toLowerCase() ==
+              address.toLowerCase()) {
+            type = 'RECEIVE';
+          }
           transfers.add({
             'blockNumber': num.parse(transferEvent['blockNumber']),
             'txHash': transferEvent['hash'],
@@ -90,10 +111,7 @@ class ExplorerService implements IExplorerService {
                 .millisecondsSinceEpoch,
             'value': transferEvent['value'],
             'tokenAddress': transferEvent['contractAddress'],
-            'type': transferEvent["from"].toString().toLowerCase() ==
-                    address.toLowerCase()
-                ? 'SEND'
-                : 'RECEIVE',
+            'type': type,
           });
         }
         return transfers;
@@ -113,6 +131,26 @@ class ExplorerService implements IExplorerService {
       if (resp['message'] == 'OK' && resp['status'] == '1') {
         List transfers = [];
         for (dynamic transferEvent in resp['result']) {
+          String type;
+          if (transferEvent["to"].toString().toLowerCase() ==
+              getCurrentEnvironment()
+                  .contracts['Hermez']
+                  .toString()
+                  .toLowerCase()) {
+            type = 'DEPOSIT';
+          } else if (transferEvent["from"].toString().toLowerCase() ==
+              getCurrentEnvironment()
+                  .contracts['Hermez']
+                  .toString()
+                  .toLowerCase()) {
+            type = 'WITHDRAW';
+          } else if (transferEvent["from"].toString().toLowerCase() ==
+              address.toLowerCase()) {
+            type = 'SEND';
+          } else if (transferEvent["to"].toString().toLowerCase() ==
+              address.toLowerCase()) {
+            type = 'RECEIVE';
+          }
           transfers.add({
             'blockNumber': num.parse(transferEvent['blockNumber']),
             'txHash': transferEvent['hash'],
@@ -127,10 +165,7 @@ class ExplorerService implements IExplorerService {
                 .millisecondsSinceEpoch,
             'value': transferEvent['value'],
             'tokenAddress': transferEvent['contractAddress'],
-            'type': transferEvent["from"].toString().toLowerCase() ==
-                    address.toLowerCase()
-                ? 'SEND'
-                : 'RECEIVE',
+            'type': type,
           });
         }
         return transfers;
