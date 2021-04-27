@@ -469,8 +469,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               padding: const EdgeInsets.all(34.0),
               child: Text(
                 widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
-                    ? 'There are no tokens in this account. \n\n Please make a deposit.'
-                    : 'Deposit tokens from your \n\n Ethereum account.',
+                    ? 'Transfer tokens to your \n\n Ethereum wallet.'
+                    : 'Transfer tokens to your \n\n Hermez wallet.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: HermezColors.blueyGrey,

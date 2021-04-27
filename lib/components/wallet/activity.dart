@@ -387,14 +387,14 @@ class _ActivityState extends State<Activity> {
                       break;
                     case "WITHDRAW":
                       txType = TransactionType.WITHDRAW;
-                      title = "Withdrawn";
-                      icon = "assets/tx_withdraw.png";
+                      title = "Moved";
+                      icon = "assets/tx_move.png";
                       isNegative = true;
                       break;
                     case "DEPOSIT":
                       txType = TransactionType.DEPOSIT;
-                      title = "Deposited";
-                      icon = "assets/tx_deposit.png";
+                      title = "Moved";
+                      icon = "assets/tx_move.png";
                       isNegative = false;
                       break;
                   }

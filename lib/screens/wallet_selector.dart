@@ -30,30 +30,22 @@ class WalletSelectorPage extends StatefulWidget {
 }
 
 class _WalletSelectorPageState extends State<WalletSelectorPage> {
-  //GlobalKey<ScaffoldState> scaffoldKey;
-
-  //final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Account> l1Accounts;
   List<Account> l2Accounts;
 
-  @override
-  initState() {
-    super.initState();
-    widget.store.initialise();
-  }
-
   Future<void> fetchData() async {
+    if (widget.store.state.ethereumAddress == null) {
+      await widget.store.initialise();
+    }
     l1Accounts = await widget.store.getL1Accounts();
     l2Accounts = await widget.store.getAccounts();
   }
 
   @override
   Widget build(BuildContext context) {
-    //store = useWallet(context);
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      //key: _scaffoldKey,
       backgroundColor: HermezColors.lightOrange,
       body: FutureBuilder(
           future: fetchData(),
@@ -495,7 +487,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
           if (currency != "USD") {
             value *= widget.store.state.exchangeRatio;
           }
-          resultValue = resultValue + value;
+          resultValue += value;
         }
       }
     }
