@@ -5,14 +5,17 @@ import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/settings.dart';
 import 'package:hermez/screens/settings_currency.dart';
 import 'package:hermez/screens/settings_details.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/screens/wallet_selector.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez_plugin/addresses.dart';
 import 'package:provider/provider.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'account_details.dart';
+import 'account_selector.dart';
 import 'transaction_details.dart';
 
 class HomePage extends StatefulWidget {
@@ -131,7 +134,19 @@ class _HomePageState extends State<HomePage> {
         arguments: QRCodeScannerArguments(
           store: widget.store,
           type: QRCodeScannerType.ALL,
+          closeWhenScanned: true,
           onScanned: (value) async {
+            if (isEthereumAddress(value)) {
+              Navigator.of(context).pushNamed("/account_selector",
+                  arguments: AccountSelectorArguments(TransactionLevel.LEVEL1,
+                      TransactionType.SEND, widget.store,
+                      addressTo: value));
+            } else if (isHermezEthereumAddress(value)) {
+              Navigator.of(context).pushNamed("/account_selector",
+                  arguments: AccountSelectorArguments(TransactionLevel.LEVEL2,
+                      TransactionType.SEND, widget.store,
+                      addressTo: value));
+            }
             /*List<String> clipboardWords =
             value.replaceAll(RegExp("\\s+"), " ").split(" ");
             setState(

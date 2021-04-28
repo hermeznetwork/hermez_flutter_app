@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/qrcode.dart';
@@ -16,8 +17,10 @@ class AccountSelectorArguments {
   final TransactionLevel txLevel;
   final TransactionType transactionType;
   final WalletHandler store;
+  final String addressTo;
 
-  AccountSelectorArguments(this.txLevel, this.transactionType, this.store);
+  AccountSelectorArguments(this.txLevel, this.transactionType, this.store,
+      {this.addressTo});
 }
 
 class AccountSelectorPage extends HookWidget {
@@ -106,11 +109,56 @@ class AccountSelectorPage extends HookWidget {
       if (snapshot.hasError) {
         // while data is loading:
         return Container(
-          color: Colors.white,
-          child: Center(
-            child: Text('There was an error:' + snapshot.error.toString()),
-          ),
-        );
+            width: double.infinity,
+            padding: const EdgeInsets.all(34.0),
+            child: Column(children: [
+              Text(
+                'There was an error loading \n\n this page.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: HermezColors.blueyGrey,
+                  fontSize: 16,
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 24),
+              Center(
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    padding: EdgeInsets.only(
+                        left: 23, right: 23, bottom: 16, top: 16),
+                    backgroundColor: Color(0xfff3f3f8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
+                  ),
+                  onPressed: () {
+                    _onRefresh();
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset('assets/reload.svg',
+                          color: HermezColors.blueyGreyTwo,
+                          semanticsLabel: 'reload'),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Text(
+                        'Reload',
+                        style: TextStyle(
+                          color: HermezColors.blueyGreyTwo,
+                          fontSize: 16,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ]));
       } else {
         if (snapshot.hasData && (snapshot.data as List).length > 0) {
           // data loaded:
@@ -337,7 +385,7 @@ class AccountSelectorPage extends HookWidget {
                           context, "/transaction_amount",
                           arguments: TransactionAmountArguments(arguments.store,
                               arguments.txLevel, arguments.transactionType,
-                              token: token));
+                              token: token, addressTo: arguments.addressTo));
                       /*final Token supportedToken =
                 await arguments.store.getTokenById(account.token.id);
                 Navigator.pushReplacementNamed(context, "/transaction_amount",
@@ -367,7 +415,8 @@ class AccountSelectorPage extends HookWidget {
                           context, "/transaction_amount",
                           arguments: TransactionAmountArguments(arguments.store,
                               arguments.txLevel, arguments.transactionType,
-                              account: account));
+                              account: account,
+                              addressTo: arguments.addressTo));
                     });
                   }
 

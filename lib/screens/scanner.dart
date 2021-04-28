@@ -184,13 +184,13 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
 
   void finish(Barcode scanData) {
     result = scanData;
-    if (widget.arguments.onScanned != null) {
-      widget.arguments.onScanned(result.code);
-    }
     if (widget.arguments.closeWhenScanned) {
       if (Navigator.canPop(context)) {
         Navigator.pop(context);
       }
+    }
+    if (widget.arguments.onScanned != null) {
+      widget.arguments.onScanned(result.code);
     }
   }
 

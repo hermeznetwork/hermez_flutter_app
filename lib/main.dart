@@ -13,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  setEnvironment('goerli');
+  setEnvironment('rinkeby');
 
   final stores = await createProviders(getCurrentEnvironment());
 

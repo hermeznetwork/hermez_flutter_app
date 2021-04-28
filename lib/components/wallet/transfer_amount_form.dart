@@ -77,6 +77,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
     super.initState();
     defaultCurrencySelected = false;
     enoughGas = true;
+    if (widget.addressTo != null && widget.addressTo.isNotEmpty) {
+      addressController.value = TextEditingValue(text: widget.addressTo);
+    }
   }
 
   @override
@@ -341,7 +344,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                 Expanded(
                   child: AddressInput(
                     controller: addressController,
-                    layerOne: store.state.txLevel == TransactionLevel.LEVEL1,
+                    layerOne: txLevel == TransactionLevel.LEVEL1,
                     onChanged: (value) {
                       setState(() {
                         addressIsValid = isAddressValid();
@@ -380,8 +383,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 Navigator.of(context).pushNamed("/scanner",
                                     arguments: QRCodeScannerArguments(
                                         store: store,
-                                        type: store.state.txLevel ==
-                                                TransactionLevel.LEVEL1
+                                        type: txLevel == TransactionLevel.LEVEL1
                                             ? QRCodeScannerType.ETHEREUM_ADDRESS
                                             : QRCodeScannerType.HERMEZ_ADDRESS,
                                         onScanned: (scannedAddress) async {
@@ -582,7 +584,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                       double amount = 0;
                                       if (defaultCurrencySelected) {
                                         if (account.token.id == 0 ||
-                                            widget.store.state.txLevel ==
+                                            txLevel ==
                                                 TransactionLevel.LEVEL2) {
                                           amount = account.token.USD *
                                                   double.parse(
@@ -612,7 +614,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                         }
                                       } else {
                                         if (account.token.id == 0 ||
-                                            widget.store.state.txLevel ==
+                                            txLevel ==
                                                 TransactionLevel.LEVEL2) {
                                           amount = ((double.parse(
                                                       account.balance) /
@@ -735,7 +737,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     Text(
                       enoughGas
                           ? 'You don’t have enough funds.'
-                          : 'You don’t have enough funds to pay gas',
+                          : 'Insufficient ETH to cover gas fee.',
                       style: TextStyle(
                         color: HermezColors.redError,
                         fontFamily: 'ModernEra',
@@ -755,7 +757,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   Future<BigInt> getEstimatedFee() async {
-    if (store.state.txLevel == TransactionLevel.LEVEL2) {
+    if (txLevel == TransactionLevel.LEVEL2) {
       StateResponse state = await store.getState();
       RecommendedFee fees = state.recommendedFee;
       estimatedFee = BigInt.from(fees.existingAccount /
@@ -824,10 +826,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
 
   bool isAddressValid() {
     return addressController.value.text.isEmpty ||
-        (store.state.txLevel == TransactionLevel.LEVEL1 &&
+        (txLevel == TransactionLevel.LEVEL1 &&
             AddressUtils.isValidEthereumAddress(
                 addressController.value.text)) ||
-        (store.state.txLevel == TransactionLevel.LEVEL2 &&
+        (txLevel == TransactionLevel.LEVEL2 &&
             isHermezEthereumAddress(addressController.value.text));
     /*final regex = RegExp(store.state.txLevel == TransactionLevel.LEVEL1
         ? '^(0?[xX]?)[a-fA-F0-9]{0,}\$' /*'^0x[a-fA-F0-9]{40}\$'*/
