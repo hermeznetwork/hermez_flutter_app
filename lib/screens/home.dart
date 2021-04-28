@@ -11,6 +11,7 @@ import 'package:hermez/screens/wallet_selector.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
+import 'package:hermez_plugin/model/account.dart';
 import 'package:provider/provider.dart';
 
 import '../context/wallet/wallet_handler.dart';
@@ -96,16 +97,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // store = useWallet(context);
-    //useState(0);
-
-    /*useEffect(() {
-      store.initialise();
-      return null;
-    }, [store]);*/
-
     return Scaffold(
-      //key: _scaffoldKey,
       body: IndexedStack(
         index: _currentIndex.value,
         children: children,
@@ -134,38 +126,87 @@ class _HomePageState extends State<HomePage> {
         arguments: QRCodeScannerArguments(
           store: widget.store,
           type: QRCodeScannerType.ALL,
-          closeWhenScanned: true,
+          closeWhenScanned: false,
           onScanned: (value) async {
-            if (isEthereumAddress(value)) {
-              Navigator.of(context).pushNamed("/account_selector",
-                  arguments: AccountSelectorArguments(TransactionLevel.LEVEL1,
-                      TransactionType.SEND, widget.store,
-                      addressTo: value));
-            } else if (isHermezEthereumAddress(value)) {
-              Navigator.of(context).pushNamed("/account_selector",
-                  arguments: AccountSelectorArguments(TransactionLevel.LEVEL2,
-                      TransactionType.SEND, widget.store,
-                      addressTo: value));
-            }
-            /*List<String> clipboardWords =
-            value.replaceAll(RegExp("\\s+"), " ").split(" ");
-            setState(
-                  () {
-                int maxLength =
-                min(clipboardWords.length, words.length);
-                for (int i = 0; i < maxLength; i++) {
-                  words[i] = clipboardWords[i];
-                  textEditingControllers[i].text = clipboardWords[i];
+            List<String> scannedStrings = value.split(':');
+            if (scannedStrings.length > 0) {
+              if (isEthereumAddress(scannedStrings[0])) {
+                if (scannedStrings.length > 1) {
+                  bool accountFound = false;
+                  List<Account> accounts = await widget.store.getL1Accounts();
+                  for (Account account in accounts) {
+                    if (account.token.symbol == scannedStrings[1]) {
+                      accountFound = true;
+                      Navigator.pushReplacementNamed(
+                          context, "/transaction_amount",
+                          arguments: TransactionAmountArguments(widget.store,
+                              TransactionLevel.LEVEL1, TransactionType.SEND,
+                              account: account,
+                              addressTo: scannedStrings[0],
+                              amount: double.parse(scannedStrings[2])));
+                      break;
+                    }
+                  }
+                  if (accountFound == false) {
+                    Navigator.pushReplacementNamed(context, "/account_selector",
+                        arguments: AccountSelectorArguments(
+                            TransactionLevel.LEVEL1,
+                            TransactionType.SEND,
+                            widget.store,
+                            addressTo: scannedStrings[0]));
+                  }
+                } else {
+                  Navigator.pushReplacementNamed(context, "/account_selector",
+                      arguments: AccountSelectorArguments(
+                          TransactionLevel.LEVEL1,
+                          TransactionType.SEND,
+                          widget.store,
+                          addressTo: scannedStrings[0]));
                 }
-                checkEnabledButton();
-              },
-            );*/
+              } else if (isHermezEthereumAddress(
+                  scannedStrings[0] + ":" + scannedStrings[1])) {
+                if (scannedStrings.length > 2) {
+                  bool accountFound = false;
+                  List<Account> accounts = await widget.store.getAccounts();
+                  for (Account account in accounts) {
+                    if (account.token.symbol == scannedStrings[2]) {
+                      accountFound = true;
+                      Navigator.pushReplacementNamed(
+                          context, "/transaction_amount",
+                          arguments: TransactionAmountArguments(widget.store,
+                              TransactionLevel.LEVEL2, TransactionType.SEND,
+                              account: account,
+                              addressTo:
+                                  scannedStrings[0] + ":" + scannedStrings[1],
+                              amount: double.parse(scannedStrings[3])));
+                      break;
+                    }
+                  }
+                  if (accountFound == false) {
+                    Navigator.pushReplacementNamed(context, "/account_selector",
+                        arguments: AccountSelectorArguments(
+                            TransactionLevel.LEVEL2,
+                            TransactionType.SEND,
+                            widget.store,
+                            addressTo:
+                                scannedStrings[0] + ":" + scannedStrings[1]));
+                  }
+                } else {
+                  Navigator.of(context).pushNamed("/account_selector",
+                      arguments: AccountSelectorArguments(
+                          TransactionLevel.LEVEL2,
+                          TransactionType.SEND,
+                          widget.store,
+                          addressTo:
+                              scannedStrings[0] + ":" + scannedStrings[1]));
+                }
+              }
+            }
           },
         ),
       );
     } else {
       setState(() {
-        //widget.store.initialise();
         children.removeAt(index);
         children.insert(
             index,
@@ -213,9 +254,6 @@ class _HomePageState extends State<HomePage> {
   Widget settingsPage(dynamic context) {
     var configurationService =
         Provider.of<ConfigurationService>(context, listen: false);
-    /*if (configurationService.didSetupWallet())
-      return WalletProvider(builder: (context, store) {*/
     return SettingsPage(widget.store, configurationService, context);
-    //});
   }
 }

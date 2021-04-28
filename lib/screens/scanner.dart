@@ -5,7 +5,6 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/recovery_phrase_utils.dart';
-import 'package:hermez_plugin/addresses.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 typedef OnScanned = void Function(String address);
@@ -167,13 +166,16 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
     });
     controller.scannedDataStream.listen((scanData) {
       if (result == null) {
-        if ((widget.arguments.type == QRCodeScannerType.ALL ||
+        List<String> scannedStrings = scanData.code.split(":");
+        if ((scannedStrings.length > 0 &&
+                    widget.arguments.type == QRCodeScannerType.ALL ||
                 widget.arguments.type == QRCodeScannerType.HERMEZ_ADDRESS) &&
-            isHermezEthereumAddress(scanData.code)) {
+            AddressUtils.isValidEthereumAddress(scannedStrings[1])) {
           finish(scanData);
-        } else if ((widget.arguments.type == QRCodeScannerType.ALL ||
+        } else if ((scannedStrings.length > 0 &&
+                    widget.arguments.type == QRCodeScannerType.ALL ||
                 widget.arguments.type == QRCodeScannerType.ETHEREUM_ADDRESS) &&
-            AddressUtils.isValidEthereumAddress(scanData.code)) {
+            AddressUtils.isValidEthereumAddress(scannedStrings[0])) {
           finish(scanData);
         } else if ((widget.arguments.type == QRCodeScannerType.RECOVERY_SEED) &&
             isValidRecoveryPhrase(scanData.code)) {

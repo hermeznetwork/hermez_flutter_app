@@ -11,6 +11,7 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
@@ -77,6 +78,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
     super.initState();
     defaultCurrencySelected = false;
     enoughGas = true;
+    if (widget.amount != null && widget.amount > 0) {
+      amountController.text =
+          EthAmountFormatter.removeDecimalZeroFormat(widget.amount);
+    }
     if (widget.addressTo != null && widget.addressTo.isNotEmpty) {
       addressController.value = TextEditingValue(text: widget.addressTo);
     }
@@ -503,39 +508,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     onChanged: (value) {
                       setState(
                         () {
-                          amountIsValid = value.isEmpty ||
-                              (account != null
-                                  ? (double.parse(value) <=
-                                      (defaultCurrencySelected
-                                          ? currency != "USD"
-                                              ? account.token.USD *
-                                                      double.parse(
-                                                          account.balance) /
-                                                      pow(
-                                                          10,
-                                                          account
-                                                              .token.decimals) *
-                                                      widget.store.state
-                                                          .exchangeRatio -
-                                                  (account.token.USD *
-                                                          widget.store.state
-                                                              .exchangeRatio) *
-                                                      (estimatedFee.toDouble() /
-                                                          pow(
-                                                              10,
-                                                              account.token
-                                                                  .decimals))
-                                              : account.token.USD * double.parse(account.balance) / pow(10, account.token.decimals) -
-                                                  (account.token.USD *
-                                                      estimatedFee.toDouble() /
-                                                      pow(
-                                                          10,
-                                                          account
-                                                              .token.decimals))
-                                          : double.parse(account.balance) /
-                                                  pow(10, account.token.decimals) -
-                                              (estimatedFee.toDouble() / pow(10, account.token.decimals))))
-                                  : true);
+                          amountIsValid = isAmountValid(value);
                         },
                       );
                     },
@@ -762,14 +735,25 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
 
   Future<BigInt> getEstimatedFee() async {
     if (transactionType == TransactionType.RECEIVE) {
-      return BigInt.zero;
+      estimatedFee = BigInt.zero;
     } else if (txLevel == TransactionLevel.LEVEL2) {
+      double amount = 0;
+      if (amountController.value.text.isNotEmpty) {
+        amount = !defaultCurrencySelected
+            ? double.parse(amountController.value.text)
+            : double.parse(amountController.value.text) /
+                /*(currency == "EUR"
+                ? account.USD * widget.store.state.exchangeRatio*
+                :*/
+                account.token.USD /*)*/;
+      }
       StateResponse state = await store.getState();
       RecommendedFee fees = state.recommendedFee;
       estimatedFee = BigInt.from(fees.existingAccount /
           account.token.USD *
           pow(10, account.token.decimals));
-      return estimatedFee;
+      amountIsValid =
+          isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
     } else {
       double amount = 0;
       if (amountController.value.text.isNotEmpty) {
@@ -783,7 +767,6 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       }
       String addressFrom;
       String addressTo;
-      //if (account.balance. > 0) {
       if (AddressUtils.isValidEthereumAddress(store.state.ethereumAddress)) {
         addressFrom = store.state.ethereumAddress;
       }
@@ -796,40 +779,43 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       ethereumToken = await getEthereumToken();
       ethereumAccount = await getEthereumAccount();
       enoughGas = await isEnoughGas();
-
-      return fee;
-      /*} else {
-        return BigInt.zero;
-        // TODO handle showing error
-      }*/
+      amountIsValid =
+          isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
     }
+    return estimatedFee;
   }
 
   bool buttonIsEnabled() {
     if (transactionType == TransactionType.RECEIVE) {
       return amountIsValid &&
           amountController.value.text.isNotEmpty &&
+          double.parse(amountController.value.text) > 0 &&
           token != null;
     } else if (txLevel == TransactionLevel.LEVEL1) {
       if (transactionType == TransactionType.SEND) {
         return amountIsValid &&
             enoughGas &&
             amountController.value.text.isNotEmpty &&
+            double.parse(amountController.value.text) > 0 &&
             addressIsValid &&
             addressController.value.text.isNotEmpty;
       } else {
         return amountIsValid &&
             enoughGas &&
-            amountController.value.text.isNotEmpty;
+            amountController.value.text.isNotEmpty &&
+            double.parse(amountController.value.text) > 0;
       }
     } else {
       if (transactionType == TransactionType.SEND) {
         return amountIsValid &&
             amountController.value.text.isNotEmpty &&
+            double.parse(amountController.value.text) > 0 &&
             addressIsValid &&
             addressController.value.text.isNotEmpty;
       } else {
-        return amountIsValid && amountController.value.text.isNotEmpty;
+        return amountIsValid &&
+            amountController.value.text.isNotEmpty &&
+            double.parse(amountController.value.text) > 0;
       }
     }
   }
@@ -841,23 +827,35 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                 addressController.value.text)) ||
         (txLevel == TransactionLevel.LEVEL2 &&
             isHermezEthereumAddress(addressController.value.text));
-    /*final regex = RegExp(store.state.txLevel == TransactionLevel.LEVEL1
-        ? '^(0?[xX]?)[a-fA-F0-9]{0,}\$' /*'^0x[a-fA-F0-9]{40}\$'*/
-        : '^([hH]?[eE]?[zZ]?:?0?[xX]?)[a-fA-F0-9]{0,}\$' /*'^hez:0x[a-fA-F0-9]{40}\$'*/);
-    try {
-      final matches = regex.allMatches(addressController.value.text);
-      for (Match match in matches) {
-        if (match.start == 0 &&
-            match.end == addressController.value.text.length) {
-          return true;
-        }
-      }
-      return false;
-    } catch (e) {
-      // Invalid regex
-      assert(false, e.toString());
-      return true;
-    }*/
+  }
+
+  bool isAmountValid(String value) {
+    final String currency =
+        widget.store.state.defaultCurrency.toString().split('.').last;
+    return value.isEmpty ||
+        (account != null
+            ? (double.parse(value) <=
+                (defaultCurrencySelected
+                    ? currency != "USD"
+                        ? account.token.USD *
+                                double.parse(account.balance) /
+                                pow(10, account.token.decimals) *
+                                widget.store.state.exchangeRatio -
+                            (account.token.USD *
+                                    widget.store.state.exchangeRatio) *
+                                (estimatedFee.toDouble() /
+                                    pow(10, account.token.decimals))
+                        : account.token.USD *
+                                double.parse(account.balance) /
+                                pow(10, account.token.decimals) -
+                            (account.token.USD *
+                                estimatedFee.toDouble() /
+                                pow(10, account.token.decimals))
+                    : double.parse(account.balance) /
+                            pow(10, account.token.decimals) -
+                        (estimatedFee.toDouble() /
+                            pow(10, account.token.decimals))))
+            : true);
   }
 
   Future<bool> isEnoughGas() async {
