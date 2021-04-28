@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:hermez/constants.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez_plugin/model/token.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share/share.dart';
@@ -28,12 +30,16 @@ class QRCodeArguments {
   final String title;
   final String code;
   final WalletHandler store;
+  final double amount;
+  final Token token;
   final bool isReceive;
   QRCodeArguments(
       {this.qrCodeType,
       this.title,
       this.code,
       this.store,
+      this.amount,
+      this.token,
       this.isReceive = false});
 }
 
@@ -85,7 +91,8 @@ class _QRCodePageState extends State<QRCodePage> {
           centerTitle: true,
           elevation: 0.0,
           backgroundColor: HermezColors.lightOrange,
-          actions: Platform.isAndroid
+          actions: Platform.isAndroid &&
+                  widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT
               ? <Widget>[
                   IconButton(
                     icon: Image.asset("assets/share.png",
@@ -129,7 +136,21 @@ class _QRCodePageState extends State<QRCodePage> {
                                             : "") +
                                         widget.arguments.store.state
                                             .ethereumAddress
-                                    : widget.arguments.code,
+                                    : widget.arguments.code +
+                                        (widget.arguments.token != null
+                                            ? ':' +
+                                                widget.arguments.token.symbol
+                                            : '') +
+                                        (widget.arguments.amount != null &&
+                                                widget.arguments.amount > 0
+                                            ? ':' +
+                                                EthAmountFormatter
+                                                    .removeDecimalZeroFormat(
+                                                        double.parse(widget
+                                                            .arguments.amount
+                                                            .toStringAsFixed(
+                                                                6)))
+                                            : ''),
                               ),
                             ),
                             QrImage(
@@ -148,7 +169,16 @@ class _QRCodePageState extends State<QRCodePage> {
                                           : "") +
                                       widget
                                           .arguments.store.state.ethereumAddress
-                                  : widget.arguments.code,
+                                  : widget.arguments.code +
+                                      (widget.arguments.token != null
+                                          ? ':' + widget.arguments.token.symbol
+                                          : '') +
+                                      (widget.arguments.amount != null &&
+                                              widget.arguments.amount > 0
+                                          ? ':' +
+                                              widget.arguments.amount
+                                                  .toStringAsFixed(6)
+                                          : ''),
                             ),
                           ],
                         ),
@@ -181,7 +211,26 @@ class _QRCodePageState extends State<QRCodePage> {
                                           widget.arguments.code.substring(
                                               (widget.arguments.code.length / 2)
                                                   .floor(),
-                                              widget.arguments.code.length),
+                                              widget.arguments.code.length) +
+                                          "\n" +
+                                          (widget.arguments.token != null
+                                              ? ':' +
+                                                  widget.arguments.token.symbol
+                                              : widget.arguments.amount != null &&
+                                                      widget.arguments.amount >
+                                                          0
+                                                  ? ':' +
+                                                      widget.arguments.store
+                                                          .state.defaultCurrency
+                                                          .toString()
+                                                          .split('.')
+                                                          .last
+                                                  : '') +
+                                          (widget.arguments.amount != null &&
+                                                  widget.arguments.amount > 0
+                                              ? ':' +
+                                                  EthAmountFormatter.removeDecimalZeroFormat(double.parse(widget.arguments.amount.toStringAsFixed(widget.arguments.token != null ? 6 : 2)))
+                                              : ''),
                               style: TextStyle(
                                 color: HermezColors.blackTwo,
                                 fontSize: 16,

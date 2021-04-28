@@ -9,9 +9,13 @@ class EthAmountFormatter {
     toUnit = EtherUnit.ether,
   }) {
     if (amount == null) return "-";
-    
+
     return EtherAmount.fromUnitAndValue(fromUnit, amount)
         .getValueInUnit(toUnit)
         .toString();
+  }
+
+  static String removeDecimalZeroFormat(double n) {
+    return n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 1);
   }
 }

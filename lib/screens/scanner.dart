@@ -96,8 +96,9 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                     FutureBuilder(
                         future: controller?.getFlashStatus(),
                         builder: (context, snapshot) {
-                          if (snapshot.hasError == null &&
-                              snapshot.data != null) {
+                          if (snapshot.hasError == false &&
+                              (snapshot.data == false ||
+                                  snapshot.data == true)) {
                             return Row(
                               children: [
                                 IconButton(

@@ -95,8 +95,6 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             BigInt estimatedFee = snapshot.data;
-            /*EtherAmount fee =
-                EtherAmount.fromUnitAndValue(EtherUnit.wei, estimatedFee);*/
             final String currency =
                 widget.store.state.defaultCurrency.toString().split('.').last;
 
@@ -126,17 +124,23 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                 : double.parse((double.parse(
                                                             amountController
                                                                 .value.text) /
-                                                        account.token.USD *
+                                                        (account != null
+                                                            ? account.token.USD
+                                                            : token.USD) *
                                                         (currency != "USD"
                                                             ? widget.store.state
                                                                 .exchangeRatio
                                                             : 1))
                                                     .toStringAsFixed(6)),
-                                            account.token,
+                                            account != null
+                                                ? account.token
+                                                : token,
                                             estimatedFee.toDouble(),
                                             txLevel == TransactionLevel.LEVEL1
                                                 ? ethereumToken
-                                                : account.token,
+                                                : account != null
+                                                    ? account.token
+                                                    : token,
                                             addressController.value.text);
                                       }
                                     : null,
@@ -757,7 +761,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   Future<BigInt> getEstimatedFee() async {
-    if (txLevel == TransactionLevel.LEVEL2) {
+    if (transactionType == TransactionType.RECEIVE) {
+      return BigInt.zero;
+    } else if (txLevel == TransactionLevel.LEVEL2) {
       StateResponse state = await store.getState();
       RecommendedFee fees = state.recommendedFee;
       estimatedFee = BigInt.from(fees.existingAccount /
@@ -800,7 +806,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   bool buttonIsEnabled() {
-    if (txLevel == TransactionLevel.LEVEL1) {
+    if (transactionType == TransactionType.RECEIVE) {
+      return amountIsValid &&
+          amountController.value.text.isNotEmpty &&
+          token != null;
+    } else if (txLevel == TransactionLevel.LEVEL1) {
       if (transactionType == TransactionType.SEND) {
         return amountIsValid &&
             enoughGas &&

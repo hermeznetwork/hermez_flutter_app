@@ -85,6 +85,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
                         : getHermezAddress(
                             widget.arguments.store.state.ethereumAddress),
                     store: widget.arguments.store,
+                    amount: amount,
+                    token: token,
                     isReceive: true));
           } else {
             String addressTo;
