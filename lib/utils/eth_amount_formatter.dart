@@ -16,6 +16,6 @@ class EthAmountFormatter {
   }
 
   static String removeDecimalZeroFormat(double n) {
-    return n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 1);
+    return n.toString().replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
   }
 }

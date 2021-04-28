@@ -861,7 +861,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   Future<bool> isEnoughGas() async {
-    if (txLevel == TransactionLevel.LEVEL1) {
+    if (txLevel == TransactionLevel.LEVEL1 &&
+        transactionType != TransactionType.RECEIVE) {
       if (ethereumAccount != null) {
         return double.parse(ethereumAccount.balance) >= estimatedFee.toDouble();
       }
@@ -885,9 +886,5 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       }
     }
     return ethereumAccount;
-  }
-
-  String removeDecimalZeroFormat(double n) {
-    return n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 1);
   }
 }

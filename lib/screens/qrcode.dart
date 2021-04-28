@@ -176,8 +176,11 @@ class _QRCodePageState extends State<QRCodePage> {
                                       (widget.arguments.amount != null &&
                                               widget.arguments.amount > 0
                                           ? ':' +
-                                              widget.arguments.amount
-                                                  .toStringAsFixed(6)
+                                              EthAmountFormatter
+                                                  .removeDecimalZeroFormat(
+                                                      double.parse(widget
+                                                          .arguments.amount
+                                                          .toStringAsFixed(6)))
                                           : ''),
                             ),
                           ],
@@ -335,7 +338,19 @@ class _QRCodePageState extends State<QRCodePage> {
                                               : "") +
                                           widget.arguments.store.state
                                               .ethereumAddress
-                                      : widget.arguments.code));
+                                      : widget.arguments.code +
+                                      (widget.arguments.token != null
+                                          ? ':' + widget.arguments.token.symbol
+                                          : '') +
+                                      (widget.arguments.amount != null &&
+                                          widget.arguments.amount > 0
+                                          ? ':' +
+                                          EthAmountFormatter
+                                              .removeDecimalZeroFormat(
+                                              double.parse(widget
+                                                  .arguments.amount
+                                                  .toStringAsFixed(6)))
+                                          : '')));
                               Flushbar(
                                 messageText: Text(
                                   'Copied',
