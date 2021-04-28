@@ -130,17 +130,21 @@ flutter:
     - tx_withdraw.png
     - tx_move.png
 
+    # Settings
+    - settings_currency_conversion.svg
+    - settings_view_explorer.svg
+    - settings_lock_wallet.svg
+    - settings_show_recovery_phrase.svg
+    - settings_change_passcode.svg
+    - settings_face.svg
+    - settings_fingerprint.svg
+    - settings_force_withdrawal.svg
+    - settings_remove_account.svg
+
+    # Scanner
     - switch_camera.png
     - flash_on.png
     - flash_off.png
-
-    - view_explorer.png
-    - show_recovery_phrase.png
-    - change_passcode.png
-    - force_withdrawal.png
-    - logout.png
-    - currency_conversion.png
-
 
     - partialERC20ABI.json
     - ERC20ABI.json

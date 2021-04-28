@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
@@ -125,17 +126,17 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               switch (widget.arguments.type) {
                 case SettingsDetailsType.GENERAL:
                   title = "Currency conversion";
-                  icon = "assets/currency_conversion.png";
+                  icon = "assets/settings_currency_conversion.svg";
                   break;
                 case SettingsDetailsType.SECURITY:
                   title = "Show recovery phrase";
-                  icon = "assets/show_recovery_phrase.png";
+                  icon = "assets/settings_show_recovery_phrase.svg";
                   break;
                 case SettingsDetailsType.ADVANCED:
                   title = "Force withdrawal";
                   subtitle = "Forces the coordinator to process"
                       " the transaction (more Gas is required).";
-                  icon = "assets/force_exit.png";
+                  icon = "assets/settings_force_withdrawal.svg";
                   break;
               }
               break;
@@ -143,15 +144,15 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               switch (widget.arguments.type) {
                 case SettingsDetailsType.GENERAL:
                   title = "View in block explorer";
-                  icon = "assets/view_explorer.png";
+                  icon = "assets/settings_view_explorer.svg";
                   break;
                 case SettingsDetailsType.SECURITY:
                   title = "Change passcode";
-                  icon = "assets/change_passcode.png";
+                  icon = "assets/settings_change_passcode.svg";
                   break;
                 case SettingsDetailsType.ADVANCED:
                   title = "Remove account";
-                  icon = "assets/remove_account.png";
+                  icon = "assets/settings_remove_account.svg";
                   break;
               }
               break;
@@ -159,7 +160,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               switch (widget.arguments.type) {
                 case SettingsDetailsType.GENERAL:
                   title = "Lock wallet";
-                  icon = "assets/logout.png";
+                  icon = "assets/settings_lock_wallet.svg";
                   break;
                 case SettingsDetailsType.SECURITY:
                   title = widget.configurationService.getBiometricsFace()
@@ -167,7 +168,9 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       : widget.configurationService.getBiometricsFingerprint()
                           ? "Disable fingerprint"
                           : "Enable fingerprint";
-                  icon = "assets/fingerprint.png";
+                  icon = widget.configurationService.getBiometricsFace()
+                      ? "assets/settings_face.svg"
+                      : "assets/settings_fingerprint.svg";
                   break;
                 case SettingsDetailsType.ADVANCED:
                   title = "General";
@@ -178,16 +181,15 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
 
           return ListTile(
             leading: Container(
-                padding: EdgeInsets.only(top: 16.0),
-                child: Image.asset(
-                  icon,
-                  height: 20,
-                  width: 20,
-                )),
-            /*trailing: Container(
-                padding: EdgeInsets.only(top: 20.0),
-                child: Image.asset("assets/arrow_right.png",
-                    height: 12, color: HermezColors.blackTwo)),*/
+              //alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(top: 16.0),
+              child: SvgPicture.asset(
+                icon,
+                /*height: 20,
+                width: 20,*/
+                fit: BoxFit.scaleDown,
+              ),
+            ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
