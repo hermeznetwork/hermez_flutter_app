@@ -28,11 +28,14 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
             elevation: 0.0,
             backgroundColor: HermezColors.lightOrange,
             actions: <Widget>[
-              new IconButton(
-                icon: new Icon(Icons.close),
-                onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                    context, "/home", (Route<dynamic> route) => false),
-              ),
+              !Navigator.canPop(context)
+                  ? new IconButton(
+                      icon: new Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, "/home", (Route<dynamic> route) => false);
+                      })
+                  : Container(),
             ],
           ),
           backgroundColor: HermezColors.lightOrange,
@@ -219,9 +222,13 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
           )),
         ),
         onWillPop: () async {
-          Navigator.pushNamedAndRemoveUntil(
-              context, "/home", (Route<dynamic> route) => false);
-          return false;
+          if (!Navigator.canPop(context)) {
+            Navigator.pushNamedAndRemoveUntil(
+                context, "/home", (Route<dynamic> route) => false);
+            return false;
+          } else {
+            return true;
+          }
         });
   }
 }

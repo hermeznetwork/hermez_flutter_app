@@ -224,9 +224,15 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                 borderRadius: BorderRadius.circular(30)),
                           ),
                           onPressed: () {
-                            if (l1Accounts != null && l1Accounts.length > 0) {
+                            if ((l1Accounts == null ||
+                                    l1Accounts.length == 0) &&
+                                (l2Accounts == null ||
+                                    l2Accounts.length == 0)) {
+                              Navigator.pushNamed(
+                                  widget.parentContext, "/first_deposit");
+                            } else if (l1Accounts != null &&
+                                l1Accounts.length > 0) {
                               widget.store.updateLevel(TransactionLevel.LEVEL1);
-
                               if (l1Accounts.length > 1) {
                                 Navigator.of(widget.parentContext)
                                     .pushNamed("/account_selector",
