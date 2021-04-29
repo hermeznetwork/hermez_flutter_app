@@ -682,7 +682,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 Navigator.of(context)
                     .pushNamed("account_details",
                         arguments: AccountDetailsArguments(
-                            account, widget.arguments.parentContext))
+                            widget.arguments.store,
+                            account,
+                            widget.arguments.parentContext))
                     .then((value) => _onRefresh());
               }); //iterate through indexes and get the next colour
             }

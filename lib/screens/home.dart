@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
             page = SettingsCurrencyPage(store: widget.store);
           } else if (settings.name == 'account_details') {
             final AccountDetailsArguments args = settings.arguments;
-            page = AccountDetailsPage(args);
+            page = AccountDetailsPage(arguments: args);
           } else if (settings.name == 'transaction_details') {
             page = WalletTransferProvider(
               builder: (context, store) {
@@ -237,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                     page = SettingsCurrencyPage(store: widget.store);
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
-                    page = AccountDetailsPage(args);
+                    page = AccountDetailsPage(arguments: args);
                   } else if (settings.name == 'transaction_details') {
                     page = WalletTransferProvider(
                       builder: (context, store) {

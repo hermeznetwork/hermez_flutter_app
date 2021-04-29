@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/components/wallet/activity.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
@@ -11,39 +10,37 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 
 import '../context/wallet/wallet_handler.dart';
-import '../context/wallet/wallet_provider.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable
 // title and message.
 
 class AccountDetailsArguments {
-  final Account element;
+  WalletHandler store;
+  final Account account;
   BuildContext parentContext;
-  //WalletHandler store;
 
-  AccountDetailsArguments(this.element, this.parentContext
-      /*this.store*/
-      );
+  AccountDetailsArguments(this.store, this.account, this.parentContext);
 }
 
-class AccountDetailsPage extends HookWidget {
-  AccountDetailsPage(this.arguments);
+class AccountDetailsPage extends StatefulWidget {
+  AccountDetailsPage({Key key, this.arguments}) : super(key: key);
+
   final AccountDetailsArguments arguments;
 
-  WalletHandler store;
+  @override
+  _AccountDetailsPageState createState() => _AccountDetailsPageState();
+}
+
+class _AccountDetailsPageState extends State<AccountDetailsPage> {
+  GlobalKey<ActivityState> _myKey = GlobalKey();
+  void _onRefresh() {
+    _myKey.currentState.onRefresh();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    store = useWallet(context);
-
-    useEffect(() {
-      store.initialise();
-      return null;
-    }, [store]);
-
-    final String currency =
-        store.state.defaultCurrency.toString().split('.').last;
     return Scaffold(
         body: NestedScrollView(
       body: Container(
@@ -51,21 +48,7 @@ class AccountDetailsPage extends HookWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Expanded(
-              child: Activity(
-                arguments: ActivityArguments(
-                    store,
-                    arguments.element,
-                    store.state.ethereumAddress,
-                    arguments.element.token.symbol,
-                    currency == "USD"
-                        ? arguments.element.token.USD
-                        : arguments.element.token.USD *
-                            store.state.exchangeRatio,
-                    store.state.defaultCurrency,
-                    arguments.parentContext),
-              ),
-            ),
+            Expanded(child: getActivity()),
             SafeArea(
               top: false,
               bottom: true,
@@ -97,7 +80,7 @@ class AccountDetailsPage extends HookWidget {
                       child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(arguments.element.token.name, // name
+                      Text(widget.arguments.account.token.name, // name
                           style: TextStyle(
                               fontFamily: 'ModernEra',
                               color: HermezColors.blackTwo,
@@ -112,7 +95,8 @@ class AccountDetailsPage extends HookWidget {
                     padding: EdgeInsets.only(
                         left: 12.0, right: 12.0, top: 4, bottom: 4),
                     child: Text(
-                      store.state.txLevel == TransactionLevel.LEVEL1
+                      widget.arguments.store.state.txLevel ==
+                              TransactionLevel.LEVEL1
                           ? "L1"
                           : "L2",
                       style: TextStyle(
@@ -143,9 +127,13 @@ class AccountDetailsPage extends HookWidget {
                           children: <Widget>[
                             Text(
                                 formatAmount(
-                                    double.parse(arguments.element.balance) /
-                                        pow(10, 18),
-                                    arguments.element.token.symbol),
+                                    double.parse(
+                                            widget.arguments.account.balance) /
+                                        pow(
+                                            10,
+                                            widget.arguments.account.token
+                                                .decimals),
+                                    widget.arguments.account.token.symbol),
                                 style: TextStyle(
                                     color: HermezColors.blackTwo,
                                     fontFamily: 'ModernEra',
@@ -185,13 +173,15 @@ class AccountDetailsPage extends HookWidget {
                     ),
                     onPressed: () {
                       Navigator.pushNamed(
-                        arguments.parentContext,
+                        widget.arguments.parentContext,
                         "/transaction_amount",
                         arguments: TransactionAmountArguments(
-                            store, store.state.txLevel, TransactionType.SEND,
-                            account: arguments.element,
+                            widget.arguments.store,
+                            widget.arguments.store.state.txLevel,
+                            TransactionType.SEND,
+                            account: widget.arguments.account,
                             allowChangeLevel: false),
-                      );
+                      ).then((value) => _onRefresh());
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -218,24 +208,30 @@ class AccountDetailsPage extends HookWidget {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      store.state.txLevel == TransactionLevel.LEVEL1
-                          ? Navigator.of(arguments.parentContext).pushNamed(
-                              "/qrcode",
-                              arguments: QRCodeArguments(
-                                  qrCodeType: QRCodeType.ETHEREUM,
-                                  code: store.state.ethereumAddress,
-                                  store: store,
-                                  isReceive: true),
-                            )
-                          : Navigator.of(arguments.parentContext).pushNamed(
-                              "/qrcode",
-                              arguments: QRCodeArguments(
-                                  qrCodeType: QRCodeType.HERMEZ,
-                                  code: getHermezAddress(
-                                      store.state.ethereumAddress),
-                                  store: store,
-                                  isReceive: true),
-                            );
+                      widget.arguments.store.state.txLevel ==
+                              TransactionLevel.LEVEL1
+                          ? Navigator.of(widget.arguments.parentContext)
+                              .pushNamed(
+                                "/qrcode",
+                                arguments: QRCodeArguments(
+                                    qrCodeType: QRCodeType.ETHEREUM,
+                                    code: widget
+                                        .arguments.store.state.ethereumAddress,
+                                    store: widget.arguments.store,
+                                    isReceive: true),
+                              )
+                              .then((value) => _onRefresh())
+                          : Navigator.of(widget.arguments.parentContext)
+                              .pushNamed(
+                                "/qrcode",
+                                arguments: QRCodeArguments(
+                                    qrCodeType: QRCodeType.HERMEZ,
+                                    code: getHermezAddress(widget
+                                        .arguments.store.state.ethereumAddress),
+                                    store: widget.arguments.store,
+                                    isReceive: true),
+                              )
+                              .then((value) => _onRefresh());
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -266,17 +262,18 @@ class AccountDetailsPage extends HookWidget {
                     ),
                     onPressed: () {
                       Navigator.pushNamed(
-                        arguments.parentContext,
+                        widget.arguments.parentContext,
                         "/transaction_amount",
                         arguments: TransactionAmountArguments(
-                            store,
-                            store.state.txLevel,
-                            store.state.txLevel == TransactionLevel.LEVEL1
+                            widget.arguments.store,
+                            widget.arguments.store.state.txLevel,
+                            widget.arguments.store.state.txLevel ==
+                                    TransactionLevel.LEVEL1
                                 ? TransactionType.DEPOSIT
                                 : TransactionType.EXIT,
-                            account: arguments.element,
+                            account: widget.arguments.account,
                             allowChangeLevel: false),
-                      );
+                      ).then((value) => _onRefresh());
                     },
                     padding: EdgeInsets.all(10.0),
                     color: Colors.transparent,
@@ -319,7 +316,7 @@ class AccountDetailsPage extends HookWidget {
     String locale = "";
     String symbol = "";
     final String currency =
-        store.state.defaultCurrency.toString().split('.').last;
+        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
     if (currency == "EUR") {
       locale = 'eu';
       symbol = '€';
@@ -330,11 +327,11 @@ class AccountDetailsPage extends HookWidget {
       locale = 'en';
       symbol = '\$';
     }
-    if (arguments.element.token.USD != null) {
-      double value =
-          arguments.element.token.USD * double.parse(arguments.element.balance);
+    if (widget.arguments.account.token.USD != null) {
+      double value = widget.arguments.account.token.USD *
+          double.parse(widget.arguments.account.balance);
       if (currency != "USD") {
-        value *= store.state.exchangeRatio;
+        value *= widget.arguments.store.state.exchangeRatio;
       }
       resultValue = resultValue + value;
     }
@@ -345,6 +342,25 @@ class AccountDetailsPage extends HookWidget {
   }
 
   void fetchState() {
-    store.getState();
+    widget.arguments.store.getState();
+  }
+
+  Activity getActivity() {
+    final String currency =
+        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
+    return Activity(
+      key: _myKey,
+      arguments: ActivityArguments(
+          widget.arguments.store,
+          widget.arguments.account,
+          widget.arguments.store.state.ethereumAddress,
+          widget.arguments.account.token.symbol,
+          currency == "USD"
+              ? widget.arguments.account.token.USD
+              : widget.arguments.account.token.USD *
+                  widget.arguments.store.state.exchangeRatio,
+          widget.arguments.store.state.defaultCurrency,
+          widget.arguments.parentContext),
+    );
   }
 }

@@ -38,10 +38,12 @@ class Activity extends StatefulWidget {
   final ActivityArguments arguments;
 
   @override
-  _ActivityState createState() => _ActivityState();
+  ActivityState createState() => ActivityState(arguments);
 }
 
-class _ActivityState extends State<Activity> {
+class ActivityState extends State<Activity> {
+  ActivityState(this.arguments);
+  final ActivityArguments arguments;
   final ScrollController _controller = ScrollController();
 
   bool _isLoading = true;
@@ -79,9 +81,7 @@ class _ActivityState extends State<Activity> {
     }
   }
 
-  Future<void> _onRefresh() async {
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+  Future<void> onRefresh() {
     fromItem = 0;
     exits = [];
     poolTxs = [];
@@ -94,9 +94,7 @@ class _ActivityState extends State<Activity> {
       _isLoading = true;
       fetchData();
     });
-    // if failed,use refreshFailed()
-    //_elements = widget.arguments.cryptoList;
-    //_refreshController.refreshCompleted();
+    return Future.value(null);
   }
 
   @override
@@ -185,23 +183,23 @@ class _ActivityState extends State<Activity> {
                       .last;
 
                   return WithdrawalRow(exit, 3, currency,
-                      widget.arguments.store.state.exchangeRatio, () {});
+                      arguments.store.state.exchangeRatio, () {});
                 } else if (i == 0 && exits.length > 0) {
                   final index = i;
                   final Exit exit = exits[index];
 
-                  final String currency = widget
-                      .arguments.store.state.defaultCurrency
+                  final String currency = arguments.store.state.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
 
-                  return WithdrawalRow(exit, 2, currency,
-                      widget.arguments.store.state.exchangeRatio, () async {
-                    Navigator.of(widget.arguments.parentContext)
+                  return WithdrawalRow(
+                      exit, 2, currency, arguments.store.state.exchangeRatio,
+                      () async {
+                    Navigator.of(arguments.parentContext)
                         .pushNamed("/transaction_details",
                             arguments: TransactionDetailsArguments(
-                              wallet: widget.arguments.store,
+                              wallet: arguments.store,
                               transactionType: TransactionType.WITHDRAW,
                               status: TransactionStatus.DRAFT,
                               token: exit.token,
@@ -211,7 +209,8 @@ class _ActivityState extends State<Activity> {
                                   pow(10, exit.token.decimals),
                               addressFrom: exit.hezEthereumAddress,
                               //addressTo: address,
-                            ));
+                            ))
+                        .then((value) => onRefresh());
                   });
                 } else if (i == 0 &&
                     pendingExits.length > 0 &&
@@ -228,7 +227,7 @@ class _ActivityState extends State<Activity> {
                       .last;
 
                   return WithdrawalRow(exit, 1, currency,
-                      widget.arguments.store.state.exchangeRatio, () async {});
+                      arguments.store.state.exchangeRatio, () async {});
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
                 else if ((pendingExits.isNotEmpty || exits.isNotEmpty
                             /*||
@@ -306,7 +305,7 @@ class _ActivityState extends State<Activity> {
                     } else if (transaction.type == "Transfer") {
                       value = transaction.amount.toString();
                       if (transaction.fromAccountIndex ==
-                          widget.arguments.account.accountIndex) {
+                          arguments.account.accountIndex) {
                         type = "SEND";
                         if (transaction.batchNum != null) {
                           status = "CONFIRMED";
@@ -325,7 +324,7 @@ class _ActivityState extends State<Activity> {
                         addressFrom = transaction.fromHezEthereumAddress;
                         addressTo = transaction.toHezEthereumAddress;
                       } else if (transaction.toAccountIndex ==
-                          widget.arguments.account.accountIndex) {
+                          arguments.account.accountIndex) {
                         type = "RECEIVE";
                         if (transaction.timestamp.isNotEmpty) {
                           status = "CONFIRMED";
@@ -349,10 +348,8 @@ class _ActivityState extends State<Activity> {
                     addressTo = event['to'];
                     value = event['value'];
                   }
-                  final String currency = widget.arguments.defaultCurrency
-                      .toString()
-                      .split('.')
-                      .last;
+                  final String currency =
+                      arguments.defaultCurrency.toString().split('.').last;
 
                   String symbol = "";
                   if (currency == "EUR") {
@@ -461,9 +458,7 @@ class _ActivityState extends State<Activity> {
                             Container(
                               padding: EdgeInsets.all(5.0),
                               child: Text(
-                                amount.toString() +
-                                    " " +
-                                    widget.arguments.symbol,
+                                amount.toString() + " " + arguments.symbol,
                                 style: TextStyle(
                                   color: HermezColors.black,
                                   fontSize: 16,
@@ -479,7 +474,7 @@ class _ActivityState extends State<Activity> {
                               child: Text(
                                 (isNegative ? "- " : "") +
                                     symbol +
-                                    (widget.arguments.exchangeRate * amount)
+                                    (arguments.exchangeRate * amount)
                                         .toStringAsFixed(2),
                                 style: TextStyle(
                                   color: isNegative
@@ -495,35 +490,35 @@ class _ActivityState extends State<Activity> {
                           ]),
                       onTap: () async {
                         Navigator.pushNamed(context, "transaction_details",
-                            arguments: TransactionDetailsArguments(
-                                wallet: widget.arguments.store,
-                                transactionType: txType,
-                                status: status != "CONFIRMED"
-                                    ? TransactionStatus.PENDING
-                                    : TransactionStatus.CONFIRMED,
-                                account: widget.arguments.account,
-                                token: widget.arguments.account.token,
-                                amount: amount,
-                                transactionId: txId,
-                                transactionHash: txHash,
-                                addressFrom: addressFrom,
-                                addressTo: addressTo,
-                                transactionDate: date));
+                                arguments: TransactionDetailsArguments(
+                                    wallet: arguments.store,
+                                    transactionType: txType,
+                                    status: status != "CONFIRMED"
+                                        ? TransactionStatus.PENDING
+                                        : TransactionStatus.CONFIRMED,
+                                    account: arguments.account,
+                                    token: arguments.account.token,
+                                    amount: amount,
+                                    transactionId: txId,
+                                    transactionHash: txHash,
+                                    addressFrom: addressFrom,
+                                    addressTo: addressTo,
+                                    transactionDate: date))
+                            .then((value) => onRefresh());
                       },
                     ),
                   );
                 }
               }),
-          onRefresh: _onRefresh,
+          onRefresh: onRefresh,
         ),
       );
     }
   }
 
   Future<void> fetchData() async {
-    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
-      poolTxs =
-          await fetchPoolTransactions(widget.arguments.account.accountIndex);
+    if (arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
+      poolTxs = await fetchPoolTransactions(arguments.account.accountIndex);
       final List<ForgedTransaction> pendingPoolTxs =
           poolTxs.map((poolTransaction) {
         return ForgedTransaction(
@@ -536,13 +531,11 @@ class _ActivityState extends State<Activity> {
             toHezEthereumAddress: poolTransaction.toHezEthereumAddress,
             timestamp: poolTransaction.timestamp);
       }).toList();
-      pendingExits =
-          await fetchPendingExits(widget.arguments.account.accountIndex);
-      exits = await fetchExits(widget.arguments.account.token.id);
+      pendingExits = await fetchPendingExits(arguments.account.accountIndex);
+      exits = await fetchExits(arguments.account.token.id);
       pendingWithdraws =
-          await fetchPendingWithdraws(widget.arguments.account.token.id);
-      pendingDeposits =
-          await fetchPendingDeposits(widget.arguments.account.token.id);
+          await fetchPendingWithdraws(arguments.account.token.id);
+      pendingDeposits = await fetchPendingDeposits(arguments.account.token.id);
       final List<ForgedTransaction> pendingDepositsTxs =
           pendingDeposits.map((pendingDeposit) {
         return ForgedTransaction(
@@ -580,14 +573,13 @@ class _ActivityState extends State<Activity> {
 
   Future<List<dynamic>> fetchPoolTransactions(String accountIndex) async {
     List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions(accountIndex);
+        await arguments.store.getPoolTransactions(accountIndex);
     poolTxs.removeWhere((transaction) => transaction.type == 'Exit');
     return poolTxs;
   }
 
   Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
-    final accountPendingDeposits =
-        await widget.arguments.store.getPendingDeposits();
+    final accountPendingDeposits = await arguments.store.getPendingDeposits();
     accountPendingDeposits.removeWhere((pendingDeposit) =>
         Token.fromJson(pendingDeposit['token']).id != tokenId);
     return accountPendingDeposits;
@@ -595,35 +587,30 @@ class _ActivityState extends State<Activity> {
 
   Future<List<dynamic>> fetchPendingExits(String accountIndex) async {
     List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions(accountIndex);
+        await arguments.store.getPoolTransactions(accountIndex);
     poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
     return poolTxs;
   }
 
   Future<List<Exit>> fetchExits(int tokenId) {
-    return widget.arguments.store.getExits(tokenId: tokenId);
+    return arguments.store.getExits(tokenId: tokenId);
   }
 
   Future<List<dynamic>> fetchPendingWithdraws(int tokenId) async {
-    final accountPendingWithdraws =
-        await widget.arguments.store.getPendingWithdraws();
+    final accountPendingWithdraws = await arguments.store.getPendingWithdraws();
     accountPendingWithdraws.removeWhere((pendingWithdraw) =>
         Token.fromJson(pendingWithdraw['token']).id != tokenId);
     return accountPendingWithdraws;
   }
 
   Future<List<dynamic>> fetchHistoryTransactions() async {
-    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
-      return await widget.arguments.store.getEthereumTransactionsByAddress(
-          widget.arguments.store.state.ethereumAddress,
-          widget.arguments.account,
-          fromItem);
+    if (arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
+      return await arguments.store.getEthereumTransactionsByAddress(
+          arguments.store.state.ethereumAddress, arguments.account, fromItem);
     } else {
-      final transactionsResponse = await widget.arguments.store
-          .getHermezTransactionsByAddress(
-              widget.arguments.store.state.ethereumAddress,
-              widget.arguments.account,
-              fromItem);
+      final transactionsResponse = await arguments.store
+          .getHermezTransactionsByAddress(arguments.store.state.ethereumAddress,
+              arguments.account, fromItem);
       pendingItems = transactionsResponse.pendingItems;
       return transactionsResponse.transactions;
     }
