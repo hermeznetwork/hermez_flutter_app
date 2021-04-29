@@ -26,6 +26,7 @@ class TransferAmountForm extends StatefulWidget {
       {Key key,
       @required this.txLevel,
       @required this.transactionType,
+      this.allowChangeLevel = false,
       this.account,
       this.token,
       this.amount,
@@ -36,6 +37,7 @@ class TransferAmountForm extends StatefulWidget {
 
   final TransactionLevel txLevel;
   final TransactionType transactionType;
+  final bool allowChangeLevel;
   final Account account;
   final Token token;
   final double amount;
@@ -45,17 +47,34 @@ class TransferAmountForm extends StatefulWidget {
       String addressTo) onSubmit;
 
   @override
-  _TransferAmountFormState createState() => _TransferAmountFormState(txLevel,
-      transactionType, account, token, amount, addressTo, store, onSubmit);
+  _TransferAmountFormState createState() => _TransferAmountFormState(
+      txLevel,
+      transactionType,
+      allowChangeLevel,
+      account,
+      token,
+      amount,
+      addressTo,
+      store,
+      onSubmit);
 }
 
 class _TransferAmountFormState extends State<TransferAmountForm> {
-  _TransferAmountFormState(this.txLevel, this.transactionType, this.account,
-      this.token, this.amount, this.addressTo, this.store, this.onSubmit);
+  _TransferAmountFormState(
+      this.txLevel,
+      this.transactionType,
+      this.allowChangeLevel,
+      this.account,
+      this.token,
+      this.amount,
+      this.addressTo,
+      this.store,
+      this.onSubmit);
 
-  final TransactionLevel txLevel;
+  TransactionLevel txLevel;
   final TransactionType transactionType;
-  final Account account;
+  Account account;
+  bool allowChangeLevel;
   final Token token;
   final double amount;
   final String addressTo;
@@ -158,7 +177,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 color: HermezColors.darkOrange,
                                 textColor: Colors.white,
                                 disabledTextColor: Colors.grey,
-                                child: Text("Continue",
+                                child: Text(
+                                    transactionType != TransactionType.RECEIVE
+                                        ? "Continue"
+                                        : "Request",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -169,26 +191,42 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             ),
                           ),
                         ),
-                        transactionType != TransactionType.RECEIVE
+                        account != null
                             ? Container(
                                 alignment: Alignment.center,
                                 margin: EdgeInsets.only(top: 20.0),
                                 child: Text(
                                   defaultCurrencySelected
                                       ? "Fee " +
-                                          ((txLevel == TransactionLevel.LEVEL1
+                                          ((transactionType !=
+                                                              TransactionType
+                                                                  .SEND ||
+                                                          (transactionType ==
+                                                                  TransactionType
+                                                                      .SEND &&
+                                                              txLevel ==
+                                                                  TransactionLevel
+                                                                      .LEVEL1)
                                                       ? ethereumToken.USD
                                                       : account.token.USD) *
-                                                  (currency != "USD"
+                                                  (currency !=
+                                                          "USD"
                                                       ? widget.store.state
                                                           .exchangeRatio
                                                       : 1) *
-                                                  (estimatedFee.toDouble() /
+                                                  (estimatedFee
+                                                          .toDouble() /
                                                       pow(
                                                           10,
-                                                          (txLevel ==
-                                                                  TransactionLevel
-                                                                      .LEVEL1
+                                                          (transactionType !=
+                                                                      TransactionType
+                                                                          .SEND ||
+                                                                  (transactionType ==
+                                                                          TransactionType
+                                                                              .SEND &&
+                                                                      txLevel ==
+                                                                          TransactionLevel
+                                                                              .LEVEL1)
                                                               ? ethereumToken
                                                                   .decimals
                                                               : account.token
@@ -205,8 +243,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                                   .LEVEL1
                                                           ? ethereumToken
                                                               .decimals
-                                                          : account
-                                                              .token.decimals)))
+                                                          : account != null
+                                                              ? account.token
+                                                                  .decimals
+                                                              : 18)))
                                               .toStringAsFixed(6) +
                                           " " +
                                           (txLevel == TransactionLevel.LEVEL1
@@ -230,14 +270,19 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                             transactionType != TransactionType.RECEIVE
                         ? MoveRow(
                             txLevel,
-                            /*() async {
-                              setState(() {
-                                txLevel = txLevel == TransactionLevel.LEVEL1
-                                    ? TransactionLevel.LEVEL2
-                                    : TransactionLevel.LEVEL1;
-                              });
-                            }*/
-                            null,
+                            allowChangeLevel
+                                ? () async {
+                                    setState(() {
+                                      txLevel =
+                                          (txLevel == TransactionLevel.LEVEL1)
+                                              ? TransactionLevel.LEVEL2
+                                              : TransactionLevel.LEVEL1;
+                                      defaultCurrencySelected = true;
+                                      account = null;
+                                      amountController.clear();
+                                    });
+                                  }
+                                : null,
                           )
                         : Container(),
                     account != null || token != null
@@ -269,7 +314,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                   arguments: AccountSelectorArguments(
                                       widget.txLevel,
                                       transactionType,
-                                      widget.store));
+                                      widget.store,
+                                      allowChangeLevel:
+                                          widget.allowChangeLevel));
                             },
                           )
                         : Container(
@@ -283,7 +330,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 Navigator.of(context).pushReplacementNamed(
                                     "/account_selector",
                                     arguments: AccountSelectorArguments(
-                                        txLevel, transactionType, store));
+                                        txLevel, transactionType, store,
+                                        allowChangeLevel:
+                                            widget.allowChangeLevel));
                               },
                               padding: EdgeInsets.all(20.0),
                               color: HermezColors.lightGrey,
@@ -512,6 +561,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                         },
                       );
                     },
+                    enabled: account != null ||
+                        transactionType == TransactionType.RECEIVE,
                     controller: amountController,
                     decimals: defaultCurrencySelected ? 2 : 6,
                   ),
@@ -530,7 +581,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      transactionType != TransactionType.RECEIVE
+                      account != null || token != null
                           ? Expanded(
                               child: Container(
                                 height: 48,
@@ -736,22 +787,28 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   Future<BigInt> getEstimatedFee() async {
     if (transactionType == TransactionType.RECEIVE) {
       estimatedFee = BigInt.zero;
-    } else if (txLevel == TransactionLevel.LEVEL2) {
+    } else if ((txLevel == TransactionLevel.LEVEL2 &&
+            transactionType == TransactionType.SEND) ||
+        transactionType == TransactionType.EXIT) {
       double amount = 0;
-      if (amountController.value.text.isNotEmpty) {
-        amount = !defaultCurrencySelected
-            ? double.parse(amountController.value.text)
-            : double.parse(amountController.value.text) /
-                /*(currency == "EUR"
+      if (account != null) {
+        if (amountController.value.text.isNotEmpty) {
+          amount = !defaultCurrencySelected
+              ? double.parse(amountController.value.text)
+              : double.parse(amountController.value.text) /
+                  /*(currency == "EUR"
                 ? account.USD * widget.store.state.exchangeRatio*
                 :*/
-                account.token.USD /*)*/;
+                  account.token.USD /*)*/;
+        }
+        StateResponse state = await store.getState();
+        RecommendedFee fees = state.recommendedFee;
+        estimatedFee = BigInt.from(fees.existingAccount /
+            account.token.USD *
+            pow(10, account.token.decimals));
+      } else {
+        estimatedFee = BigInt.zero;
       }
-      StateResponse state = await store.getState();
-      RecommendedFee fees = state.recommendedFee;
-      estimatedFee = BigInt.from(fees.existingAccount /
-          account.token.USD *
-          pow(10, account.token.decimals));
       amountIsValid =
           isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
     } else {

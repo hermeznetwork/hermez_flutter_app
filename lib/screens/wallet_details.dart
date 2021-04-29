@@ -373,7 +373,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                       widget.arguments.store,
                                       widget.arguments.store.state.txLevel,
                                       TransactionType.SEND,
-                                      account: _accounts[0]));
+                                      account: _accounts[0],
+                                      allowChangeLevel: false));
                             }
                           },
                           padding: EdgeInsets.all(10.0),

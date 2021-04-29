@@ -14,6 +14,7 @@ class AmountInput extends StatefulWidget {
     this.maxLines,
     this.obscureText = false,
     this.decimals,
+    this.enabled = true,
   }) : super(key: key);
 
   final String labelText;
@@ -23,6 +24,7 @@ class AmountInput extends StatefulWidget {
   final bool obscureText;
   final int maxLines;
   final int decimals;
+  final bool enabled;
   final TextEditingController controller;
 
   @override
@@ -55,6 +57,7 @@ class _AmountInputState extends State<AmountInput> {
       focusNode: focusNode,
       textAlign: TextAlign.center,
       maxLines: 1,
+      enabled: widget.enabled,
       cursorWidth: 5.0,
       cursorColor: HermezColors.orange,
       style: TextStyle(

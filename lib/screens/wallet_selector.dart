@@ -33,12 +33,16 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
   List<Account> l1Accounts;
   List<Account> l2Accounts;
 
+  bool isLoading = false;
+
   Future<void> fetchData() async {
+    isLoading = true;
     if (widget.store.state.ethereumAddress == null) {
       await widget.store.initialise();
     }
     l1Accounts = await widget.store.getL1Accounts();
     l2Accounts = await widget.store.getAccounts();
+    isLoading = false;
   }
 
   @override
@@ -224,63 +228,77 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                 borderRadius: BorderRadius.circular(30)),
                           ),
                           onPressed: () {
-                            if ((l1Accounts == null ||
-                                    l1Accounts.length == 0) &&
-                                (l2Accounts == null ||
-                                    l2Accounts.length == 0)) {
-                              Navigator.pushNamed(
-                                  widget.parentContext, "/first_deposit");
-                            } else if (l1Accounts != null &&
-                                l1Accounts.length > 0) {
-                              widget.store.updateLevel(TransactionLevel.LEVEL1);
-                              if (l1Accounts.length > 1) {
-                                Navigator.of(widget.parentContext)
-                                    .pushNamed("/account_selector",
-                                        arguments: AccountSelectorArguments(
-                                          TransactionLevel.LEVEL1,
-                                          TransactionType.DEPOSIT,
-                                          widget.store,
-                                        ));
-                              } else {
-                                Account account = l1Accounts[0];
+                            if (!isLoading) {
+                              if ((l1Accounts == null ||
+                                      l1Accounts.length == 0) &&
+                                  (l2Accounts == null ||
+                                      l2Accounts.length == 0)) {
                                 Navigator.pushNamed(
-                                    widget.parentContext, "/transaction_amount",
+                                    widget.parentContext, "/first_deposit");
+                              } else if (l1Accounts != null &&
+                                  l1Accounts.length > 0) {
+                                widget.store
+                                    .updateLevel(TransactionLevel.LEVEL1);
+                                if (l1Accounts.length > 1) {
+                                  Navigator.of(widget.parentContext).pushNamed(
+                                    "/account_selector",
+                                    arguments: AccountSelectorArguments(
+                                      TransactionLevel.LEVEL1,
+                                      TransactionType.DEPOSIT,
+                                      widget.store,
+                                      allowChangeLevel: true,
+                                    ),
+                                  );
+                                } else {
+                                  Account account = l1Accounts[0];
+                                  Navigator.pushNamed(
+                                    widget.parentContext,
+                                    "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                        widget.store,
-                                        TransactionLevel.LEVEL1,
-                                        TransactionType.DEPOSIT,
-                                        account: account));
-                              }
-                            } else if (l2Accounts != null &&
-                                l2Accounts.length > 0) {
-                              widget.store.updateLevel(TransactionLevel.LEVEL2);
-                              if (l2Accounts.length > 1) {
-                                Navigator.of(widget.parentContext)
-                                    .pushNamed("/account_selector",
-                                        arguments: AccountSelectorArguments(
+                                      widget.store,
+                                      TransactionLevel.LEVEL1,
+                                      TransactionType.DEPOSIT,
+                                      account: account,
+                                      allowChangeLevel: true,
+                                    ),
+                                  );
+                                }
+                              } else if (l2Accounts != null &&
+                                  l2Accounts.length > 0) {
+                                widget.store
+                                    .updateLevel(TransactionLevel.LEVEL2);
+                                if (l2Accounts.length > 1) {
+                                  Navigator.of(widget.parentContext).pushNamed(
+                                    "/account_selector",
+                                    arguments: AccountSelectorArguments(
+                                      TransactionLevel.LEVEL2,
+                                      TransactionType.EXIT,
+                                      widget.store,
+                                      allowChangeLevel: true,
+                                    ),
+                                  );
+                                } else {
+                                  Account account = l2Accounts[0];
+                                  Navigator.pushNamed(widget.parentContext,
+                                      "/transaction_amount",
+                                      arguments: TransactionAmountArguments(
+                                          widget.store,
                                           TransactionLevel.LEVEL2,
                                           TransactionType.EXIT,
-                                          widget.store,
-                                        ));
+                                          account: account,
+                                          allowChangeLevel: true));
+                                }
                               } else {
-                                Account account = l2Accounts[0];
-                                Navigator.pushNamed(
-                                    widget.parentContext, "/transaction_amount",
-                                    arguments: TransactionAmountArguments(
-                                        widget.store,
-                                        TransactionLevel.LEVEL2,
-                                        TransactionType.EXIT,
-                                        account: account));
-                              }
-                            } else {
-                              widget.store.updateLevel(TransactionLevel.LEVEL1);
-                              Navigator.of(widget.parentContext)
-                                  .pushNamed("/account_selector",
-                                      arguments: AccountSelectorArguments(
+                                widget.store
+                                    .updateLevel(TransactionLevel.LEVEL1);
+                                Navigator.of(widget.parentContext).pushNamed(
+                                    "/account_selector",
+                                    arguments: AccountSelectorArguments(
                                         TransactionLevel.LEVEL1,
                                         TransactionType.DEPOSIT,
                                         widget.store,
-                                      ));
+                                        allowChangeLevel: true));
+                              }
                             }
                           },
                           child: Row(

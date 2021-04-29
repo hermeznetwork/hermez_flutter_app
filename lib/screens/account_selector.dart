@@ -18,9 +18,10 @@ class AccountSelectorArguments {
   final TransactionType transactionType;
   final WalletHandler store;
   final String addressTo;
+  final bool allowChangeLevel;
 
   AccountSelectorArguments(this.txLevel, this.transactionType, this.store,
-      {this.addressTo});
+      {this.addressTo, this.allowChangeLevel = false});
 }
 
 class AccountSelectorPage extends HookWidget {
@@ -373,10 +374,7 @@ class AccountSelectorPage extends HookWidget {
                             ? token.USD * arguments.store.state.exchangeRatio
                             : token.USD,
                         currency,
-                        0
-                        /*double.parse(account.balance) /
-                pow(10, account.token.decimals)*/
-                        ,
+                        0,
                         false,
                         true,
                         false,
@@ -385,13 +383,9 @@ class AccountSelectorPage extends HookWidget {
                           context, "/transaction_amount",
                           arguments: TransactionAmountArguments(arguments.store,
                               arguments.txLevel, arguments.transactionType,
-                              token: token, addressTo: arguments.addressTo));
-                      /*final Token supportedToken =
-                await arguments.store.getTokenById(account.token.id);
-                Navigator.pushReplacementNamed(context, "/transaction_amount",
-                arguments: TransactionAmountArguments(arguments.store,
-                arguments.txLevel, arguments.transactionType, account));
-                */
+                              token: token,
+                              addressTo: arguments.addressTo,
+                              allowChangeLevel: arguments.allowChangeLevel));
                     });
                   } else {
                     final Account account = _accounts[index];
@@ -416,14 +410,10 @@ class AccountSelectorPage extends HookWidget {
                           arguments: TransactionAmountArguments(arguments.store,
                               arguments.txLevel, arguments.transactionType,
                               account: account,
-                              addressTo: arguments.addressTo));
+                              addressTo: arguments.addressTo,
+                              allowChangeLevel: arguments.allowChangeLevel));
                     });
                   }
-
-                  //final Color color = _colors[index %
-                  //    _colors.length];
-                  //iterate through indexes and get the next colour
-                  //return _buildRow(context, element, color); //build the row widget
                 },
               ),
               onRefresh: _onRefresh,

@@ -143,7 +143,8 @@ class _HomePageState extends State<HomePage> {
                               TransactionLevel.LEVEL1, TransactionType.SEND,
                               account: account,
                               addressTo: scannedStrings[0],
-                              amount: double.parse(scannedStrings[2])));
+                              amount: double.parse(scannedStrings[2]),
+                              allowChangeLevel: false));
                       break;
                     }
                   }
@@ -178,7 +179,8 @@ class _HomePageState extends State<HomePage> {
                               account: account,
                               addressTo:
                                   scannedStrings[0] + ":" + scannedStrings[1],
-                              amount: double.parse(scannedStrings[3])));
+                              amount: double.parse(scannedStrings[3]),
+                              allowChangeLevel: false));
                       break;
                     }
                   }

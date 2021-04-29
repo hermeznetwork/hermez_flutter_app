@@ -434,7 +434,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                     arguments: TransactionAmountArguments(
                                         widget.arguments.store,
                                         widget.arguments.store.state.txLevel,
-                                        TransactionType.RECEIVE));
+                                        TransactionType.RECEIVE, allowChangeLevel: false));
                           },
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

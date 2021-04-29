@@ -22,17 +22,15 @@ class TransactionAmountArguments {
   final Token token;
   final double amount;
   final String addressTo;
+  final bool allowChangeLevel;
   final WalletHandler store;
 
-  TransactionAmountArguments(
-    this.store,
-    this.txLevel,
-    this.transactionType, {
-    this.account,
-    this.token,
-    this.amount,
-    this.addressTo,
-  });
+  TransactionAmountArguments(this.store, this.txLevel, this.transactionType,
+      {this.account,
+      this.token,
+      this.amount,
+      this.addressTo,
+      this.allowChangeLevel});
 }
 
 class TransactionAmountPage extends StatefulWidget {
@@ -52,12 +50,50 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: new AppBar(
-        title: new Text(operation[0].toUpperCase() + operation.substring(1),
-            style: TextStyle(
-                fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
-                fontWeight: FontWeight.w800,
-                fontSize: 20)),
+        title: widget.arguments.transactionType == TransactionType.RECEIVE
+            ? Container(
+                padding: EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text(
+                      'Amount',
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
+                          color: HermezColors.blackTwo,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 20),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16.0),
+                          color: HermezColors.steel),
+                      padding: EdgeInsets.only(
+                          left: 12.0, right: 12.0, top: 4, bottom: 4),
+                      child: Text(
+                        widget.arguments.txLevel == TransactionLevel.LEVEL1
+                            ? "L1"
+                            : "L2",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : new Text(operation[0].toUpperCase() + operation.substring(1),
+                style: TextStyle(
+                    fontFamily: 'ModernEra',
+                    color: HermezColors.blackTwo,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
         actions: <Widget>[
@@ -73,6 +109,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
         account: widget.arguments.account,
         token: widget.arguments.token,
         amount: widget.arguments.amount,
+        allowChangeLevel: widget.arguments.allowChangeLevel,
         addressTo: widget.arguments.addressTo,
         store: widget.arguments.store,
         onSubmit: (amount, token, fee, feeToken, address) async {
