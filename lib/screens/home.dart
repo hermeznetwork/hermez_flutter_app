@@ -17,12 +17,14 @@ import 'package:provider/provider.dart';
 import '../context/wallet/wallet_handler.dart';
 import 'account_details.dart';
 import 'account_selector.dart';
+import 'fee_selector.dart';
 import 'transaction_details.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage(this.store);
+  HomePage(this.store, this.configurationService);
 
   final WalletHandler store;
+  final ConfigurationService configurationService;
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -57,9 +59,22 @@ class _HomePageState extends State<HomePage> {
       ),
       TabNavigationItem(
         page: settingsPage(context),
-        icon: ImageIcon(
-          AssetImage('assets/settings2.png'),
-        ),
+        icon: Stack(children: [
+          ImageIcon(
+            AssetImage('assets/settings2.png'),
+          ),
+          Positioned(
+              bottom: -1,
+              right: -1,
+              child: Stack(
+                children: [
+                  widget.configurationService.didBackupWallet()
+                      ? Container()
+                      : Icon(Icons.brightness_1,
+                          size: 8.0, color: HermezColors.darkOrange)
+                ],
+              ))
+        ]),
         title: "Settings",
       ),
     ];
@@ -79,6 +94,8 @@ class _HomePageState extends State<HomePage> {
                 configurationService: configurationService);
           } else if (settings.name == 'currency_selector') {
             page = SettingsCurrencyPage(store: widget.store);
+          } else if (settings.name == 'fee_selector') {
+            page = FeeSelectorPage(store: widget.store);
           } else if (settings.name == 'account_details') {
             final AccountDetailsArguments args = settings.arguments;
             page = AccountDetailsPage(arguments: args);
@@ -235,6 +252,8 @@ class _HomePageState extends State<HomePage> {
                         configurationService: configurationService);
                   } else if (settings.name == 'currency_selector') {
                     page = SettingsCurrencyPage(store: widget.store);
+                  } else if (settings.name == 'fee_selector') {
+                    page = FeeSelectorPage(store: widget.store);
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
                     page = AccountDetailsPage(arguments: args);

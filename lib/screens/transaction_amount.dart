@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
+import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/token.dart';
 
@@ -112,7 +113,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
         allowChangeLevel: widget.arguments.allowChangeLevel,
         addressTo: widget.arguments.addressTo,
         store: widget.arguments.store,
-        onSubmit: (amount, token, fee, feeToken, address) async {
+        onSubmit: (amount, token, fee, feeToken, address, gasLimit) async {
           if (widget.arguments.transactionType == TransactionType.RECEIVE) {
             Navigator.of(context).pushReplacementNamed("/qrcode",
                 arguments: QRCodeArguments(
@@ -127,7 +128,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
                     isReceive: true));
           } else {
             String addressTo;
-            if (widget.arguments.transactionType == TransactionType.EXIT &&
+            if (widget.arguments.transactionType == TransactionType.DEPOSIT) {
+              addressTo = getCurrentEnvironment().contracts['Hermez'];
+            } else if (widget.arguments.transactionType ==
+                    TransactionType.EXIT &&
                 address.isEmpty) {
               addressTo = getEthereumAddress(
                   widget.arguments.account.hezEthereumAddress);
@@ -146,6 +150,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
                     addressFrom: widget.arguments.account.hezEthereumAddress,
                     addressTo: addressTo,
                     fee: fee,
+                    gasLimit: gasLimit,
                     feeToken: feeToken));
           }
         },

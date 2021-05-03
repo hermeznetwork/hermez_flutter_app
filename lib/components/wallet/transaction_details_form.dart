@@ -21,6 +21,7 @@ class TransferSummaryForm extends HookWidget {
     this.account,
     this.fee,
     this.feeToken,
+    this.gasLimit,
     this.currency,
     this.transactionId,
     this.transactionHash,
@@ -34,6 +35,7 @@ class TransferSummaryForm extends HookWidget {
   final Account account;
   final double fee;
   final Token feeToken;
+  final int gasLimit;
   final String currency;
   final String transactionId;
   final String transactionHash;

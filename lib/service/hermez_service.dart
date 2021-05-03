@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/api.dart' as api;
@@ -49,7 +50,7 @@ abstract class IHermezService {
   Future<Token> getTokenById(int tokenId);
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
+      {int gasLimit = GAS_LIMIT_HIGH, int gasMultiplier = GAS_MULTIPLIER});
   Future<bool> withdraw(
       BigInt amount,
       Account account,
@@ -214,7 +215,8 @@ class HermezService implements IHermezService {
   @override
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
+      {int gasLimit = GAS_LIMIT_HIGH,
+      int gasMultiplier = GAS_MULTIPLIER}) async {
     final txHash = await tx
         .deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
             hezEthereumAddress, token, babyJubJub, client, privateKey,
@@ -239,7 +241,20 @@ class HermezService implements IHermezService {
       }
       return txHash != null;
     });
-    return txHash != null;
+    return txHash;
+  }
+
+  Future<Uint8List> signDeposit(BigInt amount, String hezEthereumAddress,
+      Token token, String babyJubJub, String privateKey,
+      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
+    final Uint8List signed = await tx.signDeposit(
+        HermezCompressedAmount.compressAmount(amount.toDouble()),
+        hezEthereumAddress,
+        token,
+        babyJubJub,
+        client,
+        privateKey);
+    return signed;
   }
 
   @override

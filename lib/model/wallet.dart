@@ -8,6 +8,8 @@ part 'wallet.g.dart';
 
 enum WalletDefaultCurrency { EUR, USD, CNY }
 
+enum WalletDefaultFee { SLOW, AVERAGE, FAST }
+
 abstract class Wallet implements Built<Wallet, WalletBuilder> {
   @nullable
   String get ethereumAddress;
@@ -35,6 +37,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   WalletDefaultCurrency get defaultCurrency;
 
+  WalletDefaultFee get defaultFee;
+
   double get exchangeRatio;
 
   TransactionLevel get txLevel;
@@ -52,6 +56,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..ethBalance = BigInt.from(0)
     ..ethUSDPrice = 0
     ..defaultCurrency = WalletDefaultCurrency.EUR
+    ..defaultFee = WalletDefaultFee.AVERAGE
     ..exchangeRatio = 0.0
     ..txLevel = TransactionLevel.LEVEL1
     ..cryptoList = List()

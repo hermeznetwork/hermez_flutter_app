@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
@@ -52,24 +51,6 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
         centerTitle: true,
         elevation: 0.0,
         backgroundColor: HermezColors.lightOrange,
-        actions: widget.arguments.store != null
-            ? <Widget>[
-                IconButton(
-                  icon: ImageIcon(
-                    AssetImage('assets/qr_code.png'),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed(
-                      "/qrcode",
-                      arguments: QRCodeArguments(
-                          qrCodeType: QRCodeType.RECOVERY_PHRASE,
-                          code: mnemonic,
-                          store: widget.arguments.store),
-                    );
-                  },
-                ),
-              ]
-            : null,
       ),
       backgroundColor: HermezColors.lightOrange,
       body: SafeArea(

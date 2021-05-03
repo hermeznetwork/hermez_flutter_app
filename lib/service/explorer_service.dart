@@ -103,7 +103,8 @@ class ExplorerService implements IExplorerService {
               'txHash': transferEvent['hash'],
               'to': transferEvent['to'],
               'from': transferEvent["from"],
-              'status': "CONFIRMED",
+              'status':
+                  transferEvent["isError"] == "0" ? "CONFIRMED" : "INVALID",
               'timestamp': DateTime.fromMillisecondsSinceEpoch(
                       DateTime.fromMillisecondsSinceEpoch(
                                   int.parse(transferEvent['timeStamp']))

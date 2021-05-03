@@ -26,13 +26,13 @@ class WalletTransferHandler {
       String from, String to, String amount) async {
     var completer = new Completer<BigInt>();
     try {
+      EtherAmount gasPrice = await _contractService.getGasPrice();
       BigInt estimatedGas = await _contractService.getEstimatedGas(
           EthereumAddress.fromHex(from),
           EthereumAddress.fromHex(to),
           EtherAmount.fromUnitAndValue(
-              EtherUnit.wei, BigInt.from(double.parse(amount) * pow(10, 18))));
-
-      EtherAmount gasPrice = await _contractService.getGasPrice();
+              EtherUnit.wei, BigInt.from(double.parse(amount) * pow(10, 18))),
+          null);
 
       print("Estimated Gas: " + estimatedGas.toString());
       print("Gas Price in Wei: " + gasPrice.getInWei.toString());

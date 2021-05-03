@@ -4,18 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez/utils/recovery_phrase_utils.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 typedef OnScanned = void Function(String address);
 
-enum QRCodeScannerType {
-  ALL,
-  HERMEZ_ADDRESS,
-  ETHEREUM_ADDRESS,
-  RECOVERY_SEED,
-  TRANSFER
-}
+enum QRCodeScannerType { ALL, HERMEZ_ADDRESS, ETHEREUM_ADDRESS, TRANSFER }
 
 class QRCodeScannerArguments {
   final WalletHandler store;
@@ -176,9 +169,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                     widget.arguments.type == QRCodeScannerType.ALL ||
                 widget.arguments.type == QRCodeScannerType.ETHEREUM_ADDRESS) &&
             AddressUtils.isValidEthereumAddress(scannedStrings[0])) {
-          finish(scanData);
-        } else if ((widget.arguments.type == QRCodeScannerType.RECOVERY_SEED) &&
-            isValidRecoveryPhrase(scanData.code)) {
           finish(scanData);
         }
       }

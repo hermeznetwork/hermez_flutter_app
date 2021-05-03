@@ -26,6 +26,7 @@ class TransactionDetailsArguments {
   final String addressTo;
   final double fee;
   final Token feeToken;
+  final int gasLimit;
   final DateTime transactionDate;
 
   final bool isTransactionBeingSigned;
@@ -46,6 +47,7 @@ class TransactionDetailsArguments {
       this.amount,
       this.fee,
       this.feeToken,
+      this.gasLimit,
       this.addressFrom,
       this.addressTo,
       this.isTransactionBeingSigned,
@@ -116,10 +118,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 addressTo: widget.arguments.addressTo,
                 fee: widget.arguments.fee,
                 feeToken: widget.arguments.feeToken,
+                gasLimit: widget.arguments.gasLimit,
                 currency: currency,
                 transactionDate: widget.arguments.transactionDate,
                 onSubmit: (address, amount) async {
-                  var success = await transferStore.transferEth(
+                  /*var success = await transferStore.transferEth(
                       widget.arguments.wallet.state.ethereumPrivateKey,
                       address,
                       amount);
@@ -133,7 +136,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     Scaffold.of(context).showSnackBar(SnackBar(
                       content: Text(transferStore.state.errors.first),
                     ));
-                  }
+                  }*/
                 },
               ),
             ),
@@ -201,29 +204,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                           iconSize: 300));
                                 }
                               } else {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    // return object of type Dialog
-                                    return AlertDialog(
-                                      title: new Text("Transfer Error"),
-                                      content: new Text(widget.arguments.wallet
-                                                  .state.txLevel ==
-                                              TransactionLevel.LEVEL1
-                                          ? transferStore.state.errors.first
-                                          : ""),
-                                      actions: <Widget>[
-                                        // usually buttons at the bottom of the dialog
-                                        new FlatButton(
-                                          textColor: HermezColors.orange,
-                                          child: new Text("Close"),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                Navigator.of(context).pushReplacementNamed(
+                                  "/info",
+                                  arguments: InfoArguments(
+                                      "info_tx_failure.png",
+                                      false,
+                                      "There has been an error with your transaction.",
+                                      iconSize: 250),
                                 );
                               }
                             },
@@ -401,8 +388,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             await widget.arguments.wallet.authorizeAccountCreation();
           }
 
-          return await widget.arguments.wallet
-              .deposit(amountDeposit, widget.arguments.token);
+          return await widget.arguments.wallet.deposit(
+              amountDeposit, widget.arguments.token,
+              gasLimit: widget.arguments.gasLimit);
         }
         break;
       case TransactionType.FORCEEXIT:

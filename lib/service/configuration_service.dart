@@ -20,6 +20,7 @@ abstract class IConfigurationService {
   Future<void> setEthereumAddress(String value);
   Future<void> setHermezAddress(String value);
   Future<void> setDefaultCurrency(WalletDefaultCurrency defaultCurrency);
+  Future<void> setDefaultFee(WalletDefaultFee defaultFee);
   Future<void> setPasscode(String value);
   Future<void> setBiometricsFingerprint(bool value);
   Future<void> setBiometricsFace(bool value);
@@ -31,6 +32,7 @@ abstract class IConfigurationService {
   Future<String> getEthereumAddress();
   Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
+  Future<WalletDefaultFee> getDefaultFee();
   Future<String> getPasscode();
   bool getBiometricsFingerprint();
   bool getBiometricsFace();
@@ -90,6 +92,12 @@ class ConfigurationService implements IConfigurationService {
   Future<void> setDefaultCurrency(WalletDefaultCurrency value) async {
     await _secureStorage.write(
         key: "defaultCurrency", value: value.toString().split(".").last);
+  }
+
+  @override
+  Future<void> setDefaultFee(WalletDefaultFee value) async {
+    await _secureStorage.write(
+        key: "defaultFee", value: value.toString().split(".").last);
   }
 
   @override
@@ -176,6 +184,18 @@ class ConfigurationService implements IConfigurationService {
       return WalletDefaultCurrency.CNY;
     } else {
       return WalletDefaultCurrency.USD;
+    }
+  }
+
+  @override
+  Future<WalletDefaultFee> getDefaultFee() async {
+    String defaultFeeString = await _secureStorage.read(key: "defaultFee");
+    if (defaultFeeString == "SLOW") {
+      return WalletDefaultFee.SLOW;
+    } else if (defaultFeeString == "FAST") {
+      return WalletDefaultFee.FAST;
+    } else {
+      return WalletDefaultFee.AVERAGE;
     }
   }
 

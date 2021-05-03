@@ -23,7 +23,7 @@ import 'transaction_amount.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-enum QRCodeType { HERMEZ, ETHEREUM, RECOVERY_PHRASE, REQUEST_PAYMENT }
+enum QRCodeType { HERMEZ, ETHEREUM, REQUEST_PAYMENT }
 
 class QRCodeArguments {
   final QRCodeType qrCodeType;
@@ -57,9 +57,7 @@ class _QRCodePageState extends State<QRCodePage> {
   @override
   Widget build(BuildContext context) {
     String title;
-    if (widget.arguments.qrCodeType == QRCodeType.RECOVERY_PHRASE) {
-      title = "Recovery phrase";
-    } else if (widget.arguments.qrCodeType == QRCodeType.HERMEZ) {
+    if (widget.arguments.qrCodeType == QRCodeType.HERMEZ) {
       title = "Your Hermez Wallet";
     } else if (widget.arguments.qrCodeType == QRCodeType.ETHEREUM) {
       title = "Your Ethereum Wallet";
@@ -67,18 +65,6 @@ class _QRCodePageState extends State<QRCodePage> {
       title = "Request payment";
     }
 
-    String code = "";
-    if (widget.arguments.qrCodeType == QRCodeType.RECOVERY_PHRASE) {
-      List<String> words = widget.arguments.code.split(" ");
-      for (int i = 0; i < words.length; i++) {
-        code += words[i];
-        if (i % 4 == 3) {
-          code += "\n";
-        } else {
-          code += " ";
-        }
-      }
-    }
     return Scaffold(
       backgroundColor: HermezColors.lightOrange,
       appBar: new AppBar(
@@ -203,10 +189,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                       "\n" +
                                       widget
                                           .arguments.store.state.ethereumAddress
-                                  : widget.arguments.qrCodeType ==
-                                          QRCodeType.RECOVERY_PHRASE
-                                      ? code
-                                      : widget.arguments.code.substring(
+                                  : widget.arguments.code.substring(
                                               0,
                                               (widget.arguments.code.length / 2)
                                                   .floor()) +
@@ -252,8 +235,7 @@ class _QRCodePageState extends State<QRCodePage> {
                     ),
                   ),
                 )),
-            widget.arguments.isReceive ||
-                    widget.arguments.qrCodeType == QRCodeType.RECOVERY_PHRASE
+            widget.arguments.isReceive
                 ? Container()
                 : Container(
                     margin: EdgeInsets.all(20),
@@ -316,8 +298,7 @@ class _QRCodePageState extends State<QRCodePage> {
                       ],
                     ),
                   ),
-            widget.arguments.isReceive &&
-                    widget.arguments.qrCodeType != QRCodeType.RECOVERY_PHRASE
+            widget.arguments.isReceive
                 ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 30.0, bottom: 0.0),
@@ -407,8 +388,6 @@ class _QRCodePageState extends State<QRCodePage> {
                   )
                 : Container(),
             (widget.arguments.isReceive &&
-                        widget.arguments.qrCodeType !=
-                            QRCodeType.RECOVERY_PHRASE &&
                         widget.arguments.qrCodeType !=
                             QRCodeType.REQUEST_PAYMENT) ||
                     (widget.arguments.qrCodeType ==

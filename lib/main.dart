@@ -13,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  setEnvironment('goerli');
+  setEnvironment('rinkeby');
 
   final stores = await createProviders(getCurrentEnvironment());
 
@@ -45,7 +45,7 @@ class MainApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done) {*/
     return new MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter App',
+      title: 'Hermez Wallet',
       initialRoute: '/',
       routes: getRoutes(context),
       /*navigatorObservers: [

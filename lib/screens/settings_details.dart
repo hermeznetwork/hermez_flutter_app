@@ -100,7 +100,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
         }
         break;
       case SettingsDetailsType.ADVANCED:
-        count = 2;
+        count = 3;
         break;
     }
     return Container(
@@ -151,8 +151,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   icon = "assets/settings_change_passcode.svg";
                   break;
                 case SettingsDetailsType.ADVANCED:
-                  title = "Remove account";
-                  icon = "assets/settings_remove_account.svg";
+                  title = "Modify default fee";
+                  icon = "assets/settings_default_fee.svg";
                   break;
               }
               break;
@@ -173,7 +173,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       : "assets/settings_fingerprint.svg";
                   break;
                 case SettingsDetailsType.ADVANCED:
-                  title = "General";
+                  title = "Remove account";
+                  icon = "assets/settings_remove_account.svg";
                   break;
               }
               break;
@@ -286,11 +287,9 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       });
                       break;
                     case SettingsDetailsType.ADVANCED:
-                      // Remove account
-                      Navigator.of(widget.arguments.parentContext).pushNamed(
-                          "/remove_account_info",
-                          arguments: RemoveAccountInfoArguments(
-                              widget.arguments.store));
+                      // Default fee
+                      Navigator.of(context).pushNamed("fee_selector",
+                          arguments: widget.arguments.store);
                       break;
                   }
                   break;
@@ -308,7 +307,11 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       checkBiometrics();
                       break;
                     case SettingsDetailsType.ADVANCED:
-                      // Nothing
+                      // Remove account
+                      Navigator.of(widget.arguments.parentContext).pushNamed(
+                          "/remove_account_info",
+                          arguments: RemoveAccountInfoArguments(
+                              widget.arguments.store));
                       break;
                   }
                   break;

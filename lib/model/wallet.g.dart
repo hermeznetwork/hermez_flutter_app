@@ -28,6 +28,8 @@ class _$Wallet extends Wallet {
   @override
   final WalletDefaultCurrency defaultCurrency;
   @override
+  final WalletDefaultFee defaultFee;
+  @override
   final double exchangeRatio;
   @override
   final TransactionLevel txLevel;
@@ -52,6 +54,7 @@ class _$Wallet extends Wallet {
       this.ethBalance,
       this.ethUSDPrice,
       this.defaultCurrency,
+      this.defaultFee,
       this.exchangeRatio,
       this.txLevel,
       this.cryptoList,
@@ -90,6 +93,7 @@ class _$Wallet extends Wallet {
         ethBalance == other.ethBalance &&
         ethUSDPrice == other.ethUSDPrice &&
         defaultCurrency == other.defaultCurrency &&
+        defaultFee == other.defaultFee &&
         exchangeRatio == other.exchangeRatio &&
         txLevel == other.txLevel &&
         cryptoList == other.cryptoList &&
@@ -114,19 +118,23 @@ class _$Wallet extends Wallet {
                                                     $jc(
                                                         $jc(
                                                             $jc(
-                                                                0,
-                                                                ethereumAddress
+                                                                $jc(
+                                                                    0,
+                                                                    ethereumAddress
+                                                                        .hashCode),
+                                                                ethereumPrivateKey
                                                                     .hashCode),
-                                                            ethereumPrivateKey
+                                                            hermezWallet
                                                                 .hashCode),
-                                                        hermezWallet.hashCode),
-                                                    hermezAddress.hashCode),
-                                                hermezPublicKeyHex.hashCode),
-                                            hermezPublicKeyBase64.hashCode),
-                                        tokensBalance.hashCode),
-                                    ethBalance.hashCode),
-                                ethUSDPrice.hashCode),
-                            defaultCurrency.hashCode),
+                                                        hermezAddress.hashCode),
+                                                    hermezPublicKeyHex
+                                                        .hashCode),
+                                                hermezPublicKeyBase64.hashCode),
+                                            tokensBalance.hashCode),
+                                        ethBalance.hashCode),
+                                    ethUSDPrice.hashCode),
+                                defaultCurrency.hashCode),
+                            defaultFee.hashCode),
                         exchangeRatio.hashCode),
                     txLevel.hashCode),
                 cryptoList.hashCode),
@@ -147,6 +155,7 @@ class _$Wallet extends Wallet {
           ..add('ethBalance', ethBalance)
           ..add('ethUSDPrice', ethUSDPrice)
           ..add('defaultCurrency', defaultCurrency)
+          ..add('defaultFee', defaultFee)
           ..add('exchangeRatio', exchangeRatio)
           ..add('txLevel', txLevel)
           ..add('cryptoList', cryptoList)
@@ -199,6 +208,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   set defaultCurrency(WalletDefaultCurrency defaultCurrency) =>
       _$this._defaultCurrency = defaultCurrency;
 
+  WalletDefaultFee _defaultFee;
+  WalletDefaultFee get defaultFee => _$this._defaultFee;
+  set defaultFee(WalletDefaultFee defaultFee) =>
+      _$this._defaultFee = defaultFee;
+
   double _exchangeRatio;
   double get exchangeRatio => _$this._exchangeRatio;
   set exchangeRatio(double exchangeRatio) =>
@@ -243,6 +257,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _ethBalance = _$v.ethBalance;
       _ethUSDPrice = _$v.ethUSDPrice;
       _defaultCurrency = _$v.defaultCurrency;
+      _defaultFee = _$v.defaultFee;
       _exchangeRatio = _$v.exchangeRatio;
       _txLevel = _$v.txLevel;
       _cryptoList = _$v.cryptoList;
@@ -282,6 +297,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               ethBalance: ethBalance,
               ethUSDPrice: ethUSDPrice,
               defaultCurrency: defaultCurrency,
+              defaultFee: defaultFee,
               exchangeRatio: exchangeRatio,
               txLevel: txLevel,
               cryptoList: cryptoList,

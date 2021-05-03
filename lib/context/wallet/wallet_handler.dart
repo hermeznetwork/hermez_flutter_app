@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/constants.dart';
@@ -120,6 +120,9 @@ class WalletHandler {
 
     final defaultCurrency = await _configurationService.getDefaultCurrency();
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
+
+    final defaultFee = await _configurationService.getDefaultFee();
+    _store.dispatch(DefaultFeeUpdated(defaultFee));
 
     final exchangeRatio =
         await _exchangeService.getFiatExchangeRates(["EUR", "CNY"]);
@@ -274,8 +277,9 @@ class WalletHandler {
           // GET L1 ETH Balance
           web3.EtherAmount ethBalance = await _contractService.getEthBalance(
               web3.EthereumAddress.fromHex(state.ethereumAddress));
-
-          if (ethBalance.getInWei > BigInt.zero) {
+          List<dynamic> transactions = await getEthereumTransactionsByAddress(
+              state.ethereumAddress, token, null);
+          if (transactions != null && transactions.isNotEmpty) {
             final account = Account(
                 accountIndex: "0",
                 balance: ethBalance.getInWei.toString(),
@@ -289,6 +293,8 @@ class WalletHandler {
         } else {
           //Map<String, BigInt> tokensBalance = Map();
           var tokenBalance = BigInt.zero;
+          List<dynamic> transactions = await getEthereumTransactionsByAddress(
+              state.ethereumAddress, token, null);
           try {
             tokenBalance = await _contractService.getTokenBalance(
                 web3.EthereumAddress.fromHex(state.ethereumAddress),
@@ -297,7 +303,7 @@ class WalletHandler {
           } catch (error) {
             throw error;
           }
-          if (tokenBalance > BigInt.zero) {
+          if (transactions != null && transactions.isNotEmpty) {
             var tokenAmount = web3.EtherAmount.fromUnitAndValue(
                 web3.EtherUnit.wei, tokenBalance);
             final account = Account(
@@ -372,35 +378,52 @@ class WalletHandler {
       web3.TransactionReceipt receipt =
           await _contractService.getTxReceipt(transactionHash);
       if (receipt != null) {
-        final hermezContract = await ContractParser.fromAssets(
-            'HermezABI.json', contractAddresses['Hermez'], "Hermez");
-        final contractEvent = hermezContract.event('L1UserTxEvent');
-        for (var log in receipt.logs) {
-          List<String> topics =
-              List<String>.from(log['topics'].map((topic) => topic.toString()));
-          try {
-            List l1UserTxEvent =
-                contractEvent.decodeResults(topics, log['data']);
-            final transactionId =
-                getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
+        if (receipt.status == false) {
+          // Tx didn't pass
+          if (pendingDeposit['id'] == null) {
+            pendingDeposit['id'] = transactionHash;
+            accountPendingDeposits[accountPendingDeposits.indexWhere(
+                    (element) => element['hash'] == pendingDeposit['hash'])] =
+                pendingDeposit;
+            await _configurationService.updatePendingDepositId(
+                transactionHash, transactionHash);
+          }
+          depositIds.add(transactionHash);
+          await _configurationService.removePendingDeposit(transactionHash);
+        } else {
+          final hermezContract = await ContractParser.fromAssets(
+              'HermezABI.json', contractAddresses['Hermez'], "Hermez");
+          final contractEvent = hermezContract.event('L1UserTxEvent');
+          for (var log in receipt.logs) {
+            List<String> topics = List<String>.from(
+                log['topics'].map((topic) => topic.toString()));
+            try {
+              List l1UserTxEvent =
+                  contractEvent.decodeResults(topics, log['data']);
+              final transactionId =
+                  getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
 
-            if (pendingDeposit['id'] == null) {
-              pendingDeposit['id'] = transactionId;
-              accountPendingDeposits[accountPendingDeposits.indexWhere(
-                      (element) => element['hash'] == pendingDeposit['hash'])] =
-                  pendingDeposit;
-              _configurationService.updatePendingDepositId(
-                  transactionHash, transactionId);
-            }
+              if (pendingDeposit['id'] == null) {
+                pendingDeposit['id'] = transactionId;
+                accountPendingDeposits[accountPendingDeposits.indexWhere(
+                        (element) =>
+                            element['hash'] == pendingDeposit['hash'])] =
+                    pendingDeposit;
+                _configurationService.updatePendingDepositId(
+                    transactionHash, transactionId);
+              }
 
-            final forgedTransaction =
-                await getHistoryTransaction(transactionId);
-            if (forgedTransaction != null &&
-                forgedTransaction.batchNum != null) {
-              depositIds.add(transactionHash);
-              _configurationService.removePendingDeposit(transactionId);
+              final forgedTransaction =
+                  await getHistoryTransaction(transactionId);
+              if (forgedTransaction != null &&
+                  forgedTransaction.batchNum != null) {
+                depositIds.add(transactionHash);
+                _configurationService.removePendingDeposit(transactionId);
+              }
+            } catch (e) {
+              print(e.toString());
             }
-          } catch (e) {}
+          }
         }
       }
       /*
@@ -487,14 +510,27 @@ class WalletHandler {
     }
   }
 
-  Future<bool> deposit(BigInt amount, Token token) async {
+  // TODO estimateFeeDeposit
+
+  Future<Uint8List> signDeposit(BigInt amount, Token token) async {
+    //_store.dispatch(TransactionStarted());
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+    return _hermezService.signDeposit(amount, hermezAddress, token,
+        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
+  }
+
+  Future<bool> deposit(BigInt amount, Token token, {int gasLimit}) async {
     _store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.deposit(amount, hermezAddress, token,
-        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
+        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey,
+        gasLimit: gasLimit);
   }
 
   Future<bool> withdraw(double amount, Account account, Exit exit,
@@ -596,28 +632,53 @@ class WalletHandler {
     return result;
   }
 
-  Future<BigInt> getEstimatedFee(String from, String to, BigInt amount) async {
+  Future<BigInt> getGasPrice() async {
+    web3.EtherAmount gasPrice = await _contractService.getGasPrice();
+    return gasPrice.getInWei;
+  }
+
+  Future<BigInt> getGasLimit(String from, String to, BigInt amount,
+      {Uint8List data}) async {
     web3.EthereumAddress fromAddress;
     web3.EthereumAddress toAddress;
-    web3.EtherAmount gasPrice = await _contractService.getGasPrice();
     if (from != null && from.isNotEmpty) {
       fromAddress = web3.EthereumAddress.fromHex(from);
     }
     if (to != null && to.isNotEmpty) {
       toAddress = web3.EthereumAddress.fromHex(to);
     }
-    BigInt estimatedGas = await _contractService.getEstimatedGas(
-      fromAddress,
-      toAddress,
-      web3.EtherAmount.fromUnitAndValue(
-        web3.EtherUnit.wei,
-        BigInt.from(
-          amount.toDouble() * pow(10, 18),
+    BigInt maxGas = await _contractService.getEstimatedGas(
+        fromAddress,
+        toAddress,
+        web3.EtherAmount.fromUnitAndValue(
+          web3.EtherUnit.wei,
+          amount,
         ),
-      ),
-    );
+        data);
+    return maxGas;
+  }
 
-    BigInt estimatedFee = gasPrice.getInWei * estimatedGas;
+  Future<BigInt> getEstimatedFee(String from, String to, BigInt amount,
+      {Uint8List data}) async {
+    web3.EthereumAddress fromAddress;
+    web3.EthereumAddress toAddress;
+    if (from != null && from.isNotEmpty) {
+      fromAddress = web3.EthereumAddress.fromHex(from);
+    }
+    if (to != null && to.isNotEmpty) {
+      toAddress = web3.EthereumAddress.fromHex(to);
+    }
+    web3.EtherAmount gasPrice = await _contractService.getGasPrice();
+    BigInt maxGas = await _contractService.getEstimatedGas(
+        fromAddress,
+        toAddress,
+        web3.EtherAmount.fromUnitAndValue(
+          web3.EtherUnit.wei,
+          amount,
+        ),
+        data);
+
+    BigInt estimatedFee = gasPrice.getInWei * maxGas;
 
     return estimatedFee;
   }
@@ -630,17 +691,26 @@ class WalletHandler {
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
   }
 
+  Future<void> updateDefaultFee(WalletDefaultFee defaultFee) async {
+    _configurationService.setDefaultFee(defaultFee);
+    _store.dispatch(DefaultFeeUpdated(defaultFee));
+  }
+
   void updateLevel(TransactionLevel txLevel) async {
     await _configurationService.setLevelSelected(txLevel);
     _store.dispatch(LevelUpdated(txLevel));
   }
 
   Future<List<dynamic>> getEthereumTransactionsByAddress(
-      String address, Account account, int fromItem) async {
-    if (account.token.symbol == "ETH") {
+      String address, Token token, int fromItem) async {
+    if (token.symbol == "ETH") {
       return _explorerService.getTransactionsByAccountAddress(address);
     } else {
-      return _explorerService.getTransferEventsByAccountAddress(address);
+      List<dynamic> transactions =
+          await _explorerService.getTransferEventsByAccountAddress(address);
+      return transactions
+          .where((element) => element['tokenAddress'] == token.ethereumAddress)
+          .toList();
     }
   }
 

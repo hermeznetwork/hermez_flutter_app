@@ -348,6 +348,7 @@ class ActivityState extends State<Activity> {
                     addressTo = event['to'];
                     value = event['value'];
                   }
+
                   final String currency =
                       arguments.defaultCurrency.toString().split('.').last;
 
@@ -396,8 +397,18 @@ class ActivityState extends State<Activity> {
                       break;
                   }
 
+                  TransactionStatus txStatus = TransactionStatus.CONFIRMED;
                   if (status == "CONFIRMED") {
                     subtitle = format.format(date);
+                    txStatus = TransactionStatus.CONFIRMED;
+                  } else if (status == "INVALID") {
+                    subtitle = "Invalid";
+                    statusColor = HermezColors.statusRed;
+                    statusBackgroundColor = HermezColors.statusRedBackground;
+                    txStatus = TransactionStatus.INVALID;
+                  } else {
+                    subtitle = "Pending";
+                    txStatus = TransactionStatus.PENDING;
                   }
 
                   return Container(
@@ -428,7 +439,7 @@ class ActivityState extends State<Activity> {
                                           .withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Text("Pending",
+                                    child: Text(subtitle,
                                         // On Hold, Pending
                                         style: TextStyle(
                                           color: statusColor,
@@ -493,9 +504,7 @@ class ActivityState extends State<Activity> {
                                 arguments: TransactionDetailsArguments(
                                     wallet: arguments.store,
                                     transactionType: txType,
-                                    status: status != "CONFIRMED"
-                                        ? TransactionStatus.PENDING
-                                        : TransactionStatus.CONFIRMED,
+                                    status: txStatus,
                                     account: arguments.account,
                                     token: arguments.account.token,
                                     amount: amount,
@@ -606,7 +615,9 @@ class ActivityState extends State<Activity> {
   Future<List<dynamic>> fetchHistoryTransactions() async {
     if (arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
       return await arguments.store.getEthereumTransactionsByAddress(
-          arguments.store.state.ethereumAddress, arguments.account, fromItem);
+          arguments.store.state.ethereumAddress,
+          arguments.account.token,
+          fromItem);
     } else {
       final transactionsResponse = await arguments.store
           .getHermezTransactionsByAddress(arguments.store.state.ethereumAddress,

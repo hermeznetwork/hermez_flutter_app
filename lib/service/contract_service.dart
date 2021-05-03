@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:hermez/service/network/api_eth_gas_station_client.dart';
 import 'package:hermez/utils/contract_parser.dart';
@@ -266,13 +267,10 @@ class ContractService implements IContractService {
   Future<BigInt> getEstimatedGas(
     EthereumAddress from,
     EthereumAddress to,
-    EtherAmount amount,
+    EtherAmount value,
+    Uint8List data,
   ) async {
-    return client.estimateGas(
-      sender: from,
-      to: to,
-      value: amount, /* gasPrice: await getGasPrice()*/
-    );
+    return client.estimateGas(sender: from, to: to, value: value, data: data);
   }
 
   Future<int> getNetworkId() {
@@ -280,14 +278,7 @@ class ContractService implements IContractService {
   }
 
   Future<EtherAmount> getGasPrice() async {
-    //double gasPrice = await _apiEthGasStationClient().getGasPrice();
-    //return EtherAmount.fromUnitAndValue(
-    //    EtherUnit.gwei, BigInt.from(gasPrice / 10));
     return client.getGasPrice();
-    /*const strAvgGas = await client.getGasPrice()
-    const avgGas = Scalar.e(strAvgGas)
-    const res = (avgGas * Scalar.e(multiplier))
-    const retValue = res.toString()*/
   }
 
   /*StreamSubscription listenEthTransfer(TransferEvent onTransfer, {int take}) {

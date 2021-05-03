@@ -23,6 +23,11 @@ class DefaultCurrencyUpdated extends WalletAction {
   final WalletDefaultCurrency defaultCurrency;
 }
 
+class DefaultFeeUpdated extends WalletAction {
+  DefaultFeeUpdated(this.defaultFee);
+  final WalletDefaultFee defaultFee;
+}
+
 class ExchangeRatioUpdated extends WalletAction {
   ExchangeRatioUpdated(this.exchangeRatio);
   final double exchangeRatio;
@@ -60,6 +65,10 @@ Wallet reducer(Wallet state, WalletAction action) {
 
   if (action is DefaultCurrencyUpdated) {
     return state.rebuild((b) => b..defaultCurrency = action.defaultCurrency);
+  }
+
+  if (action is DefaultFeeUpdated) {
+    return state.rebuild((b) => b..defaultFee = action.defaultFee);
   }
 
   if (action is ExchangeRatioUpdated) {

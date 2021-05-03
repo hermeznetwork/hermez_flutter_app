@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -161,22 +162,35 @@ class AccountRow extends StatelessWidget {
     double resultValue = 0;
     String result = "";
     String locale = "eu";
+    bool isCurrency = false;
     if (symbol == "EUR") {
       locale = 'eu';
       symbol = '€';
+      isCurrency = true;
     } else if (symbol == "CNY") {
       locale = 'en';
       symbol = '\¥';
+      isCurrency = true;
     } else if (symbol == "USD") {
       locale = 'en';
       symbol = '\$';
+      isCurrency = true;
     }
     if (amount != null) {
       double value = amount;
-      resultValue = resultValue + value;
+      resultValue += value;
     }
-    result =
-        NumberFormat.currency(locale: locale, symbol: symbol).format(amount);
+    resultValue =
+        double.parse(EthAmountFormatter.removeDecimalZeroFormat(resultValue));
+    result = NumberFormat.currency(
+            locale: locale,
+            symbol: symbol,
+            decimalDigits: resultValue % 1 == 0
+                ? 0
+                : isCurrency
+                    ? 2
+                    : 6)
+        .format(resultValue);
     return result;
   }
 }

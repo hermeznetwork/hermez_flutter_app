@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/backup_info.dart';
 import 'package:hermez/screens/biometrics.dart';
+import 'package:hermez/screens/fee_selector.dart';
 import 'package:hermez/screens/first_deposit.dart';
 import 'package:hermez/screens/home.dart';
 import 'package:hermez/screens/import.dart';
@@ -13,7 +14,6 @@ import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/recovery_phrase_confirm.dart';
 import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/screens/scanner.dart';
-import 'package:hermez/screens/settings_currency.dart';
 import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/transaction_details.dart';
@@ -44,7 +44,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
-          return HomePage(store);
+          return HomePage(store, configurationService);
         });
       } else {
         return WalletSetupProvider(builder: (context, store) {
@@ -87,6 +87,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
           arguments: ModalRoute.of(context).settings.arguments,
           configurationService: configurationService);
     },
+    '/select_fee': (BuildContext context) {
+      return FeeSelectorPage(store: ModalRoute.of(context).settings.arguments);
+    },
     '/remove_account_info': (BuildContext context) {
       return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);
     },
@@ -109,8 +112,8 @@ Map<String, WidgetBuilder> getRoutes(context) {
     },
     '/qrcode': (BuildContext context) =>
         QRCodePage(arguments: ModalRoute.of(context).settings.arguments),
-    '/currency_selector': (BuildContext context) =>
-        SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
+    //'/currency_selector': (BuildContext context) =>
+    //    SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
     '/first_deposit': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
