@@ -9,17 +9,21 @@ import 'package:http/http.dart' as http2;
 
 class ApiEthGasStationClient {
   final String _baseAddress;
+  final String _apiKey;
 
   final String ETH_GAS_URL = "/api/ethgasAPI.json";
 
-  ApiEthGasStationClient(this._baseAddress);
+  ApiEthGasStationClient(this._baseAddress, this._apiKey);
 
-  // EXCHANGE RATE
-  Future<double> getGasPrice() async {
+  Future<GasPriceResponse> getGasPrice() async {
     final response = await _get(ETH_GAS_URL, null);
-    final GasPriceResponse gasPriceResponse =
-        GasPriceResponse.fromJson(json.decode(response.body));
-    return gasPriceResponse.average.toDouble();
+    GasPriceResponse gasPriceResponse;
+    try {
+      gasPriceResponse = GasPriceResponse.fromJson(json.decode(response.body));
+    } catch (e) {
+      print(e.toString());
+    }
+    return gasPriceResponse;
   }
 
   Future<http2.Response> _get(
@@ -27,9 +31,10 @@ class ApiEthGasStationClient {
     try {
       var uri;
       if (queryParameters != null) {
-        uri = Uri.http(_baseAddress, endpoint, queryParameters);
+        uri = Uri.https(_baseAddress, endpoint + '?api-key=' + this._apiKey,
+            queryParameters);
       } else {
-        uri = Uri.http(_baseAddress, endpoint);
+        uri = Uri.https(_baseAddress, endpoint + '?api-key=' + this._apiKey);
       }
       final response = await http2.get(
         uri,
@@ -41,56 +46,6 @@ class ApiEthGasStationClient {
       return returnResponseOrThrowException(response);
     } on IOException catch (e) {
       print(e.toString());
-      throw NetworkException();
-    }
-  }
-
-  Future<http2.Response> _post(
-      String endpoint, Map<String, dynamic> body) async {
-    try {
-      final response = await http2.post(
-        '$_baseAddress$endpoint',
-        body: json.encode(body),
-        headers: {
-          HttpHeaders.acceptHeader: '*/*',
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-      );
-
-      return returnResponseOrThrowException(response);
-    } on IOException {
-      throw NetworkException();
-    }
-  }
-
-  Future<http2.Response> _put(dynamic task) async {
-    try {
-      final response = await http2.put(
-        '$_baseAddress/todos/${task.id}',
-        body: json.encode(task.toJson()),
-        headers: {
-          HttpHeaders.acceptHeader: 'application/json',
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-      );
-
-      return returnResponseOrThrowException(response);
-    } on IOException {
-      throw NetworkException();
-    }
-  }
-
-  Future<http2.Response> _delete(String id) async {
-    try {
-      final response = await http2.delete(
-        '$_baseAddress/todos/$id',
-        headers: {
-          HttpHeaders.acceptHeader: 'application/json',
-        },
-      );
-
-      return returnResponseOrThrowException(response);
-    } on IOException {
       throw NetworkException();
     }
   }

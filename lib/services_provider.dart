@@ -32,8 +32,8 @@ Future<List<SingleChildWidget>> createProviders(EnvParams hermezParams) async {
   final hermezService = HermezService(client, configurationService);
   final exchangeService =
       ExchangeService(FIAT_EXCHANGE_RATES_API_URL, EXCHANGE_RATES_API_KEY);
-  final contractService =
-      ContractService(client, configurationService, ETH_GAS_PRICE_URL);
+  final contractService = ContractService(
+      client, configurationService, ETH_GAS_PRICE_URL, ETH_GAS_STATION_API_KEY);
   final explorerService = ExplorerService(
       hermezParams.etherscanApiUrl, hermezParams.etherscanApiKey);
 

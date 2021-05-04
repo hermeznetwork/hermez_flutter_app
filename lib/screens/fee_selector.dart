@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 import '../context/wallet/wallet_handler.dart';
@@ -8,10 +9,20 @@ import '../context/wallet/wallet_handler.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-class FeeSelectorPage extends StatefulWidget {
-  FeeSelectorPage({Key key, this.store}) : super(key: key);
-
+class FeeSelectorArguments {
   final WalletHandler store;
+  WalletDefaultFee selectedFee;
+  GasPriceResponse gasPriceResponse;
+  final void Function(WalletDefaultFee selectedFee) onFeeSelected;
+
+  FeeSelectorArguments(this.store,
+      {this.selectedFee, this.gasPriceResponse, this.onFeeSelected});
+}
+
+class FeeSelectorPage extends StatefulWidget {
+  FeeSelectorPage({Key key, this.arguments}) : super(key: key);
+
+  final FeeSelectorArguments arguments;
 
   @override
   _FeeSelectorPageState createState() => _FeeSelectorPageState();
@@ -62,10 +73,15 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                          'Select the default fee you want to'
-                          ' spend to cover the cost of processing'
-                          ' your transactions. Higher fees are '
-                          'more likely to be processed.',
+                          widget.arguments.selectedFee != null
+                              ? 'Select the fee you want to'
+                                  ' spend to cover the cost of processing'
+                                  ' your transaction. Higher fees are '
+                                  'more likely to be processed.'
+                              : 'Select the default fee you want to'
+                                  ' spend to cover the cost of processing'
+                                  ' your transactions. Higher fees are '
+                                  'more likely to be processed.',
                           style: TextStyle(
                             color: HermezColors.blueyGreyTwo,
                             fontSize: 16,
@@ -86,31 +102,99 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                         child: Container(
                           padding: EdgeInsets.only(
                               left: 5.0, top: 30.0, bottom: 30.0),
-                          child: Text(
-                            element.toString().split(".").last.substring(0, 1) +
-                                element
-                                    .toString()
-                                    .split(".")
-                                    .last
-                                    .substring(1)
-                                    .toLowerCase(),
-                            style: TextStyle(
-                                fontFamily: 'ModernEra',
-                                color: HermezColors.blackTwo,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16),
-                            textAlign: TextAlign.left,
+                          child: Column(
+                            children: [
+                              Container(
+                                child: Text(
+                                  element
+                                          .toString()
+                                          .split(".")
+                                          .last
+                                          .substring(0, 1) +
+                                      element
+                                          .toString()
+                                          .split(".")
+                                          .last
+                                          .substring(1)
+                                          .toLowerCase(),
+                                  style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      color: HermezColors.blackTwo,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                              Container(
+                                padding:
+                                    EdgeInsets.only(top: 12.0, bottom: 12.0),
+                                child: Text(
+                                  element
+                                          .toString()
+                                          .split(".")
+                                          .last
+                                          .substring(0, 1) +
+                                      element
+                                          .toString()
+                                          .split(".")
+                                          .last
+                                          .substring(1)
+                                          .toLowerCase(),
+                                  style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      color: HermezColors.blackTwo,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                              Container(
+                                child: Text(
+                                  element
+                                          .toString()
+                                          .split(".")
+                                          .last
+                                          .substring(0, 1) +
+                                      element
+                                          .toString()
+                                          .split(".")
+                                          .last
+                                          .substring(1)
+                                          .toLowerCase(),
+                                  style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      color: HermezColors.blackTwo,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      trailing: widget.store.state.defaultFee == element
+                      trailing: (widget.arguments.selectedFee != null
+                              ? widget.arguments.selectedFee == element
+                              : widget.arguments.store.state.defaultFee ==
+                                  element)
                           ? Radio(
                               groupValue: null,
                               activeColor: HermezColors.blackTwo,
                               value: null,
                               onChanged: (value) {
                                 setState(() {
-                                  widget.store.updateDefaultFee(element);
+                                  if (widget.arguments.selectedFee != null) {
+                                    widget.arguments.selectedFee = element;
+                                  } else {
+                                    widget.arguments.store
+                                        .updateDefaultFee(element);
+                                  }
+                                  if (widget.arguments.onFeeSelected != null) {
+                                    widget.arguments.onFeeSelected(element);
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
+                                  }
                                 });
                               },
                             )
@@ -120,13 +204,34 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                               activeColor: HermezColors.blackTwo,
                               onChanged: (value) {
                                 setState(() {
-                                  widget.store.updateDefaultFee(element);
+                                  if (widget.arguments.selectedFee != null) {
+                                    widget.arguments.selectedFee = element;
+                                  } else {
+                                    widget.arguments.store
+                                        .updateDefaultFee(element);
+                                  }
+                                  if (widget.arguments.onFeeSelected != null) {
+                                    widget.arguments.onFeeSelected(element);
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
+                                  }
                                 });
                               },
                             ),
                       onTap: () {
                         setState(() {
-                          widget.store.updateDefaultFee(element);
+                          if (widget.arguments.selectedFee != null) {
+                            widget.arguments.selectedFee = element;
+                          } else {
+                            widget.arguments.store.updateDefaultFee(element);
+                          }
+                          if (widget.arguments.onFeeSelected != null) {
+                            widget.arguments.onFeeSelected(element);
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            }
+                          }
                         });
                       });
                 }

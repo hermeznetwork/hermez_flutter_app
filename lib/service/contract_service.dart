@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:hermez/service/network/api_eth_gas_station_client.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/contract_parser.dart';
+import 'package:hermez_plugin/environment.dart';
 import 'package:web3dart/web3dart.dart';
 
 import 'configuration_service.dart';
@@ -29,20 +31,22 @@ abstract class IContractService {
 }
 
 class ContractService implements IContractService {
-  ContractService(this.client, this._configService, this._estimateGasPriceUrl
+  ContractService(this.client, this._configService, this._estimateGasPriceUrl,
+      this._estimateGasPriceApiKey
       //this.tokenContractsAddress,
       /*this.contracts*/
       );
 
   final Web3Client client;
   String _estimateGasPriceUrl;
+  String _estimateGasPriceApiKey;
   IConfigurationService _configService;
   //Credentials credentials;
   //final List<String> tokenContractsAddress;
   //final List<DeployedContract> contract;
 
-  ApiEthGasStationClient _apiEthGasStationClient() =>
-      ApiEthGasStationClient(this._estimateGasPriceUrl);
+  ApiEthGasStationClient _apiEthGasStationClient() => ApiEthGasStationClient(
+      this._estimateGasPriceUrl, this._estimateGasPriceApiKey);
 
   ContractEvent _transferEvent(DeployedContract contract) =>
       contract.event('Transfer');
@@ -204,7 +208,7 @@ class ContractService implements IContractService {
     final from = await credentials.extractAddress();
     final networkId = await client.getNetworkId();
 
-    double gasPrice = await _apiEthGasStationClient().getGasPrice();
+    GasPriceResponse gasPrice = await _apiEthGasStationClient().getGasPrice();
 
     EtherAmount etherAmount = await client.getGasPrice();
 
@@ -277,8 +281,45 @@ class ContractService implements IContractService {
     return client.getNetworkId();
   }
 
-  Future<EtherAmount> getGasPrice() async {
-    return client.getGasPrice();
+  Future<GasPriceResponse> getGasPrice() async {
+    if (getCurrentEnvironment().chainId == 1) {
+      GasPriceResponse gasPrice = await _apiEthGasStationClient().getGasPrice();
+      return gasPrice;
+      /*if (feeType == WalletDefaultFee.SLOW) {
+        return EtherAmount.fromUnitAndValue(
+            EtherUnit.wei, gasPrice.safeLow * pow(10, 8));
+      } else if (feeType == WalletDefaultFee.AVERAGE) {
+        return EtherAmount.fromUnitAndValue(
+            EtherUnit.wei, gasPrice.average * pow(10, 8));
+      } else if (feeType == WalletDefaultFee.FAST) {
+        return EtherAmount.fromUnitAndValue(
+            EtherUnit.wei, gasPrice.fast * pow(10, 8));
+      }*/
+    } else {
+      EtherAmount gasPrice = await client.getGasPrice();
+      GasPriceResponse gasPriceResponse = GasPriceResponse(
+          safeLow: EtherAmount.fromUnitAndValue(
+                      EtherUnit.wei, gasPrice.getInWei.toInt() ~/ 2)
+                  .getValueInUnit(EtherUnit.gwei)
+                  .toInt() *
+              10,
+          average: gasPrice.getValueInUnit(EtherUnit.gwei).toInt() * 10,
+          fast: EtherAmount.fromUnitAndValue(
+                      EtherUnit.wei, gasPrice.getInWei.toInt() * 2)
+                  .getValueInUnit(EtherUnit.gwei)
+                  .toInt() *
+              10);
+      return gasPriceResponse;
+      /*if (feeType == WalletDefaultFee.SLOW) {
+        return;
+      } else if (feeType == WalletDefaultFee.AVERAGE) {
+        return EtherAmount.fromUnitAndValue(
+            EtherUnit.wei, gasPrice.getInWei.toInt());
+      } else if (feeType == WalletDefaultFee.FAST) {
+        return EtherAmount.fromUnitAndValue(
+            EtherUnit.wei, gasPrice.getInWei.toInt() * 2);
+      }*/
+    }
   }
 
   /*StreamSubscription listenEthTransfer(TransferEvent onTransfer, {int take}) {

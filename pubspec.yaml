@@ -161,6 +161,9 @@ flutter:
     - flash_on.png
     - flash_off.png
 
+    # Amount
+    - fee_arrow.svg
+
     - partialERC20ABI.json
     - ERC20ABI.json
     - HermezABI.json

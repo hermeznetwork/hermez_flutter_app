@@ -87,8 +87,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
           arguments: ModalRoute.of(context).settings.arguments,
           configurationService: configurationService);
     },
-    '/select_fee': (BuildContext context) {
-      return FeeSelectorPage(store: ModalRoute.of(context).settings.arguments);
+    '/fee_selector': (BuildContext context) {
+      return FeeSelectorPage(
+          arguments: ModalRoute.of(context).settings.arguments);
     },
     '/remove_account_info': (BuildContext context) {
       return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);

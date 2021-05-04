@@ -95,7 +95,8 @@ class _HomePageState extends State<HomePage> {
           } else if (settings.name == 'currency_selector') {
             page = SettingsCurrencyPage(store: widget.store);
           } else if (settings.name == 'fee_selector') {
-            page = FeeSelectorPage(store: widget.store);
+            page =
+                FeeSelectorPage(arguments: FeeSelectorArguments(widget.store));
           } else if (settings.name == 'account_details') {
             final AccountDetailsArguments args = settings.arguments;
             page = AccountDetailsPage(arguments: args);
@@ -253,7 +254,8 @@ class _HomePageState extends State<HomePage> {
                   } else if (settings.name == 'currency_selector') {
                     page = SettingsCurrencyPage(store: widget.store);
                   } else if (settings.name == 'fee_selector') {
-                    page = FeeSelectorPage(store: widget.store);
+                    page = FeeSelectorPage(
+                        arguments: FeeSelectorArguments(widget.store));
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
                     page = AccountDetailsPage(arguments: args);

@@ -6,6 +6,7 @@ import 'package:hermez/context/transfer/wallet_transfer_state.dart';
 import 'package:hermez/model/wallet_transfer.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -26,7 +27,10 @@ class WalletTransferHandler {
       String from, String to, String amount) async {
     var completer = new Completer<BigInt>();
     try {
-      EtherAmount gasPrice = await _contractService.getGasPrice();
+      GasPriceResponse gasPriceResponse = await _contractService.getGasPrice();
+      EtherAmount gasPrice =
+          EtherAmount.inWei(BigInt.from(gasPriceResponse.average * pow(10, 8)));
+
       BigInt estimatedGas = await _contractService.getEstimatedGas(
           EthereumAddress.fromHex(from),
           EthereumAddress.fromHex(to),

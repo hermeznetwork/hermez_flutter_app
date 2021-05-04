@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -10,6 +11,7 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
@@ -266,7 +268,7 @@ class WalletHandler {
   }
 
   Future<List<Account>> getL1Accounts() async {
-    List<Account> accounts = List();
+    List<Account> accounts = [];
     if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
 
@@ -277,9 +279,7 @@ class WalletHandler {
           // GET L1 ETH Balance
           web3.EtherAmount ethBalance = await _contractService.getEthBalance(
               web3.EthereumAddress.fromHex(state.ethereumAddress));
-          List<dynamic> transactions = await getEthereumTransactionsByAddress(
-              state.ethereumAddress, token, null);
-          if (transactions != null && transactions.isNotEmpty) {
+          if (ethBalance.getInWei > BigInt.zero) {
             final account = Account(
                 accountIndex: "0",
                 balance: ethBalance.getInWei.toString(),
@@ -289,12 +289,24 @@ class WalletHandler {
                 nonce: 0,
                 token: token);
             accounts.add(account);
+          } else {
+            List<dynamic> transactions = await getEthereumTransactionsByAddress(
+                state.ethereumAddress, token, null);
+            if (transactions != null && transactions.isNotEmpty) {
+              final account = Account(
+                  accountIndex: "0",
+                  balance: ethBalance.getInWei.toString(),
+                  bjj: "",
+                  hezEthereumAddress: state.ethereumAddress,
+                  itemId: 0,
+                  nonce: 0,
+                  token: token);
+              accounts.add(account);
+            }
           }
         } else {
           //Map<String, BigInt> tokensBalance = Map();
           var tokenBalance = BigInt.zero;
-          List<dynamic> transactions = await getEthereumTransactionsByAddress(
-              state.ethereumAddress, token, null);
           try {
             tokenBalance = await _contractService.getTokenBalance(
                 web3.EthereumAddress.fromHex(state.ethereumAddress),
@@ -303,9 +315,9 @@ class WalletHandler {
           } catch (error) {
             throw error;
           }
-          if (transactions != null && transactions.isNotEmpty) {
-            var tokenAmount = web3.EtherAmount.fromUnitAndValue(
-                web3.EtherUnit.wei, tokenBalance);
+          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+              web3.EtherUnit.wei, tokenBalance);
+          if (tokenBalance > BigInt.zero) {
             final account = Account(
                 accountIndex: "0",
                 balance: tokenAmount.getInWei.toString(),
@@ -315,7 +327,21 @@ class WalletHandler {
                 nonce: 0,
                 token: token);
             accounts.add(account);
-            //tokensBalance[token.symbol] = tokenBalance;
+          } else {
+            List<dynamic> transactions = await getEthereumTransactionsByAddress(
+                state.ethereumAddress, token, null);
+            if (transactions != null && transactions.isNotEmpty) {
+              final account = Account(
+                  accountIndex: "0",
+                  balance: tokenAmount.getInWei.toString(),
+                  bjj: "",
+                  hezEthereumAddress: state.ethereumAddress,
+                  itemId: 0,
+                  nonce: 0,
+                  token: token);
+              accounts.add(account);
+              //tokensBalance[token.symbol] = tokenBalance;
+            }
           }
         }
       }
@@ -510,8 +536,6 @@ class WalletHandler {
     }
   }
 
-  // TODO estimateFeeDeposit
-
   Future<Uint8List> signDeposit(BigInt amount, Token token) async {
     //_store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
@@ -632,9 +656,9 @@ class WalletHandler {
     return result;
   }
 
-  Future<BigInt> getGasPrice() async {
-    web3.EtherAmount gasPrice = await _contractService.getGasPrice();
-    return gasPrice.getInWei;
+  Future<GasPriceResponse> getGasPrice() async {
+    GasPriceResponse gasPrice = await _contractService.getGasPrice();
+    return gasPrice;
   }
 
   Future<BigInt> getGasLimit(String from, String to, BigInt amount,
@@ -658,7 +682,8 @@ class WalletHandler {
     return maxGas;
   }
 
-  Future<BigInt> getEstimatedFee(String from, String to, BigInt amount,
+  Future<BigInt> getEstimatedFee(
+      String from, String to, BigInt amount, WalletDefaultFee feeSpeed,
       {Uint8List data}) async {
     web3.EthereumAddress fromAddress;
     web3.EthereumAddress toAddress;
@@ -668,7 +693,7 @@ class WalletHandler {
     if (to != null && to.isNotEmpty) {
       toAddress = web3.EthereumAddress.fromHex(to);
     }
-    web3.EtherAmount gasPrice = await _contractService.getGasPrice();
+    GasPriceResponse gasPriceResponse = await getGasPrice();
     BigInt maxGas = await _contractService.getEstimatedGas(
         fromAddress,
         toAddress,
@@ -678,7 +703,20 @@ class WalletHandler {
         ),
         data);
 
-    BigInt estimatedFee = gasPrice.getInWei * maxGas;
+    BigInt gasPrice = BigInt.zero;
+    switch (feeSpeed) {
+      case WalletDefaultFee.SLOW:
+        gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
+        break;
+      case WalletDefaultFee.AVERAGE:
+        gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
+        break;
+      case WalletDefaultFee.FAST:
+        gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
+        break;
+    }
+
+    BigInt estimatedFee = gasPrice * maxGas;
 
     return estimatedFee;
   }

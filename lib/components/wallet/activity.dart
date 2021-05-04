@@ -393,7 +393,8 @@ class ActivityState extends State<Activity> {
                       txType = TransactionType.DEPOSIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = false;
+                      isNegative = widget.arguments.store.state.txLevel ==
+                          TransactionLevel.LEVEL1;
                       break;
                   }
 
@@ -571,7 +572,25 @@ class ActivityState extends State<Activity> {
         _isLoading = false;
       });
     } else {
+      pendingDeposits = await fetchPendingDeposits(arguments.account.token.id);
+      final List<ForgedTransaction> pendingDepositsTxs =
+          pendingDeposits.map((pendingDeposit) {
+        return ForgedTransaction(
+            id: pendingDeposit['id'],
+            hash: pendingDeposit['hash'],
+            l1info: L1Info(depositAmount: pendingDeposit['amount'].toString()),
+            type: pendingDeposit['type'],
+            fromHezEthereumAddress: pendingDeposit['fromHezEthereumAddress'],
+            timestamp: pendingDeposit['timestamp']);
+      }).toList();
       List<dynamic> historyTransactions = await fetchHistoryTransactions();
+      if (transactions.isEmpty) {
+        for (ForgedTransaction forgedTransaction in pendingDepositsTxs) {
+          historyTransactions.firstWhere(
+              (element) => element['txHash'] == forgedTransaction.hash,
+              orElse: () => transactions.add(forgedTransaction));
+        }
+      }
       setState(() {
         pendingItems = 0;
         transactions.addAll(historyTransactions);

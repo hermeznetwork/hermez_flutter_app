@@ -1,16 +1,21 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/form/address_input.dart';
 import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/move_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/model/wallet.dart';
+import 'package:hermez/screens/fee_selector.dart';
 import 'package:hermez/screens/scanner.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -94,6 +99,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   bool enoughGas;
   BigInt estimatedFee;
   BigInt gasLimit;
+  WalletDefaultFee selectedFeeSpeed;
+  GasPriceResponse gasPriceResponse;
 
   final TextEditingController amountController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
@@ -111,6 +118,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
       addressController.value = TextEditingValue(text: widget.addressTo);
     }
     needRefresh = true;
+    selectedFeeSpeed = widget.store.state.defaultFee;
   }
 
   @override
@@ -124,7 +132,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   Widget build(BuildContext context) => FutureBuilder(
         future: getEstimatedFee(),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData &&
+              snapshot.connectionState == ConnectionState.done) {
             BigInt estimatedFee = snapshot.data;
             final String currency =
                 widget.store.state.defaultCurrency.toString().split('.').last;
@@ -202,65 +211,133 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                         account != null
                             ? Container(
                                 alignment: Alignment.center,
-                                margin: EdgeInsets.only(top: 20.0),
-                                child: Text(
-                                  defaultCurrencySelected
-                                      ? "Fee " +
-                                          (((txLevel == TransactionLevel.LEVEL2 &&
-                                                              transactionType ==
-                                                                  TransactionType
-                                                                      .SEND) ||
-                                                          transactionType ==
-                                                              TransactionType
-                                                                  .EXIT
-                                                      ? account.token.USD
-                                                      : ethereumToken.USD) *
-                                                  (currency != "USD"
-                                                      ? widget.store.state
-                                                          .exchangeRatio
-                                                      : 1) *
-                                                  (estimatedFee.toDouble() /
-                                                      pow(
-                                                          10,
-                                                          ((txLevel == TransactionLevel.LEVEL2 &&
-                                                                      transactionType ==
-                                                                          TransactionType
-                                                                              .SEND) ||
-                                                                  transactionType ==
-                                                                      TransactionType
-                                                                          .EXIT
-                                                              ? account.token
-                                                                  .decimals
-                                                              : ethereumToken
-                                                                  .decimals))))
-                                              .toStringAsFixed(2) +
-                                          " " +
-                                          currency
-                                      : "Fee " +
-                                          (estimatedFee.toDouble() /
-                                                  pow(
-                                                      10,
-                                                      (txLevel ==
-                                                              TransactionLevel
-                                                                  .LEVEL1
-                                                          ? ethereumToken
-                                                              .decimals
-                                                          : account != null
-                                                              ? account.token
-                                                                  .decimals
-                                                              : 18)))
-                                              .toStringAsFixed(6) +
-                                          " " +
-                                          (txLevel == TransactionLevel.LEVEL1
-                                              ? ethereumToken.symbol
-                                              : account.token.symbol),
-                                  style: TextStyle(
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w500,
+                                margin: EdgeInsets.only(top: 24.0),
+                                child: TextButton(
+                                  onPressed: (txLevel ==
+                                                  TransactionLevel.LEVEL2 &&
+                                              transactionType ==
+                                                  TransactionType.SEND) ||
+                                          transactionType ==
+                                              TransactionType.EXIT
+                                      ? null
+                                      : () {
+                                          Navigator.of(context).pushNamed(
+                                              "/fee_selector",
+                                              arguments: FeeSelectorArguments(
+                                                  widget.store,
+                                                  selectedFee: selectedFeeSpeed,
+                                                  gasPriceResponse:
+                                                      gasPriceResponse,
+                                                  onFeeSelected: (selectedFee) {
+                                                setState(() {
+                                                  needRefresh = true;
+                                                  selectedFeeSpeed =
+                                                      selectedFee;
+                                                });
+                                              }));
+                                        },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        defaultCurrencySelected
+                                            ? "Fee " +
+                                                (((txLevel ==
+                                                                        TransactionLevel
+                                                                            .LEVEL2 &&
+                                                                    transactionType ==
+                                                                        TransactionType
+                                                                            .SEND) ||
+                                                                transactionType ==
+                                                                    TransactionType
+                                                                        .EXIT
+                                                            ? account.token.USD
+                                                            : ethereumToken
+                                                                .USD) *
+                                                        (currency != "USD"
+                                                            ? widget.store.state
+                                                                .exchangeRatio
+                                                            : 1) *
+                                                        (estimatedFee
+                                                                .toDouble() /
+                                                            pow(
+                                                                10,
+                                                                ((txLevel == TransactionLevel.LEVEL2 && transactionType == TransactionType.SEND) ||
+                                                                        transactionType ==
+                                                                            TransactionType
+                                                                                .EXIT
+                                                                    ? account
+                                                                        .token
+                                                                        .decimals
+                                                                    : ethereumToken
+                                                                        .decimals))))
+                                                    .toStringAsFixed(2) +
+                                                " " +
+                                                currency
+                                            : "Fee " +
+                                                (estimatedFee.toDouble() /
+                                                        pow(
+                                                            10,
+                                                            (txLevel ==
+                                                                    TransactionLevel
+                                                                        .LEVEL1
+                                                                ? ethereumToken
+                                                                    .decimals
+                                                                : account !=
+                                                                        null
+                                                                    ? account
+                                                                        .token
+                                                                        .decimals
+                                                                    : 18)))
+                                                    .toStringAsFixed(6) +
+                                                " " +
+                                                (txLevel ==
+                                                        TransactionLevel.LEVEL1
+                                                    ? ethereumToken.symbol
+                                                    : account.token.symbol),
+                                        style: TextStyle(
+                                          color: (txLevel ==
+                                                          TransactionLevel
+                                                              .LEVEL2 &&
+                                                      transactionType ==
+                                                          TransactionType
+                                                              .SEND) ||
+                                                  transactionType ==
+                                                      TransactionType.EXIT
+                                              ? HermezColors.blueyGreyTwo
+                                              : HermezColors.blackTwo,
+                                          fontSize: 16,
+                                          fontFamily: 'ModernEra',
+                                          fontWeight: (txLevel ==
+                                                          TransactionLevel
+                                                              .LEVEL2 &&
+                                                      transactionType ==
+                                                          TransactionType
+                                                              .SEND) ||
+                                                  transactionType ==
+                                                      TransactionType.EXIT
+                                              ? FontWeight.w500
+                                              : FontWeight.w700,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      (txLevel == TransactionLevel.LEVEL2 &&
+                                                  transactionType ==
+                                                      TransactionType.SEND) ||
+                                              transactionType ==
+                                                  TransactionType.EXIT
+                                          ? Container()
+                                          : Container(
+                                              alignment: Alignment.center,
+                                              margin: EdgeInsets.only(left: 6),
+                                              child: SvgPicture.asset(
+                                                  'assets/fee_arrow.svg',
+                                                  color: HermezColors.blackTwo,
+                                                  semanticsLabel:
+                                                      'fee_selector'),
+                                            ),
+                                    ],
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                               )
                             : Container(),
@@ -815,6 +892,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         }
         amountIsValid =
             isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
+
+        if (transactionType == TransactionType.EXIT) {
+          Uint8List data;
+          BigInt amountToEstimate = BigInt.one;
+          data = await store.signDeposit(amountToEstimate, account.token);
+          ethereumAccount = await getEthereumAccount();
+          enoughGas = await isEnoughGas(estimatedFee);
+        }
       } else {
         double amount = 0;
         if (amountController.value.text.isNotEmpty) {
@@ -833,12 +918,24 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
           addressFrom = store.state.ethereumAddress;
         }
         if (transactionType == TransactionType.DEPOSIT) {
-          BigInt gasPrice = await store.getGasPrice();
+          gasPriceResponse = await store.getGasPrice();
+          BigInt gasPrice = BigInt.zero;
+          switch (selectedFeeSpeed) {
+            case WalletDefaultFee.SLOW:
+              gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
+              break;
+            case WalletDefaultFee.AVERAGE:
+              gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
+              break;
+            case WalletDefaultFee.FAST:
+              gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
+              break;
+          }
           try {
             addressTo = getCurrentEnvironment().contracts['Hermez'];
             BigInt amountToEstimate = BigInt.one;
             BigInt ethAmountToEstimate = BigInt.one;
-            int offset = 0;
+            int offset = GAS_LIMIT_OFFSET;
             if (account.token.id != 0) {
               offset = GAS_STANDARD_ERC20_TX;
               ethAmountToEstimate = BigInt.zero;
@@ -857,8 +954,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             addressController.value.text)) {
           addressTo = addressController.value.text;
           try {
-            BigInt fee = await store.getEstimatedFee(addressFrom, addressTo,
+            BigInt fee = await store.getEstimatedFee(
+                addressFrom,
+                addressTo,
                 getTokenAmountBigInt(amount, account.token.decimals),
+                selectedFeeSpeed,
                 data: data);
             estimatedFee = fee;
           } catch (e) {
@@ -868,7 +968,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         }
         ethereumToken = await getEthereumToken();
         ethereumAccount = await getEthereumAccount();
-        enoughGas = await isEnoughGas();
+        enoughGas = await isEnoughGas(estimatedFee);
         amountIsValid =
             isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
       }
@@ -950,11 +1050,12 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             : true);
   }
 
-  Future<bool> isEnoughGas() async {
-    if (txLevel == TransactionLevel.LEVEL1 &&
-        transactionType != TransactionType.RECEIVE) {
+  Future<bool> isEnoughGas(BigInt gasFee) async {
+    if ((txLevel == TransactionLevel.LEVEL1 &&
+            transactionType != TransactionType.RECEIVE) ||
+        transactionType == TransactionType.EXIT) {
       if (ethereumAccount != null) {
-        return double.parse(ethereumAccount.balance) >= estimatedFee.toDouble();
+        return double.parse(ethereumAccount.balance) >= gasFee.toDouble();
       }
       return false;
     } else {

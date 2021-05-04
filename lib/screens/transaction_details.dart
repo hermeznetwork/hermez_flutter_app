@@ -208,7 +208,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                   "/info",
                                   arguments: InfoArguments(
                                       "info_tx_failure.png",
-                                      false,
+                                      true,
                                       "There has been an error with your transaction.",
                                       iconSize: 250),
                                 );
