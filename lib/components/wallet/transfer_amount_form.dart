@@ -608,7 +608,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      account != null || token != null
+                      account != null ||
+                              token != null &&
+                                  transactionType != TransactionType.RECEIVE
                           ? Expanded(
                               child: Container(
                                 height: 48,
@@ -1061,59 +1063,67 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
 
   BigInt getGasPrice() {
     BigInt gasPrice = BigInt.zero;
-    switch (selectedFeeSpeed) {
-      case WalletDefaultFee.SLOW:
-        gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
-        break;
-      case WalletDefaultFee.AVERAGE:
-        gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
-        break;
-      case WalletDefaultFee.FAST:
-        gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
-        break;
+    if (transactionType != TransactionType.RECEIVE) {
+      switch (selectedFeeSpeed) {
+        case WalletDefaultFee.SLOW:
+          gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
+          break;
+        case WalletDefaultFee.AVERAGE:
+          gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
+          break;
+        case WalletDefaultFee.FAST:
+          gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
+          break;
+      }
     }
     return gasPrice;
   }
 
   String getFeeText() {
-    BigInt estimatedFee = getEstimatedFee();
+    if (transactionType == TransactionType.RECEIVE) {
+      return "";
+    } else {
+      BigInt estimatedFee = getEstimatedFee();
 
-    final String currency =
-        widget.store.state.defaultCurrency.toString().split('.').last;
+      final String currency =
+          widget.store.state.defaultCurrency.toString().split('.').last;
 
-    return defaultCurrencySelected
-        ? "Fee " +
-            (((txLevel == TransactionLevel.LEVEL2 &&
-                                transactionType == TransactionType.SEND) ||
-                            transactionType == TransactionType.EXIT
-                        ? account.token.USD
-                        : ethereumToken.USD) *
-                    (currency != "USD" ? widget.store.state.exchangeRatio : 1) *
-                    (estimatedFee.toDouble() /
-                        pow(
-                            10,
-                            ((txLevel == TransactionLevel.LEVEL2 &&
-                                        transactionType ==
-                                            TransactionType.SEND) ||
-                                    transactionType == TransactionType.EXIT
-                                ? account.token.decimals
-                                : ethereumToken.decimals))))
-                .toStringAsFixed(2) +
-            " " +
-            currency
-        : "Fee " +
-            (estimatedFee.toDouble() /
-                    pow(
-                        10,
-                        (txLevel == TransactionLevel.LEVEL1
-                            ? ethereumToken.decimals
-                            : account != null
-                                ? account.token.decimals
-                                : 18)))
-                .toStringAsFixed(6) +
-            " " +
-            (txLevel == TransactionLevel.LEVEL1
-                ? ethereumToken.symbol
-                : account.token.symbol);
+      return defaultCurrencySelected
+          ? "Fee " +
+              (((txLevel == TransactionLevel.LEVEL2 &&
+                                  transactionType == TransactionType.SEND) ||
+                              transactionType == TransactionType.EXIT
+                          ? account.token.USD
+                          : ethereumToken.USD) *
+                      (currency != "USD"
+                          ? widget.store.state.exchangeRatio
+                          : 1) *
+                      (estimatedFee.toDouble() /
+                          pow(
+                              10,
+                              ((txLevel == TransactionLevel.LEVEL2 &&
+                                          transactionType ==
+                                              TransactionType.SEND) ||
+                                      transactionType == TransactionType.EXIT
+                                  ? account.token.decimals
+                                  : ethereumToken.decimals))))
+                  .toStringAsFixed(2) +
+              " " +
+              currency
+          : "Fee " +
+              (estimatedFee.toDouble() /
+                      pow(
+                          10,
+                          (txLevel == TransactionLevel.LEVEL1
+                              ? ethereumToken.decimals
+                              : account != null
+                                  ? account.token.decimals
+                                  : 18)))
+                  .toStringAsFixed(6) +
+              " " +
+              (txLevel == TransactionLevel.LEVEL1
+                  ? ethereumToken.symbol
+                  : account.token.symbol);
+    }
   }
 }
