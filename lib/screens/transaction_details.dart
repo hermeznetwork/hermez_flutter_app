@@ -27,6 +27,7 @@ class TransactionDetailsArguments {
   final double fee;
   final Token feeToken;
   final int gasLimit;
+  final int gasPrice;
   final DateTime transactionDate;
 
   final bool isTransactionBeingSigned;
@@ -48,6 +49,7 @@ class TransactionDetailsArguments {
       this.fee,
       this.feeToken,
       this.gasLimit,
+      this.gasPrice,
       this.addressFrom,
       this.addressTo,
       this.isTransactionBeingSigned,
@@ -390,7 +392,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
           return await widget.arguments.wallet.deposit(
               amountDeposit, widget.arguments.token,
-              gasLimit: widget.arguments.gasLimit);
+              gasLimit: widget.arguments.gasLimit,
+              gasPrice: widget.arguments.gasPrice);
         }
         break;
       case TransactionType.FORCEEXIT:

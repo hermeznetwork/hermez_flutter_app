@@ -53,7 +53,7 @@ class TransferAmountForm extends StatefulWidget {
   final String addressTo;
   final WalletHandler store;
   final void Function(double amount, Token token, double fee, Token feeToken,
-      String addressTo, int gasLimit) onSubmit;
+      String addressTo, int gasLimit, int gasPrice) onSubmit;
 
   @override
   _TransferAmountFormState createState() => _TransferAmountFormState(
@@ -89,7 +89,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   final String addressTo;
   final WalletHandler store;
   final void Function(double amount, Token token, double fee, Token feeToken,
-      String addressTo, int gasLimit) onSubmit;
+      String addressTo, int gasLimit, int gasPrice) onSubmit;
   bool needRefresh = true;
   bool amountIsValid = true;
   bool addressIsValid = true;
@@ -181,7 +181,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                     ? account.token
                                                     : token,
                                             addressController.value.text,
-                                            gasLimit.toInt());
+                                            gasLimit.toInt(),
+                                            getGasPrice().toInt());
                                       }
                                     : null,
                                 padding: EdgeInsets.only(
@@ -640,11 +641,15 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                         if (account.token.id == 0 ||
                                             txLevel ==
                                                 TransactionLevel.LEVEL2) {
+                                          double balance = double.parse(
+                                              (double.parse(account.balance) /
+                                                      pow(
+                                                          10,
+                                                          account
+                                                              .token.decimals))
+                                                  .toStringAsFixed(6));
                                           amount = account.token.USD *
-                                                  double.parse(
-                                                      account.balance) /
-                                                  pow(10,
-                                                      account.token.decimals) *
+                                                  balance *
                                                   (currency != 'USD'
                                                       ? widget.store.state
                                                           .exchangeRatio
@@ -658,9 +663,15 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                   pow(10,
                                                       account.token.decimals));
                                         } else {
+                                          double balance = double.parse(
+                                              (double.parse(account.balance) /
+                                                      pow(
+                                                          10,
+                                                          account
+                                                              .token.decimals))
+                                                  .toStringAsFixed(6));
                                           amount = account.token.USD *
-                                              double.parse(account.balance) /
-                                              pow(10, account.token.decimals) *
+                                              balance *
                                               (currency != 'USD'
                                                   ? widget
                                                       .store.state.exchangeRatio
@@ -670,17 +681,25 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                         if (account.token.id == 0 ||
                                             txLevel ==
                                                 TransactionLevel.LEVEL2) {
-                                          amount = ((double.parse(
-                                                      account.balance) /
-                                                  pow(10,
-                                                      account.token.decimals)) -
+                                          double balance = double.parse(
+                                              (double.parse(account.balance) /
+                                                      pow(
+                                                          10,
+                                                          account
+                                                              .token.decimals))
+                                                  .toStringAsFixed(6));
+                                          amount = balance -
                                               (estimatedFee.toDouble() /
                                                   pow(10,
-                                                      account.token.decimals)));
+                                                      account.token.decimals));
                                         } else {
-                                          amount = (double.parse(
-                                                  account.balance) /
-                                              pow(10, account.token.decimals));
+                                          amount = double.parse(
+                                              (double.parse(account.balance) /
+                                                      pow(
+                                                          10,
+                                                          account
+                                                              .token.decimals))
+                                                  .toStringAsFixed(6));
                                         }
                                       }
                                       amountIsValid = amount > 0;
@@ -1036,6 +1055,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   }
 
   BigInt getEstimatedFee() {
+    BigInt gasPrice = getGasPrice();
+    return gasLimit * gasPrice;
+  }
+
+  BigInt getGasPrice() {
     BigInt gasPrice = BigInt.zero;
     switch (selectedFeeSpeed) {
       case WalletDefaultFee.SLOW:
@@ -1048,8 +1072,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
         break;
     }
-
-    return gasLimit * gasPrice;
+    return gasPrice;
   }
 
   String getFeeText() {

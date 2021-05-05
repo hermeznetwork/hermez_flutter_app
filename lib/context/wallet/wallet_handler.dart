@@ -549,7 +549,8 @@ class WalletHandler {
         hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
   }
 
-  Future<bool> deposit(BigInt amount, Token token, {int gasLimit}) async {
+  Future<bool> deposit(BigInt amount, Token token,
+      {int gasLimit, int gasPrice}) async {
     _store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
@@ -557,7 +558,7 @@ class WalletHandler {
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.deposit(amount, hermezAddress, token,
         hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey,
-        gasLimit: gasLimit);
+        gasLimit: gasLimit, gasPrice: gasPrice);
   }
 
   Future<bool> withdraw(double amount, Account account, Exit exit,

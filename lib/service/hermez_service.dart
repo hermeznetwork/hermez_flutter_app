@@ -50,7 +50,7 @@ abstract class IHermezService {
   Future<Token> getTokenById(int tokenId);
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT_HIGH, int gasMultiplier = GAS_MULTIPLIER});
+      {int gasLimit = GAS_LIMIT_HIGH, int gasPrice = GAS_MULTIPLIER});
   Future<bool> withdraw(
       BigInt amount,
       Account account,
@@ -215,12 +215,11 @@ class HermezService implements IHermezService {
   @override
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT_HIGH,
-      int gasMultiplier = GAS_MULTIPLIER}) async {
+      {int gasLimit = GAS_LIMIT_HIGH, int gasPrice = GAS_MULTIPLIER}) async {
     final txHash = await tx
         .deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
             hezEthereumAddress, token, babyJubJub, client, privateKey,
-            gasLimit: gasLimit, gasMultiplier: gasMultiplier)
+            gasLimit: gasLimit, gasPrice: gasPrice)
         .then((txHash) async {
       if (txHash != null) {
         await api.getAccounts(hezEthereumAddress, [token.id]).then((res) {
