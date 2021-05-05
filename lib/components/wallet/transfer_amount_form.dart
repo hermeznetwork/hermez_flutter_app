@@ -462,6 +462,10 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                     onChanged: (value) {
                       setState(() {
                         addressIsValid = isAddressValid();
+                        if (addressIsValid) {
+                          amountController.clear();
+                          needRefresh = true;
+                        }
                       });
                     },
                   ),
@@ -482,11 +486,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                               onPressed: () {
                                 getClipBoardData().then((String result) {
                                   setState(() {
-                                    amountController.clear();
                                     addressController.clear();
                                     addressController.text = result;
                                     addressIsValid = isAddressValid();
                                     if (addressIsValid) {
+                                      amountController.clear();
                                       needRefresh = true;
                                     }
                                   });
@@ -511,6 +515,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                 scannedAddress.toString();
                                             addressIsValid = isAddressValid();
                                             if (addressIsValid) {
+                                              amountController.clear();
                                               needRefresh = true;
                                             }
                                           });
@@ -530,6 +535,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                           addressController.clear();
                           addressIsValid = isAddressValid();
                           if (addressIsValid) {
+                            amountController.clear();
                             needRefresh = true;
                           }
                         }),
