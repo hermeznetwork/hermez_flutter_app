@@ -40,7 +40,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
     if (widget.store.state.ethereumAddress == null) {
       await widget.store.initialise();
     }
-    l1Accounts = await widget.store.getL1Accounts();
+    l1Accounts = await widget.store.getL1Accounts(false);
     l2Accounts = await widget.store.getAccounts();
     isLoading = false;
   }

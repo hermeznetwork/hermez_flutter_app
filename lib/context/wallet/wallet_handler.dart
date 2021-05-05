@@ -267,7 +267,7 @@ class WalletHandler {
         BalanceUpdated(ethBalance.getInWei, tokensBalance, L2accounts));
   }
 
-  Future<List<Account>> getL1Accounts() async {
+  Future<List<Account>> getL1Accounts(bool showZeroBalanceAccounts) async {
     List<Account> accounts = [];
     if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
@@ -328,19 +328,22 @@ class WalletHandler {
                 token: token);
             accounts.add(account);
           } else {
-            List<dynamic> transactions = await getEthereumTransactionsByAddress(
-                state.ethereumAddress, token, null);
-            if (transactions != null && transactions.isNotEmpty) {
-              final account = Account(
-                  accountIndex: "0",
-                  balance: tokenAmount.getInWei.toString(),
-                  bjj: "",
-                  hezEthereumAddress: state.ethereumAddress,
-                  itemId: 0,
-                  nonce: 0,
-                  token: token);
-              accounts.add(account);
-              //tokensBalance[token.symbol] = tokenBalance;
+            if (showZeroBalanceAccounts) {
+              List<dynamic> transactions =
+                  await getEthereumTransactionsByAddress(
+                      state.ethereumAddress, token, null);
+              if (transactions != null && transactions.isNotEmpty) {
+                final account = Account(
+                    accountIndex: "0",
+                    balance: tokenAmount.getInWei.toString(),
+                    bjj: "",
+                    hezEthereumAddress: state.ethereumAddress,
+                    itemId: 0,
+                    nonce: 0,
+                    token: token);
+                accounts.add(account);
+                //tokensBalance[token.symbol] = tokenBalance;
+              }
             }
           }
         }
@@ -682,7 +685,7 @@ class WalletHandler {
     return maxGas;
   }
 
-  Future<BigInt> getEstimatedFee(
+  Future<BigInt> getEstimatedGas(
       String from, String to, BigInt amount, WalletDefaultFee feeSpeed,
       {Uint8List data}) async {
     web3.EthereumAddress fromAddress;

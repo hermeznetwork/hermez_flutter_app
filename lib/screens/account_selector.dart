@@ -35,7 +35,7 @@ class AccountSelectorPage extends HookWidget {
     if ((arguments.txLevel == TransactionLevel.LEVEL1 &&
             arguments.transactionType != TransactionType.FORCEEXIT) ||
         arguments.transactionType == TransactionType.DEPOSIT) {
-      return arguments.store.getL1Accounts();
+      return arguments.store.getL1Accounts(false);
     } else {
       return arguments.store.getAccounts();
     }

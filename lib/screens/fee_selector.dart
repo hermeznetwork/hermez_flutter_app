@@ -1,7 +1,11 @@
+import 'dart:math';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez_plugin/model/token.dart';
 
 import '../context/wallet/wallet_handler.dart';
 
@@ -12,11 +16,17 @@ import '../context/wallet/wallet_handler.dart';
 class FeeSelectorArguments {
   final WalletHandler store;
   WalletDefaultFee selectedFee;
+  Token ethereumToken;
+  BigInt estimatedGas;
   GasPriceResponse gasPriceResponse;
   final void Function(WalletDefaultFee selectedFee) onFeeSelected;
 
   FeeSelectorArguments(this.store,
-      {this.selectedFee, this.gasPriceResponse, this.onFeeSelected});
+      {this.selectedFee,
+      this.ethereumToken,
+      this.estimatedGas,
+      this.gasPriceResponse,
+      this.onFeeSelected});
 }
 
 class FeeSelectorPage extends StatefulWidget {
@@ -95,130 +105,187 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                   final index = i - 1;
 
                   dynamic element = WalletDefaultFee.values.elementAt(index);
+                  int gasPrice = 0;
+                  if (widget.arguments.selectedFee != null) {
+                    switch (index) {
+                      case 0:
+                        gasPrice = widget.arguments.gasPriceResponse.safeLow *
+                            pow(10, 8);
+                        break;
+                      case 1:
+                        gasPrice = widget.arguments.gasPriceResponse.average *
+                            pow(10, 8);
+                        break;
+                      case 2:
+                        gasPrice =
+                            widget.arguments.gasPriceResponse.fast * pow(10, 8);
+                        break;
+                    }
+                  }
 
                   return ListTile(
-                      title: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: EdgeInsets.only(
-                              left: 5.0, top: 30.0, bottom: 30.0),
-                          child: Column(
-                            children: [
-                              Container(
-                                child: Text(
-                                  element
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(0, 1) +
+                      title: Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              padding: EdgeInsets.only(
+                                  left: 5.0, top: 24.0, bottom: 24.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    child: Text(
                                       element
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(1)
-                                          .toLowerCase(),
-                                  style: TextStyle(
-                                      fontFamily: 'ModernEra',
-                                      color: HermezColors.blackTwo,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16),
-                                  textAlign: TextAlign.left,
-                                ),
+                                              .toString()
+                                              .split(".")
+                                              .last
+                                              .substring(0, 1) +
+                                          element
+                                              .toString()
+                                              .split(".")
+                                              .last
+                                              .substring(1)
+                                              .toLowerCase(),
+                                      style: TextStyle(
+                                          fontFamily: 'ModernEra',
+                                          color: HermezColors.blackTwo,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  widget.arguments.selectedFee != null
+                                      ? Container(
+                                          padding: EdgeInsets.only(
+                                              top: 12.0, bottom: 12.0),
+                                          child: Text(
+                                            (widget.arguments.estimatedGas
+                                                            .toInt() *
+                                                        gasPrice /
+                                                        pow(
+                                                            10,
+                                                            widget
+                                                                .arguments
+                                                                .ethereumToken
+                                                                .decimals))
+                                                    .toStringAsFixed(6) +
+                                                " " +
+                                                widget.arguments.ethereumToken
+                                                    .symbol,
+                                            style: TextStyle(
+                                                fontFamily: 'ModernEra',
+                                                color: HermezColors.blackTwo,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 16),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        )
+                                      : Container(),
+                                  widget.arguments.selectedFee != null
+                                      ? Container(
+                                          child: Text(
+                                            ((widget.arguments.ethereumToken
+                                                            .USD) *
+                                                        (widget
+                                                                    .arguments
+                                                                    .store
+                                                                    .state
+                                                                    .defaultCurrency
+                                                                    .toString()
+                                                                    .split(".")
+                                                                    .last !=
+                                                                "USD"
+                                                            ? widget
+                                                                .arguments
+                                                                .store
+                                                                .state
+                                                                .exchangeRatio
+                                                            : 1) *
+                                                        (widget.arguments
+                                                                .estimatedGas
+                                                                .toInt() *
+                                                            gasPrice /
+                                                            pow(
+                                                                10,
+                                                                widget
+                                                                    .arguments
+                                                                    .ethereumToken
+                                                                    .decimals)))
+                                                    .toStringAsFixed(2) +
+                                                " " +
+                                                widget.arguments.store.state
+                                                    .defaultCurrency
+                                                    .toString()
+                                                    .split(".")
+                                                    .last,
+                                            style: TextStyle(
+                                                fontFamily: 'ModernEra',
+                                                color:
+                                                    HermezColors.blueyGreyTwo,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 16),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        )
+                                      : Container(),
+                                ],
                               ),
-                              Container(
-                                padding:
-                                    EdgeInsets.only(top: 12.0, bottom: 12.0),
-                                child: Text(
-                                  element
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(0, 1) +
-                                      element
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(1)
-                                          .toLowerCase(),
-                                  style: TextStyle(
-                                      fontFamily: 'ModernEra',
-                                      color: HermezColors.blackTwo,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16),
-                                  textAlign: TextAlign.left,
-                                ),
-                              ),
-                              Container(
-                                child: Text(
-                                  element
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(0, 1) +
-                                      element
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(1)
-                                          .toLowerCase(),
-                                  style: TextStyle(
-                                      fontFamily: 'ModernEra',
-                                      color: HermezColors.blackTwo,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16),
-                                  textAlign: TextAlign.left,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      trailing: (widget.arguments.selectedFee != null
-                              ? widget.arguments.selectedFee == element
-                              : widget.arguments.store.state.defaultFee ==
-                                  element)
-                          ? Radio(
-                              groupValue: null,
-                              activeColor: HermezColors.blackTwo,
-                              value: null,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (widget.arguments.selectedFee != null) {
-                                    widget.arguments.selectedFee = element;
-                                  } else {
-                                    widget.arguments.store
-                                        .updateDefaultFee(element);
-                                  }
-                                  if (widget.arguments.onFeeSelected != null) {
-                                    widget.arguments.onFeeSelected(element);
-                                    if (Navigator.canPop(context)) {
-                                      Navigator.pop(context);
-                                    }
-                                  }
-                                });
-                              },
-                            )
-                          : Radio(
-                              groupValue: null,
-                              value: element.toString().split(".").last,
-                              activeColor: HermezColors.blackTwo,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (widget.arguments.selectedFee != null) {
-                                    widget.arguments.selectedFee = element;
-                                  } else {
-                                    widget.arguments.store
-                                        .updateDefaultFee(element);
-                                  }
-                                  if (widget.arguments.onFeeSelected != null) {
-                                    widget.arguments.onFeeSelected(element);
-                                    if (Navigator.canPop(context)) {
-                                      Navigator.pop(context);
-                                    }
-                                  }
-                                });
-                              },
                             ),
+                          ),
+                          (widget.arguments.selectedFee != null
+                                  ? widget.arguments.selectedFee == element
+                                  : widget.arguments.store.state.defaultFee ==
+                                      element)
+                              ? Radio(
+                                  groupValue: null,
+                                  activeColor: HermezColors.blackTwo,
+                                  value: null,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      if (widget.arguments.selectedFee !=
+                                          null) {
+                                        widget.arguments.selectedFee = element;
+                                      } else {
+                                        widget.arguments.store
+                                            .updateDefaultFee(element);
+                                      }
+                                      if (widget.arguments.onFeeSelected !=
+                                          null) {
+                                        widget.arguments.onFeeSelected(element);
+                                        if (Navigator.canPop(context)) {
+                                          Navigator.pop(context);
+                                        }
+                                      }
+                                    });
+                                  },
+                                )
+                              : Radio(
+                                  groupValue: null,
+                                  value: element.toString().split(".").last,
+                                  activeColor: HermezColors.blackTwo,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      if (widget.arguments.selectedFee !=
+                                          null) {
+                                        widget.arguments.selectedFee = element;
+                                      } else {
+                                        widget.arguments.store
+                                            .updateDefaultFee(element);
+                                      }
+                                      if (widget.arguments.onFeeSelected !=
+                                          null) {
+                                        widget.arguments.onFeeSelected(element);
+                                        if (Navigator.canPop(context)) {
+                                          Navigator.pop(context);
+                                        }
+                                      }
+                                    });
+                                  },
+                                ),
+                        ],
+                      ),
                       onTap: () {
                         setState(() {
                           if (widget.arguments.selectedFee != null) {

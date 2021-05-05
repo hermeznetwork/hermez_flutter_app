@@ -88,7 +88,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
       return widget.arguments.store.getAccounts();
     } else {
-      return widget.arguments.store.getL1Accounts();
+      return widget.arguments.store.getL1Accounts(true);
     }
   }
 

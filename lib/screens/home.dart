@@ -151,7 +151,8 @@ class _HomePageState extends State<HomePage> {
               if (isEthereumAddress(scannedStrings[0])) {
                 if (scannedStrings.length > 1) {
                   bool accountFound = false;
-                  List<Account> accounts = await widget.store.getL1Accounts();
+                  List<Account> accounts =
+                      await widget.store.getL1Accounts(true);
                   for (Account account in accounts) {
                     if (account.token.symbol == scannedStrings[1]) {
                       accountFound = true;
