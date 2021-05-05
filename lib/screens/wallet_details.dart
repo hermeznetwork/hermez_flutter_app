@@ -357,7 +357,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           onPressed: () async {
-                            if (_accounts.length > 1) {
+                            List<Account> accounts = _accounts
+                                .takeWhile((account) =>
+                                    double.parse(account.balance) > 0)
+                                .toList();
+                            if (accounts.length > 1) {
                               Navigator.of(widget.arguments.parentContext)
                                   .pushNamed("/account_selector",
                                       arguments: AccountSelectorArguments(
@@ -373,7 +377,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                       widget.arguments.store,
                                       widget.arguments.store.state.txLevel,
                                       TransactionType.SEND,
-                                      account: _accounts[0],
+                                      account: accounts[0],
                                       allowChangeLevel: false));
                             }
                           },

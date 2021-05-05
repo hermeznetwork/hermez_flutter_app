@@ -213,12 +213,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                 alignment: Alignment.center,
                                 margin: EdgeInsets.only(top: 24.0),
                                 child: TextButton(
-                                  onPressed: (txLevel ==
-                                                  TransactionLevel.LEVEL2 &&
+                                  onPressed: ((txLevel ==
+                                                      TransactionLevel.LEVEL2 &&
+                                                  transactionType ==
+                                                      TransactionType.SEND) ||
                                               transactionType ==
-                                                  TransactionType.SEND) ||
-                                          transactionType ==
-                                              TransactionType.EXIT
+                                                  TransactionType.EXIT) ||
+                                          snapshot.connectionState !=
+                                              ConnectionState.done
                                       ? null
                                       : () {
                                           Navigator.of(context).pushNamed(
@@ -240,30 +242,38 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                         },
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Text(
                                         feeText,
                                         style: TextStyle(
-                                          color: (txLevel ==
-                                                          TransactionLevel
-                                                              .LEVEL2 &&
+                                          color: ((txLevel ==
+                                                              TransactionLevel
+                                                                  .LEVEL2 &&
+                                                          transactionType ==
+                                                              TransactionType
+                                                                  .SEND) ||
                                                       transactionType ==
                                                           TransactionType
-                                                              .SEND) ||
-                                                  transactionType ==
-                                                      TransactionType.EXIT
+                                                              .EXIT) ||
+                                                  snapshot.connectionState !=
+                                                      ConnectionState.done
                                               ? HermezColors.blueyGreyTwo
                                               : HermezColors.blackTwo,
                                           fontSize: 16,
                                           fontFamily: 'ModernEra',
-                                          fontWeight: (txLevel ==
-                                                          TransactionLevel
-                                                              .LEVEL2 &&
+                                          fontWeight: ((txLevel ==
+                                                              TransactionLevel
+                                                                  .LEVEL2 &&
+                                                          transactionType ==
+                                                              TransactionType
+                                                                  .SEND) ||
                                                       transactionType ==
                                                           TransactionType
-                                                              .SEND) ||
-                                                  transactionType ==
-                                                      TransactionType.EXIT
+                                                              .EXIT) ||
+                                                  snapshot.connectionState !=
+                                                      ConnectionState.done
                                               ? FontWeight.w500
                                               : FontWeight.w700,
                                         ),
@@ -275,15 +285,34 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                               transactionType ==
                                                   TransactionType.EXIT
                                           ? Container()
-                                          : Container(
-                                              alignment: Alignment.center,
-                                              margin: EdgeInsets.only(left: 6),
-                                              child: SvgPicture.asset(
-                                                  'assets/fee_arrow.svg',
-                                                  color: HermezColors.blackTwo,
-                                                  semanticsLabel:
-                                                      'fee_selector'),
-                                            ),
+                                          : snapshot.connectionState ==
+                                                  ConnectionState.done
+                                              ? Container(
+                                                  alignment: Alignment.center,
+                                                  margin: EdgeInsets.only(
+                                                      left: 6, bottom: 2),
+                                                  child: SvgPicture.asset(
+                                                      'assets/fee_arrow.svg',
+                                                      color:
+                                                          HermezColors.blackTwo,
+                                                      semanticsLabel:
+                                                          'fee_selector'),
+                                                )
+                                              : Container(
+                                                  alignment: Alignment.center,
+                                                  margin: EdgeInsets.only(
+                                                      left: 6, bottom: 1),
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    valueColor:
+                                                        new AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            HermezColors
+                                                                .blueyGrey),
+                                                    strokeWidth: 2,
+                                                  ),
+                                                  width: 10,
+                                                  height: 10),
                                     ],
                                   ),
                                 ),
@@ -453,9 +482,13 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                               onPressed: () {
                                 getClipBoardData().then((String result) {
                                   setState(() {
+                                    amountController.clear();
                                     addressController.clear();
                                     addressController.text = result;
                                     addressIsValid = isAddressValid();
+                                    if (addressIsValid) {
+                                      needRefresh = true;
+                                    }
                                   });
                                 });
                               },
@@ -477,6 +510,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                             addressController.text =
                                                 scannedAddress.toString();
                                             addressIsValid = isAddressValid();
+                                            if (addressIsValid) {
+                                              needRefresh = true;
+                                            }
                                           });
                                         }));
                               }, // handle your image tap here
@@ -493,6 +529,9 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                         onPressed: () => setState(() {
                           addressController.clear();
                           addressIsValid = isAddressValid();
+                          if (addressIsValid) {
+                            needRefresh = true;
+                          }
                         }),
                       ),
               ],
@@ -885,19 +924,19 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         if (AddressUtils.isValidEthereumAddress(store.state.ethereumAddress)) {
           addressFrom = store.state.ethereumAddress;
         }
+        gasPriceResponse = await store.getGasPrice();
+        switch (selectedFeeSpeed) {
+          case WalletDefaultFee.SLOW:
+            gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
+            break;
+          case WalletDefaultFee.AVERAGE:
+            gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
+            break;
+          case WalletDefaultFee.FAST:
+            gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
+            break;
+        }
         if (transactionType == TransactionType.DEPOSIT) {
-          gasPriceResponse = await store.getGasPrice();
-          switch (selectedFeeSpeed) {
-            case WalletDefaultFee.SLOW:
-              gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
-              break;
-            case WalletDefaultFee.AVERAGE:
-              gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
-              break;
-            case WalletDefaultFee.FAST:
-              gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
-              break;
-          }
           try {
             addressTo = getCurrentEnvironment().contracts['Hermez'];
             BigInt amountToEstimate = BigInt.one;
@@ -920,18 +959,16 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             addressController.value.text)) {
           addressTo = addressController.value.text;
           try {
-            gasPriceResponse = await store.getGasPrice();
-            switch (selectedFeeSpeed) {
-              case WalletDefaultFee.SLOW:
-                gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
-                break;
-              case WalletDefaultFee.AVERAGE:
-                gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
-                break;
-              case WalletDefaultFee.FAST:
-                gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
-                break;
-            }
+            BigInt maxGas = await store.getGasLimit(addressFrom, addressTo,
+                getTokenAmountBigInt(amount, account.token.decimals),
+                data: data);
+            gasLimit = maxGas;
+          } catch (e) {
+            print(e.toString());
+            gasLimit = BigInt.zero;
+          }
+        } else {
+          try {
             BigInt maxGas = await store.getGasLimit(addressFrom, addressTo,
                 getTokenAmountBigInt(amount, account.token.decimals),
                 data: data);
@@ -966,7 +1003,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             amountController.value.text.isNotEmpty &&
             double.parse(amountController.value.text) > 0 &&
             addressIsValid &&
-            addressController.value.text.isNotEmpty;
+            addressController.value.text.isNotEmpty &&
+            needRefresh == false;
       } else {
         return amountIsValid &&
             enoughGas &&
