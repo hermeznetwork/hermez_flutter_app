@@ -70,13 +70,8 @@ class TransferSummaryForm extends HookWidget {
         break;
     }
 
-    /*useEffect(() {
-      if (token != null) toController.value = TextEditingValue(text: token);
-      return null;
-    }, [token]);*/
-
-    return new Container(
-        child: new SingleChildScrollView(
+    return Container(
+        child: SingleChildScrollView(
             child: Column(
                 children: ListTile.divideTiles(
                     context: context,
@@ -121,17 +116,12 @@ class TransferSummaryForm extends HookWidget {
                                 store.state.ethereumAddress.toLowerCase() ||
                             addressFrom.toLowerCase() ==
                                 getHermezAddress(store.state.ethereumAddress)
-                                    .toLowerCase() ||
-                            addressFrom.toLowerCase() ==
-                                getCurrentEnvironment()
-                                    .contracts['Hermez']
                                     .toLowerCase())
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                                addressFrom.toLowerCase() ==
-                                        store.state.ethereumAddress
-                                            .toLowerCase()
+                                transactionType == TransactionType.DEPOSIT ||
+                                        transactionType == TransactionType.SEND
                                     ? 'My Ethereum address'
                                     : 'My Hermez address',
                                 style: TextStyle(
@@ -171,15 +161,12 @@ class TransferSummaryForm extends HookWidget {
                 (addressFrom == store.state.ethereumAddress ||
                         addressFrom.toLowerCase() ==
                             getHermezAddress(store.state.ethereumAddress)
-                                .toLowerCase() ||
-                        addressFrom.toLowerCase() ==
-                            getCurrentEnvironment()
-                                .contracts['Hermez']
                                 .toLowerCase())
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          (addressFrom == store.state.ethereumAddress
+                          (transactionType == TransactionType.DEPOSIT ||
+                                      transactionType == TransactionType.SEND
                                   ? "0x"
                                   : "hez:0x") +
                               AddressUtils.strip0x(store.state.ethereumAddress
@@ -256,11 +243,9 @@ class TransferSummaryForm extends HookWidget {
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                                addressTo.toLowerCase() ==
-                                        store.state.ethereumAddress
-                                            .toLowerCase()
-                                    ? 'My Ethereum address'
-                                    : 'My Hermez address',
+                                transactionType == TransactionType.DEPOSIT
+                                    ? 'My Hermez address'
+                                    : 'My Ethereum address',
                                 style: TextStyle(
                                   color: HermezColors.black,
                                   fontSize: 16,
@@ -307,10 +292,9 @@ class TransferSummaryForm extends HookWidget {
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          (addressTo.toLowerCase() ==
-                                      store.state.ethereumAddress.toLowerCase()
-                                  ? "0x"
-                                  : "hez:0x") +
+                          (transactionType == TransactionType.DEPOSIT
+                                  ? "hez:0x"
+                                  : "0x") +
                               AddressUtils.strip0x(store.state.ethereumAddress
                                       .substring(0, 6))
                                   .toUpperCase() +

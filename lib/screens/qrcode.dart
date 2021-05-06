@@ -190,33 +190,41 @@ class _QRCodePageState extends State<QRCodePage> {
                                       widget
                                           .arguments.store.state.ethereumAddress
                                   : widget.arguments.code.substring(
-                                              0,
-                                              (widget.arguments.code.length / 2)
-                                                  .floor()) +
-                                          "\n" +
-                                          widget.arguments.code.substring(
-                                              (widget.arguments.code.length / 2)
-                                                  .floor(),
-                                              widget.arguments.code.length) +
-                                          "\n" +
-                                          (widget.arguments.token != null
-                                              ? ':' +
-                                                  widget.arguments.token.symbol
-                                              : widget.arguments.amount != null &&
-                                                      widget.arguments.amount >
-                                                          0
-                                                  ? ':' +
-                                                      widget.arguments.store
-                                                          .state.defaultCurrency
-                                                          .toString()
-                                                          .split('.')
-                                                          .last
-                                                  : '') +
-                                          (widget.arguments.amount != null &&
+                                          0,
+                                          (widget.arguments.code.length / 2)
+                                              .floor()) +
+                                      "\n" +
+                                      widget.arguments.code.substring(
+                                          (widget.arguments.code.length / 2)
+                                              .floor(),
+                                          widget.arguments.code.length) +
+                                      "\n" +
+                                      (widget.arguments.token != null
+                                          ? ':' + widget.arguments.token.symbol
+                                          : widget.arguments.amount != null &&
                                                   widget.arguments.amount > 0
                                               ? ':' +
-                                                  EthAmountFormatter.removeDecimalZeroFormat(double.parse(widget.arguments.amount.toStringAsFixed(widget.arguments.token != null ? 6 : 2)))
-                                              : ''),
+                                                  widget.arguments.store.state
+                                                      .defaultCurrency
+                                                      .toString()
+                                                      .split('.')
+                                                      .last
+                                              : '') +
+                                      (widget.arguments.amount != null &&
+                                              widget.arguments.amount > 0
+                                          ? ':' +
+                                              EthAmountFormatter
+                                                  .removeDecimalZeroFormat(
+                                                double.parse(widget
+                                                    .arguments.amount
+                                                    .toStringAsFixed(widget
+                                                                .arguments
+                                                                .token !=
+                                                            null
+                                                        ? 6
+                                                        : 2))
+                                              )
+                                          : ''),
                               style: TextStyle(
                                 color: HermezColors.blackTwo,
                                 fontSize: 16,
@@ -320,18 +328,17 @@ class _QRCodePageState extends State<QRCodePage> {
                                           widget.arguments.store.state
                                               .ethereumAddress
                                       : widget.arguments.code +
-                                      (widget.arguments.token != null
-                                          ? ':' + widget.arguments.token.symbol
-                                          : '') +
-                                      (widget.arguments.amount != null &&
-                                          widget.arguments.amount > 0
-                                          ? ':' +
-                                          EthAmountFormatter
-                                              .removeDecimalZeroFormat(
-                                              double.parse(widget
-                                                  .arguments.amount
-                                                  .toStringAsFixed(6)))
-                                          : '')));
+                                          (widget.arguments.token != null
+                                              ? ':' +
+                                                  widget.arguments.token.symbol
+                                              : '') +
+                                          (widget.arguments.amount != null &&
+                                                  widget.arguments.amount > 0
+                                              ? ':' +
+                                                  EthAmountFormatter.removeDecimalZeroFormat(
+                                                      double.parse(
+                                                          widget.arguments.amount.toStringAsFixed(6)))
+                                              : '')));
                               Flushbar(
                                 messageText: Text(
                                   'Copied',
@@ -413,7 +420,8 @@ class _QRCodePageState extends State<QRCodePage> {
                                     arguments: TransactionAmountArguments(
                                         widget.arguments.store,
                                         widget.arguments.store.state.txLevel,
-                                        TransactionType.RECEIVE, allowChangeLevel: false));
+                                        TransactionType.RECEIVE,
+                                        allowChangeLevel: false));
                           },
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

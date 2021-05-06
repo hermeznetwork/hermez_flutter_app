@@ -60,10 +60,10 @@ abstract class IHermezService {
       String hezEthereumAddress,
       String babyJubJub,
       String privateKey,
-      {int gasLimit = GAS_LIMIT,
-      int gasMultiplier = GAS_MULTIPLIER});
+      {int gasLimit = GAS_LIMIT_HIGH,
+      int gasPrice = GAS_MULTIPLIER});
   Future<bool> forceExit(BigInt amount, Account account, String privateKey,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
+      {int gasLimit = GAS_LIMIT, int gasPrice = GAS_MULTIPLIER});
   Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
@@ -256,6 +256,37 @@ class HermezService implements IHermezService {
     return signed;
   }
 
+  Future<Uint8List> signWithdraw(
+      BigInt amount,
+      Account account,
+      Exit exit,
+      bool completeDelayedWithdrawal,
+      bool instantWithdrawal,
+      String hezEthereumAddress,
+      String babyJubJub,
+      String privateKey) async {
+    //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+
+    if (completeDelayedWithdrawal == null ||
+        completeDelayedWithdrawal == false) {
+      bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
+      return tx.signWithdraw(
+          amount,
+          exit != null
+              ? exit.accountIndex
+              : "hez:" + account.token.symbol + ":0",
+          exit != null ? exit.token : account.token,
+          babyJubJub,
+          exit != null ? BigInt.from(exit.batchNum) : BigInt.zero,
+          exit.merkleProof.siblings != null ? exit.merkleProof.siblings : [],
+          client,
+          privateKey,
+          isInstant: isIntant);
+    } else {
+      return tx.signDelayedWithdraw(account.token, client, privateKey);
+    }
+  }
+
   @override
   Future<bool> withdraw(
       BigInt amount,
@@ -266,15 +297,16 @@ class HermezService implements IHermezService {
       String hezEthereumAddress,
       String babyJubJub,
       String privateKey,
-      {int gasLimit = GAS_LIMIT,
-      int gasMultiplier = GAS_MULTIPLIER}) async {
+      {int gasLimit = GAS_LIMIT_HIGH,
+      int gasPrice = GAS_MULTIPLIER}) async {
     final withdrawalId = exit.accountIndex + exit.batchNum.toString();
 
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       try {
         bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
-        await tx
+
+        final txHash = await tx
             .withdraw(
                 amount,
                 exit.accountIndex,
@@ -284,39 +316,53 @@ class HermezService implements IHermezService {
                 exit.merkleProof.siblings,
                 client,
                 privateKey,
-                isInstant: isIntant)
-            .then((value) async => {
-                  if (isIntant)
-                    {
-                      _configService.addPendingWithdraw({
-                        'hermezEthereumAddress': hezEthereumAddress,
-                        'id': withdrawalId,
-                        'accountIndex': exit.accountIndex,
-                        'batchNum': exit.batchNum,
-                        'amount': amount.toDouble(),
-                        'token': exit.token.toJson()
-                      })
-                    }
-                  else
-                    {
-                      _configService.addPendingDelayedWithdraw({
-                        'id': withdrawalId,
-                        'accountIndex': exit.accountIndex,
-                        'batchNum': exit.batchNum,
-                        'instant': false,
-                        'date': DateTime.now(),
-                        'amount': amount,
-                        'token': exit.token
-                      })
-                    }
-                });
-        return true;
+                isInstant: isIntant,
+                gasLimit: gasLimit,
+                gasPrice: gasPrice)
+            .then((txHash) async {
+          if (txHash != null) {
+            if (isIntant) {
+              if (_configService.getPendingWithdraw(withdrawalId) != null) {
+                _configService.removePendingWithdraw(withdrawalId);
+              }
+              _configService.addPendingWithdraw({
+                'hermezEthereumAddress': hezEthereumAddress,
+                'id': withdrawalId,
+                'itemId': exit.itemId,
+                'accountIndex': exit.accountIndex,
+                'batchNum': exit.batchNum,
+                'amount': amount.toDouble(),
+                'token': exit.token.toJson(),
+                'hash': txHash,
+                'status': 'pending'
+              });
+            } else {
+              if (_configService.getPendingWithdraw(withdrawalId) != null) {
+                _configService.removePendingDelayedWithdraw(withdrawalId);
+              }
+              _configService.addPendingDelayedWithdraw({
+                'id': withdrawalId,
+                'itemId': exit.itemId,
+                'accountIndex': exit.accountIndex,
+                'batchNum': exit.batchNum,
+                'instant': false,
+                'date': DateTime.now(),
+                'amount': amount.toDouble(),
+                'token': exit.token.toJson(),
+                'hash': txHash,
+                'status': 'pending'
+              });
+            }
+          }
+          return txHash != null;
+        });
+        return txHash;
       } catch (error) {
         print(error);
       }
     } else {
       try {
-        tx.delayedWithdraw(hezEthereumAddress, account.token, client).then(
+        tx.delayedWithdraw(account.token, client, privateKey).then(
             (value) async =>
                 {_configService.removePendingDelayedWithdraw(withdrawalId)});
       } catch (error) {
@@ -327,12 +373,13 @@ class HermezService implements IHermezService {
 
   @override
   Future<bool> forceExit(BigInt amount, Account account, String privateKey,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
+      {int gasLimit = GAS_LIMIT, int gasPrice = GAS_MULTIPLIER}) async {
     return tx.forceExit(
-        HermezCompressedAmount.compressAmount(amount.toDouble()),
-        account.accountIndex,
-        account.token,
-        client,
-        privateKey);
+            HermezCompressedAmount.compressAmount(amount.toDouble()),
+            account.accountIndex,
+            account.token,
+            client,
+            privateKey) !=
+        null;
   }
 }

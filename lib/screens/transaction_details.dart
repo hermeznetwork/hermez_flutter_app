@@ -5,6 +5,7 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
@@ -271,9 +272,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                   margin: EdgeInsets.only(top: 20.0),
                   child: Text(
-                    (widget.arguments.amount).toString() +
-                        " " +
-                        widget.arguments.token.symbol,
+                    EthAmountFormatter.formatAmount(
+                        widget.arguments.amount, widget.arguments.token.symbol),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: HermezColors.blackTwo,
@@ -285,13 +285,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                 margin: EdgeInsets.only(top: 15.0, bottom: 30.0),
                 child: Text(
-                  symbol +
+                  EthAmountFormatter.formatAmount(
                       (widget.arguments.amount *
-                              widget.arguments.token.USD *
-                              (currency != "USD"
-                                  ? widget.arguments.wallet.state.exchangeRatio
-                                  : 1))
-                          .toStringAsFixed(2),
+                          widget.arguments.token.USD *
+                          (currency != "USD"
+                              ? widget.arguments.wallet.state.exchangeRatio
+                              : 1)),
+                      currency),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: HermezColors.steel,
@@ -380,7 +380,6 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       case TransactionType.DEPOSIT:
         {
           // check getCreateAccountAuth
-
           final amountDeposit =
               getTokenAmountBigInt(widget.arguments.amount, 18);
 
@@ -399,24 +398,31 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       case TransactionType.FORCEEXIT:
         {
           return await widget.arguments.wallet.forceExit(
-              web3.EtherAmount.fromUnitAndValue(
-                      web3.EtherUnit.wei,
-                      (widget.arguments.amount *
-                              BigInt.from(10).pow(18).toDouble())
-                          .toInt())
-                  .getInWei,
-              widget.arguments.account);
+            web3.EtherAmount.fromUnitAndValue(
+                    web3.EtherUnit.wei,
+                    (widget.arguments.amount *
+                            BigInt.from(10).pow(18).toDouble())
+                        .toInt())
+                .getInWei,
+            widget.arguments.account,
+            /*gasLimit: widget.arguments.gasLimit,
+              gasPrice: widget.arguments.gasPrice*/
+          );
         }
         break;
       case TransactionType.WITHDRAW:
         {
+          final amountWithdraw = getTokenAmountBigInt(
+              widget.arguments.amount, widget.arguments.token.decimals);
+
           return await widget.arguments.wallet.withdraw(
-              widget.arguments.amount *
-                  pow(10, widget.arguments.token.decimals),
+              amountWithdraw,
               widget.arguments.account,
               widget.arguments.exit,
               widget.arguments.completeDelayedWithdrawal,
-              widget.arguments.instantWithdrawal);
+              widget.arguments.instantWithdrawal,
+              gasLimit: widget.arguments.gasLimit,
+              gasPrice: widget.arguments.gasPrice);
         }
         break;
       case TransactionType.EXIT:

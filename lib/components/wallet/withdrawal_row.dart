@@ -3,16 +3,17 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/model/exit.dart';
-import 'package:intl/intl.dart';
 
 class WithdrawalRow extends StatelessWidget {
   WithdrawalRow(
-      this.exit, this.step, this.currency, this.exchangeRatio, this.onPressed);
+      this.exit, this.step, this.currency, this.exchangeRatio, this.onPressed,
+      {this.retry = false});
 
   final Exit exit;
   final int step;
   final String currency;
   final double exchangeRatio;
+  final bool retry;
   final void Function() onPressed;
 
   Widget build(BuildContext context) {
@@ -182,8 +183,9 @@ class WithdrawalRow extends StatelessWidget {
                                     ),
                                   ),
                                   TextSpan(
-                                      text:
-                                          "Sign required to\nfinalize withdraw",
+                                      text: retry
+                                          ? "There was an error\nprocessing the withdraw"
+                                          : "Sign required to\nfinalize withdraw",
                                       style: TextStyle(
                                         color: HermezColors.steel,
                                         fontSize: 14,
@@ -219,7 +221,7 @@ class WithdrawalRow extends StatelessWidget {
                                   left: 24.0),
                               color: Color(0xffe75a2b),
                               textColor: Colors.white,
-                              child: Text("Finalise",
+                              child: Text(retry ? "Try again" : "Finalize",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -233,28 +235,5 @@ class WithdrawalRow extends StatelessWidget {
                     : Container(),
               ]), //title to be name of the crypto
             ])));
-  }
-
-  String formatAmount(double amount, String symbol) {
-    double resultValue = 0;
-    String result = "";
-    String locale = "eu";
-    if (symbol == "EUR") {
-      locale = 'eu';
-      symbol = '€';
-    } else if (currency == "CNY") {
-      locale = 'en';
-      symbol = '\¥';
-    } else {
-      locale = 'en';
-      symbol = '\$';
-    }
-    if (amount != null) {
-      double value = amount;
-      resultValue = resultValue + value;
-    }
-    result =
-        NumberFormat.currency(locale: locale, symbol: symbol).format(amount);
-    return result;
   }
 }

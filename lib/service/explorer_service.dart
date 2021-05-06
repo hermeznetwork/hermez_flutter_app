@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:http/http.dart';
+import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
 
 typedef TransferEvent = void Function(
@@ -77,44 +79,61 @@ class ExplorerService implements IExplorerService {
       if (resp['message'] == 'OK' && resp['status'] == '1') {
         List transfers = [];
         for (dynamic transferEvent in resp['result']) {
-          if (double.parse(transferEvent['value']) > 0) {
+          bool addTransfer = true;
+          if (transferEvent['contractAddress'] == "") {
             String type;
+            dynamic value = transferEvent['value'];
             if (transferEvent["to"].toString().toLowerCase() ==
                 getCurrentEnvironment()
                     .contracts['Hermez']
                     .toString()
                     .toLowerCase()) {
-              type = 'WITHDRAW';
-            } else if (transferEvent["from"].toString().toLowerCase() ==
-                getCurrentEnvironment()
-                    .contracts['Hermez']
-                    .toString()
-                    .toLowerCase()) {
-              type = 'DEPOSIT';
-            } else if (transferEvent["from"].toString().toLowerCase() ==
+              List<dynamic> decodedInput = decodeCall(transferEvent["input"]);
+              if (decodedInput.length > 2) {
+                type = 'DEPOSIT';
+                if ((decodedInput[4] as BigInt).toInt() != 0) {
+                  addTransfer = false;
+                }
+              } else {
+                type = 'WITHDRAW';
+                if ((decodedInput[0] as BigInt).toInt() != 0) {
+                  addTransfer = false;
+                }
+              }
+              value = (decodedInput[1] as BigInt).toInt().toString();
+            } /* else if (transferEvent["from"].toString().toLowerCase() ==
+              getCurrentEnvironment()
+                  .contracts['Hermez']
+                  .toString()
+                  .toLowerCase()) {
+            type = 'DEPOSIT';
+          }*/
+            else if (transferEvent["from"].toString().toLowerCase() ==
                 address.toLowerCase()) {
               type = 'SEND';
             } else if (transferEvent["to"].toString().toLowerCase() ==
                 address.toLowerCase()) {
               type = 'RECEIVE';
             }
-            transfers.add({
-              'blockNumber': num.parse(transferEvent['blockNumber']),
-              'txHash': transferEvent['hash'],
-              'to': transferEvent['to'],
-              'from': transferEvent["from"],
-              'status':
-                  transferEvent["isError"] == "0" ? "CONFIRMED" : "INVALID",
-              'timestamp': DateTime.fromMillisecondsSinceEpoch(
-                      DateTime.fromMillisecondsSinceEpoch(
-                                  int.parse(transferEvent['timeStamp']))
-                              .millisecondsSinceEpoch *
-                          1000)
-                  .millisecondsSinceEpoch,
-              'value': transferEvent['value'],
-              'tokenAddress': transferEvent['contractAddress'],
-              'type': type,
-            });
+            if (addTransfer) {
+              transfers.add({
+                'blockNumber': num.parse(transferEvent['blockNumber']),
+                'txHash': transferEvent['hash'],
+                'to': transferEvent['to'],
+                'from': transferEvent["from"],
+                'status':
+                    transferEvent["isError"] == "0" ? "CONFIRMED" : "INVALID",
+                'timestamp': DateTime.fromMillisecondsSinceEpoch(
+                        DateTime.fromMillisecondsSinceEpoch(
+                                    int.parse(transferEvent['timeStamp']))
+                                .millisecondsSinceEpoch *
+                            1000)
+                    .millisecondsSinceEpoch,
+                'value': value,
+                'tokenAddress': transferEvent['contractAddress'],
+                'type': type,
+              });
+            }
           }
         }
         return transfers;
@@ -124,6 +143,37 @@ class ExplorerService implements IExplorerService {
     } catch (e) {
       throw 'Error! Get transactions failed for - address: $address --- $e';
     }
+  }
+
+  List<dynamic> decodeCall(String data) {
+    String method = data.substring(0, 10);
+    TransactionType type;
+    if (method == "0xd9d4ca44") {
+      type = TransactionType.WITHDRAW;
+    } else if (method == "0xc7273053") {
+      type = TransactionType.DEPOSIT;
+    }
+    String noMethodData = '0x' + data.substring(10);
+    List<AbiType> list = [];
+    if (type == TransactionType.WITHDRAW) {
+      list = [
+        UintType(length: 32),
+        UintType(length: 192),
+      ];
+    } else if (type == TransactionType.DEPOSIT) {
+      list = [
+        UintType(),
+        UintType(length: 48),
+        UintType(length: 40),
+        UintType(length: 40),
+        UintType(length: 32)
+      ];
+    }
+
+    final buffer = hexToBytes(noMethodData).buffer;
+    dynamic tuple = TupleType(list);
+    final parsedData = tuple.decode(buffer, 0);
+    return parsedData.data;
   }
 
   Future<List<dynamic>> getTransferEventsByAccountAddress(String address,

@@ -389,6 +389,9 @@ class WalletHandler {
         web3.EthereumAddress.fromHex(state.ethereumAddress),
         onlyPendingWithdraws: onlyPendingWithdraws,
         tokenId: tokenId);
+    exits.sort((exit1, exit2) {
+      return exit2.itemId.compareTo(exit1.itemId);
+    });
     return exits;
   }
 
@@ -479,19 +482,53 @@ class WalletHandler {
     final List accountPendingWithdraws = _storageService
         .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
 
-    List withdawalIds = [];
+    List removeWithdawalIds = [];
+    List updateWithdawalIds = [];
+    List<dynamic> updatePendingWithdraws = [];
     accountPendingWithdraws.forEach((pendingWithdraw) async {
       final exit = await getExit(
           pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
       if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
         final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-        withdawalIds.add(withdrawalId);
+        removeWithdawalIds.add(withdrawalId);
         _configurationService.removePendingWithdraw(withdrawalId);
+      }
+      final transactionHash = pendingWithdraw['hash'];
+      if (transactionHash != null) {
+        web3.TransactionInformation txInfo;
+        try {
+          txInfo = await _contractService.getTransactionByHash(transactionHash);
+        } catch (e) {
+          final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+          removeWithdawalIds.add(withdrawalId);
+          _configurationService.removePendingWithdraw(withdrawalId);
+        }
+        if (txInfo != null) {
+          web3.TransactionReceipt receipt =
+              await _contractService.getTxReceipt(transactionHash);
+          if (receipt != null) {
+            if (receipt.status == false) {
+              // Tx didn't pass
+              String status = 'fail';
+              pendingWithdraw['status'] = status;
+              final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+              updateWithdawalIds.add(withdrawalId);
+              updatePendingWithdraws.add(pendingWithdraw);
+              _configurationService.updatePendingWithdrawStatus(
+                  status, withdrawalId);
+            }
+          }
+        } else {}
       }
     });
 
-    accountPendingWithdraws.removeWhere(
-        (pendingWithdraw) => withdawalIds.contains(pendingWithdraw['id']));
+    /*accountPendingWithdraws[accountPendingWithdraws.indexWhere(
+            (pendingWithdraw) =>
+                updateWithdawalIds.contains(pendingWithdraw['id']))] =
+        updatePendingWithdraws[0];*/
+
+    accountPendingWithdraws.removeWhere((pendingWithdraw) =>
+        removeWithdawalIds.contains(pendingWithdraw['id']));
 
     return accountPendingWithdraws;
   }
@@ -561,16 +598,16 @@ class WalletHandler {
         gasLimit: gasLimit, gasPrice: gasPrice);
   }
 
-  Future<bool> withdraw(double amount, Account account, Exit exit,
+  Future<Uint8List> signWithdraw(BigInt amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
-    _store.dispatch(TransactionStarted());
+    //_store.dispatch(TransactionStarted());
 
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    final success = await _hermezService.withdraw(
-        BigInt.from(amount),
+    return _hermezService.signWithdraw(
+        amount,
         account,
         exit,
         completeDelayedWithdrawal,
@@ -578,10 +615,29 @@ class WalletHandler {
         hermezAddress,
         hermezWallet.publicKeyCompressedHex,
         state.ethereumPrivateKey);
+  }
 
-    //if (success) {
+  Future<bool> withdraw(BigInt amount, Account account, Exit exit,
+      bool completeDelayedWithdrawal, bool instantWithdrawal,
+      {int gasLimit, int gasPrice}) async {
+    _store.dispatch(TransactionStarted());
 
-    //}
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+    final success = await _hermezService.withdraw(
+        amount,
+        account,
+        exit,
+        completeDelayedWithdrawal,
+        instantWithdrawal,
+        hermezAddress,
+        hermezWallet.publicKeyCompressedHex,
+        state.ethereumPrivateKey,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice);
+
     return success;
   }
 

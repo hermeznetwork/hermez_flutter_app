@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:another_flushbar/flushbar.dart';
@@ -12,16 +13,21 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
+import 'package:hermez_plugin/constants.dart';
+import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_plugin/utils.dart';
 import 'package:intl/intl.dart';
 
 import 'account_details.dart';
@@ -47,6 +53,7 @@ class WalletDetailsPage extends StatefulWidget {
 class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<Account> _accounts;
   List<Exit> _exits = [];
+  List<Exit> _filteredExits = [];
   List<dynamic> _poolTxs = [];
   List<dynamic> _pendingWithdraws = [];
   List<dynamic> _pendingDeposits = [];
@@ -83,7 +90,17 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         _poolTxs = await fetchPendingExits();
       } catch (e) {}
       _exits = await fetchExits();
+      _filteredExits = _exits.toList();
       _pendingWithdraws = await fetchPendingWithdraws();
+      _filteredExits.removeWhere((Exit exit) {
+        for (dynamic pendingWithdraw in _pendingWithdraws) {
+          if (pendingWithdraw["id"] ==
+              (exit.accountIndex + exit.batchNum.toString())) {
+            return true;
+          }
+        }
+        return false;
+      });
       _pendingDeposits = await fetchPendingDeposits();
 
       return widget.arguments.store.getAccounts();
@@ -582,58 +599,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
           itemBuilder: (context, i) {
             //item builder returns a row for each index i=0,1,2,3,4
             // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
-
-            if (i == 0 && _pendingWithdraws.length > 0) {
-              final index = i;
-              final Token token =
-                  Token.fromJson(_pendingWithdraws[index]['token']);
-
-              final Exit exit = Exit(
-                  hezEthereumAddress: _pendingWithdraws[index]
-                      ['hermezEthereumAddress'],
-                  token: token,
-                  balance: _pendingWithdraws[index]['amount']
-                      .toString()
-                      .replaceAll('.0', ''));
-
-              final String currency = widget
-                  .arguments.store.state.defaultCurrency
-                  .toString()
-                  .split('.')
-                  .last;
-
-              return WithdrawalRow(exit, 3, currency,
-                  widget.arguments.store.state.exchangeRatio, () {});
-            } else if (i == 0 && _exits.length > 0) {
-              final index = i;
-              final Exit exit = _exits[index];
-
-              final String currency = widget
-                  .arguments.store.state.defaultCurrency
-                  .toString()
-                  .split('.')
-                  .last;
-
-              return WithdrawalRow(
-                  exit, 2, currency, widget.arguments.store.state.exchangeRatio,
-                  () async {
-                Navigator.of(widget.arguments.parentContext)
-                    .pushNamed("/transaction_details",
-                        arguments: TransactionDetailsArguments(
-                          wallet: widget.arguments.store,
-                          transactionType: TransactionType.WITHDRAW,
-                          status: TransactionStatus.DRAFT,
-                          token: exit.token,
-                          //account: widget.arguments.account,
-                          exit: exit,
-                          amount: double.parse(exit.balance) /
-                              pow(10, exit.token.decimals),
-                          addressFrom: exit.hezEthereumAddress,
-                          //addressTo: address,
-                        ));
-              });
-            } // final index = i ~/ 2; //get the actual index excluding dividers.
-            else if (i == 0 && _poolTxs.length > 0 && i < _poolTxs.length) {
+            if (i == 0 && _poolTxs.length > 0 && i < _poolTxs.length) {
               final index = i;
               final PoolTransaction transaction = _poolTxs[index];
 
@@ -647,7 +613,188 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
               return WithdrawalRow(exit, 1, currency,
                   widget.arguments.store.state.exchangeRatio, () async {});
-            } else {
+            } else if (i == 0 && _filteredExits.length > 0) {
+              final index = i;
+              final Exit exit = _filteredExits[index];
+
+              final String currency = widget
+                  .arguments.store.state.defaultCurrency
+                  .toString()
+                  .split('.')
+                  .last;
+
+              return WithdrawalRow(
+                  exit, 2, currency, widget.arguments.store.state.exchangeRatio,
+                  () async {
+                BigInt gasPrice = BigInt.one;
+                GasPriceResponse gasPriceResponse =
+                    await widget.arguments.store.getGasPrice();
+                switch (widget.arguments.store.state.defaultFee) {
+                  case WalletDefaultFee.SLOW:
+                    int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
+                    gasPrice = BigInt.from(gasPriceFloor);
+                    break;
+                  case WalletDefaultFee.AVERAGE:
+                    int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
+                    gasPrice = BigInt.from(gasPriceFloor);
+                    break;
+                  case WalletDefaultFee.FAST:
+                    int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
+                    gasPrice = BigInt.from(gasPriceFloor);
+                    break;
+                }
+                String addressFrom = exit.hezEthereumAddress;
+                String addressTo = getCurrentEnvironment().contracts['Hermez'];
+
+                BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                try {
+                  final amountWithdraw = getTokenAmountBigInt(
+                      double.parse(exit.balance) / pow(10, exit.token.decimals),
+                      exit.token.decimals);
+                  Uint8List data = await widget.arguments.store
+                      .signWithdraw(amountWithdraw, null, exit, false, true);
+                  gasLimit = await widget.arguments.store.getGasLimit(
+                      getEthereumAddress(exit.hezEthereumAddress),
+                      addressTo,
+                      BigInt.zero,
+                      data: data);
+                } catch (e) {
+                  gasLimit = BigInt.from(GAS_LIMIT_DEFAULT_WITHDRAW);
+                  for (BigInt sibling in exit.merkleProof.siblings) {
+                    gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
+                  }
+                  if (exit.token.id != 0) {
+                    gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+                  }
+                }
+                int offset = GAS_LIMIT_OFFSET;
+                gasLimit += BigInt.from(offset);
+
+                Navigator.of(widget.arguments.parentContext)
+                    .pushNamed("/transaction_details",
+                        arguments: TransactionDetailsArguments(
+                          wallet: widget.arguments.store,
+                          transactionType: TransactionType.WITHDRAW,
+                          status: TransactionStatus.DRAFT,
+                          token: exit.token,
+                          fee: gasLimit.toInt() * gasPrice.toDouble(),
+                          feeToken: exit.token,
+                          gasLimit: gasLimit.toInt(),
+                          gasPrice: gasPrice.toInt(),
+                          //account: widget.arguments.account,
+                          exit: exit,
+                          amount: double.parse(exit.balance) /
+                              pow(10, exit.token.decimals),
+                          addressFrom: addressFrom,
+                          addressTo: addressTo,
+                        ))
+                    .then((value) => _onRefresh());
+              });
+            } else if (i == 0 && _pendingWithdraws.length > 0) {
+              final index = i;
+              final pendingWithdraw = _pendingWithdraws[index];
+              final Token token =
+                  Token.fromJson(_pendingWithdraws[index]['token']);
+
+              final Exit exit = _exits.firstWhere(
+                  (exit) => exit.itemId == pendingWithdraw['itemId'],
+                  orElse: () => Exit(
+                      hezEthereumAddress:
+                          pendingWithdraw['hermezEthereumAddress'],
+                      token: token,
+                      balance: pendingWithdraw['amount']
+                          .toString()
+                          .replaceAll('.0', '')));
+
+              final String currency = widget
+                  .arguments.store.state.defaultCurrency
+                  .toString()
+                  .split('.')
+                  .last;
+
+              int step = 3;
+              if (pendingWithdraw['status'] == 'pending') {
+                step = 3;
+              } else if (pendingWithdraw['status'] == 'fail') {
+                step = 2;
+              }
+
+              return WithdrawalRow(
+                exit,
+                step,
+                currency,
+                widget.arguments.store.state.exchangeRatio,
+                step == 2
+                    ? () async {
+                        BigInt gasPrice = BigInt.one;
+                        GasPriceResponse gasPriceResponse =
+                            await widget.arguments.store.getGasPrice();
+                        switch (widget.arguments.store.state.defaultFee) {
+                          case WalletDefaultFee.SLOW:
+                            int gasPriceFloor =
+                                gasPriceResponse.safeLow * pow(10, 8);
+                            gasPrice = BigInt.from(gasPriceFloor);
+                            break;
+                          case WalletDefaultFee.AVERAGE:
+                            int gasPriceFloor =
+                                gasPriceResponse.average * pow(10, 8);
+                            gasPrice = BigInt.from(gasPriceFloor);
+                            break;
+                          case WalletDefaultFee.FAST:
+                            int gasPriceFloor =
+                                gasPriceResponse.fast * pow(10, 8);
+                            gasPrice = BigInt.from(gasPriceFloor);
+                            break;
+                        }
+
+                        String addressFrom = exit.hezEthereumAddress;
+                        String addressTo =
+                            getCurrentEnvironment().contracts['Hermez'];
+
+                        BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                        try {
+                          final amountWithdraw = getTokenAmountBigInt(
+                              double.parse(exit.balance) /
+                                  pow(10, exit.token.decimals),
+                              exit.token.decimals);
+                          Uint8List data = await widget.arguments.store
+                              .signWithdraw(
+                                  amountWithdraw, null, exit, false, true);
+                          gasLimit = await widget.arguments.store.getGasLimit(
+                              addressFrom, addressTo, BigInt.zero,
+                              data: data);
+                        } catch (e) {
+                          int offset = GAS_LIMIT_OFFSET;
+                          gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                          gasLimit += BigInt.from(offset);
+                          gasLimit += BigInt.from(offset);
+                        }
+
+                        Navigator.of(widget.arguments.parentContext)
+                            .pushNamed("/transaction_details",
+                                arguments: TransactionDetailsArguments(
+                                  wallet: widget.arguments.store,
+                                  transactionType: TransactionType.WITHDRAW,
+                                  status: TransactionStatus.DRAFT,
+                                  token: exit.token,
+                                  fee: gasLimit.toInt() * gasPrice.toDouble(),
+                                  feeToken: exit.token,
+                                  gasLimit: gasLimit.toInt(),
+                                  gasPrice: gasPrice.toInt(),
+                                  //account: widget.arguments.account,
+                                  exit: exit,
+                                  amount: double.parse(exit.balance) /
+                                      pow(10, exit.token.decimals),
+                                  addressFrom: exit.hezEthereumAddress,
+                                  addressTo: addressTo,
+                                ))
+                            .then((value) => _onRefresh());
+                      }
+                    : () {},
+                retry: true,
+              );
+            } // final index = i ~/ 2; //get the actual index excluding dividers.
+            else {
               final index = i -
                   (_poolTxs.isNotEmpty ||
                           _exits.isNotEmpty ||
