@@ -260,9 +260,10 @@ class ConfigurationService implements IConfigurationService {
 
     final List accountPendingWithdraws = _storageService
         .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
-    return accountPendingWithdraws.firstWhere(
+    dynamic result = accountPendingWithdraws.firstWhere(
         (pendingWithdraw) => pendingWithdraw['id'] == pendingWithdrawId,
         orElse: null);
+    return result;
   }
 
   /// Adds a pendingWithdraw to the pendingWithdraw pool

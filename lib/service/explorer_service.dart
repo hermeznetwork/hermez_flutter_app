@@ -185,13 +185,13 @@ class ExplorerService implements IExplorerService {
         List transfers = [];
         for (dynamic transferEvent in resp['result']) {
           String type;
-          if (transferEvent["to"].toString().toLowerCase() ==
+          if (transferEvent["from"].toString().toLowerCase() ==
               getCurrentEnvironment()
                   .contracts['Hermez']
                   .toString()
                   .toLowerCase()) {
             type = 'WITHDRAW';
-          } else if (transferEvent["from"].toString().toLowerCase() ==
+          } else if (transferEvent["to"].toString().toLowerCase() ==
               getCurrentEnvironment()
                   .contracts['Hermez']
                   .toString()

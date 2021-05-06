@@ -253,6 +253,9 @@ class ActivityState extends State<Activity> {
                         gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
                       }
                     }
+
+                    Token ethereumToken =
+                        await widget.arguments.store.getTokenById(0);
                     int offset = GAS_LIMIT_OFFSET;
                     gasLimit += BigInt.from(offset);
                     Navigator.of(arguments.parentContext)
@@ -263,10 +266,9 @@ class ActivityState extends State<Activity> {
                               status: TransactionStatus.DRAFT,
                               token: exit.token,
                               fee: gasLimit.toInt() * gasPrice.toDouble(),
-                              feeToken: exit.token,
+                              feeToken: ethereumToken,
                               gasLimit: gasLimit.toInt(),
                               gasPrice: gasPrice.toInt(),
-                              //account: widget.arguments.account,
                               exit: exit,
                               amount: double.parse(exit.balance) /
                                   pow(10, exit.token.decimals),
@@ -365,7 +367,8 @@ class ActivityState extends State<Activity> {
                             }
                             int offset = GAS_LIMIT_OFFSET;
                             gasLimit += BigInt.from(offset);
-
+                            Token ethereumToken =
+                                await widget.arguments.store.getTokenById(0);
                             Navigator.of(arguments.parentContext)
                                 .pushNamed("/transaction_details",
                                     arguments: TransactionDetailsArguments(
@@ -375,10 +378,9 @@ class ActivityState extends State<Activity> {
                                       token: exit.token,
                                       fee: gasLimit.toInt() *
                                           gasPrice.toDouble(),
-                                      feeToken: exit.token,
+                                      feeToken: ethereumToken,
                                       gasLimit: gasLimit.toInt(),
                                       gasPrice: gasPrice.toInt(),
-                                      //account: widget.arguments.account,
                                       exit: exit,
                                       amount: double.parse(exit.balance) /
                                           pow(10, exit.token.decimals),

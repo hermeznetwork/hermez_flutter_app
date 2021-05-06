@@ -116,6 +116,10 @@ class TransferSummaryForm extends HookWidget {
                                 store.state.ethereumAddress.toLowerCase() ||
                             addressFrom.toLowerCase() ==
                                 getHermezAddress(store.state.ethereumAddress)
+                                    .toLowerCase() ||
+                            addressFrom.toLowerCase() ==
+                                getCurrentEnvironment()
+                                    .contracts['Hermez']
                                     .toLowerCase())
                         ? Align(
                             alignment: Alignment.centerRight,
