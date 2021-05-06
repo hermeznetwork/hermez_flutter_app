@@ -121,7 +121,10 @@ class TransferSummaryForm extends HookWidget {
                             alignment: Alignment.centerRight,
                             child: Text(
                                 transactionType == TransactionType.DEPOSIT ||
-                                        transactionType == TransactionType.SEND
+                                        (transactionType ==
+                                                TransactionType.SEND &&
+                                            store.state.txLevel ==
+                                                TransactionLevel.LEVEL1)
                                     ? 'My Ethereum address'
                                     : 'My Hermez address',
                                 style: TextStyle(
@@ -166,7 +169,10 @@ class TransferSummaryForm extends HookWidget {
                         alignment: Alignment.centerRight,
                         child: Text(
                           (transactionType == TransactionType.DEPOSIT ||
-                                      transactionType == TransactionType.SEND
+                                      (transactionType ==
+                                              TransactionType.SEND &&
+                                          store.state.txLevel ==
+                                              TransactionLevel.LEVEL1)
                                   ? "0x"
                                   : "hez:0x") +
                               AddressUtils.strip0x(store.state.ethereumAddress
@@ -243,7 +249,11 @@ class TransferSummaryForm extends HookWidget {
                         ? Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                                transactionType == TransactionType.DEPOSIT
+                                transactionType == TransactionType.DEPOSIT ||
+                                        (transactionType ==
+                                                TransactionType.RECEIVE &&
+                                            store.state.txLevel ==
+                                                TransactionLevel.LEVEL2)
                                     ? 'My Hermez address'
                                     : 'My Ethereum address',
                                 style: TextStyle(
@@ -292,7 +302,11 @@ class TransferSummaryForm extends HookWidget {
                     ? Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          (transactionType == TransactionType.DEPOSIT
+                          (transactionType == TransactionType.DEPOSIT ||
+                                      (transactionType ==
+                                              TransactionType.RECEIVE &&
+                                          store.state.txLevel ==
+                                              TransactionLevel.LEVEL2)
                                   ? "hez:0x"
                                   : "0x") +
                               AddressUtils.strip0x(store.state.ethereumAddress
