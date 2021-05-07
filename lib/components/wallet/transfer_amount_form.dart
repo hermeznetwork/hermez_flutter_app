@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -23,8 +24,6 @@ import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/merkle_proof.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
@@ -897,56 +896,29 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                 :*/
                     account.token.USD /*)*/;
           }
+
           StateResponse state = await store.getState();
           RecommendedFee fees = state.recommendedFee;
           gasLimit = BigInt.from(fees.existingAccount /
               account.token.USD *
               pow(10, account.token.decimals));
+          if (transactionType == TransactionType.EXIT) {
+            BigInt ethGasLimit = BigInt.from(
+                GAS_LIMIT_WITHDRAW_DEFAULT + (GAS_LIMIT_WITHDRAW_SIBLING * 4));
+            if (account.token.id != 0) {
+              ethGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+            }
+            ethereumToken = await getEthereumToken();
+            ethereumAccount = await getEthereumAccount();
+            enoughGas = await isEnoughGas(ethGasLimit + gasPrice);
+
+            ethereumAccount = await getEthereumAccount();
+          } else {}
         } else {
           gasLimit = BigInt.zero;
         }
 
-        if (transactionType == TransactionType.EXIT) {
-          String addressFrom;
-          String addressTo;
-          Uint8List data;
-          if (AddressUtils.isValidEthereumAddress(
-              store.state.ethereumAddress)) {
-            addressFrom = store.state.ethereumAddress;
-          }
-          addressTo = getCurrentEnvironment().contracts['Hermez'];
-          BigInt amountToEstimate = BigInt.one;
-          BigInt ethAmountToEstimate = BigInt.zero;
-          Exit exit = Exit(
-              token: account.token,
-              batchNum: 2924,
-              accountIndex: "hez:ETH:2732",
-              merkleProof: MerkleProof(siblings: [
-                /*
-                BigInt.parse(
-                    "401271638131731070304038066115449524748948929201709019771917909821625190741"),
-                BigInt.parse(
-                    "78359649915361430925971027230725325245019676534998069058593710650695443653"),
-                BigInt.zero,
-                BigInt.parse(
-                    "3518934656694463824787976366012399730924714133510695183109220841329054695268"),
-                BigInt.parse(
-                    "10282618350558208313060397607720727170151482091009114467709397801077224952874")
-              */
-              ]));
-          /*data = await store.signWithdraw(
-              amountToEstimate, account, exit, false, true);*/
-          /*gasLimit = await store.getGasLimit(
-              addressFrom, addressTo, ethAmountToEstimate,
-              data: data);*/
-          ethereumToken = await getEthereumToken();
-          ethereumAccount = await getEthereumAccount();
-          enoughGas = await isEnoughGas(gasLimit + gasPrice);
-
-          ethereumAccount = await getEthereumAccount();
-        }
-
-        enoughGas = true; //await isEnoughGas(gasLimit);
+        enoughGas = await isEnoughGas(gasLimit);
         amountIsValid =
             isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
       } else {
@@ -985,24 +957,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
             break;
         }
         if (transactionType == TransactionType.DEPOSIT) {
-          try {
-            addressTo = getCurrentEnvironment().contracts['Hermez'];
-            BigInt amountToEstimate = BigInt.one;
-            BigInt ethAmountToEstimate = BigInt.one;
-            int offset = GAS_LIMIT_OFFSET;
-            if (account.token.id != 0) {
-              offset = GAS_STANDARD_ERC20_TX;
-              ethAmountToEstimate = BigInt.zero;
-            }
-            data = await store.signDeposit(amountToEstimate, account.token);
-            gasLimit = await store.getGasLimit(
-                addressFrom, addressTo, ethAmountToEstimate,
-                data: data);
-            gasLimit += BigInt.from(offset);
-          } catch (e) {
-            print(e.toString());
-            gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-          }
+          addressTo = getCurrentEnvironment().contracts['Hermez'];
+          BigInt amountToEstimate = BigInt.one;
+          HashMap<String, List<BigInt>> depositGasLimit =
+              await store.depositGasLimit(amountToEstimate, account.token);
+          gasLimit = BigInt.zero;
         } else if (transactionType == TransactionType.WITHDRAW) {
           try {
             addressTo = getCurrentEnvironment().contracts['Hermez'];
@@ -1138,8 +1097,11 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
 
   Future<bool> isEnoughGas(BigInt gasFee) async {
     if ((txLevel == TransactionLevel.LEVEL1 &&
-            transactionType != TransactionType.RECEIVE) ||
-        transactionType == TransactionType.EXIT) {
+            transactionType !=
+                TransactionType
+                    .RECEIVE) /*||
+        transactionType == TransactionType.EXIT*/
+        ) {
       if (ethereumAccount != null) {
         return double.parse(ethereumAccount.balance) >= gasFee.toDouble();
       }

@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -576,18 +577,21 @@ class WalletHandler {
     }
   }
 
-  Future<Uint8List> signDeposit(BigInt amount, Token token) async {
+  Future<HashMap<String, List<BigInt>>> depositGasLimit(
+      BigInt amount, Token token) async {
     //_store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    return _hermezService.signDeposit(amount, hermezAddress, token,
-        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
+    return _hermezService.depositGasLimit(
+        amount, hermezAddress, token, hermezWallet.publicKeyCompressedHex);
   }
 
   Future<bool> deposit(BigInt amount, Token token,
-      {int gasLimit, int gasPrice}) async {
+      {List<BigInt> approveGasLimit,
+      List<BigInt> depositGasLimit,
+      int gasPrice}) async {
     _store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
@@ -595,7 +599,9 @@ class WalletHandler {
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.deposit(amount, hermezAddress, token,
         hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey,
-        gasLimit: gasLimit, gasPrice: gasPrice);
+        approveGasLimit: approveGasLimit,
+        depositGasLimit: depositGasLimit,
+        gasPrice: gasPrice);
   }
 
   Future<Uint8List> signWithdraw(BigInt amount, Account account, Exit exit,

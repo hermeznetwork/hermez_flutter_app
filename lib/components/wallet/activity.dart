@@ -245,10 +245,9 @@ class ActivityState extends State<Activity> {
                           BigInt.zero,
                           data: data);
                     } catch (e) {
-                      gasLimit = BigInt.from(GAS_LIMIT_DEFAULT_WITHDRAW);
-                      for (BigInt sibling in exit.merkleProof.siblings) {
-                        gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
-                      }
+                      gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT +
+                          (GAS_LIMIT_WITHDRAW_SIBLING *
+                              exit.merkleProof.siblings.length));
                       if (exit.token.id != 0) {
                         gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
                       }
@@ -354,13 +353,10 @@ class ActivityState extends State<Activity> {
                                       BigInt.zero,
                                       data: data);
                             } catch (e) {
-                              gasLimit =
-                                  BigInt.from(GAS_LIMIT_DEFAULT_WITHDRAW);
-                              for (BigInt sibling
-                                  in exit.merkleProof.siblings) {
-                                gasLimit +=
-                                    BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
-                              }
+                              gasLimit = BigInt.from(
+                                  GAS_LIMIT_WITHDRAW_DEFAULT +
+                                      (GAS_LIMIT_WITHDRAW_SIBLING *
+                                          exit.merkleProof.siblings.length));
                               if (exit.token.id != 0) {
                                 gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
                               }

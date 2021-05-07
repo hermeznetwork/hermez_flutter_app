@@ -391,7 +391,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
           return await widget.arguments.wallet.deposit(
               amountDeposit, widget.arguments.token,
-              gasLimit: widget.arguments.gasLimit,
+              approveGasLimit: [BigInt.from(widget.arguments.gasLimit)],
+              depositGasLimit: [BigInt.from(widget.arguments.gasLimit)],
               gasPrice: widget.arguments.gasPrice);
         }
         break;

@@ -99,18 +99,14 @@ class ExplorerService implements IExplorerService {
                 if ((decodedInput[0] as BigInt).toInt() != 0) {
                   addTransfer = false;
                 }
+                value = (decodedInput[1] as BigInt).toInt().toString();
               }
-              value = (decodedInput[1] as BigInt).toInt().toString();
-            } /* else if (transferEvent["from"].toString().toLowerCase() ==
-              getCurrentEnvironment()
-                  .contracts['Hermez']
-                  .toString()
-                  .toLowerCase()) {
-            type = 'DEPOSIT';
-          }*/
-            else if (transferEvent["from"].toString().toLowerCase() ==
+            } else if (transferEvent["from"].toString().toLowerCase() ==
                 address.toLowerCase()) {
               type = 'SEND';
+              if (transferEvent['value'] == '0') {
+                addTransfer = false;
+              }
             } else if (transferEvent["to"].toString().toLowerCase() ==
                 address.toLowerCase()) {
               type = 'RECEIVE';

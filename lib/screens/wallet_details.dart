@@ -659,7 +659,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       BigInt.zero,
                       data: data);
                 } catch (e) {
-                  gasLimit = BigInt.from(GAS_LIMIT_DEFAULT_WITHDRAW);
+                  gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
                   for (BigInt sibling in exit.merkleProof.siblings) {
                     gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
                   }

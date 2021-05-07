@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:hermez_plugin/addresses.dart' as addresses;
@@ -50,7 +51,9 @@ abstract class IHermezService {
   Future<Token> getTokenById(int tokenId);
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT_HIGH, int gasPrice = GAS_MULTIPLIER});
+      {List<BigInt> approveGasLimit,
+      List<BigInt> depositGasLimit,
+      int gasPrice = GAS_MULTIPLIER});
   Future<bool> withdraw(
       BigInt amount,
       Account account,
@@ -215,11 +218,15 @@ class HermezService implements IHermezService {
   @override
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT_HIGH, int gasPrice = GAS_MULTIPLIER}) async {
+      {List<BigInt> approveGasLimit,
+      List<BigInt> depositGasLimit,
+      int gasPrice = GAS_MULTIPLIER}) async {
     final txHash = await tx
         .deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
             hezEthereumAddress, token, babyJubJub, client, privateKey,
-            gasLimit: gasLimit, gasPrice: gasPrice)
+            approveGasLimit: approveGasLimit,
+            depositGasLimit: depositGasLimit,
+            gasPrice: gasPrice)
         .then((txHash) async {
       if (txHash != null) {
         await api.getAccounts(hezEthereumAddress, [token.id]).then((res) {
@@ -243,17 +250,15 @@ class HermezService implements IHermezService {
     return txHash;
   }
 
-  Future<Uint8List> signDeposit(BigInt amount, String hezEthereumAddress,
-      Token token, String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    final Uint8List signed = await tx.signDeposit(
+  Future<HashMap<String, List<BigInt>>> depositGasLimit(BigInt amount,
+      String hezEthereumAddress, Token token, String babyJubJub) async {
+    final HashMap<String, List<BigInt>> gasLimit = await tx.depositGasLimit(
         HermezCompressedAmount.compressAmount(amount.toDouble()),
         hezEthereumAddress,
         token,
         babyJubJub,
-        client,
-        privateKey);
-    return signed;
+        client);
+    return gasLimit;
   }
 
   Future<Uint8List> signWithdraw(
