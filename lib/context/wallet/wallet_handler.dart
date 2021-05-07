@@ -577,7 +577,7 @@ class WalletHandler {
     }
   }
 
-  Future<HashMap<String, List<BigInt>>> depositGasLimit(
+  Future<LinkedHashMap<String, List<BigInt>>> depositGasLimit(
       BigInt amount, Token token) async {
     //_store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();

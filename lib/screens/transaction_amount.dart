@@ -113,8 +113,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
         allowChangeLevel: widget.arguments.allowChangeLevel,
         addressTo: widget.arguments.addressTo,
         store: widget.arguments.store,
-        onSubmit:
-            (amount, token, fee, feeToken, address, gasLimit, gasPrice) async {
+        onSubmit: (amount, token, fee, feeToken, address, gasLimit, gasPrice,
+            depositGasLimit) async {
           if (widget.arguments.transactionType == TransactionType.RECEIVE) {
             Navigator.of(context).pushReplacementNamed("/qrcode",
                 arguments: QRCodeArguments(
@@ -153,7 +153,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
                     fee: fee,
                     gasLimit: gasLimit,
                     gasPrice: gasPrice,
-                    feeToken: feeToken));
+                    feeToken: feeToken,
+                    depositGasLimit: depositGasLimit));
           }
         },
       ),

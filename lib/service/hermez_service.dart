@@ -250,14 +250,15 @@ class HermezService implements IHermezService {
     return txHash;
   }
 
-  Future<HashMap<String, List<BigInt>>> depositGasLimit(BigInt amount,
+  Future<LinkedHashMap<String, List<BigInt>>> depositGasLimit(BigInt amount,
       String hezEthereumAddress, Token token, String babyJubJub) async {
-    final HashMap<String, List<BigInt>> gasLimit = await tx.depositGasLimit(
-        HermezCompressedAmount.compressAmount(amount.toDouble()),
-        hezEthereumAddress,
-        token,
-        babyJubJub,
-        client);
+    final LinkedHashMap<String, List<BigInt>> gasLimit =
+        await tx.depositGasLimit(
+            HermezCompressedAmount.compressAmount(amount.toDouble()),
+            hezEthereumAddress,
+            token,
+            babyJubJub,
+            client);
     return gasLimit;
   }
 

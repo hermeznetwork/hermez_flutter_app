@@ -53,8 +53,15 @@ class TransferAmountForm extends StatefulWidget {
   final double amount;
   final String addressTo;
   final WalletHandler store;
-  final void Function(double amount, Token token, double fee, Token feeToken,
-      String addressTo, int gasLimit, int gasPrice) onSubmit;
+  final void Function(
+      double amount,
+      Token token,
+      double fee,
+      Token feeToken,
+      String addressTo,
+      int gasLimit,
+      int gasPrice,
+      LinkedHashMap<String, List<BigInt>> depositGasLimit) onSubmit;
 
   @override
   _TransferAmountFormState createState() => _TransferAmountFormState(
@@ -89,8 +96,15 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   final double amount;
   final String addressTo;
   final WalletHandler store;
-  final void Function(double amount, Token token, double fee, Token feeToken,
-      String addressTo, int gasLimit, int gasPrice) onSubmit;
+  final void Function(
+      double amount,
+      Token token,
+      double fee,
+      Token feeToken,
+      String addressTo,
+      int gasLimit,
+      int gasPrice,
+      LinkedHashMap<String, List<BigInt>> depositGasLimit) onSubmit;
   bool needRefresh = true;
   bool amountIsValid = true;
   bool addressIsValid = true;
@@ -98,6 +112,7 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
   Token ethereumToken;
   Account ethereumAccount;
   bool enoughGas;
+  LinkedHashMap<String, List<BigInt>> depositGasLimit;
   BigInt gasLimit;
   WalletDefaultFee selectedFeeSpeed;
   GasPriceResponse gasPriceResponse;
@@ -183,7 +198,8 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
                                                     : token,
                                             addressController.value.text,
                                             gasLimit.toInt(),
-                                            getGasPrice().toInt());
+                                            getGasPrice().toInt(),
+                                            depositGasLimit);
                                       }
                                     : null,
                                 padding: EdgeInsets.only(
@@ -959,9 +975,14 @@ class _TransferAmountFormState extends State<TransferAmountForm> {
         if (transactionType == TransactionType.DEPOSIT) {
           addressTo = getCurrentEnvironment().contracts['Hermez'];
           BigInt amountToEstimate = BigInt.one;
-          HashMap<String, List<BigInt>> depositGasLimit =
+          depositGasLimit =
               await store.depositGasLimit(amountToEstimate, account.token);
           gasLimit = BigInt.zero;
+          depositGasLimit.forEach((String key, List<BigInt> value) {
+            value.forEach((gas) {
+              gasLimit += gas;
+            });
+          });
         } else if (transactionType == TransactionType.WITHDRAW) {
           try {
             addressTo = getCurrentEnvironment().contracts['Hermez'];

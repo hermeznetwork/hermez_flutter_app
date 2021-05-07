@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class TransactionDetailsArguments {
   final Token feeToken;
   final int gasLimit;
   final int gasPrice;
+  final LinkedHashMap<String, List<BigInt>> depositGasLimit;
   final DateTime transactionDate;
 
   final bool isTransactionBeingSigned;
@@ -51,6 +53,7 @@ class TransactionDetailsArguments {
       this.feeToken,
       this.gasLimit,
       this.gasPrice,
+      this.depositGasLimit,
       this.addressFrom,
       this.addressTo,
       this.isTransactionBeingSigned,
@@ -391,8 +394,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
           return await widget.arguments.wallet.deposit(
               amountDeposit, widget.arguments.token,
-              approveGasLimit: [BigInt.from(widget.arguments.gasLimit)],
-              depositGasLimit: [BigInt.from(widget.arguments.gasLimit)],
+              approveGasLimit:
+                  widget.arguments.depositGasLimit['approveGasLimit'],
+              depositGasLimit:
+                  widget.arguments.depositGasLimit['depositGasLimit'],
               gasPrice: widget.arguments.gasPrice);
         }
         break;
