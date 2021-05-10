@@ -221,9 +221,16 @@ class HermezService implements IHermezService {
       {BigInt approveGasLimit,
       BigInt depositGasLimit,
       int gasPrice = GAS_MULTIPLIER}) async {
+    HermezCompressedAmount compressedAmount;
+    try {
+      compressedAmount =
+          HermezCompressedAmount.compressAmount(amount.toDouble());
+    } catch (e) {
+      return false;
+    }
     final txHash = await tx
-        .deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
-            hezEthereumAddress, token, babyJubJub, client, privateKey,
+        .deposit(compressedAmount, hezEthereumAddress, token, babyJubJub,
+            client, privateKey,
             approveGasLimit: approveGasLimit,
             depositGasLimit: depositGasLimit,
             gasPrice: gasPrice)

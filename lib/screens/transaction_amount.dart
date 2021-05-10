@@ -1341,12 +1341,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     } else {
       if (widget.arguments.transactionType == TransactionType.SEND) {
         return amountIsValid &&
+            enoughGas &&
             amountController.value.text.isNotEmpty &&
             double.parse(amountController.value.text) > 0 &&
             addressIsValid &&
             addressController.value.text.isNotEmpty;
       } else {
         return amountIsValid &&
+            enoughGas &&
             amountController.value.text.isNotEmpty &&
             double.parse(amountController.value.text) > 0;
       }
@@ -1449,11 +1451,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   Future<bool> isEnoughGas(BigInt gasFee) async {
     if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            widget.arguments.transactionType !=
-                TransactionType
-                    .RECEIVE) /*||
-        widget.arguments.transactionType == TransactionType.EXIT*/
-        ) {
+            widget.arguments.transactionType != TransactionType.RECEIVE) ||
+        widget.arguments.transactionType == TransactionType.EXIT) {
       if (ethereumAccount != null) {
         bool result = (double.tryParse(ethereumAccount.balance) ?? 0) >=
             gasFee.toDouble();
@@ -1482,13 +1481,17 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   BigInt getEstimatedFee() {
-    BigInt gasPrice = getGasPrice();
+    BigInt gasPrice = BigInt.one;
+    if (widget.arguments.transactionType != TransactionType.EXIT) {
+      gasPrice = getGasPrice();
+    }
     return gasLimit * gasPrice;
   }
 
   BigInt getGasPrice() {
     BigInt gasPrice = BigInt.one;
-    if (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+    if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 ||
+            widget.arguments.transactionType == TransactionType.EXIT) &&
         gasPriceResponse != null &&
         selectedFeeSpeed != null) {
       switch (selectedFeeSpeed) {
