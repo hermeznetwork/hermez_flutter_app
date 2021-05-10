@@ -21,6 +21,7 @@ class TransferSummaryForm extends HookWidget {
     this.account,
     this.fee,
     this.feeToken,
+    this.feeAccount,
     this.gasLimit,
     this.currency,
     this.transactionId,
@@ -35,6 +36,7 @@ class TransferSummaryForm extends HookWidget {
   final Account account;
   final double fee;
   final Token feeToken;
+  final Account feeAccount;
   final int gasLimit;
   final String currency;
   final String transactionId;
@@ -53,6 +55,8 @@ class TransferSummaryForm extends HookWidget {
     if (transactionDate != null) {
       date = format.format(transactionDate);
     }
+
+    bool enoughFee = isFeeEnough();
 
     var statusText = "";
     switch (status) {
@@ -374,19 +378,56 @@ class TransferSummaryForm extends HookWidget {
                       ),
                       SizedBox(height: 7),
                       Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            (fee.toDouble() / pow(10, feeToken.decimals))
-                                    .toStringAsFixed(6) +
-                                " " +
-                                feeToken.symbol,
-                            style: TextStyle(
-                              color: HermezColors.blueyGreyTwo,
-                              fontSize: 16,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          (fee.toDouble() / pow(10, feeToken.decimals))
+                                  .toStringAsFixed(6) +
+                              " " +
+                              feeToken.symbol,
+                          style: TextStyle(
+                            color: HermezColors.blueyGreyTwo,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      enoughFee ? Container() : SizedBox(height: 3),
+                      enoughFee
+                          ? Container()
+                          : Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                child: RichText(
+                                  text: TextSpan(
+                                    style:
+                                        Theme.of(context).textTheme.bodyText2,
+                                    children: [
+                                      WidgetSpan(
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 5.0),
+                                          child: Image.asset("assets/info.png",
+                                              width: 15,
+                                              height: 15,
+                                              color: HermezColors.redError),
+                                        ),
+                                      ),
+                                      TextSpan(
+                                          text:
+                                              "Insufficient ETH to cover gas fee",
+                                          style: TextStyle(
+                                            color: HermezColors.redError,
+                                            fontSize: 14,
+                                            height: 1.43,
+                                            fontFamily: 'ModernEra',
+                                            fontWeight: FontWeight.w500,
+                                          )),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                          ))
                     ],
                   ),
                 ),
@@ -459,5 +500,15 @@ class TransferSummaryForm extends HookWidget {
                 )
               : Container(),
         ]).toList())));
+  }
+
+  bool isFeeEnough() {
+    if (fee != null && feeToken != null && feeAccount != null) {
+      return double.parse((fee.toDouble() / pow(10, feeToken.decimals))
+              .toStringAsFixed(6)) >
+          double.parse(feeAccount.balance);
+    } else {
+      return true;
+    }
   }
 }

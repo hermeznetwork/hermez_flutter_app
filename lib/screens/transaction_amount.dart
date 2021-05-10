@@ -1446,6 +1446,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   pow(10, widget.arguments.account.token.decimals)))
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
     }
+    if (amount < 0) {
+      amount = 0;
+    }
     return amount;
   }
 
@@ -1469,14 +1472,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   Future<Account> getEthereumAccount() async {
-    List<Account> accounts = await widget.arguments.store.getL1Accounts(true);
-    Account ethereumAccount;
-    for (Account account in accounts) {
-      if (account.token.id == 0) {
-        ethereumAccount = account;
-        break;
-      }
-    }
+    Account ethereumAccount = await widget.arguments.store.getL1Account(0);
     return ethereumAccount;
   }
 

@@ -543,8 +543,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
                     Token ethereumToken =
                         await widget.arguments.store.getTokenById(0);
+                    Account feeAccount = await getEthereumAccount();
                     int offset = GAS_LIMIT_OFFSET;
                     gasLimit += BigInt.from(offset);
+
                     Navigator.of(widget.arguments.parentContext)
                         .pushNamed("/transaction_details",
                             arguments: TransactionDetailsArguments(
@@ -554,6 +556,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               token: exit.token,
                               fee: gasLimit.toInt() * gasPrice.toDouble(),
                               feeToken: ethereumToken,
+                              feeAccount: feeAccount,
                               gasLimit: gasLimit.toInt(),
                               gasPrice: gasPrice.toInt(),
                               exit: exit,
@@ -653,6 +656,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             gasLimit += BigInt.from(offset);
                             Token ethereumToken =
                                 await widget.arguments.store.getTokenById(0);
+                            Account feeAccount = await getEthereumAccount();
                             Navigator.of(widget.arguments.parentContext)
                                 .pushNamed("/transaction_details",
                                     arguments: TransactionDetailsArguments(
@@ -663,6 +667,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                       fee: gasLimit.toInt() *
                                           gasPrice.toDouble(),
                                       feeToken: ethereumToken,
+                                      feeAccount: feeAccount,
                                       gasLimit: gasLimit.toInt(),
                                       gasPrice: gasPrice.toInt(),
                                       exit: exit,
@@ -1072,7 +1077,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           .getAccount(widget.arguments.account.accountIndex);
     } else {
       return widget.arguments.store
-          .getL1Account(widget.arguments.account.token);
+          .getL1Account(widget.arguments.account.token.id);
     }
   }
 
@@ -1154,6 +1159,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       return false;
     });
     return filteredTransactions;
+  }
+
+  Future<Account> getEthereumAccount() async {
+    Account ethereumAccount = await widget.arguments.store.getL1Account(0);
+    return ethereumAccount;
   }
 
   @override

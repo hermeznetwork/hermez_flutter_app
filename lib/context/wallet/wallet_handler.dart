@@ -374,20 +374,19 @@ class WalletHandler {
     return account;
   }
 
-  Future<Account> getL1Account(Token token) async {
+  Future<Account> getL1Account(int tokenId) async {
     if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
-
-      if (supportedTokens.firstWhere(
-              (supportedToken) => supportedToken.id == token.id,
-              orElse: null) !=
-          null) {
-        if (token.id == 0) {
+      Token token = supportedTokens.firstWhere(
+          (supportedToken) => supportedToken.id == tokenId,
+          orElse: null);
+      if (token != null) {
+        if (tokenId == 0) {
           // GET L1 ETH Balance
           web3.EtherAmount ethBalance = await _contractService.getEthBalance(
               web3.EthereumAddress.fromHex(state.ethereumAddress));
           final account = Account(
-              accountIndex: token.id.toString(),
+              accountIndex: tokenId.toString(),
               balance: ethBalance.getInWei.toString(),
               bjj: "",
               hezEthereumAddress: state.ethereumAddress,

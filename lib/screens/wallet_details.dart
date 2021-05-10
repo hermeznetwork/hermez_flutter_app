@@ -366,50 +366,48 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               : Container(),
           _accounts != null && _accounts.length > 0
               ? Expanded(
-                  child:
-                      // takes in an object and color and returns a circle avatar with first letter and required color
-                      FlatButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                  child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      onPressed: () async {
+                        List<Account> accounts = _accounts
+                            .takeWhile(
+                                (account) => double.parse(account.balance) > 0)
+                            .toList();
+                        Account account;
+                        if (accounts.length == 1) {
+                          account = accounts[0];
+                        }
+                        Navigator.pushNamed(widget.arguments.parentContext,
+                            "/transaction_amount",
+                            arguments: TransactionAmountArguments(
+                              widget.arguments.store,
+                              widget.arguments.store.state.txLevel,
+                              TransactionType.SEND,
+                              account: account,
+                            ));
+                      },
+                      padding: EdgeInsets.all(10.0),
+                      color: Colors.transparent,
+                      textColor: HermezColors.blackTwo,
+                      child: Column(
+                        children: <Widget>[
+                          Image.asset(
+                            "assets/send2.png",
+                            width: 80,
+                            height: 80,
                           ),
-                          onPressed: () async {
-                            List<Account> accounts = _accounts
-                                .takeWhile((account) =>
-                                    double.parse(account.balance) > 0)
-                                .toList();
-                            Account account;
-                            if (accounts.length == 1) {
-                              account = accounts[0];
-                            }
-                            Navigator.pushNamed(widget.arguments.parentContext,
-                                "/transaction_amount",
-                                arguments: TransactionAmountArguments(
-                                  widget.arguments.store,
-                                  widget.arguments.store.state.txLevel,
-                                  TransactionType.SEND,
-                                  account: account,
-                                ));
-                          },
-                          padding: EdgeInsets.all(10.0),
-                          color: Colors.transparent,
-                          textColor: HermezColors.blackTwo,
-                          child: Column(
-                            children: <Widget>[
-                              Image.asset(
-                                "assets/send2.png",
-                                width: 80,
-                                height: 80,
-                              ),
-                              Text(
-                                'Send',
-                                style: TextStyle(
-                                  color: HermezColors.blackTwo,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          )),
+                          Text(
+                            'Send',
+                            style: TextStyle(
+                              color: HermezColors.blackTwo,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      )),
                 )
               : Container(),
           SizedBox(width: 20.0),
@@ -661,6 +659,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 }
                 int offset = GAS_LIMIT_OFFSET;
                 gasLimit += BigInt.from(offset);
+                Token feeToken = await getEthereumToken();
+                Account feeAccount = await getEthereumAccount();
 
                 Navigator.of(widget.arguments.parentContext)
                     .pushNamed("/transaction_details",
@@ -670,7 +670,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           status: TransactionStatus.DRAFT,
                           token: exit.token,
                           fee: gasLimit.toInt() * gasPrice.toDouble(),
-                          feeToken: exit.token,
+                          feeToken: feeToken,
+                          feeAccount: feeAccount,
                           gasLimit: gasLimit.toInt(),
                           gasPrice: gasPrice.toInt(),
                           //account: widget.arguments.account,
@@ -744,6 +745,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             getCurrentEnvironment().contracts['Hermez'];
 
                         BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                        Token feeToken = await getEthereumToken();
+                        Account feeAccount = await getEthereumAccount();
                         try {
                           final amountWithdraw = getTokenAmountBigInt(
                               double.parse(exit.balance) /
@@ -770,7 +773,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   status: TransactionStatus.DRAFT,
                                   token: exit.token,
                                   fee: gasLimit.toInt() * gasPrice.toDouble(),
-                                  feeToken: exit.token,
+                                  feeToken: feeToken,
+                                  feeAccount: feeAccount,
                                   gasLimit: gasLimit.toInt(),
                                   gasPrice: gasPrice.toInt(),
                                   //account: widget.arguments.account,
@@ -874,5 +878,14 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));
     return result;
+  }
+
+  Future<Token> getEthereumToken() async {
+    return await widget.arguments.store.getTokenById(0);
+  }
+
+  Future<Account> getEthereumAccount() async {
+    Account ethereumAccount = await widget.arguments.store.getL1Account(0);
+    return ethereumAccount;
   }
 }

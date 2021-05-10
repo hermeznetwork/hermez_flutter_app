@@ -28,6 +28,7 @@ class TransactionDetailsArguments {
   final String addressTo;
   final double fee;
   final Token feeToken;
+  final Account feeAccount;
   final int gasLimit;
   final int gasPrice;
   final LinkedHashMap<String, BigInt> depositGasLimit;
@@ -51,6 +52,7 @@ class TransactionDetailsArguments {
       this.amount,
       this.fee,
       this.feeToken,
+      this.feeAccount,
       this.gasLimit,
       this.gasPrice,
       this.depositGasLimit,
@@ -89,6 +91,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         .split('.')
         .last;
 
+    bool enoughFee = isFeeEnough();
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
@@ -124,6 +128,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 addressTo: widget.arguments.addressTo,
                 fee: widget.arguments.fee,
                 feeToken: widget.arguments.feeToken,
+                feeAccount: widget.arguments.feeAccount,
                 gasLimit: widget.arguments.gasLimit,
                 currency: currency,
                 transactionDate: widget.arguments.transactionDate,
@@ -158,100 +163,106 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(100.0),
                             ),
-                            onPressed: () async {
-                              var success = false;
-                              if (widget.arguments.wallet.state.txLevel ==
-                                      TransactionLevel.LEVEL1 &&
-                                  widget.arguments.transactionType !=
-                                      TransactionType.DEPOSIT) {
-                                if (widget.arguments.token.id == 0) {
-                                  success = await transferStore.transferEth(
-                                      widget.arguments.wallet.state
-                                          .ethereumPrivateKey,
-                                      widget.arguments.addressTo,
-                                      widget.arguments.amount.toString());
-                                } else {
-                                  success = await transferStore.transfer(
-                                      widget.arguments.addressTo,
-                                      widget.arguments.amount.toString(),
-                                      widget.arguments.token.ethereumAddress,
-                                      widget.arguments.token.symbol);
-                                }
-                              } else {
-                                success = await handleFormSubmit();
-                              }
+                            onPressed: enoughFee
+                                ? () async {
+                                    var success = false;
+                                    if (widget.arguments.wallet.state.txLevel ==
+                                            TransactionLevel.LEVEL1 &&
+                                        widget.arguments.transactionType !=
+                                            TransactionType.DEPOSIT) {
+                                      if (widget.arguments.token.id == 0) {
+                                        success =
+                                            await transferStore.transferEth(
+                                                widget.arguments.wallet.state
+                                                    .ethereumPrivateKey,
+                                                widget.arguments.addressTo,
+                                                widget.arguments.amount
+                                                    .toString());
+                                      } else {
+                                        success = await transferStore.transfer(
+                                            widget.arguments.addressTo,
+                                            widget.arguments.amount.toString(),
+                                            widget.arguments.token
+                                                .ethereumAddress,
+                                            widget.arguments.token.symbol);
+                                      }
+                                    } else {
+                                      success = await handleFormSubmit();
+                                    }
 
-                              if (success) {
-                                if (widget.arguments.transactionType ==
-                                    TransactionType.EXIT) {
-                                  Navigator.of(context)
-                                      .pushNamed("/info",
+                                    if (success) {
+                                      if (widget.arguments.transactionType ==
+                                          TransactionType.EXIT) {
+                                        Navigator.of(context)
+                                            .pushNamed("/info",
+                                                arguments: InfoArguments(
+                                                    "success.png",
+                                                    true,
+                                                    "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
+                                                    iconSize: 300))
+                                            .then((value) {
+                                          if (Navigator.canPop(context)) {
+                                            Navigator.pop(context);
+                                          }
+                                        });
+                                      } else if (widget
+                                              .arguments.transactionType ==
+                                          TransactionType.WITHDRAW) {
+                                        Navigator.of(context)
+                                            .pushNamed("/info",
+                                                arguments: InfoArguments(
+                                                    "success.png",
+                                                    true,
+                                                    "Your withdrawal is awaiting verification.",
+                                                    iconSize: 300))
+                                            .then((value) {
+                                          if (Navigator.canPop(context)) {
+                                            Navigator.pop(context);
+                                          }
+                                        });
+                                      } else {
+                                        Navigator.of(context)
+                                            .pushNamed(
+                                          "/info",
                                           arguments: InfoArguments(
                                               "success.png",
                                               true,
-                                              "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
-                                              iconSize: 300))
-                                      .then((value) {
-                                    if (Navigator.canPop(context)) {
-                                      Navigator.pop(context);
+                                              "Your transaction is awaiting verification.",
+                                              iconSize: 300),
+                                        )
+                                            .then((value) {
+                                          if (Navigator.canPop(context)) {
+                                            Navigator.pop(context);
+                                          }
+                                        });
+                                      }
+                                    } else {
+                                      Navigator.of(context)
+                                          .pushNamed(
+                                        "/info",
+                                        arguments: InfoArguments(
+                                            "info_tx_failure.png",
+                                            true,
+                                            "There has been an error with your transaction.",
+                                            iconSize: 250),
+                                      )
+                                          .then((value) {
+                                        if (Navigator.canPop(context)) {
+                                          Navigator.pop(context);
+                                        }
+                                      });
                                     }
-                                  });
-                                } else if (widget.arguments.transactionType ==
-                                    TransactionType.WITHDRAW) {
-                                  Navigator.of(context)
-                                      .pushNamed("/info",
-                                          arguments: InfoArguments(
-                                              "success.png",
-                                              true,
-                                              "Your withdrawal is awaiting verification.",
-                                              iconSize: 300))
-                                      .then((value) {
-                                    if (Navigator.canPop(context)) {
-                                      Navigator.pop(context);
-                                    }
-                                  });
-                                } else {
-                                  Navigator.of(context)
-                                      .pushNamed(
-                                    "/info",
-                                    arguments: InfoArguments(
-                                        "success.png",
-                                        true,
-                                        "Your transaction is awaiting verification.",
-                                        iconSize: 300),
-                                  )
-                                      .then((value) {
-                                    if (Navigator.canPop(context)) {
-                                      Navigator.pop(context);
-                                    }
-                                  });
-                                }
-                              } else {
-                                Navigator.of(context)
-                                    .pushNamed(
-                                  "/info",
-                                  arguments: InfoArguments(
-                                      "info_tx_failure.png",
-                                      true,
-                                      "There has been an error with your transaction.",
-                                      iconSize: 250),
-                                )
-                                    .then((value) {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
                                   }
-                                });
-                              }
-                            },
+                                : null,
                             padding: EdgeInsets.only(
                                 top: 18.0,
                                 bottom: 18.0,
                                 right: 24.0,
                                 left: 24.0),
-                            disabledTextColor: Colors.grey,
-                            disabledColor: Colors.blueGrey,
+                            disabledColor: HermezColors.blueyGreyTwo,
                             color: HermezColors.darkOrange,
                             textColor: Colors.white,
+                            disabledTextColor: Colors.grey,
                             child: Text(
                               getButtonLabel(),
                               style: TextStyle(
@@ -494,6 +505,19 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               receiverAccount,
               transactionFee);
         }
+    }
+  }
+
+  bool isFeeEnough() {
+    if (widget.arguments.fee != null &&
+        widget.arguments.feeToken != null &&
+        widget.arguments.feeAccount != null) {
+      return double.parse((widget.arguments.fee.toDouble() /
+                  pow(10, widget.arguments.feeToken.decimals))
+              .toStringAsFixed(6)) >
+          double.parse(widget.arguments.feeAccount.balance);
+    } else {
+      return true;
     }
   }
 }
