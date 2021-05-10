@@ -221,7 +221,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       future: fetchData(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          String feeText = getFeeText();
+          String feeText = getFeeText(snapshot.connectionState);
           BigInt estimatedFee = getEstimatedFee(); //snapshot.data;
           final String currency = widget.arguments.store.state.defaultCurrency
               .toString()
@@ -382,26 +382,27 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                       textAlign: TextAlign.center,
                                     ),
                                     (widget.arguments.txLevel ==
-                                                    TransactionLevel.LEVEL2 &&
-                                                widget.arguments
-                                                        .transactionType ==
-                                                    TransactionType.SEND) ||
+                                                TransactionLevel.LEVEL2 &&
                                             widget.arguments.transactionType ==
-                                                TransactionType.EXIT
+                                                TransactionType.SEND)
                                         ? Container()
                                         : snapshot.connectionState ==
                                                 ConnectionState.done
-                                            ? Container(
-                                                alignment: Alignment.center,
-                                                margin: EdgeInsets.only(
-                                                    left: 6, bottom: 2),
-                                                child: SvgPicture.asset(
-                                                    'assets/fee_arrow.svg',
-                                                    color:
-                                                        HermezColors.blackTwo,
-                                                    semanticsLabel:
-                                                        'fee_selector'),
-                                              )
+                                            ? widget.arguments
+                                                        .transactionType ==
+                                                    TransactionType.EXIT
+                                                ? Container()
+                                                : Container(
+                                                    alignment: Alignment.center,
+                                                    margin: EdgeInsets.only(
+                                                        left: 6, bottom: 2),
+                                                    child: SvgPicture.asset(
+                                                        'assets/fee_arrow.svg',
+                                                        color: HermezColors
+                                                            .blackTwo,
+                                                        semanticsLabel:
+                                                            'fee_selector'),
+                                                  )
                                             : Container(
                                                 alignment: Alignment.center,
                                                 margin: EdgeInsets.only(
@@ -1505,7 +1506,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     return gasPrice;
   }
 
-  String getFeeText() {
+  String getFeeText(ConnectionState connectionState) {
     if (widget.arguments.account == null ||
         widget.arguments.transactionType == TransactionType.RECEIVE) {
       return "";
@@ -1514,7 +1515,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           .toString()
           .split('.')
           .last;
-      BigInt estimatedFee = getEstimatedFee();
+      BigInt estimatedFee = BigInt.zero;
+
+      if (connectionState == ConnectionState.done) {
+        estimatedFee = getEstimatedFee();
+      }
 
       return defaultCurrencySelected
           ? "Fee " +
@@ -1543,19 +1548,18 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
               " " +
               currency
           : "Fee " +
-              (estimatedFee.toDouble() /
+              EthAmountFormatter.formatAmount(
+                  (estimatedFee.toDouble() /
                       pow(
                           10,
                           (widget.arguments.txLevel == TransactionLevel.LEVEL1
                               ? ethereumToken.decimals
                               : widget.arguments.account != null
                                   ? widget.arguments.account.token.decimals
-                                  : 18)))
-                  .toStringAsFixed(6) +
-              " " +
-              (widget.arguments.txLevel == TransactionLevel.LEVEL1
-                  ? ethereumToken.symbol
-                  : widget.arguments.account.token.symbol);
+                                  : 18))),
+                  (widget.arguments.txLevel == TransactionLevel.LEVEL1
+                      ? ethereumToken.symbol
+                      : widget.arguments.account.token.symbol));
     }
   }
 }
