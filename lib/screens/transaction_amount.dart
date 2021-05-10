@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +24,6 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/utils.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'account_selector.dart';
@@ -78,6 +76,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   BigInt gasLimit;
   WalletDefaultFee selectedFeeSpeed;
   GasPriceResponse gasPriceResponse;
+  BigInt l1Fee;
+  BigInt l2Fee;
   final TextEditingController amountController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
 
@@ -1024,10 +1024,150 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     return data.text;
   }
 
+  Future<void> calculateFees() async {
+    BigInt gasPrice = BigInt.zero;
+    if (widget.arguments.transactionType == TransactionType.RECEIVE) {
+      l1Fee = BigInt.zero;
+      l2Fee = BigInt.zero;
+      gasLimit = BigInt.zero;
+    } else if (widget.arguments.transactionType == TransactionType.EXIT) {
+      // calculate fee l1 and l2
+
+      // fee withdraw l1 --> 230k + Transfer cost + (31k * siblings.length)
+      gasPriceResponse = await widget.arguments.store.getGasPrice();
+      ethereumToken = await getEthereumToken();
+      ethereumAccount = await getEthereumAccount();
+      BigInt ethGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+      ethGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
+      if (widget.arguments.account.token.id != 0) {
+        ethGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+      }
+
+      // fee l2
+      gasLimit = BigInt.zero;
+      if (widget.arguments.account != null) {
+        StateResponse state = await widget.arguments.store.getState();
+        RecommendedFee fees = state.recommendedFee;
+        gasLimit = BigInt.from(fees.existingAccount /
+            widget.arguments.account.token.USD *
+            pow(10, widget.arguments.account.token.decimals));
+      }
+      gasPrice = getGasPrice();
+      enoughGas = await isEnoughGas(ethGasLimit * gasPrice);
+
+      double amount = 0;
+      if (widget.arguments.account != null) {
+        if (amountController.value.text.isNotEmpty) {
+          amount = !defaultCurrencySelected
+              ? double.parse(amountController.value.text)
+              : double.parse(amountController.value.text) /
+                  widget.arguments.account.token.USD;
+        }
+      }
+      amountIsValid =
+          isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
+    } else if (widget.arguments.transactionType == TransactionType.SEND) {
+      if (widget.arguments.txLevel == TransactionLevel.LEVEL1) {
+        // calculate fee L1
+        gasPriceResponse = await widget.arguments.store.getGasPrice();
+        ethereumToken = await getEthereumToken();
+        ethereumAccount = await getEthereumAccount();
+        gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+        if (widget.arguments.account.token.id != 0) {
+          gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+        }
+        gasPrice = getGasPrice();
+        enoughGas = await isEnoughGas(gasLimit * gasPrice);
+        l1Fee = gasLimit * gasPrice;
+
+        double amount = 0;
+        if (widget.arguments.account != null) {
+          if (amountController.value.text.isNotEmpty) {
+            amount = !defaultCurrencySelected
+                ? double.parse(amountController.value.text)
+                : double.parse(amountController.value.text) /
+                    widget.arguments.account.token.USD;
+          }
+        }
+        amountIsValid =
+            isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
+      } else {
+        // calculate fee L2
+        gasLimit = BigInt.zero;
+        if (widget.arguments.account != null) {
+          StateResponse state = await widget.arguments.store.getState();
+          RecommendedFee fees = state.recommendedFee;
+          gasLimit = BigInt.from(fees.existingAccount /
+              widget.arguments.account.token.USD *
+              pow(10, widget.arguments.account.token.decimals));
+        }
+        enoughGas = await isEnoughGas(gasLimit);
+        l2Fee = gasLimit;
+
+        double amount = 0;
+        if (widget.arguments.account != null) {
+          if (amountController.value.text.isNotEmpty) {
+            amount = !defaultCurrencySelected
+                ? double.parse(amountController.value.text)
+                : double.parse(amountController.value.text) /
+                    widget.arguments.account.token.USD;
+          }
+        }
+        amountIsValid =
+            isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
+      }
+    } else if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT ||
+        widget.arguments.transactionType == TransactionType.WITHDRAW) {
+      // calculate fee L1
+      gasPriceResponse = await widget.arguments.store.getGasPrice();
+      ethereumToken = await getEthereumToken();
+      ethereumAccount = await getEthereumAccount();
+      if (widget.arguments.transactionType == TransactionType.DEPOSIT) {
+        String addressTo = getCurrentEnvironment().contracts['Hermez'];
+        gasLimit = BigInt.zero;
+        if (widget.arguments.account != null) {
+          BigInt amountToEstimate = BigInt.one;
+          depositGasLimit = await widget.arguments.store.depositGasLimit(
+              amountToEstimate, widget.arguments.account.token);
+          depositGasLimit.forEach((String key, BigInt value) {
+            gasLimit += value;
+          });
+        }
+      } else if (widget.arguments.transactionType == TransactionType.WITHDRAW) {
+        gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+        gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
+        if (widget.arguments.account.token.id != 0) {
+          gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+        }
+      } else if (widget.arguments.transactionType ==
+          TransactionType.FORCEEXIT) {
+        // TODO
+      }
+      gasPrice = getGasPrice();
+      enoughGas = await isEnoughGas(gasLimit * gasPrice);
+
+      double amount = 0;
+      if (widget.arguments.account != null) {
+        if (amountController.value.text.isNotEmpty) {
+          amount = !defaultCurrencySelected
+              ? double.parse(amountController.value.text)
+              : double.parse(amountController.value.text) /
+                  widget.arguments.account.token.USD;
+        }
+      }
+      amountIsValid =
+          isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
+    }
+  }
+
   Future<bool> fetchData() async {
     if (needRefresh == true) {
-      BigInt gasPrice = BigInt.zero;
+      await calculateFees();
+      /*BigInt gasPrice = BigInt.zero;
       if (widget.arguments.transactionType == TransactionType.RECEIVE) {
+        l1Fee = BigInt.zero;
+        l2Fee = BigInt.zero;
         gasLimit = BigInt.zero;
       } else if ((widget.arguments.txLevel == TransactionLevel.LEVEL2 &&
               widget.arguments.transactionType == TransactionType.SEND) ||
@@ -1170,7 +1310,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         } catch (e) {
           print(e.toString());
         }
-      }
+      }*/
       needRefresh = false;
     }
     return true;
@@ -1347,7 +1487,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   BigInt getGasPrice() {
     BigInt gasPrice = BigInt.one;
-    if (gasPriceResponse != null && selectedFeeSpeed != null) {
+    if (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+        gasPriceResponse != null &&
+        selectedFeeSpeed != null) {
       switch (selectedFeeSpeed) {
         case WalletDefaultFee.SLOW:
           gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
@@ -1368,12 +1510,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         widget.arguments.transactionType == TransactionType.RECEIVE) {
       return "";
     } else {
-      BigInt estimatedFee = getEstimatedFee();
-
       final String currency = widget.arguments.store.state.defaultCurrency
           .toString()
           .split('.')
           .last;
+      BigInt estimatedFee = getEstimatedFee();
 
       return defaultCurrencySelected
           ? "Fee " +
