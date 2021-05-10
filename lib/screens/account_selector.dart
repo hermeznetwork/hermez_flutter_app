@@ -17,11 +17,11 @@ class AccountSelectorArguments {
   final TransactionLevel txLevel;
   final TransactionType transactionType;
   final WalletHandler store;
-  final String addressTo;
-  final bool allowChangeLevel;
+  final void Function(Account selectedAccount) onAccountSelected;
+  final void Function(Token selectedToken) onTokenSelected;
 
   AccountSelectorArguments(this.txLevel, this.transactionType, this.store,
-      {this.addressTo, this.allowChangeLevel = false});
+      {this.onAccountSelected, this.onTokenSelected});
 }
 
 class AccountSelectorPage extends HookWidget {
@@ -76,7 +76,11 @@ class AccountSelectorPage extends HookWidget {
         actions: <Widget>[
           new IconButton(
             icon: new Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(null),
+            onPressed: () {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            },
           ),
         ],
         leading: new Container(),
@@ -174,9 +178,14 @@ class AccountSelectorPage extends HookWidget {
             margin: EdgeInsets.all(20.0),
             child: Column(children: [
               Text(
-                arguments.txLevel == TransactionLevel.LEVEL1
-                    ? 'Make a deposit first in your Ethereum wallet to move your funds.'
-                    : 'Make a deposit first in your Hermez wallet to move your funds.',
+                'Make a deposit first in your ' +
+                    (arguments.txLevel == TransactionLevel.LEVEL1
+                        ? 'Ethereum wallet'
+                        : 'Hermez wallet') +
+                    ' to ' +
+                    (arguments.transactionType == TransactionType.SEND
+                        ? 'send tokens.'
+                        : 'move your funds.'),
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: HermezColors.blackTwo,
@@ -379,13 +388,12 @@ class AccountSelectorPage extends HookWidget {
                         true,
                         false,
                         true, (String tokenId, String amount) async {
-                      Navigator.pushReplacementNamed(
-                          context, "/transaction_amount",
-                          arguments: TransactionAmountArguments(arguments.store,
-                              arguments.txLevel, arguments.transactionType,
-                              token: token,
-                              addressTo: arguments.addressTo,
-                              allowChangeLevel: arguments.allowChangeLevel));
+                      if (arguments.onTokenSelected != null) {
+                        arguments.onTokenSelected(token);
+                      }
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      }
                     });
                   } else {
                     final Account account = _accounts[index];
@@ -403,15 +411,12 @@ class AccountSelectorPage extends HookWidget {
                         true,
                         false,
                         false, (String token, String amount) async {
-                      final Token supportedToken =
-                          await arguments.store.getTokenById(account.token.id);
-                      Navigator.pushReplacementNamed(
-                          context, "/transaction_amount",
-                          arguments: TransactionAmountArguments(arguments.store,
-                              arguments.txLevel, arguments.transactionType,
-                              account: account,
-                              addressTo: arguments.addressTo,
-                              allowChangeLevel: arguments.allowChangeLevel));
+                      if (arguments.onAccountSelected != null) {
+                        arguments.onAccountSelected(account);
+                      }
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      }
                     });
                   }
                 },

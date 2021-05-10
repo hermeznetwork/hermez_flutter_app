@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+class BlinkingTextAnimationArguments {
+  final Color color;
+  final String text;
+  final double fontSize;
+  final FontWeight fontWeight;
+
+  BlinkingTextAnimationArguments(
+      this.color, this.text, this.fontSize, this.fontWeight);
+}
+
 class BlinkingTextAnimation extends StatefulWidget {
+  BlinkingTextAnimation({Key key, this.arguments}) : super(key: key);
+
+  final BlinkingTextAnimationArguments arguments;
+
   @override
   _BlinkingAnimationState createState() => _BlinkingAnimationState();
 }
@@ -21,8 +35,8 @@ class _BlinkingAnimationState extends State<BlinkingTextAnimation>
         CurvedAnimation(parent: controller, curve: Curves.ease);
 
     animation = ColorTween(
-            begin: Colors.white.withAlpha(255),
-            end: Colors.white.withAlpha(100))
+            begin: widget.arguments.color.withAlpha(255),
+            end: widget.arguments.color.withAlpha(100))
         .animate(curve);
 
     animation.addStatusListener((status) {
@@ -43,12 +57,12 @@ class _BlinkingAnimationState extends State<BlinkingTextAnimation>
         animation: animation,
         builder: (BuildContext context, Widget child) {
           return new Container(
-            child: Text('0.0',
+            child: Text(widget.arguments.text,
                 style: TextStyle(
                   color: animation.value,
-                  fontSize: 32,
+                  fontSize: widget.arguments.fontSize,
                   fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w700,
+                  fontWeight: widget.arguments.fontWeight,
                 )),
           );
         });

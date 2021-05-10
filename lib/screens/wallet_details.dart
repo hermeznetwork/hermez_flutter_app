@@ -14,7 +14,6 @@ import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
@@ -378,25 +377,18 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                 .takeWhile((account) =>
                                     double.parse(account.balance) > 0)
                                 .toList();
-                            if (accounts.length > 1) {
-                              Navigator.of(widget.arguments.parentContext)
-                                  .pushNamed("/account_selector",
-                                      arguments: AccountSelectorArguments(
-                                        widget.arguments.store.state.txLevel,
-                                        TransactionType.SEND,
-                                        widget.arguments.store,
-                                      ));
-                            } else {
-                              Navigator.pushNamed(
-                                  widget.arguments.parentContext,
-                                  "/transaction_amount",
-                                  arguments: TransactionAmountArguments(
-                                      widget.arguments.store,
-                                      widget.arguments.store.state.txLevel,
-                                      TransactionType.SEND,
-                                      account: accounts[0],
-                                      allowChangeLevel: false));
+                            Account account;
+                            if (accounts.length == 1) {
+                              account = accounts[0];
                             }
+                            Navigator.pushNamed(widget.arguments.parentContext,
+                                "/transaction_amount",
+                                arguments: TransactionAmountArguments(
+                                  widget.arguments.store,
+                                  widget.arguments.store.state.txLevel,
+                                  TransactionType.SEND,
+                                  account: account,
+                                ));
                           },
                           padding: EdgeInsets.all(10.0),
                           color: Colors.transparent,

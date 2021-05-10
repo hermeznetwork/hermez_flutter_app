@@ -78,6 +78,23 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                 )
               : Container(),
           SafeArea(
+            child: Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(top: 84),
+              child: Text(
+                'Scan another Hermez code to\n send or receive tokens in your \nHermez wallet.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: HermezColors.lightGrey,
+                  fontSize: 16,
+                  height: 1.57,
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[

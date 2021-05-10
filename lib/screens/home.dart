@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
-import 'package:hermez/screens/scanner.dart';
+import 'package:hermez/screens/qrcode_scanner.dart';
 import 'package:hermez/screens/settings.dart';
 import 'package:hermez/screens/settings_currency.dart';
 import 'package:hermez/screens/settings_details.dart';
@@ -16,7 +16,6 @@ import 'package:provider/provider.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'account_details.dart';
-import 'account_selector.dart';
 import 'fee_selector.dart';
 import 'transaction_details.dart';
 
@@ -168,19 +167,16 @@ class _HomePageState extends State<HomePage> {
                     }
                   }
                   if (accountFound == false) {
-                    Navigator.pushReplacementNamed(context, "/account_selector",
-                        arguments: AccountSelectorArguments(
-                            TransactionLevel.LEVEL1,
-                            TransactionType.SEND,
-                            widget.store,
+                    Navigator.pushReplacementNamed(
+                        context, "/transaction_amount",
+                        arguments: TransactionAmountArguments(widget.store,
+                            TransactionLevel.LEVEL1, TransactionType.SEND,
                             addressTo: scannedStrings[0]));
                   }
                 } else {
-                  Navigator.pushReplacementNamed(context, "/account_selector",
-                      arguments: AccountSelectorArguments(
-                          TransactionLevel.LEVEL1,
-                          TransactionType.SEND,
-                          widget.store,
+                  Navigator.pushReplacementNamed(context, "/transaction_amount",
+                      arguments: TransactionAmountArguments(widget.store,
+                          TransactionLevel.LEVEL1, TransactionType.SEND,
                           addressTo: scannedStrings[0]));
                 }
               } else if (isHermezEthereumAddress(
@@ -204,20 +200,17 @@ class _HomePageState extends State<HomePage> {
                     }
                   }
                   if (accountFound == false) {
-                    Navigator.pushReplacementNamed(context, "/account_selector",
-                        arguments: AccountSelectorArguments(
-                            TransactionLevel.LEVEL2,
-                            TransactionType.SEND,
-                            widget.store,
+                    Navigator.pushReplacementNamed(
+                        context, "/transaction_amount",
+                        arguments: TransactionAmountArguments(widget.store,
+                            TransactionLevel.LEVEL2, TransactionType.SEND,
                             addressTo:
                                 scannedStrings[0] + ":" + scannedStrings[1]));
                   }
                 } else {
-                  Navigator.of(context).pushNamed("/account_selector",
-                      arguments: AccountSelectorArguments(
-                          TransactionLevel.LEVEL2,
-                          TransactionType.SEND,
-                          widget.store,
+                  Navigator.pushReplacementNamed(context, "/transaction_amount",
+                      arguments: TransactionAmountArguments(widget.store,
+                          TransactionLevel.LEVEL2, TransactionType.SEND,
                           addressTo:
                               scannedStrings[0] + ":" + scannedStrings[1]));
                 }

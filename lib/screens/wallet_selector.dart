@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -141,7 +140,13 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                                 fontFamily: 'ModernEra',
                                                 fontWeight: FontWeight.w700,
                                               ))
-                                          : BlinkingTextAnimation()
+                                          : BlinkingTextAnimation(
+                                              arguments:
+                                                  BlinkingTextAnimationArguments(
+                                                      Colors.white,
+                                                      '0.0',
+                                                      32,
+                                                      FontWeight.w700))
                                     ],
                                   ),
                                 ),
@@ -239,65 +244,62 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                   l1Accounts.length > 0) {
                                 widget.store
                                     .updateLevel(TransactionLevel.LEVEL1);
-                                if (l1Accounts.length > 1) {
-                                  Navigator.of(widget.parentContext).pushNamed(
-                                    "/account_selector",
-                                    arguments: AccountSelectorArguments(
-                                      TransactionLevel.LEVEL1,
-                                      TransactionType.DEPOSIT,
-                                      widget.store,
-                                      allowChangeLevel: true,
-                                    ),
-                                  );
-                                } else {
-                                  Account account = l1Accounts[0];
-                                  Navigator.pushNamed(
-                                    widget.parentContext,
-                                    "/transaction_amount",
+                                Account account;
+                                if (l1Accounts.length == 1) {
+                                  account = l1Accounts[0];
+                                }
+                                Navigator.pushNamed(
+                                    widget.parentContext, "/transaction_amount",
                                     arguments: TransactionAmountArguments(
                                       widget.store,
                                       TransactionLevel.LEVEL1,
                                       TransactionType.DEPOSIT,
                                       account: account,
                                       allowChangeLevel: true,
-                                    ),
-                                  );
-                                }
+                                    )).then((value) {
+                                  setState(() {
+                                    l1Accounts = null;
+                                    l2Accounts = null;
+                                  });
+                                });
                               } else if (l2Accounts != null &&
                                   l2Accounts.length > 0) {
                                 widget.store
                                     .updateLevel(TransactionLevel.LEVEL2);
-                                if (l2Accounts.length > 1) {
-                                  Navigator.of(widget.parentContext).pushNamed(
-                                    "/account_selector",
-                                    arguments: AccountSelectorArguments(
+                                Account account;
+                                if (l2Accounts.length == 1) {
+                                  account = l2Accounts[0];
+                                }
+                                Navigator.pushNamed(
+                                    widget.parentContext, "/transaction_amount",
+                                    arguments: TransactionAmountArguments(
+                                      widget.store,
                                       TransactionLevel.LEVEL2,
                                       TransactionType.EXIT,
-                                      widget.store,
+                                      account: account,
                                       allowChangeLevel: true,
-                                    ),
-                                  );
-                                } else {
-                                  Account account = l2Accounts[0];
-                                  Navigator.pushNamed(widget.parentContext,
-                                      "/transaction_amount",
-                                      arguments: TransactionAmountArguments(
-                                          widget.store,
-                                          TransactionLevel.LEVEL2,
-                                          TransactionType.EXIT,
-                                          account: account,
-                                          allowChangeLevel: true));
-                                }
+                                    )).then((value) {
+                                  setState(() {
+                                    l1Accounts = null;
+                                    l2Accounts = null;
+                                  });
+                                });
                               } else {
                                 widget.store
                                     .updateLevel(TransactionLevel.LEVEL1);
-                                Navigator.of(widget.parentContext).pushNamed(
-                                    "/account_selector",
-                                    arguments: AccountSelectorArguments(
-                                        TransactionLevel.LEVEL1,
-                                        TransactionType.DEPOSIT,
-                                        widget.store,
-                                        allowChangeLevel: true));
+                                Navigator.pushNamed(
+                                    widget.parentContext, "/transaction_amount",
+                                    arguments: TransactionAmountArguments(
+                                      widget.store,
+                                      TransactionLevel.LEVEL1,
+                                      TransactionType.DEPOSIT,
+                                      allowChangeLevel: true,
+                                    )).then((value) {
+                                  setState(() {
+                                    l1Accounts = null;
+                                    l2Accounts = null;
+                                  });
+                                });
                               }
                             }
                           },
@@ -406,7 +408,13 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                                 fontFamily: 'ModernEra',
                                                 fontWeight: FontWeight.w700,
                                               ))
-                                          : BlinkingTextAnimation()
+                                          : BlinkingTextAnimation(
+                                              arguments:
+                                                  BlinkingTextAnimationArguments(
+                                                      Colors.white,
+                                                      '0.0',
+                                                      32,
+                                                      FontWeight.w700))
                                     ],
                                   ),
                                 ),

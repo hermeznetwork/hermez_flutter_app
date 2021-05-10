@@ -282,7 +282,7 @@ class WalletHandler {
               web3.EthereumAddress.fromHex(state.ethereumAddress));
           if (ethBalance.getInWei > BigInt.zero) {
             final account = Account(
-                accountIndex: "0",
+                accountIndex: token.id.toString(),
                 balance: ethBalance.getInWei.toString(),
                 bjj: "",
                 hezEthereumAddress: state.ethereumAddress,
@@ -295,7 +295,7 @@ class WalletHandler {
                 state.ethereumAddress, token, null);
             if (transactions != null && transactions.isNotEmpty) {
               final account = Account(
-                  accountIndex: "0",
+                  accountIndex: token.id.toString(),
                   balance: ethBalance.getInWei.toString(),
                   bjj: "",
                   hezEthereumAddress: state.ethereumAddress,
@@ -320,7 +320,7 @@ class WalletHandler {
               web3.EtherUnit.wei, tokenBalance);
           if (tokenBalance > BigInt.zero) {
             final account = Account(
-                accountIndex: "0",
+                accountIndex: token.id.toString(),
                 balance: tokenAmount.getInWei.toString(),
                 bjj: "",
                 hezEthereumAddress: state.ethereumAddress,
@@ -335,7 +335,7 @@ class WalletHandler {
                       state.ethereumAddress, token, null);
               if (transactions != null && transactions.isNotEmpty) {
                 final account = Account(
-                    accountIndex: "0",
+                    accountIndex: token.id.toString(),
                     balance: tokenAmount.getInWei.toString(),
                     bjj: "",
                     hezEthereumAddress: state.ethereumAddress,
@@ -367,6 +367,61 @@ class WalletHandler {
     final accounts = await _hermezService.getAccounts(
         web3.EthereumAddress.fromHex(ethereumAddress), tokenIds);
     return accounts;
+  }
+
+  Future<Account> getAccount(String accountIndex) async {
+    Account account = await _hermezService.getAccount(accountIndex);
+    return account;
+  }
+
+  Future<Account> getL1Account(Token token) async {
+    if (state != null && state.ethereumAddress != null) {
+      final supportedTokens = await _hermezService.getTokens();
+
+      if (supportedTokens.firstWhere(
+              (supportedToken) => supportedToken.id == token.id,
+              orElse: null) !=
+          null) {
+        if (token.id == 0) {
+          // GET L1 ETH Balance
+          web3.EtherAmount ethBalance = await _contractService.getEthBalance(
+              web3.EthereumAddress.fromHex(state.ethereumAddress));
+          final account = Account(
+              accountIndex: token.id.toString(),
+              balance: ethBalance.getInWei.toString(),
+              bjj: "",
+              hezEthereumAddress: state.ethereumAddress,
+              itemId: 0,
+              nonce: 0,
+              token: token);
+          return account;
+        } else {
+          var tokenBalance = BigInt.zero;
+          try {
+            tokenBalance = await _contractService.getTokenBalance(
+                web3.EthereumAddress.fromHex(state.ethereumAddress),
+                web3.EthereumAddress.fromHex(token.ethereumAddress),
+                token.name);
+          } catch (error) {
+            throw error;
+          }
+          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+              web3.EtherUnit.wei, tokenBalance);
+
+          final account = Account(
+              accountIndex: token.id.toString(),
+              balance: tokenAmount.getInWei.toString(),
+              bjj: "",
+              hezEthereumAddress: state.ethereumAddress,
+              itemId: 0,
+              nonce: 0,
+              token: token);
+          return account;
+        }
+      } else {
+        return null;
+      }
+    }
   }
 
   Future<StateResponse> getState() async {
@@ -577,7 +632,7 @@ class WalletHandler {
     }
   }
 
-  Future<LinkedHashMap<String, List<BigInt>>> depositGasLimit(
+  Future<LinkedHashMap<String, BigInt>> depositGasLimit(
       BigInt amount, Token token) async {
     //_store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
@@ -589,9 +644,7 @@ class WalletHandler {
   }
 
   Future<bool> deposit(BigInt amount, Token token,
-      {List<BigInt> approveGasLimit,
-      List<BigInt> depositGasLimit,
-      int gasPrice}) async {
+      {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice}) async {
     _store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();

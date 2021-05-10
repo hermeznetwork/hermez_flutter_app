@@ -12,7 +12,6 @@ import 'package:hermez_plugin/environment.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'account_selector.dart';
 import 'transaction_amount.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -255,13 +254,14 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Force withdrawal
-                      Navigator.of(widget.arguments.parentContext)
-                          .pushNamed("/account_selector",
-                              arguments: AccountSelectorArguments(
-                                TransactionLevel.LEVEL2,
-                                TransactionType.FORCEEXIT,
-                                widget.arguments.store,
-                              ));
+                      Navigator.pushNamed(
+                          widget.arguments.parentContext, "/transaction_amount",
+                          arguments: TransactionAmountArguments(
+                            widget.arguments.store,
+                            TransactionLevel.LEVEL2,
+                            TransactionType.FORCEEXIT,
+                            //account: account,
+                          ));
                       break;
                   }
                   break;

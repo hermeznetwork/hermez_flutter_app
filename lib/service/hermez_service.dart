@@ -51,8 +51,8 @@ abstract class IHermezService {
   Future<Token> getTokenById(int tokenId);
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {List<BigInt> approveGasLimit,
-      List<BigInt> depositGasLimit,
+      {BigInt approveGasLimit,
+      BigInt depositGasLimit,
       int gasPrice = GAS_MULTIPLIER});
   Future<bool> withdraw(
       BigInt amount,
@@ -218,8 +218,8 @@ class HermezService implements IHermezService {
   @override
   Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {List<BigInt> approveGasLimit,
-      List<BigInt> depositGasLimit,
+      {BigInt approveGasLimit,
+      BigInt depositGasLimit,
       int gasPrice = GAS_MULTIPLIER}) async {
     final txHash = await tx
         .deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
@@ -250,15 +250,14 @@ class HermezService implements IHermezService {
     return txHash;
   }
 
-  Future<LinkedHashMap<String, List<BigInt>>> depositGasLimit(BigInt amount,
+  Future<LinkedHashMap<String, BigInt>> depositGasLimit(BigInt amount,
       String hezEthereumAddress, Token token, String babyJubJub) async {
-    final LinkedHashMap<String, List<BigInt>> gasLimit =
-        await tx.depositGasLimit(
-            HermezCompressedAmount.compressAmount(amount.toDouble()),
-            hezEthereumAddress,
-            token,
-            babyJubJub,
-            client);
+    final LinkedHashMap<String, BigInt> gasLimit = await tx.depositGasLimit(
+        HermezCompressedAmount.compressAmount(amount.toDouble()),
+        hezEthereumAddress,
+        token,
+        babyJubJub,
+        client);
     return gasLimit;
   }
 

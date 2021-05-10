@@ -30,7 +30,7 @@ class TransactionDetailsArguments {
   final Token feeToken;
   final int gasLimit;
   final int gasPrice;
-  final LinkedHashMap<String, List<BigInt>> depositGasLimit;
+  final LinkedHashMap<String, BigInt> depositGasLimit;
   final DateTime transactionDate;
 
   final bool isTransactionBeingSigned;
@@ -104,7 +104,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         actions: <Widget>[
           new IconButton(
             icon: new Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(null),
+            onPressed: () => Navigator.of(context).pop(false),
           ),
         ],
       ),
@@ -184,40 +184,63 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               if (success) {
                                 if (widget.arguments.transactionType ==
                                     TransactionType.EXIT) {
-                                  Navigator.of(context).pushReplacementNamed(
-                                      "/info",
-                                      arguments: InfoArguments(
-                                          "success.png",
-                                          true,
-                                          "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
-                                          iconSize: 300));
+                                  Navigator.of(context)
+                                      .pushNamed("/info",
+                                          arguments: InfoArguments(
+                                              "success.png",
+                                              true,
+                                              "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
+                                              iconSize: 300))
+                                      .then((value) {
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
+                                  });
                                 } else if (widget.arguments.transactionType ==
                                     TransactionType.WITHDRAW) {
-                                  Navigator.of(context).pushReplacementNamed(
-                                      "/info",
-                                      arguments: InfoArguments(
-                                          "success.png",
-                                          true,
-                                          "Your withdrawal is awaiting verification.",
-                                          iconSize: 300));
+                                  Navigator.of(context)
+                                      .pushNamed("/info",
+                                          arguments: InfoArguments(
+                                              "success.png",
+                                              true,
+                                              "Your withdrawal is awaiting verification.",
+                                              iconSize: 300))
+                                      .then((value) {
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
+                                  });
                                 } else {
-                                  Navigator.of(context).pushReplacementNamed(
-                                      "/info",
-                                      arguments: InfoArguments(
-                                          "success.png",
-                                          true,
-                                          "Your transaction is awaiting verification.",
-                                          iconSize: 300));
+                                  Navigator.of(context)
+                                      .pushNamed(
+                                    "/info",
+                                    arguments: InfoArguments(
+                                        "success.png",
+                                        true,
+                                        "Your transaction is awaiting verification.",
+                                        iconSize: 300),
+                                  )
+                                      .then((value) {
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
+                                  });
                                 }
                               } else {
-                                Navigator.of(context).pushReplacementNamed(
+                                Navigator.of(context)
+                                    .pushNamed(
                                   "/info",
                                   arguments: InfoArguments(
                                       "info_tx_failure.png",
                                       true,
                                       "There has been an error with your transaction.",
                                       iconSize: 250),
-                                );
+                                )
+                                    .then((value) {
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context);
+                                  }
+                                });
                               }
                             },
                             padding: EdgeInsets.only(
