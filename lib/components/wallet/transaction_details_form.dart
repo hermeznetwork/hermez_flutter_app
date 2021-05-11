@@ -504,9 +504,7 @@ class TransferSummaryForm extends HookWidget {
 
   bool isFeeEnough() {
     if (fee != null && feeToken != null && feeAccount != null) {
-      return double.parse((fee.toDouble() / pow(10, feeToken.decimals))
-              .toStringAsFixed(6)) >
-          double.parse(feeAccount.balance);
+      return BigInt.parse(feeAccount.balance) > BigInt.from(fee);
     } else {
       return true;
     }

@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
@@ -398,6 +397,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       }
       resultValue = resultValue + value;
     }
+
     //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));
@@ -519,20 +519,15 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         getCurrentEnvironment().contracts['Hermez'];
 
                     BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                    final amountWithdraw = getTokenAmountBigInt(
+                        double.parse(exit.balance) /
+                            pow(10, exit.token.decimals),
+                        exit.token.decimals);
                     try {
-                      final amountWithdraw = getTokenAmountBigInt(
-                          double.parse(exit.balance) /
-                              pow(10, exit.token.decimals),
-                          exit.token.decimals);
-                      Uint8List data = await widget.arguments.store
-                          .signWithdraw(
-                              amountWithdraw, null, exit, false, true);
-                      gasLimit = await widget.arguments.store.getGasLimit(
-                          getEthereumAddress(exit.hezEthereumAddress),
-                          addressTo,
-                          BigInt.zero,
-                          data: data);
+                      gasLimit = await widget.arguments.store.withdrawGasLimit(
+                          amountWithdraw, null, exit, false, true);
                     } catch (e) {
+                      //
                       gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT +
                           (GAS_LIMIT_WITHDRAW_SIBLING *
                               exit.merkleProof.siblings.length));
@@ -560,7 +555,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               gasLimit: gasLimit.toInt(),
                               gasPrice: gasPrice.toInt(),
                               exit: exit,
-                              amount: double.parse(exit.balance) /
+                              amount: amountWithdraw.toDouble() /
                                   pow(10, exit.token.decimals),
                               addressFrom: addressFrom,
                               addressTo: addressTo,
@@ -628,21 +623,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 getCurrentEnvironment().contracts['Hermez'];
 
                             BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                            final amountWithdraw = getTokenAmountBigInt(
+                                double.parse(exit.balance) /
+                                    pow(10, exit.token.decimals),
+                                exit.token.decimals);
                             try {
-                              final amountWithdraw = getTokenAmountBigInt(
-                                  double.parse(exit.balance) /
-                                      pow(10, exit.token.decimals),
-                                  exit.token.decimals);
-                              Uint8List data = await widget.arguments.store
-                                  .signWithdraw(
-                                      amountWithdraw, null, exit, false, true);
                               gasLimit = await widget.arguments.store
-                                  .getGasLimit(
-                                      getEthereumAddress(
-                                          exit.hezEthereumAddress),
-                                      addressTo,
-                                      BigInt.zero,
-                                      data: data);
+                                  .withdrawGasLimit(
+                                      amountWithdraw, null, exit, false, true);
                             } catch (e) {
                               gasLimit = BigInt.from(
                                   GAS_LIMIT_WITHDRAW_DEFAULT +
@@ -671,7 +659,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                       gasLimit: gasLimit.toInt(),
                                       gasPrice: gasPrice.toInt(),
                                       exit: exit,
-                                      amount: double.parse(exit.balance) /
+                                      amount: amountWithdraw.toDouble() /
                                           pow(10, exit.token.decimals),
                                       addressFrom: addressFrom,
                                       addressTo: addressTo,
@@ -808,9 +796,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     symbol = "\$";
                   }
 
-                  var amount = double.parse(value) / pow(10, 18);
-                  /*EtherAmount.fromUnitAndValue(
-                  EtherUnit.wei, ));*/
+                  var amount = (getTokenAmountBigInt(
+                              double.parse(value) /
+                                  pow(10,
+                                      widget.arguments.account.token.decimals),
+                              widget.arguments.account.token.decimals)
+                          .toDouble()) /
+                      pow(10, widget.arguments.account.token.decimals);
                   var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
                   //var format = DateFormat('dd MMM');
                   var format = DateFormat('dd/MM/yyyy');

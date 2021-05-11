@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:another_flushbar/flushbar.dart';
@@ -323,12 +322,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Text(
-                                        widget.arguments.store.state.txLevel ==
-                                                TransactionLevel.LEVEL1
-                                            ? totalBalance(snapshot)
-                                            : totalBalance(snapshot),
-                                        //"\$${EthAmountFormatter(tokenBalance).format()}",
+                                    Text(totalBalance(snapshot),
                                         style: TextStyle(
                                           color: HermezColors.black,
                                           fontSize: 32,
@@ -637,22 +631,18 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 String addressTo = getCurrentEnvironment().contracts['Hermez'];
 
                 BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                final amountWithdraw = getTokenAmountBigInt(
+                    double.parse(exit.balance) / pow(10, exit.token.decimals),
+                    exit.token.decimals);
                 try {
-                  final amountWithdraw = getTokenAmountBigInt(
-                      double.parse(exit.balance) / pow(10, exit.token.decimals),
-                      exit.token.decimals);
-                  Uint8List data = await widget.arguments.store
-                      .signWithdraw(amountWithdraw, null, exit, false, true);
-                  gasLimit = await widget.arguments.store.getGasLimit(
-                      getEthereumAddress(exit.hezEthereumAddress),
-                      addressTo,
-                      BigInt.zero,
-                      data: data);
+                  gasLimit = await widget.arguments.store.withdrawGasLimit(
+                      amountWithdraw, null, exit, false, true);
                 } catch (e) {
+                  // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
                   gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
-                  for (BigInt sibling in exit.merkleProof.siblings) {
+                  exit.merkleProof.siblings.forEach((element) {
                     gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
-                  }
+                  });
                   if (exit.token.id != 0) {
                     gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
                   }
@@ -674,9 +664,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           feeAccount: feeAccount,
                           gasLimit: gasLimit.toInt(),
                           gasPrice: gasPrice.toInt(),
-                          //account: widget.arguments.account,
                           exit: exit,
-                          amount: double.parse(exit.balance) /
+                          amount: amountWithdraw.toDouble() /
                               pow(10, exit.token.decimals),
                           addressFrom: addressFrom,
                           addressTo: addressTo,
@@ -752,17 +741,18 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               double.parse(exit.balance) /
                                   pow(10, exit.token.decimals),
                               exit.token.decimals);
-                          Uint8List data = await widget.arguments.store
-                              .signWithdraw(
+                          gasLimit = await widget.arguments.store
+                              .withdrawGasLimit(
                                   amountWithdraw, null, exit, false, true);
-                          gasLimit = await widget.arguments.store.getGasLimit(
-                              addressFrom, addressTo, BigInt.zero,
-                              data: data);
                         } catch (e) {
-                          int offset = GAS_LIMIT_OFFSET;
-                          gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-                          gasLimit += BigInt.from(offset);
-                          gasLimit += BigInt.from(offset);
+                          // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
+                          gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+                          exit.merkleProof.siblings.forEach((element) {
+                            gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
+                          });
+                          if (exit.token.id != 0) {
+                            gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+                          }
                         }
 
                         Navigator.of(widget.arguments.parentContext)
@@ -777,11 +767,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   feeAccount: feeAccount,
                                   gasLimit: gasLimit.toInt(),
                                   gasPrice: gasPrice.toInt(),
-                                  //account: widget.arguments.account,
                                   exit: exit,
                                   amount: double.parse(exit.balance) /
                                       pow(10, exit.token.decimals),
-                                  addressFrom: exit.hezEthereumAddress,
+                                  addressFrom: addressFrom,
                                   addressTo: addressTo,
                                 ))
                             .then((value) => _onRefresh());
@@ -875,6 +864,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         }
       }
     }
+
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));
     return result;

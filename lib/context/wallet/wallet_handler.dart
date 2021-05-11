@@ -656,7 +656,7 @@ class WalletHandler {
         gasPrice: gasPrice);
   }
 
-  Future<Uint8List> signWithdraw(BigInt amount, Account account, Exit exit,
+  Future<BigInt> withdrawGasLimit(BigInt amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
     //_store.dispatch(TransactionStarted());
 
@@ -664,15 +664,14 @@ class WalletHandler {
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    return _hermezService.signWithdraw(
+    return _hermezService.withdrawGasLimit(
         amount,
         account,
         exit,
         completeDelayedWithdrawal,
         instantWithdrawal,
         hermezAddress,
-        hermezWallet.publicKeyCompressedHex,
-        state.ethereumPrivateKey);
+        hermezWallet.publicKeyCompressedHex);
   }
 
   Future<bool> withdraw(BigInt amount, Account account, Exit exit,
@@ -703,10 +702,18 @@ class WalletHandler {
     _store.dispatch(TransactionFinished());
   }
 
-  Future<bool> forceExit(BigInt amount, Account account) {
+  Future<BigInt> forceExitGasLimit(BigInt amount, Account account) async {
+    //_store.dispatch(TransactionStarted());
+    final hermezAddress = await _configurationService.getHermezAddress();
+    return _hermezService.forceExitGasLimit(amount, hermezAddress, account);
+  }
+
+  Future<bool> forceExit(BigInt amount, Account account,
+      {int gasLimit, int gasPrice}) {
     _store.dispatch(TransactionStarted());
 
-    return _hermezService.forceExit(amount, account, state.ethereumPrivateKey);
+    return _hermezService.forceExit(amount, account, state.ethereumPrivateKey,
+        gasLimit: gasLimit, gasPrice: gasPrice);
   }
 
   Future<bool> exit(double amount, Account account, double fee) async {

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
 
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/api.dart' as api;
@@ -268,22 +267,20 @@ class HermezService implements IHermezService {
     return gasLimit;
   }
 
-  Future<Uint8List> signWithdraw(
+  Future<BigInt> withdrawGasLimit(
       BigInt amount,
       Account account,
       Exit exit,
       bool completeDelayedWithdrawal,
       bool instantWithdrawal,
       String hezEthereumAddress,
-      String babyJubJub,
-      String privateKey) async {
-    //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-
+      String babyJubJub) async {
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
-      return tx.signWithdraw(
+      return tx.withdrawGasLimit(
           amount,
+          hezEthereumAddress,
           exit != null
               ? exit.accountIndex
               : "hez:" + account.token.symbol + ":0",
@@ -292,10 +289,10 @@ class HermezService implements IHermezService {
           exit != null ? BigInt.from(exit.batchNum) : BigInt.zero,
           exit.merkleProof.siblings != null ? exit.merkleProof.siblings : [],
           client,
-          privateKey,
           isInstant: isIntant);
     } else {
-      return tx.signDelayedWithdraw(account.token, client, privateKey);
+      return tx.delayedWithdrawGasLimit(
+          hezEthereumAddress, account.token, client);
     }
   }
 
@@ -383,15 +380,27 @@ class HermezService implements IHermezService {
     }
   }
 
+  Future<BigInt> forceExitGasLimit(
+      BigInt amount, String hezEthereumAddress, Account account) async {
+    return await tx.forceExitGasLimit(
+        hezEthereumAddress,
+        HermezCompressedAmount.compressAmount(amount.toDouble()),
+        account.accountIndex,
+        account.token,
+        client);
+  }
+
   @override
   Future<bool> forceExit(BigInt amount, Account account, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasPrice = GAS_MULTIPLIER}) async {
-    return tx.forceExit(
-            HermezCompressedAmount.compressAmount(amount.toDouble()),
-            account.accountIndex,
-            account.token,
-            client,
-            privateKey) !=
-        null;
+    final txHash = await tx.forceExit(
+        HermezCompressedAmount.compressAmount(amount.toDouble()),
+        account.accountIndex,
+        account.token,
+        client,
+        privateKey,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice);
+    return txHash != null;
   }
 }

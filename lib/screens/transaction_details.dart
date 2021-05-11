@@ -14,7 +14,6 @@ import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/utils.dart';
-import 'package:web3dart/web3dart.dart' as web3;
 
 import '../components/wallet/transaction_details_form.dart';
 import '../context/transfer/wallet_transfer_provider.dart';
@@ -437,17 +436,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         break;
       case TransactionType.FORCEEXIT:
         {
+          final amountExit = getTokenAmountBigInt(
+              widget.arguments.amount, widget.arguments.token.decimals);
+
           return await widget.arguments.wallet.forceExit(
-            web3.EtherAmount.fromUnitAndValue(
-                    web3.EtherUnit.wei,
-                    (widget.arguments.amount *
-                            BigInt.from(10).pow(18).toDouble())
-                        .toInt())
-                .getInWei,
-            widget.arguments.account,
-            /*gasLimit: widget.arguments.gasLimit,
-              gasPrice: widget.arguments.gasPrice*/
-          );
+              amountExit, widget.arguments.account,
+              gasLimit: widget.arguments.gasLimit,
+              gasPrice: widget.arguments.gasPrice);
         }
         break;
       case TransactionType.WITHDRAW:
@@ -469,6 +464,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         {
           final fees = await widget.arguments.wallet.fetchFees();
           final transactionFee = getFee(fees, true);
+
+          final amountExit = getTokenAmountBigInt(
+              widget.arguments.amount, widget.arguments.token.decimals);
 
           return await widget.arguments.wallet.exit(
               widget.arguments.amount *
@@ -512,10 +510,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     if (widget.arguments.fee != null &&
         widget.arguments.feeToken != null &&
         widget.arguments.feeAccount != null) {
-      return double.parse((widget.arguments.fee.toDouble() /
-                  pow(10, widget.arguments.feeToken.decimals))
-              .toStringAsFixed(6)) >
-          double.parse(widget.arguments.feeAccount.balance);
+      return BigInt.parse(widget.arguments.feeAccount.balance) >
+          BigInt.from(widget.arguments.fee);
     } else {
       return true;
     }
