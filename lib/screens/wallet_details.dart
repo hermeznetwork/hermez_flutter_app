@@ -607,71 +607,218 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .split('.')
                   .last;
 
-              return WithdrawalRow(
-                  exit, 2, currency, widget.arguments.store.state.exchangeRatio,
+              return Stack(/*alignment: Alignment.center,*/ children: <Widget>[
+                Positioned(
+                    //top: 10,
+                    child: WithdrawalRow(
+                  exit,
+                  1,
+                  currency,
+                  widget.arguments.store.state.exchangeRatio,
                   () async {
-                BigInt gasPrice = BigInt.one;
-                GasPriceResponse gasPriceResponse =
-                    await widget.arguments.store.getGasPrice();
-                switch (widget.arguments.store.state.defaultFee) {
-                  case WalletDefaultFee.SLOW:
-                    int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
-                    gasPrice = BigInt.from(gasPriceFloor);
-                    break;
-                  case WalletDefaultFee.AVERAGE:
-                    int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
-                    gasPrice = BigInt.from(gasPriceFloor);
-                    break;
-                  case WalletDefaultFee.FAST:
-                    int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
-                    gasPrice = BigInt.from(gasPriceFloor);
-                    break;
-                }
-                String addressFrom = exit.hezEthereumAddress;
-                String addressTo = getCurrentEnvironment().contracts['Hermez'];
+                    BigInt gasPrice = BigInt.one;
+                    GasPriceResponse gasPriceResponse =
+                        await widget.arguments.store.getGasPrice();
+                    switch (widget.arguments.store.state.defaultFee) {
+                      case WalletDefaultFee.SLOW:
+                        int gasPriceFloor =
+                            gasPriceResponse.safeLow * pow(10, 8);
+                        gasPrice = BigInt.from(gasPriceFloor);
+                        break;
+                      case WalletDefaultFee.AVERAGE:
+                        int gasPriceFloor =
+                            gasPriceResponse.average * pow(10, 8);
+                        gasPrice = BigInt.from(gasPriceFloor);
+                        break;
+                      case WalletDefaultFee.FAST:
+                        int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
+                        gasPrice = BigInt.from(gasPriceFloor);
+                        break;
+                    }
+                    String addressFrom = exit.hezEthereumAddress;
+                    String addressTo =
+                        getCurrentEnvironment().contracts['Hermez'];
 
-                BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-                final amountWithdraw = getTokenAmountBigInt(
-                    double.parse(exit.balance) / pow(10, exit.token.decimals),
-                    exit.token.decimals);
-                try {
-                  gasLimit = await widget.arguments.store.withdrawGasLimit(
-                      amountWithdraw, null, exit, false, true);
-                } catch (e) {
-                  // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
-                  gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
-                  exit.merkleProof.siblings.forEach((element) {
-                    gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
-                  });
-                  if (exit.token.id != 0) {
-                    gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+                    BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                    final amountWithdraw = getTokenAmountBigInt(
+                        double.parse(exit.balance) /
+                            pow(10, exit.token.decimals),
+                        exit.token.decimals);
+                    try {
+                      gasLimit = await widget.arguments.store.withdrawGasLimit(
+                          amountWithdraw, null, exit, false, true);
+                    } catch (e) {
+                      // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
+                      gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+                      exit.merkleProof.siblings.forEach((element) {
+                        gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
+                      });
+                      if (exit.token.id != 0) {
+                        gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+                      }
+                    }
+                    int offset = GAS_LIMIT_OFFSET;
+                    gasLimit += BigInt.from(offset);
+                    Token feeToken = await getEthereumToken();
+                    Account feeAccount = await getEthereumAccount();
+
+                    Navigator.of(widget.arguments.parentContext)
+                        .pushNamed("/transaction_details",
+                            arguments: TransactionDetailsArguments(
+                              wallet: widget.arguments.store,
+                              transactionType: TransactionType.WITHDRAW,
+                              status: TransactionStatus.DRAFT,
+                              token: exit.token,
+                              fee: gasLimit.toInt() * gasPrice.toDouble(),
+                              feeToken: feeToken,
+                              feeAccount: feeAccount,
+                              gasLimit: gasLimit.toInt(),
+                              gasPrice: gasPrice.toInt(),
+                              exit: exit,
+                              amount: amountWithdraw.toDouble() /
+                                  pow(10, exit.token.decimals),
+                              addressFrom: addressFrom,
+                              addressTo: addressTo,
+                            ))
+                        .then((value) => _onRefresh());
+                  },
+                  position: 3,
+                )),
+                Positioned(
+                    //top: 10,
+                    child: WithdrawalRow(exit, 1, currency,
+                        widget.arguments.store.state.exchangeRatio, () async {
+                  BigInt gasPrice = BigInt.one;
+                  GasPriceResponse gasPriceResponse =
+                      await widget.arguments.store.getGasPrice();
+                  switch (widget.arguments.store.state.defaultFee) {
+                    case WalletDefaultFee.SLOW:
+                      int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                    case WalletDefaultFee.AVERAGE:
+                      int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                    case WalletDefaultFee.FAST:
+                      int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
                   }
-                }
-                int offset = GAS_LIMIT_OFFSET;
-                gasLimit += BigInt.from(offset);
-                Token feeToken = await getEthereumToken();
-                Account feeAccount = await getEthereumAccount();
+                  String addressFrom = exit.hezEthereumAddress;
+                  String addressTo =
+                      getCurrentEnvironment().contracts['Hermez'];
 
-                Navigator.of(widget.arguments.parentContext)
-                    .pushNamed("/transaction_details",
-                        arguments: TransactionDetailsArguments(
-                          wallet: widget.arguments.store,
-                          transactionType: TransactionType.WITHDRAW,
-                          status: TransactionStatus.DRAFT,
-                          token: exit.token,
-                          fee: gasLimit.toInt() * gasPrice.toDouble(),
-                          feeToken: feeToken,
-                          feeAccount: feeAccount,
-                          gasLimit: gasLimit.toInt(),
-                          gasPrice: gasPrice.toInt(),
-                          exit: exit,
-                          amount: amountWithdraw.toDouble() /
-                              pow(10, exit.token.decimals),
-                          addressFrom: addressFrom,
-                          addressTo: addressTo,
-                        ))
-                    .then((value) => _onRefresh());
-              });
+                  BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                  final amountWithdraw = getTokenAmountBigInt(
+                      double.parse(exit.balance) / pow(10, exit.token.decimals),
+                      exit.token.decimals);
+                  try {
+                    gasLimit = await widget.arguments.store.withdrawGasLimit(
+                        amountWithdraw, null, exit, false, true);
+                  } catch (e) {
+                    // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
+                    gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+                    exit.merkleProof.siblings.forEach((element) {
+                      gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
+                    });
+                    if (exit.token.id != 0) {
+                      gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+                    }
+                  }
+                  int offset = GAS_LIMIT_OFFSET;
+                  gasLimit += BigInt.from(offset);
+                  Token feeToken = await getEthereumToken();
+                  Account feeAccount = await getEthereumAccount();
+
+                  Navigator.of(widget.arguments.parentContext)
+                      .pushNamed("/transaction_details",
+                          arguments: TransactionDetailsArguments(
+                            wallet: widget.arguments.store,
+                            transactionType: TransactionType.WITHDRAW,
+                            status: TransactionStatus.DRAFT,
+                            token: exit.token,
+                            fee: gasLimit.toInt() * gasPrice.toDouble(),
+                            feeToken: feeToken,
+                            feeAccount: feeAccount,
+                            gasLimit: gasLimit.toInt(),
+                            gasPrice: gasPrice.toInt(),
+                            exit: exit,
+                            amount: amountWithdraw.toDouble() /
+                                pow(10, exit.token.decimals),
+                            addressFrom: addressFrom,
+                            addressTo: addressTo,
+                          ))
+                      .then((value) => _onRefresh());
+                }, position: 2)),
+                Positioned(
+                    //top: 10,
+                    child: WithdrawalRow(exit, 2, currency,
+                        widget.arguments.store.state.exchangeRatio, () async {
+                  BigInt gasPrice = BigInt.one;
+                  GasPriceResponse gasPriceResponse =
+                      await widget.arguments.store.getGasPrice();
+                  switch (widget.arguments.store.state.defaultFee) {
+                    case WalletDefaultFee.SLOW:
+                      int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                    case WalletDefaultFee.AVERAGE:
+                      int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                    case WalletDefaultFee.FAST:
+                      int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                  }
+                  String addressFrom = exit.hezEthereumAddress;
+                  String addressTo =
+                      getCurrentEnvironment().contracts['Hermez'];
+
+                  BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                  final amountWithdraw = getTokenAmountBigInt(
+                      double.parse(exit.balance) / pow(10, exit.token.decimals),
+                      exit.token.decimals);
+                  try {
+                    gasLimit = await widget.arguments.store.withdrawGasLimit(
+                        amountWithdraw, null, exit, false, true);
+                  } catch (e) {
+                    // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
+                    gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+                    exit.merkleProof.siblings.forEach((element) {
+                      gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
+                    });
+                    if (exit.token.id != 0) {
+                      gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+                    }
+                  }
+                  int offset = GAS_LIMIT_OFFSET;
+                  gasLimit += BigInt.from(offset);
+                  Token feeToken = await getEthereumToken();
+                  Account feeAccount = await getEthereumAccount();
+
+                  Navigator.of(widget.arguments.parentContext)
+                      .pushNamed("/transaction_details",
+                          arguments: TransactionDetailsArguments(
+                            wallet: widget.arguments.store,
+                            transactionType: TransactionType.WITHDRAW,
+                            status: TransactionStatus.DRAFT,
+                            token: exit.token,
+                            fee: gasLimit.toInt() * gasPrice.toDouble(),
+                            feeToken: feeToken,
+                            feeAccount: feeAccount,
+                            gasLimit: gasLimit.toInt(),
+                            gasPrice: gasPrice.toInt(),
+                            exit: exit,
+                            amount: amountWithdraw.toDouble() /
+                                pow(10, exit.token.decimals),
+                            addressFrom: addressFrom,
+                            addressTo: addressTo,
+                          ))
+                      .then((value) => _onRefresh());
+                }))
+              ]);
             } else if (i == 0 && _pendingWithdraws.length > 0) {
               final index = i;
               final pendingWithdraw = _pendingWithdraws[index];
