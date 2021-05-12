@@ -387,8 +387,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       textColor: HermezColors.blackTwo,
                       child: Column(
                         children: <Widget>[
-                          Image.asset(
-                            "assets/send2.png",
+                          SvgPicture.asset(
+                            "assets/bt_send.svg",
                             width: 80,
                             height: 80,
                           ),
@@ -441,8 +441,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     textColor: HermezColors.blackTwo,
                     child: Column(
                       children: <Widget>[
-                        Image.asset(
-                          "assets/receive2.png",
+                        SvgPicture.asset(
+                          "assets/bt_receive.svg",
                           width: 80,
                           height: 80,
                         ),
@@ -697,7 +697,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               int step = 3;
               if (pendingWithdraw['status'] == 'pending') {
                 step = 3;
-              } else if (pendingWithdraw['status'] == 'fail') {
+              } else if (pendingWithdraw['status'] == 'fail' ||
+                  pendingWithdraw['status'] == 'initiated') {
                 step = 2;
               }
 
@@ -776,7 +777,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             .then((value) => _onRefresh());
                       }
                     : () {},
-                retry: true,
+                retry: pendingWithdraw['status'] == 'fail',
               );
             } // final index = i ~/ 2; //get the actual index excluding dividers.
             else {

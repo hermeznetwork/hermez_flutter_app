@@ -167,8 +167,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                     var success = false;
                                     if (widget.arguments.wallet.state.txLevel ==
                                             TransactionLevel.LEVEL1 &&
-                                        widget.arguments.transactionType !=
-                                            TransactionType.DEPOSIT) {
+                                        widget.arguments.transactionType ==
+                                            TransactionType.SEND) {
                                       if (widget.arguments.token.id == 0) {
                                         success =
                                             await transferStore.transferEth(
@@ -219,16 +219,31 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                             Navigator.pop(context);
                                           }
                                         });
+                                      } else if (widget
+                                              .arguments.transactionType ==
+                                          TransactionType.FORCEEXIT) {
+                                        Navigator.of(context)
+                                            .pushNamed("/info",
+                                                arguments: InfoArguments(
+                                                    "success.png",
+                                                    true,
+                                                    "Your transaction is awaiting verification.",
+                                                    iconSize: 300))
+                                            .then((value) {
+                                          Navigator.pushNamedAndRemoveUntil(
+                                              context,
+                                              "/home",
+                                              (Route<dynamic> route) => false,
+                                              arguments: true);
+                                        });
                                       } else {
                                         Navigator.of(context)
-                                            .pushNamed(
-                                          "/info",
-                                          arguments: InfoArguments(
-                                              "success.png",
-                                              true,
-                                              "Your transaction is awaiting verification.",
-                                              iconSize: 300),
-                                        )
+                                            .pushNamed("/info",
+                                                arguments: InfoArguments(
+                                                    "success.png",
+                                                    true,
+                                                    "Your transaction is awaiting verification.",
+                                                    iconSize: 300))
                                             .then((value) {
                                           if (Navigator.canPop(context)) {
                                             Navigator.pop(context);

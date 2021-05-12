@@ -64,7 +64,8 @@ abstract class IHermezService {
       String privateKey,
       {int gasLimit = GAS_LIMIT_HIGH,
       int gasPrice = GAS_MULTIPLIER});
-  Future<bool> forceExit(BigInt amount, Account account, String privateKey,
+  Future<bool> forceExit(BigInt amount, String hezEthereumAddress,
+      Account account, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasPrice = GAS_MULTIPLIER});
   Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token);
@@ -308,7 +309,7 @@ class HermezService implements IHermezService {
       String privateKey,
       {int gasLimit = GAS_LIMIT_HIGH,
       int gasPrice = GAS_MULTIPLIER}) async {
-    final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+    //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
 
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
@@ -331,26 +332,25 @@ class HermezService implements IHermezService {
             .then((txHash) async {
           if (txHash != null) {
             if (isIntant) {
-              if (_configService.getPendingWithdraw(withdrawalId) != null) {
-                _configService.removePendingWithdraw(withdrawalId);
+              if (_configService.getPendingWithdraw(txHash) != null) {
+                _configService.removePendingWithdraw(txHash);
               }
               _configService.addPendingWithdraw({
+                'id': txHash,
                 'hermezEthereumAddress': hezEthereumAddress,
-                'id': withdrawalId,
                 'itemId': exit.itemId,
                 'accountIndex': exit.accountIndex,
                 'batchNum': exit.batchNum,
                 'amount': amount.toDouble(),
                 'token': exit.token.toJson(),
-                'hash': txHash,
                 'status': 'pending'
               });
             } else {
-              if (_configService.getPendingWithdraw(withdrawalId) != null) {
-                _configService.removePendingDelayedWithdraw(withdrawalId);
+              if (_configService.getPendingWithdraw(txHash) != null) {
+                _configService.removePendingDelayedWithdraw(txHash);
               }
               _configService.addPendingDelayedWithdraw({
-                'id': withdrawalId,
+                'id': txHash,
                 'itemId': exit.itemId,
                 'accountIndex': exit.accountIndex,
                 'batchNum': exit.batchNum,
@@ -358,7 +358,6 @@ class HermezService implements IHermezService {
                 'date': DateTime.now(),
                 'amount': amount.toDouble(),
                 'token': exit.token.toJson(),
-                'hash': txHash,
                 'status': 'pending'
               });
             }
@@ -371,9 +370,15 @@ class HermezService implements IHermezService {
       }
     } else {
       try {
-        tx.delayedWithdraw(account.token, client, privateKey).then(
-            (value) async =>
-                {_configService.removePendingDelayedWithdraw(withdrawalId)});
+        final txHash =
+            await tx.delayedWithdraw(account.token, client, privateKey).then(
+          (txHash) async {
+            if (txHash != null) {
+              _configService.removePendingDelayedWithdraw(txHash);
+            }
+          },
+        );
+        return txHash != null;
       } catch (error) {
         print(error);
       }
@@ -391,16 +396,34 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<bool> forceExit(BigInt amount, Account account, String privateKey,
+  Future<bool> forceExit(BigInt amount, String hezEthereumAddress,
+      Account account, String privateKey,
       {int gasLimit = GAS_LIMIT, int gasPrice = GAS_MULTIPLIER}) async {
-    final txHash = await tx.forceExit(
-        HermezCompressedAmount.compressAmount(amount.toDouble()),
-        account.accountIndex,
-        account.token,
-        client,
-        privateKey,
-        gasLimit: gasLimit,
-        gasPrice: gasPrice);
-    return txHash != null;
+    try {
+      final txHash = await tx
+          .forceExit(HermezCompressedAmount.compressAmount(amount.toDouble()),
+              account.accountIndex, account.token, client, privateKey,
+              gasLimit: gasLimit, gasPrice: gasPrice)
+          .then((txHash) async {
+        if (txHash != null) {
+          if (_configService.getPendingWithdraw(txHash) != null) {
+            _configService.removePendingWithdraw(txHash);
+          }
+          _configService.addPendingWithdraw({
+            'id': txHash,
+            'hermezEthereumAddress': hezEthereumAddress,
+            'accountIndex': account.accountIndex,
+            //'batchNum': exit.batchNum,
+            'amount': amount.toDouble(),
+            'token': account.token.toJson(),
+            'status': 'initiated'
+          });
+        }
+        return txHash;
+      });
+      return txHash != null;
+    } catch (error) {
+      print(error);
+    }
   }
 }

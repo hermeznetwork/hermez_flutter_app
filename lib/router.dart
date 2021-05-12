@@ -44,7 +44,16 @@ Map<String, WidgetBuilder> getRoutes(context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
-          return HomePage(store, configurationService);
+          final bool showHermezWallet =
+              ModalRoute.of(context).settings.arguments;
+          HomeArguments args;
+          if (showHermezWallet != null) {
+            args = HomeArguments(store, configurationService,
+                showHermezWallet: showHermezWallet);
+          } else {
+            args = HomeArguments(store, configurationService);
+          }
+          return HomePage(arguments: args);
         });
       } else {
         return WalletSetupProvider(builder: (context, store) {
@@ -119,7 +128,10 @@ Map<String, WidgetBuilder> getRoutes(context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
-          return FirstDepositPage(store: store);
+          bool showHermezWallet = ModalRoute.of(context).settings.arguments;
+          return FirstDepositPage(
+              arguments: FirstDepositArguments(store,
+                  showHermezWallet: showHermezWallet));
         });
       }
       return WalletSetupProvider(builder: (context, store) {

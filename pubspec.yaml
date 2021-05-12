@@ -80,6 +80,7 @@ dependencies:
   another_flushbar: ^1.10.20
   after_layout: ^1.1.0
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -119,16 +120,18 @@ flutter:
     - info_backup.png
 
     # Remove account
-    - remove_account.png
     - remove_account_warning.png
     # Home
-    - receive2.png
-    - settings2.png
-    - home_tab_item.png
+    - bt_move.svg
+    - bt_receive.svg
+    - bt_send.svg
+    - tab_home.svg
+    - tab_scan.svg
+    - tab_settings.svg
     - move.png
     - hermez_logo.png
     - ethereum_logo.png
-    - move2.png
+
     - change_move_enable.png
     - change_move_disable.png
     - deposit3.png
@@ -139,8 +142,9 @@ flutter:
     # Account Details
     - tx_send.png
     - tx_receive.png
-    - tx_withdraw.png
+    # - tx_receive.svg
     - tx_move.png
+    # - tx_move.svg
 
     # Settings
     - settings_currency_conversion.svg
@@ -155,12 +159,14 @@ flutter:
     - settings_remove_account.svg
 
     # Scanner
-    - switch_camera.png
+    - switch_camera.svg
     - flash_on.png
-    - flash_off.png
+    # - flash_on.svg
+    - flash_off.svg
 
     # Amount
     - fee_arrow.svg
+    - deposit.png
 
     - partialERC20ABI.json
     - ERC20ABI.json
@@ -169,14 +175,10 @@ flutter:
     - account.png
     - wallet.png
     - search.png
-    - send.png
-    - send2.png
     - label.png
-    - home.png
     - transfer.png
     - list.png
-    - deposit.png
-    - deposit2.png
+
     - add.png
     - warning.png
     - pending.png
@@ -184,11 +186,9 @@ flutter:
     - arrow_down.png
     - arrows_up_down.png
     - success.png
-    - settings.png
-    - scan.png
+    - scan.svg
     - withdraw.png
     - withdraw2.png
-    - tx_deposit.png
     - show_explorer.png
     - paste.png
     - force_exit.png
@@ -207,19 +207,13 @@ flutter:
     - family: MyFlutterApp
       fonts:
         - asset: fonts/MyFlutterApp.ttf
-  # fonts:
     - family: ModernEra
       fonts:
         - asset: fonts/ModernEra-Bold.ttf
         - asset: fonts/ModernEra-ExtraBold.ttf
         - asset: fonts/ModernEra-Medium.ttf
         - asset: fonts/ModernEra-Regular.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
+
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

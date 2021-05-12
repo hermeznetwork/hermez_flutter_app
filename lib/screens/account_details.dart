@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/qrcode.dart';
@@ -268,7 +269,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             textColor: HermezColors.blackTwo,
             child: Column(
               children: <Widget>[
-                Image.asset("assets/send2.png"),
+                SvgPicture.asset("assets/bt_send.svg"),
                 Text(
                   'Send',
                   style: TextStyle(
@@ -317,7 +318,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 SizedBox(
                   height: 5,
                 ),
-                Image.asset("assets/receive2.png"),
+                SvgPicture.asset("assets/bt_receive.svg"),
                 Text(
                   'Receive',
                   style: TextStyle(
@@ -356,7 +357,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 textColor: HermezColors.blackTwo,
                 child: Column(
                   children: <Widget>[
-                    Image.asset("assets/move2.png"),
+                    SvgPicture.asset("assets/bt_move.svg"),
                     Text(
                       'Move',
                       style: TextStyle(

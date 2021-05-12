@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
 import 'package:hermez/screens/qrcode_scanner.dart';
@@ -19,11 +20,19 @@ import 'account_details.dart';
 import 'fee_selector.dart';
 import 'transaction_details.dart';
 
-class HomePage extends StatefulWidget {
-  HomePage(this.store, this.configurationService);
-
+class HomeArguments {
+  bool showHermezWallet;
   final WalletHandler store;
   final ConfigurationService configurationService;
+
+  HomeArguments(this.store, this.configurationService,
+      {this.showHermezWallet = false});
+}
+
+class HomePage extends StatefulWidget {
+  HomePage({Key key, this.arguments}) : super(key: key);
+
+  final HomeArguments arguments;
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -32,42 +41,45 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   ValueNotifier _currentIndex;
   List<Widget> children;
+  Navigator navigator;
+  BuildContext _context;
 
   //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<TabNavigationItem> items;
 
+  bool showHermezWallet = false;
+
   @override
   void initState() {
-    widget.store.initialise();
+    widget.arguments.store.initialise();
+    showHermezWallet = widget.arguments.showHermezWallet;
     _currentIndex = ValueNotifier(0);
     items = [
       TabNavigationItem(
-        page: WalletSelectorPage(store: widget.store, parentContext: context),
-        icon: ImageIcon(
-          AssetImage('assets/home_tab_item.png'),
-        ),
+        page: WalletSelectorPage(
+            arguments: WalletSelectorArguments(widget.arguments.store, context,
+                showHermezWallet: showHermezWallet, hermezWalletShown: () {
+          showHermezWallet = false;
+        })),
+        icon: SvgPicture.asset('assets/tab_home.svg'),
         title: "Home",
       ),
       TabNavigationItem(
         page: Container(),
-        icon: ImageIcon(
-          AssetImage('assets/scan.png'),
-        ),
+        icon: SvgPicture.asset('assets/tab_scan.svg'),
         title: "QR Scan",
       ),
       TabNavigationItem(
         page: settingsPage(context),
         icon: Stack(children: [
-          ImageIcon(
-            AssetImage('assets/settings2.png'),
-          ),
+          SvgPicture.asset('assets/tab_settings.svg'),
           Positioned(
               bottom: -1,
               right: -1,
               child: Stack(
                 children: [
-                  widget.configurationService.didBackupWallet()
+                  widget.arguments.configurationService.didBackupWallet()
                       ? Container()
                       : Icon(Icons.brightness_1,
                           size: 8.0, color: HermezColors.darkOrange)
@@ -80,8 +92,9 @@ class _HomePageState extends State<HomePage> {
     children = [
       for (final tabItem in items)
         Navigator(onGenerateRoute: (settings) {
+          _context = context;
           Widget page = tabItem.page;
-          if (settings.name == 'home') {
+          if (settings.name == 'wallet_details') {
             page = WalletDetailsPage(
               arguments: settings.arguments,
             );
@@ -92,10 +105,10 @@ class _HomePageState extends State<HomePage> {
                 arguments: settings.arguments,
                 configurationService: configurationService);
           } else if (settings.name == 'currency_selector') {
-            page = SettingsCurrencyPage(store: widget.store);
+            page = SettingsCurrencyPage(store: widget.arguments.store);
           } else if (settings.name == 'fee_selector') {
-            page =
-                FeeSelectorPage(arguments: FeeSelectorArguments(widget.store));
+            page = FeeSelectorPage(
+                arguments: FeeSelectorArguments(widget.arguments.store));
           } else if (settings.name == 'account_details') {
             final AccountDetailsArguments args = settings.arguments;
             page = AccountDetailsPage(arguments: args);
@@ -106,6 +119,7 @@ class _HomePageState extends State<HomePage> {
               },
             );
           }
+
           return MaterialPageRoute(builder: (_) => page);
         }),
     ];
@@ -141,7 +155,7 @@ class _HomePageState extends State<HomePage> {
       Navigator.of(context).pushNamed(
         "/scanner",
         arguments: QRCodeScannerArguments(
-          store: widget.store,
+          store: widget.arguments.store,
           type: QRCodeScannerType.ALL,
           closeWhenScanned: false,
           onScanned: (value) async {
@@ -151,14 +165,16 @@ class _HomePageState extends State<HomePage> {
                 if (scannedStrings.length > 1) {
                   bool accountFound = false;
                   List<Account> accounts =
-                      await widget.store.getL1Accounts(true);
+                      await widget.arguments.store.getL1Accounts(true);
                   for (Account account in accounts) {
                     if (account.token.symbol == scannedStrings[1]) {
                       accountFound = true;
                       Navigator.pushReplacementNamed(
                           context, "/transaction_amount",
-                          arguments: TransactionAmountArguments(widget.store,
-                              TransactionLevel.LEVEL1, TransactionType.SEND,
+                          arguments: TransactionAmountArguments(
+                              widget.arguments.store,
+                              TransactionLevel.LEVEL1,
+                              TransactionType.SEND,
                               account: account,
                               addressTo: scannedStrings[0],
                               amount: double.parse(scannedStrings[2]),
@@ -169,28 +185,35 @@ class _HomePageState extends State<HomePage> {
                   if (accountFound == false) {
                     Navigator.pushReplacementNamed(
                         context, "/transaction_amount",
-                        arguments: TransactionAmountArguments(widget.store,
-                            TransactionLevel.LEVEL1, TransactionType.SEND,
+                        arguments: TransactionAmountArguments(
+                            widget.arguments.store,
+                            TransactionLevel.LEVEL1,
+                            TransactionType.SEND,
                             addressTo: scannedStrings[0]));
                   }
                 } else {
                   Navigator.pushReplacementNamed(context, "/transaction_amount",
-                      arguments: TransactionAmountArguments(widget.store,
-                          TransactionLevel.LEVEL1, TransactionType.SEND,
+                      arguments: TransactionAmountArguments(
+                          widget.arguments.store,
+                          TransactionLevel.LEVEL1,
+                          TransactionType.SEND,
                           addressTo: scannedStrings[0]));
                 }
               } else if (isHermezEthereumAddress(
                   scannedStrings[0] + ":" + scannedStrings[1])) {
                 if (scannedStrings.length > 2) {
                   bool accountFound = false;
-                  List<Account> accounts = await widget.store.getAccounts();
+                  List<Account> accounts =
+                      await widget.arguments.store.getAccounts();
                   for (Account account in accounts) {
                     if (account.token.symbol == scannedStrings[2]) {
                       accountFound = true;
                       Navigator.pushReplacementNamed(
                           context, "/transaction_amount",
-                          arguments: TransactionAmountArguments(widget.store,
-                              TransactionLevel.LEVEL2, TransactionType.SEND,
+                          arguments: TransactionAmountArguments(
+                              widget.arguments.store,
+                              TransactionLevel.LEVEL2,
+                              TransactionType.SEND,
                               account: account,
                               addressTo:
                                   scannedStrings[0] + ":" + scannedStrings[1],
@@ -202,15 +225,19 @@ class _HomePageState extends State<HomePage> {
                   if (accountFound == false) {
                     Navigator.pushReplacementNamed(
                         context, "/transaction_amount",
-                        arguments: TransactionAmountArguments(widget.store,
-                            TransactionLevel.LEVEL2, TransactionType.SEND,
+                        arguments: TransactionAmountArguments(
+                            widget.arguments.store,
+                            TransactionLevel.LEVEL2,
+                            TransactionType.SEND,
                             addressTo:
                                 scannedStrings[0] + ":" + scannedStrings[1]));
                   }
                 } else {
                   Navigator.pushReplacementNamed(context, "/transaction_amount",
-                      arguments: TransactionAmountArguments(widget.store,
-                          TransactionLevel.LEVEL2, TransactionType.SEND,
+                      arguments: TransactionAmountArguments(
+                          widget.arguments.store,
+                          TransactionLevel.LEVEL2,
+                          TransactionType.SEND,
                           addressTo:
                               scannedStrings[0] + ":" + scannedStrings[1]));
                 }
@@ -227,14 +254,20 @@ class _HomePageState extends State<HomePage> {
             Navigator(
                 key: GlobalKey(),
                 onGenerateRoute: (settings) {
+                  _context = context;
                   Widget page;
                   if (index == 0) {
                     page = WalletSelectorPage(
-                        store: widget.store, parentContext: context);
+                        arguments: WalletSelectorArguments(
+                            widget.arguments.store, context,
+                            showHermezWallet: showHermezWallet,
+                            hermezWalletShown: () {
+                      showHermezWallet = false;
+                    }));
                   } else if (index == 2) {
                     page = settingsPage(context);
                   }
-                  if (settings.name == 'home') {
+                  if (settings.name == 'wallet_details') {
                     page = WalletDetailsPage(
                       arguments: settings.arguments,
                     );
@@ -246,10 +279,11 @@ class _HomePageState extends State<HomePage> {
                         arguments: settings.arguments,
                         configurationService: configurationService);
                   } else if (settings.name == 'currency_selector') {
-                    page = SettingsCurrencyPage(store: widget.store);
+                    page = SettingsCurrencyPage(store: widget.arguments.store);
                   } else if (settings.name == 'fee_selector') {
                     page = FeeSelectorPage(
-                        arguments: FeeSelectorArguments(widget.store));
+                        arguments:
+                            FeeSelectorArguments(widget.arguments.store));
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
                     page = AccountDetailsPage(arguments: args);
@@ -271,6 +305,6 @@ class _HomePageState extends State<HomePage> {
   Widget settingsPage(dynamic context) {
     var configurationService =
         Provider.of<ConfigurationService>(context, listen: false);
-    return SettingsPage(widget.store, configurationService, context);
+    return SettingsPage(widget.arguments.store, configurationService, context);
   }
 }

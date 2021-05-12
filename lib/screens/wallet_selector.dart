@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/wallet_details.dart';
@@ -17,30 +18,56 @@ import 'transaction_amount.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-class WalletSelectorPage extends StatefulWidget {
-  WalletSelectorPage({Key key, this.store, this.parentContext})
-      : super(key: key);
-
+class WalletSelectorArguments {
+  bool showHermezWallet;
+  Function hermezWalletShown;
   WalletHandler store;
   BuildContext parentContext;
+
+  WalletSelectorArguments(this.store, this.parentContext,
+      {this.showHermezWallet = false, this.hermezWalletShown});
+}
+
+class WalletSelectorPage extends StatefulWidget {
+  WalletSelectorPage({Key key, this.arguments}) : super(key: key);
+
+  WalletSelectorArguments arguments;
 
   @override
   _WalletSelectorPageState createState() => _WalletSelectorPageState();
 }
 
-class _WalletSelectorPageState extends State<WalletSelectorPage> {
+class _WalletSelectorPageState extends State<WalletSelectorPage>
+    with AfterLayoutMixin<WalletSelectorPage> {
   List<Account> l1Accounts;
   List<Account> l2Accounts;
 
   bool isLoading = false;
 
+  @override
+  Future<void> afterFirstLayout(BuildContext context) {
+    if (widget.arguments.showHermezWallet == true) {
+      widget.arguments.store.updateLevel(TransactionLevel.LEVEL2);
+      Navigator.pushNamed(context, 'wallet_details',
+          arguments: WalletDetailsArguments(
+            widget.arguments.store,
+            TransactionLevel.LEVEL2,
+            widget.arguments.parentContext,
+          ));
+      widget.arguments.showHermezWallet = false;
+      if (widget.arguments.hermezWalletShown != null) {
+        widget.arguments.hermezWalletShown();
+      }
+    }
+  }
+
   Future<void> fetchData() async {
     isLoading = true;
-    if (widget.store.state.ethereumAddress == null) {
-      await widget.store.initialise();
+    if (widget.arguments.store.state.ethereumAddress == null) {
+      await widget.arguments.store.initialise();
     }
-    l1Accounts = await widget.store.getL1Accounts(false);
-    l2Accounts = await widget.store.getAccounts();
+    l1Accounts = await widget.arguments.store.getL1Accounts(false);
+    l2Accounts = await widget.arguments.store.getAccounts();
     isLoading = false;
   }
 
@@ -63,14 +90,15 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                       child: Center(
                         child: new GestureDetector(
                           onTap: () {
-                            widget.store.updateLevel(TransactionLevel.LEVEL2);
+                            widget.arguments.store
+                                .updateLevel(TransactionLevel.LEVEL2);
                             Future.delayed(const Duration(milliseconds: 500),
                                 () {
-                              Navigator.pushNamed(context, 'home',
+                              Navigator.pushNamed(context, 'wallet_details',
                                   arguments: WalletDetailsArguments(
-                                    widget.store,
+                                    widget.arguments.store,
                                     TransactionLevel.LEVEL2,
-                                    widget.parentContext,
+                                    widget.arguments.parentContext,
                                   )).then((value) {
                                 setState(() {
                                   l1Accounts = null;
@@ -156,29 +184,31 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                       child: Text(
                                         "hez:" +
                                             "0x" +
-                                            (widget.store.state
-                                                        .ethereumAddress !=
-                                                    null
-                                                ? AddressUtils.strip0x(
-                                                        widget.store.state
-                                                            .ethereumAddress
-                                                            .substring(0, 6))
+                                            (widget.arguments.store.state.ethereumAddress != null
+                                                ? AddressUtils.strip0x(widget
+                                                        .arguments
+                                                        .store
+                                                        .state
+                                                        .ethereumAddress
+                                                        .substring(0, 6))
                                                     .toUpperCase()
                                                 : "") +
                                             " ･･･ " +
-                                            (widget.store.state
-                                                        .ethereumAddress !=
+                                            (widget.arguments.store
+                                                        .state.ethereumAddress !=
                                                     null
-                                                ? widget
-                                                    .store.state.ethereumAddress
+                                                ? widget.arguments.store.state
+                                                    .ethereumAddress
                                                     .substring(
                                                         widget
+                                                                .arguments
                                                                 .store
                                                                 .state
                                                                 .ethereumAddress
                                                                 .length -
                                                             4,
                                                         widget
+                                                            .arguments
                                                             .store
                                                             .state
                                                             .ethereumAddress
@@ -199,16 +229,18 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                           color: Colors.white,
                                         ),
                                         onPressed: () {
-                                          Navigator.of(widget.parentContext)
+                                          Navigator.of(widget
+                                                  .arguments.parentContext)
                                               .pushNamed(
                                             "/qrcode",
                                             arguments: QRCodeArguments(
                                                 qrCodeType: QRCodeType.HERMEZ,
                                                 code: getHermezAddress(widget
+                                                    .arguments
                                                     .store
                                                     .state
                                                     .ethereumAddress),
-                                                store: widget.store,
+                                                store: widget.arguments.store,
                                                 isReceive: true),
                                           );
                                         })
@@ -239,19 +271,22 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                   (l2Accounts == null ||
                                       l2Accounts.length == 0)) {
                                 Navigator.pushNamed(
-                                    widget.parentContext, "/first_deposit");
+                                    widget.arguments.parentContext,
+                                    "/first_deposit",
+                                    arguments: false);
                               } else if (l1Accounts != null &&
                                   l1Accounts.length > 0) {
-                                widget.store
+                                widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL1);
                                 Account account;
                                 if (l1Accounts.length == 1) {
                                   account = l1Accounts[0];
                                 }
                                 Navigator.pushNamed(
-                                    widget.parentContext, "/transaction_amount",
+                                    widget.arguments.parentContext,
+                                    "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                      widget.store,
+                                      widget.arguments.store,
                                       TransactionLevel.LEVEL1,
                                       TransactionType.DEPOSIT,
                                       account: account,
@@ -264,16 +299,17 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                 });
                               } else if (l2Accounts != null &&
                                   l2Accounts.length > 0) {
-                                widget.store
+                                widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL2);
                                 Account account;
                                 if (l2Accounts.length == 1) {
                                   account = l2Accounts[0];
                                 }
                                 Navigator.pushNamed(
-                                    widget.parentContext, "/transaction_amount",
+                                    widget.arguments.parentContext,
+                                    "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                      widget.store,
+                                      widget.arguments.store,
                                       TransactionLevel.LEVEL2,
                                       TransactionType.EXIT,
                                       account: account,
@@ -285,12 +321,13 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                   });
                                 });
                               } else {
-                                widget.store
+                                widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL1);
                                 Navigator.pushNamed(
-                                    widget.parentContext, "/transaction_amount",
+                                    widget.arguments.parentContext,
+                                    "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                      widget.store,
+                                      widget.arguments.store,
                                       TransactionLevel.LEVEL1,
                                       TransactionType.DEPOSIT,
                                       allowChangeLevel: true,
@@ -331,14 +368,15 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                       child: Center(
                         child: new GestureDetector(
                           onTap: () {
-                            widget.store.updateLevel(TransactionLevel.LEVEL1);
+                            widget.arguments.store
+                                .updateLevel(TransactionLevel.LEVEL1);
                             Future.delayed(const Duration(milliseconds: 500),
                                 () {
-                              Navigator.pushNamed(context, 'home',
+                              Navigator.pushNamed(context, 'wallet_details',
                                   arguments: WalletDetailsArguments(
-                                    widget.store,
+                                    widget.arguments.store,
                                     TransactionLevel.LEVEL1,
-                                    widget.parentContext,
+                                    widget.arguments.parentContext,
                                   )).then((value) {
                                 setState(() {
                                   l1Accounts = null;
@@ -423,29 +461,31 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                     Expanded(
                                       child: Text(
                                         "0x" +
-                                            (widget.store.state
-                                                        .ethereumAddress !=
-                                                    null
-                                                ? AddressUtils.strip0x(
-                                                        widget.store.state
-                                                            .ethereumAddress
-                                                            .substring(0, 6))
+                                            (widget.arguments.store.state.ethereumAddress != null
+                                                ? AddressUtils.strip0x(widget
+                                                        .arguments
+                                                        .store
+                                                        .state
+                                                        .ethereumAddress
+                                                        .substring(0, 6))
                                                     .toUpperCase()
                                                 : "") +
                                             " ･･･ " +
-                                            (widget.store.state
-                                                        .ethereumAddress !=
+                                            (widget.arguments.store
+                                                        .state.ethereumAddress !=
                                                     null
-                                                ? widget
-                                                    .store.state.ethereumAddress
+                                                ? widget.arguments.store.state
+                                                    .ethereumAddress
                                                     .substring(
                                                         widget
+                                                                .arguments
                                                                 .store
                                                                 .state
                                                                 .ethereumAddress
                                                                 .length -
                                                             4,
                                                         widget
+                                                            .arguments
                                                             .store
                                                             .state
                                                             .ethereumAddress
@@ -466,14 +506,15 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
                                         color: Colors.white,
                                       ),
                                       onPressed: () {
-                                        Navigator.of(widget.parentContext)
+                                        Navigator.of(
+                                                widget.arguments.parentContext)
                                             .pushNamed(
                                           "/qrcode",
                                           arguments: QRCodeArguments(
                                               qrCodeType: QRCodeType.ETHEREUM,
-                                              code: widget
-                                                  .store.state.ethereumAddress,
-                                              store: widget.store,
+                                              code: widget.arguments.store.state
+                                                  .ethereumAddress,
+                                              store: widget.arguments.store,
                                               isReceive: true),
                                         );
                                         //Navigator.pushNamed(context, 'home');
@@ -501,7 +542,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
     String locale = "";
     String symbol = "";
     final String currency =
-        widget.store.state.defaultCurrency.toString().split('.').last;
+        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
     if (currency == "EUR") {
       locale = 'eu';
       symbol = '€';
@@ -517,7 +558,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage> {
         if (account.token.USD != null) {
           double value = account.token.USD * double.parse(account.balance);
           if (currency != "USD") {
-            value *= widget.store.state.exchangeRatio;
+            value *= widget.arguments.store.state.exchangeRatio;
           }
           resultValue += value;
         }

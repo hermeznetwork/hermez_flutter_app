@@ -91,7 +91,8 @@ class IntroPage extends HookWidget {
                                   Navigator.pushNamedAndRemoveUntil(
                                       context,
                                       "/first_deposit",
-                                      (Route<dynamic> route) => false);
+                                      (Route<dynamic> route) => false,
+                                      arguments: true);
                                 }));
                           }),
                         );

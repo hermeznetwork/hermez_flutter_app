@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -113,12 +114,13 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                                 IconButton(
                                     iconSize: 56,
                                     padding: EdgeInsets.all(0),
-                                    icon: Image.asset(
-                                        snapshot.data == true
-                                            ? "assets/flash_on.png"
-                                            : "assets/flash_off.png",
-                                        width: 56,
-                                        height: 56),
+                                    icon: snapshot.data == true
+                                        ? Image.asset("assets/flash_on.png",
+                                            width: 56, height: 56)
+                                        : SvgPicture.asset(
+                                            "assets/flash_off.svg",
+                                            width: 56,
+                                            height: 56),
                                     onPressed: () async {
                                       await controller?.toggleFlash();
                                       setState(() {});
@@ -133,7 +135,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                     IconButton(
                         iconSize: 56,
                         padding: EdgeInsets.all(0),
-                        icon: Image.asset("assets/switch_camera.png",
+                        icon: SvgPicture.asset("assets/switch_camera.svg",
                             width: 56, height: 56),
                         onPressed: () async {
                           await controller?.flipCamera();

@@ -379,7 +379,7 @@ class WalletHandler {
       final supportedTokens = await _hermezService.getTokens();
       Token token = supportedTokens.firstWhere(
           (supportedToken) => supportedToken.id == tokenId,
-          orElse: null);
+          orElse: () => null);
       if (token != null) {
         if (tokenId == 0) {
           // GET L1 ETH Balance
@@ -541,22 +541,28 @@ class WalletHandler {
     List updateWithdawalIds = [];
     List<dynamic> updatePendingWithdraws = [];
     accountPendingWithdraws.forEach((pendingWithdraw) async {
-      final exit = await getExit(
-          pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
-      if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
-        final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-        removeWithdawalIds.add(withdrawalId);
-        _configurationService.removePendingWithdraw(withdrawalId);
+      final String transactionHash = pendingWithdraw['id'];
+      Exit exit;
+      if (pendingWithdraw['accountIndex'] != null &&
+          pendingWithdraw['batchNum'] != null) {
+        exit = await getExit(
+            pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
+        if ((exit.instantWithdraw != null || exit.delayedWithdraw != null) &&
+            transactionHash != null) {
+          //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+          removeWithdawalIds.add(transactionHash);
+          _configurationService.removePendingWithdraw(transactionHash);
+        }
       }
-      final transactionHash = pendingWithdraw['hash'];
+
       if (transactionHash != null) {
         web3.TransactionInformation txInfo;
         try {
           txInfo = await _contractService.getTransactionByHash(transactionHash);
         } catch (e) {
-          final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-          removeWithdawalIds.add(withdrawalId);
-          _configurationService.removePendingWithdraw(withdrawalId);
+          //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+          removeWithdawalIds.add(transactionHash);
+          _configurationService.removePendingWithdraw(transactionHash);
         }
         if (txInfo != null) {
           web3.TransactionReceipt receipt =
@@ -564,13 +570,18 @@ class WalletHandler {
           if (receipt != null) {
             if (receipt.status == false) {
               // Tx didn't pass
-              String status = 'fail';
-              pendingWithdraw['status'] = status;
-              final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-              updateWithdawalIds.add(withdrawalId);
-              updatePendingWithdraws.add(pendingWithdraw);
-              _configurationService.updatePendingWithdrawStatus(
-                  status, withdrawalId);
+              if (exit == null) {
+                removeWithdawalIds.add(transactionHash);
+                _configurationService.removePendingWithdraw(transactionHash);
+              } else {
+                String status = 'fail';
+                pendingWithdraw['status'] = status;
+                //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+                updateWithdawalIds.add(transactionHash);
+                updatePendingWithdraws.add(pendingWithdraw);
+                _configurationService.updatePendingWithdrawStatus(
+                    status, transactionHash);
+              }
             }
           }
         } else {}
@@ -709,10 +720,11 @@ class WalletHandler {
   }
 
   Future<bool> forceExit(BigInt amount, Account account,
-      {int gasLimit, int gasPrice}) {
+      {int gasLimit, int gasPrice}) async {
     _store.dispatch(TransactionStarted());
-
-    return _hermezService.forceExit(amount, account, state.ethereumPrivateKey,
+    final hermezAddress = await _configurationService.getHermezAddress();
+    return _hermezService.forceExit(
+        amount, hermezAddress, account, state.ethereumPrivateKey,
         gasLimit: gasLimit, gasPrice: gasPrice);
   }
 

@@ -4,10 +4,17 @@ import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 
-class FirstDepositPage extends StatefulWidget {
-  FirstDepositPage({this.store, Key key}) : super(key: key);
-
+class FirstDepositArguments {
   final WalletHandler store;
+  final bool showHermezWallet;
+
+  FirstDepositArguments(this.store, {this.showHermezWallet = false});
+}
+
+class FirstDepositPage extends StatefulWidget {
+  FirstDepositPage({this.arguments, Key key}) : super(key: key);
+
+  final FirstDepositArguments arguments;
 
   @override
   _FirstDepositPageState createState() => _FirstDepositPageState();
@@ -16,7 +23,7 @@ class FirstDepositPage extends StatefulWidget {
 class _FirstDepositPageState extends State<FirstDepositPage> {
   @override
   void initState() {
-    widget.store.initialise();
+    widget.arguments.store.initialise();
     super.initState();
   }
 
@@ -33,7 +40,8 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                       icon: new Icon(Icons.close),
                       onPressed: () {
                         Navigator.pushNamedAndRemoveUntil(
-                            context, "/home", (Route<dynamic> route) => false);
+                            context, "/home", (Route<dynamic> route) => false,
+                            arguments: true);
                       })
                   : Container(),
             ],
@@ -66,9 +74,9 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                     "/qrcode",
                     arguments: QRCodeArguments(
                       qrCodeType: QRCodeType.HERMEZ,
-                      code:
-                          getHermezAddress(widget.store.state.ethereumAddress),
-                      store: widget.store,
+                      code: getHermezAddress(
+                          widget.arguments.store.state.ethereumAddress),
+                      store: widget.arguments.store,
                     ),
                   );
                 },
@@ -147,8 +155,8 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                     "/qrcode",
                     arguments: QRCodeArguments(
                       qrCodeType: QRCodeType.ETHEREUM,
-                      code: widget.store.state.ethereumAddress,
-                      store: widget.store,
+                      code: widget.arguments.store.state.ethereumAddress,
+                      store: widget.arguments.store,
                     ),
                   );
                 },
@@ -224,7 +232,8 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
         onWillPop: () async {
           if (!Navigator.canPop(context)) {
             Navigator.pushNamedAndRemoveUntil(
-                context, "/home", (Route<dynamic> route) => false);
+                context, "/home", (Route<dynamic> route) => false,
+                arguments: widget.arguments.showHermezWallet);
             return false;
           } else {
             return true;

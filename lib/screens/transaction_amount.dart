@@ -666,8 +666,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                           });
                                         }));
                               }, // handle your image tap here
-                              child: Image.asset(
-                                "assets/scan.png",
+                              child: SvgPicture.asset(
+                                "assets/scan.svg",
                                 color: HermezColors.blackTwo,
                               ),
                             ),
@@ -775,8 +775,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   child: AmountInput(
                     onChanged: (value) {
                       setState(() {
-                        double amount = double.parse(value);
-                        amountIsValid = isAmountValid(amount.toString());
+                        if (value.isNotEmpty) {
+                          double amount = double.parse(value);
+                          amountIsValid = isAmountValid(amount.toString());
+                        } else {
+                          amountIsValid = isAmountValid('0');
+                        }
                       });
                     },
                     enabled: widget.arguments.account != null ||
@@ -1183,7 +1187,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       return amountIsValid &&
           amountController.value.text.isNotEmpty &&
           double.parse(amountController.value.text) > 0 &&
-          widget.arguments.token != null;
+          widget.arguments.token != null &&
+          needRefresh == false;
     } else if (widget.arguments.txLevel == TransactionLevel.LEVEL1) {
       if (widget.arguments.transactionType == TransactionType.SEND) {
         return amountIsValid &&
@@ -1197,7 +1202,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         return amountIsValid &&
             enoughGas &&
             amountController.value.text.isNotEmpty &&
-            double.parse(amountController.value.text) > 0;
+            double.parse(amountController.value.text) > 0 &&
+            needRefresh == false;
       }
     } else {
       if (widget.arguments.transactionType == TransactionType.SEND) {
@@ -1206,12 +1212,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             amountController.value.text.isNotEmpty &&
             double.parse(amountController.value.text) > 0 &&
             addressIsValid &&
-            addressController.value.text.isNotEmpty;
+            addressController.value.text.isNotEmpty &&
+            needRefresh == false;
       } else {
         return amountIsValid &&
             enoughGas &&
             amountController.value.text.isNotEmpty &&
-            double.parse(amountController.value.text) > 0;
+            double.parse(amountController.value.text) > 0 &&
+            needRefresh == false;
       }
     }
   }
