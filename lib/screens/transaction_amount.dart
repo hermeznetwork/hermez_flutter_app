@@ -126,6 +126,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           TextEditingValue(text: widget.arguments.addressTo);
     }
     needRefresh = true;
+    showEstimatedFees = false;
     selectedFeeSpeed = widget.arguments.store.state.defaultFee;
     selectedWithdrawFeeSpeed = widget.arguments.store.state.defaultFee;
   }
@@ -1532,6 +1533,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   Future<bool> fetchData() async {
     if (needRefresh == true) {
+      showEstimatedFees = false;
       await calculateFees();
       needRefresh = false;
     }
