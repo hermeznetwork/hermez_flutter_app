@@ -437,7 +437,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               ),
                             )
                           : Container(),
-                      showEstimatedFees && needRefresh == false
+                      showEstimatedFees &&
+                              needRefresh == false &&
+                              widget.arguments.account != null
                           ? buildFeesList()
                           : Container(),
                     ],
@@ -579,7 +581,13 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               ],
                             ), //title to be name of the crypto
                           )),
-                  enoughGas == false && !needRefresh
+                  (widget.arguments.transactionType ==
+                                  TransactionType.FORCEEXIT ||
+                              widget.arguments.transactionType ==
+                                  TransactionType.EXIT) &&
+                          enoughGas == false &&
+                          !needRefresh &&
+                          widget.arguments.account != null
                       ? _buildNoGasRow()
                       : Container(),
                   _buildAmountRow(
@@ -608,16 +616,24 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     double currencyExchange = (ethereumToken.USD *
         (currency != "USD" ? widget.arguments.store.state.exchangeRatio : 1));
     double exitFee = 0;
-    if (widget.arguments.transactionType == TransactionType.FORCEEXIT) {
-      // fee force exit l1
+    double withdrawFee = 0;
+    if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT ||
+        widget.arguments.transactionType == TransactionType.WITHDRAW ||
+        (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+            widget.arguments.transactionType == TransactionType.SEND)) {
+      // fee l1
       BigInt gasPrice = getGasPrice(selectedFeeSpeed);
       BigInt estimatedFee = gasLimit * gasPrice;
       exitFee = estimatedFee.toDouble() / pow(10, ethereumToken.decimals);
     }
-    BigInt withdrawGasPrice = getGasPrice(selectedWithdrawFeeSpeed);
-    BigInt withdrawEstimatedFee = withdrawGasLimit * withdrawGasPrice;
-    double withdrawFee =
-        withdrawEstimatedFee.toDouble() / pow(10, ethereumToken.decimals);
+    if (widget.arguments.transactionType == TransactionType.EXIT ||
+        widget.arguments.transactionType == TransactionType.FORCEEXIT) {
+      BigInt withdrawGasPrice = getGasPrice(selectedWithdrawFeeSpeed);
+      BigInt withdrawEstimatedFee = withdrawGasLimit * withdrawGasPrice;
+      withdrawFee =
+          withdrawEstimatedFee.toDouble() / pow(10, ethereumToken.decimals);
+    }
 
     String currencyFee = EthAmountFormatter.formatAmount(
         (exitFee + withdrawFee) * currencyExchange, currency);
@@ -674,7 +690,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: (amountIsValid && enoughGas) || needRefresh
+              color: (amountIsValid && enoughGas) ||
+                      needRefresh ||
+                      widget.arguments.account == null
                   ? HermezColors.blueyGreyThree
                   : HermezColors.redError,
               width: 2,
@@ -854,7 +872,13 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             ), //title to be name of the crypto
           ),
         ),
-        amountIsValid || !enoughGas || needRefresh
+        (amountIsValid && enoughGas) ||
+                ((widget.arguments.transactionType == TransactionType.EXIT ||
+                        widget.arguments.transactionType ==
+                            TransactionType.FORCEEXIT) &&
+                    !enoughGas) ||
+                needRefresh ||
+                widget.arguments.account == null
             ? SizedBox(
                 height: 40,
               )
@@ -883,7 +907,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                       ),
                     ),
                     Text(
-                      'You don’t have enough funds.',
+                      (enoughGas || widget.arguments.account.token.id == 0)
+                          ? 'You don’t have enough funds.'
+                          : 'Insufficient ETH to cover gas fee.',
                       style: TextStyle(
                         color: HermezColors.redError,
                         fontFamily: 'ModernEra',
@@ -1469,6 +1495,17 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         }
         gasPrice = getGasPrice(selectedFeeSpeed);
         enoughGas = await isEnoughGas(gasLimit * gasPrice);
+
+        //(CALCULATE FOR MOVE L1 - L2 Swaps)
+        // fee withdraw l1 --> 230k + Transfer cost + (31k * siblings.length)
+        gasPriceResponse = await widget.arguments.store.getGasPrice();
+        ethereumToken = await getEthereumToken();
+        ethereumAccount = await getEthereumAccount();
+        withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+        withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
+        if (widget.arguments.account.token.id != 0) {
+          withdrawGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+        }
       } else if (widget.arguments.transactionType == TransactionType.WITHDRAW) {
         gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
