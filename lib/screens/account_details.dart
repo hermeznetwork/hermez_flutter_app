@@ -520,28 +520,26 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         getCurrentEnvironment().contracts['Hermez'];
 
                     BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-                    final amountWithdraw = getTokenAmountBigInt(
-                        double.parse(exit.balance) /
-                            pow(10, exit.token.decimals),
-                        exit.token.decimals);
+                    Token feeToken =
+                        await widget.arguments.store.getTokenById(0);
+                    Account feeAccount = await getEthereumAccount();
                     try {
+                      final amountWithdraw = getTokenAmountBigInt(
+                          double.parse(exit.balance) /
+                              pow(10, exit.token.decimals),
+                          exit.token.decimals);
                       gasLimit = await widget.arguments.store.withdrawGasLimit(
                           amountWithdraw, null, exit, false, true);
                     } catch (e) {
-                      //
-                      gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT +
-                          (GAS_LIMIT_WITHDRAW_SIBLING *
-                              exit.merkleProof.siblings.length));
+                      // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
+                      gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+                      exit.merkleProof.siblings.forEach((element) {
+                        gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
+                      });
                       if (exit.token.id != 0) {
                         gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
                       }
                     }
-
-                    Token ethereumToken =
-                        await widget.arguments.store.getTokenById(0);
-                    Account feeAccount = await getEthereumAccount();
-                    int offset = GAS_LIMIT_OFFSET;
-                    gasLimit += BigInt.from(offset);
 
                     Navigator.of(widget.arguments.parentContext)
                         .pushNamed("/transaction_details",
@@ -551,12 +549,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               status: TransactionStatus.DRAFT,
                               token: exit.token,
                               fee: gasLimit.toInt() * gasPrice.toDouble(),
-                              feeToken: ethereumToken,
+                              feeToken: feeToken,
                               feeAccount: feeAccount,
                               gasLimit: gasLimit.toInt(),
                               gasPrice: gasPrice.toInt(),
                               exit: exit,
-                              amount: amountWithdraw.toDouble() /
+                              amount: double.parse(exit.balance) /
                                   pow(10, exit.token.decimals),
                               addressFrom: addressFrom,
                               addressTo: addressTo,
@@ -584,11 +582,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       .split('.')
                       .last;
 
-                  int step = 3;
+                  int step = 2;
                   if (pendingWithdraw['status'] == 'pending') {
                     step = 3;
                   } else if (pendingWithdraw['status'] == 'fail') {
                     step = 2;
+                  } else if (pendingWithdraw['status'] == 'initiated') {
+                    step = 1;
                   }
 
                   return WithdrawalRow(

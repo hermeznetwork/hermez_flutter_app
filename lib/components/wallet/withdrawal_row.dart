@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/model/exit.dart';
 
@@ -72,11 +73,12 @@ class WithdrawalRow extends StatelessWidget {
                       ),
                       SizedBox(height: 16.0),
                       Container(
-                        child: Text("Withdrawal",
+                        child: Text("Move to\nEthereum Wallet",
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
+                              height: 1.3,
                               fontFamily: 'ModernEra',
                               fontWeight: FontWeight.w700,
                             )),
@@ -115,11 +117,10 @@ class WithdrawalRow extends StatelessWidget {
                     SizedBox(height: 16.0),
                     Container(
                       child: Text(
-                          (double.parse(exit.balance) /
-                                      pow(10, exit.token.decimals))
-                                  .toString() +
-                              " " +
-                              exit.token.symbol,
+                          EthAmountFormatter.formatAmount(
+                              double.parse(exit.balance) /
+                                  pow(10, exit.token.decimals),
+                              exit.token.symbol),
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: Colors.white,
