@@ -309,12 +309,23 @@ class HermezService implements IHermezService {
       String privateKey,
       {int gasLimit = GAS_LIMIT_HIGH,
       int gasPrice = GAS_MULTIPLIER}) async {
-    //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+    final withdrawalId = exit.accountIndex + exit.batchNum.toString();
 
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       try {
         bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
+
+        // get client nonce
+        final credentials = await client.credentialsFromPrivateKey(privateKey);
+        final from = await credentials.extractAddress();
+        int clientNonce = await client.getTransactionCount(from);
+        /*int nonce = _configService.getLatestNonce();
+        if (nonce <= clientNonce) {
+          nonce = clientNonce + 1;
+        } else {
+          nonce += 1;
+        }*/
 
         final txHash = await tx
             .withdraw(
@@ -328,15 +339,17 @@ class HermezService implements IHermezService {
                 privateKey,
                 isInstant: isIntant,
                 gasLimit: gasLimit,
-                gasPrice: gasPrice)
+                gasPrice: gasPrice,
+                nonce: clientNonce)
             .then((txHash) async {
           if (txHash != null) {
+            // update nonce
+            _configService.setLatestNonce(clientNonce);
+
             if (isIntant) {
-              if (_configService.getPendingWithdraw(txHash) != null) {
-                _configService.removePendingWithdraw(txHash);
-              }
               _configService.addPendingWithdraw({
-                'id': txHash,
+                'id': withdrawalId,
+                'hash': txHash,
                 'hermezEthereumAddress': hezEthereumAddress,
                 'itemId': exit.itemId,
                 'accountIndex': exit.accountIndex,
@@ -346,11 +359,10 @@ class HermezService implements IHermezService {
                 'status': 'pending'
               });
             } else {
-              if (_configService.getPendingWithdraw(txHash) != null) {
-                _configService.removePendingDelayedWithdraw(txHash);
-              }
               _configService.addPendingDelayedWithdraw({
-                'id': txHash,
+                'id': withdrawalId,
+                'hash': txHash,
+                'hermezEthereumAddress': hezEthereumAddress,
                 'itemId': exit.itemId,
                 'accountIndex': exit.accountIndex,
                 'batchNum': exit.batchNum,
@@ -406,14 +418,16 @@ class HermezService implements IHermezService {
               gasLimit: gasLimit, gasPrice: gasPrice)
           .then((txHash) async {
         if (txHash != null) {
-          if (_configService.getPendingWithdraw(txHash) != null) {
-            _configService.removePendingWithdraw(txHash);
-          }
+          String withdrawalId = account.accountIndex +
+              ":" +
+              account.token.symbol +
+              ":" +
+              amount.toString();
           _configService.addPendingWithdraw({
-            'id': txHash,
+            'id': withdrawalId,
+            'hash': txHash,
             'hermezEthereumAddress': hezEthereumAddress,
             'accountIndex': account.accountIndex,
-            //'batchNum': exit.batchNum,
             'amount': amount.toDouble(),
             'token': account.token.toJson(),
             'status': 'initiated'

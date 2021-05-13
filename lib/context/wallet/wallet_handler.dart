@@ -538,20 +538,22 @@ class WalletHandler {
         .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
 
     List removeWithdawalIds = [];
+    List removeWithdawalHashes = [];
     List updateWithdawalIds = [];
     List<dynamic> updatePendingWithdraws = [];
     accountPendingWithdraws.forEach((pendingWithdraw) async {
-      final String transactionHash = pendingWithdraw['id'];
+      final String transactionHash = pendingWithdraw['hash'];
+      final String status = pendingWithdraw['status'];
       Exit exit;
       if (pendingWithdraw['accountIndex'] != null &&
-          pendingWithdraw['batchNum'] != null) {
+          pendingWithdraw['batchNum'] != null &&
+          status == 'pending') {
         exit = await getExit(
             pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
-        if ((exit.instantWithdraw != null || exit.delayedWithdraw != null) &&
-            transactionHash != null) {
-          //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-          removeWithdawalIds.add(transactionHash);
-          _configurationService.removePendingWithdraw(transactionHash);
+        if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
+          final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+          removeWithdawalIds.add(withdrawalId);
+          _configurationService.removePendingWithdraw(withdrawalId);
         }
       }
 
@@ -560,9 +562,12 @@ class WalletHandler {
         try {
           txInfo = await _contractService.getTransactionByHash(transactionHash);
         } catch (e) {
-          //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-          removeWithdawalIds.add(transactionHash);
-          _configurationService.removePendingWithdraw(transactionHash);
+          // TODO maybe remove this?
+          if (exit == null) {
+            removeWithdawalHashes.add(transactionHash);
+            _configurationService.removePendingWithdraw(transactionHash,
+                name: 'hash');
+          }
         }
         if (txInfo != null) {
           web3.TransactionReceipt receipt =
@@ -571,20 +576,44 @@ class WalletHandler {
             if (receipt.status == false) {
               // Tx didn't pass
               if (exit == null) {
-                removeWithdawalIds.add(transactionHash);
-                _configurationService.removePendingWithdraw(transactionHash);
+                removeWithdawalHashes.add(transactionHash);
+                _configurationService.removePendingWithdraw(transactionHash,
+                    name: 'hash');
               } else {
                 String status = 'fail';
                 pendingWithdraw['status'] = status;
-                //final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-                updateWithdawalIds.add(transactionHash);
-                updatePendingWithdraws.add(pendingWithdraw);
+                final withdrawalId =
+                    exit.accountIndex + exit.batchNum.toString();
+                updateWithdawalIds.add(withdrawalId);
+                updatePendingWithdraws.add(withdrawalId);
                 _configurationService.updatePendingWithdrawStatus(
-                    status, transactionHash);
+                    status, withdrawalId);
+              }
+            } else {
+              if (status == 'initiated') {
+                List<Exit> exits = await getExits(
+                    tokenId: Token.fromJson(pendingWithdraw['token']).id);
+                exit = exits.firstWhere(
+                    (Exit exit) =>
+                        pendingWithdraw['accountIndex'] == exit.accountIndex &&
+                        (pendingWithdraw['amount'] as double)
+                                .toInt()
+                                .toString() ==
+                            exit.balance &&
+                        Token.fromJson(pendingWithdraw['token']).id ==
+                            exit.token.id &&
+                        (exit.instantWithdraw == null &&
+                            exit.delayedWithdraw == null),
+                    orElse: () => null);
+                if (exit != null) {
+                  removeWithdawalHashes.add(transactionHash);
+                  _configurationService.removePendingWithdraw(transactionHash,
+                      name: 'hash');
+                }
               }
             }
           }
-        } else {}
+        }
       }
     });
 
@@ -595,6 +624,9 @@ class WalletHandler {
 
     accountPendingWithdraws.removeWhere((pendingWithdraw) =>
         removeWithdawalIds.contains(pendingWithdraw['id']));
+
+    accountPendingWithdraws.removeWhere((pendingWithdraw) =>
+        removeWithdawalHashes.contains(pendingWithdraw['hash']));
 
     return accountPendingWithdraws;
   }

@@ -103,7 +103,7 @@ flutter:
     # Intro
     - intro_hermez_logo.png
     # Info
-    - info.png
+    - info.svg
     - info_success.png
     - info_failure.png
     - info_tx_failure.png
@@ -115,10 +115,8 @@ flutter:
     - fingerprint.png
     - arrow_right.png
     - backup_warning.png
-
     # Backup
     - info_backup.png
-
     # Remove account
     - remove_account_warning.png
     # Home
@@ -131,21 +129,18 @@ flutter:
     - move.png
     - hermez_logo.png
     - ethereum_logo.png
-
-    - change_move_enable.png
-    - change_move_disable.png
+    - change_move_enable.svg
+    - change_move_disable.svg
     - deposit3.png
     - hermez_logo_white.png
     - share.png
     - reload.svg
-
     # Account Details
     - tx_send.png
     - tx_receive.png
     # - tx_receive.svg
     - tx_move.png
     # - tx_move.svg
-
     # Settings
     - settings_currency_conversion.svg
     - settings_view_explorer.svg
@@ -157,7 +152,6 @@ flutter:
     - settings_force_withdrawal.svg
     - settings_default_fee.svg
     - settings_remove_account.svg
-
     # Scanner
     - switch_camera.svg
     - flash_on.png

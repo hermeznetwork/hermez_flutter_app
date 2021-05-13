@@ -38,9 +38,11 @@ abstract class IConfigurationService {
   bool getBiometricsFace();
   bool didSetupWallet();
   bool didBackupWallet();
+  Future<bool> setLatestNonce(int value);
+  int getLatestNonce();
   dynamic getPendingWithdraw(String pendingWithdrawId);
   void addPendingWithdraw(dynamic pendingWithdraw);
-  void removePendingWithdraw(String pendingWithdrawId);
+  void removePendingWithdraw(String value, {String name = 'id'});
   dynamic getPendingDelayedWithdraw(String pendingWithdrawId);
   void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
   void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
@@ -247,6 +249,15 @@ class ConfigurationService implements IConfigurationService {
     return _preferences.getBool("didBackupWallet") ?? false;
   }
 
+  @override
+  int getLatestNonce() {
+    return _preferences.getInt("latest_nonce") ?? 1;
+  }
+
+  Future<bool> setLatestNonce(int value) async {
+    return await _preferences.setInt("latest_nonce", value);
+  }
+
   /// Gets a pendingWithdraw from the pendingWithdraw pool
   /// @param {string} pendingWithdrawId - The pendingWithdraw id
   /// @returns {object} pendingWithdraw - The pendingWithdraw to add to the pool
@@ -283,20 +294,19 @@ class ConfigurationService implements IConfigurationService {
   }
 
   /// Removes a pendingWithdraw from the pendingWithdraw pool
-  /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was originally made
   /// @param {string} pendingWithdrawId - The pendingWithdraw identifier to remove from the pool
   /// @returns {void}
   @override
-  void removePendingWithdraw(String pendingWithdrawId) async {
+  void removePendingWithdraw(String value, {String name = 'id'}) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
     await _storageService.removeItem(PENDING_WITHDRAWS_KEY, chainId,
-        hermezEthereumAddress, pendingWithdrawId, false);
+        hermezEthereumAddress, name, value, false);
   }
 
-  void updatePendingWithdrawStatus(
-      String transactionStatus, String pendingWithdrawId) async {
+  void updatePendingWithdrawStatus(String transactionStatus, String value,
+      {String name = 'id'}) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
@@ -304,7 +314,7 @@ class ConfigurationService implements IConfigurationService {
         PENDING_WITHDRAWS_KEY,
         chainId,
         hermezEthereumAddress,
-        {'name': 'id', 'value': pendingWithdrawId},
+        {'name': name, 'value': value},
         {'status': transactionStatus},
         false);
   }
@@ -349,7 +359,7 @@ class ConfigurationService implements IConfigurationService {
     final hermezEthereumAddress = await getHermezAddress();
 
     await _storageService.removeItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId,
-        hermezEthereumAddress, pendingDelayedWithdrawId, false);
+        hermezEthereumAddress, 'id', pendingDelayedWithdrawId, false);
   }
 
   /// Updates the date in a delayed withdraw transaction
@@ -422,7 +432,7 @@ class ConfigurationService implements IConfigurationService {
     final hermezEthereumAddress = await getHermezAddress();
 
     _storageService.removeItem(PENDING_DEPOSITS_KEY, chainId,
-        hermezEthereumAddress, transactionId, false);
+        hermezEthereumAddress, 'id', transactionId, false);
   }
 
   void updatePendingDepositId(

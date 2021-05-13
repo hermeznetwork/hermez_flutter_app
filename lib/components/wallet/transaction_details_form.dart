@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -407,7 +408,7 @@ class TransferSummaryForm extends HookWidget {
                                         child: Padding(
                                           padding:
                                               const EdgeInsets.only(right: 5.0),
-                                          child: Image.asset("assets/info.png",
+                                          child: SvgPicture.asset("assets/info.svg",
                                               width: 15,
                                               height: 15,
                                               color: HermezColors.redError),

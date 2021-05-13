@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -172,7 +173,7 @@ class _PinPageState extends State<PinPage> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(right: 5.0),
                                   child: pinError
-                                      ? Image.asset("assets/info.png",
+                                      ? SvgPicture.asset("assets/info.svg",
                                           width: 17,
                                           height: 17,
                                           color: HermezColors.redError)

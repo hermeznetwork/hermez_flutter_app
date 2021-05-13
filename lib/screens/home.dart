@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
 import 'package:hermez/screens/qrcode_scanner.dart';
@@ -55,40 +56,7 @@ class _HomePageState extends State<HomePage> {
     widget.arguments.store.initialise();
     showHermezWallet = widget.arguments.showHermezWallet;
     _currentIndex = ValueNotifier(0);
-    items = [
-      TabNavigationItem(
-        page: WalletSelectorPage(
-            arguments: WalletSelectorArguments(widget.arguments.store, context,
-                showHermezWallet: showHermezWallet, hermezWalletShown: () {
-          showHermezWallet = false;
-        })),
-        icon: SvgPicture.asset('assets/tab_home.svg'),
-        title: "Home",
-      ),
-      TabNavigationItem(
-        page: Container(),
-        icon: SvgPicture.asset('assets/tab_scan.svg'),
-        title: "QR Scan",
-      ),
-      TabNavigationItem(
-        page: settingsPage(context),
-        icon: Stack(children: [
-          SvgPicture.asset('assets/tab_settings.svg'),
-          Positioned(
-              bottom: -1,
-              right: -1,
-              child: Stack(
-                children: [
-                  widget.arguments.configurationService.didBackupWallet()
-                      ? Container()
-                      : Icon(Icons.brightness_1,
-                          size: 8.0, color: HermezColors.darkOrange)
-                ],
-              ))
-        ]),
-        title: "Settings",
-      ),
-    ];
+    updateItems();
     children = [
       for (final tabItem in items)
         Navigator(onGenerateRoute: (settings) {
@@ -128,6 +96,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    updateItems();
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex.value,
@@ -306,5 +275,51 @@ class _HomePageState extends State<HomePage> {
     var configurationService =
         Provider.of<ConfigurationService>(context, listen: false);
     return SettingsPage(widget.arguments.store, configurationService, context);
+  }
+
+  updateItems() {
+    items = [
+      TabNavigationItem(
+        page: WalletSelectorPage(
+            arguments: WalletSelectorArguments(widget.arguments.store, context,
+                showHermezWallet: showHermezWallet, hermezWalletShown: () {
+          showHermezWallet = false;
+        })),
+        icon: SvgPicture.asset('assets/tab_home.svg',
+            color: _currentIndex.value == 0
+                ? HermezColors.blackTwo
+                : HermezColors.blueyGreyTwo),
+        title: "Home",
+      ),
+      TabNavigationItem(
+        page: Container(),
+        icon: SvgPicture.asset('assets/tab_scan.svg',
+            color: _currentIndex.value == 1
+                ? HermezColors.blackTwo
+                : HermezColors.blueyGreyTwo),
+        title: "QR Scan",
+      ),
+      TabNavigationItem(
+        page: settingsPage(context),
+        icon: Stack(children: [
+          SvgPicture.asset('assets/tab_settings.svg',
+              color: _currentIndex.value == 2
+                  ? HermezColors.blackTwo
+                  : HermezColors.blueyGreyTwo),
+          Positioned(
+              bottom: -1,
+              right: -1,
+              child: Stack(
+                children: [
+                  widget.arguments.configurationService.didBackupWallet()
+                      ? Container()
+                      : Icon(Icons.brightness_1,
+                          size: 8.0, color: HermezColors.darkOrange)
+                ],
+              ))
+        ]),
+        title: "Settings",
+      ),
+    ];
   }
 }

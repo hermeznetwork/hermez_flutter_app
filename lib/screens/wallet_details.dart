@@ -387,10 +387,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       textColor: HermezColors.blackTwo,
                       child: Column(
                         children: <Widget>[
-                          SvgPicture.asset(
-                            "assets/bt_send.svg",
+                          Container(
                             width: 80,
                             height: 80,
+                            child: SvgPicture.asset(
+                              "assets/bt_send.svg",
+                              fit: BoxFit.cover,
+                            ),
                           ),
                           Text(
                             'Send',
@@ -441,10 +444,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     textColor: HermezColors.blackTwo,
                     child: Column(
                       children: <Widget>[
-                        SvgPicture.asset(
-                          "assets/bt_receive.svg",
+                        Container(
                           width: 80,
                           height: 80,
+                          child: SvgPicture.asset(
+                            "assets/bt_receive.svg",
+                            fit: BoxFit.cover,
+                          ),
                         ),
                         Text(
                           'Receive',
@@ -694,12 +700,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .split('.')
                   .last;
 
-              int step = 3;
+              int step = 2;
               if (pendingWithdraw['status'] == 'pending') {
                 step = 3;
-              } else if (pendingWithdraw['status'] == 'fail' ||
-                  pendingWithdraw['status'] == 'initiated') {
+              } else if (pendingWithdraw['status'] == 'fail') {
                 step = 2;
+              } else if (pendingWithdraw['status'] == 'initiated') {
+                step = 1;
               }
 
               return WithdrawalRow(

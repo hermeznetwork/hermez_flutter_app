@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
@@ -56,9 +57,9 @@ class MoveRow extends StatelessWidget {
                       onPressed();
                     }
                   },
-                  icon: Image.asset(onPressed != null
-                      ? "assets/change_move_enable.png"
-                      : "assets/change_move_disable.png"),
+                  icon: SvgPicture.asset(onPressed != null
+                      ? "assets/change_move_enable.svg"
+                      : "assets/change_move_disable.svg"),
                   label: Text(""))),
           Expanded(
             child: Column(

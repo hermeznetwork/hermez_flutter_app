@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/model/exit.dart';
 
@@ -176,7 +177,7 @@ class WithdrawalRow extends StatelessWidget {
                                     child: Padding(
                                       padding:
                                           const EdgeInsets.only(right: 5.0),
-                                      child: Image.asset("assets/info.png",
+                                      child: SvgPicture.asset("assets/info.svg",
                                           width: 15,
                                           height: 15,
                                           color: HermezColors.steel),
