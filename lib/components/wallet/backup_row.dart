@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class BackupRow extends StatelessWidget {
@@ -23,7 +24,7 @@ class BackupRow extends StatelessWidget {
               child: Image.asset("assets/backup_warning.png", height: 20)),
           trailing: Container(
               padding: EdgeInsets.only(top: 20.0),
-              child: Image.asset("assets/arrow_right.png",
+              child: SvgPicture.asset("assets/arrow_right.svg",
                   height: 12, color: Colors.white)),
           title: Align(
             alignment: Alignment.centerLeft,

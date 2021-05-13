@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/backup_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/settings_details.dart';
@@ -98,7 +99,7 @@ class SettingsPage extends HookWidget {
             return ListTile(
               trailing: Container(
                   padding: EdgeInsets.only(top: 20.0),
-                  child: Image.asset("assets/arrow_right.png",
+                  child: SvgPicture.asset("assets/arrow_right.svg",
                       height: 12, color: HermezColors.blackTwo)),
               title: Align(
                 alignment: Alignment.centerLeft,

@@ -113,7 +113,6 @@ flutter:
     - biometrics_face.png
     - face.png
     - fingerprint.png
-    - arrow_right.png
     - backup_warning.png
     # Backup
     - info_backup.png
@@ -159,7 +158,9 @@ flutter:
     - flash_off.svg
 
     # Amount
-    - fee_arrow.svg
+    - arrow_right.svg
+    - arrow_down.svg
+    - arrow_up.svg
     - deposit.png
 
     - partialERC20ABI.json
@@ -170,14 +171,12 @@ flutter:
     - wallet.png
     - search.png
     - label.png
-    - transfer.png
     - list.png
 
     - add.png
     - warning.png
     - pending.png
     - upload.png
-    - arrow_down.png
     - arrows_up_down.png
     - success.png
     - scan.svg
