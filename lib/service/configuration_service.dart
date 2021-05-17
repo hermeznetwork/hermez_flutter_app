@@ -186,6 +186,10 @@ class ConfigurationService implements IConfigurationService {
       return WalletDefaultCurrency.EUR;
     } else if (defaultCurrencyString == "CNY") {
       return WalletDefaultCurrency.CNY;
+    } else if (defaultCurrencyString == "JPY") {
+      return WalletDefaultCurrency.JPY;
+    } else if (defaultCurrencyString == "GBP") {
+      return WalletDefaultCurrency.GBP;
     } else {
       return WalletDefaultCurrency.USD;
     }

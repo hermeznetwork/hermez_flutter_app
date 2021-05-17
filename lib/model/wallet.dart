@@ -6,7 +6,7 @@ import 'package:hermez_plugin/model/account.dart';
 
 part 'wallet.g.dart';
 
-enum WalletDefaultCurrency { EUR, USD, CNY }
+enum WalletDefaultCurrency { USD, EUR, CNY, JPY, GBP }
 
 enum WalletDefaultFee { SLOW, AVERAGE, FAST }
 

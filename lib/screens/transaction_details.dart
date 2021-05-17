@@ -256,7 +256,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                       arguments: InfoArguments(
                                                           "success.png",
                                                           true,
-                                                          "Your transaction is awaiting verification.",
+                                                          "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
                                                           iconSize: 300))
                                                   .then((value) {
                                                 Navigator
@@ -401,6 +401,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       symbol = "€";
     } else if (currency == "CNY") {
       symbol = "\¥";
+    } else if (currency == "JPY") {
+      symbol = "\¥";
+    } else if (currency == "GBP") {
+      symbol = "\£";
     } else {
       symbol = "\$";
     }

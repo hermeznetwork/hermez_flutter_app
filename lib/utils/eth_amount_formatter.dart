@@ -33,6 +33,14 @@ class EthAmountFormatter {
       locale = 'en';
       symbol = '\¥';
       isCurrency = true;
+    } else if (symbol == "JPY") {
+      locale = 'en';
+      symbol = "\¥";
+      isCurrency = true;
+    } else if (symbol == "GBP") {
+      locale = 'en';
+      symbol = "\£";
+      isCurrency = true;
     } else if (symbol == "USD") {
       locale = 'en';
       symbol = '\$';

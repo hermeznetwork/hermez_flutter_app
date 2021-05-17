@@ -386,6 +386,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     } else if (currency == "CNY") {
       locale = 'en';
       symbol = '\¥';
+    } else if (currency == "JPY") {
+      locale = 'en';
+      symbol = "\¥";
+    } else if (currency == "GBP") {
+      locale = 'en';
+      symbol = "\£";
     } else {
       locale = 'en';
       symbol = '\$';
@@ -785,6 +791,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     symbol = "€";
                   } else if (currency == "CNY") {
                     symbol = "\¥";
+                  } else if (currency == "JPY") {
+                    symbol = "\¥";
+                  } else if (currency == "GBP") {
+                    symbol = "\£";
                   } else {
                     symbol = "\$";
                   }

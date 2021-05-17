@@ -853,6 +853,12 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     } else if (currency == "CNY") {
       locale = 'en';
       symbol = '\¥';
+    } else if (currency == "JPY") {
+      locale = 'en';
+      symbol = "\¥";
+    } else if (currency == "GBP") {
+      locale = 'en';
+      symbol = "\£";
     } else {
       locale = 'en';
       symbol = '\$';

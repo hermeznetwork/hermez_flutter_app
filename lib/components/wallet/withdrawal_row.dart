@@ -45,6 +45,10 @@ class WithdrawalRow extends StatelessWidget {
       symbol = "€";
     } else if (currency == "CNY") {
       symbol = "\¥";
+    } else if (currency == "JPY") {
+      symbol = "\¥";
+    } else if (currency == "GBP") {
+      symbol = "\£";
     } else {
       symbol = "\$";
     }
