@@ -1,6 +1,8 @@
 PODS:
   - camera (0.0.1):
     - Flutter
+  - esys_flutter_share (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - flutter_secure_storage (3.3.1):
     - Flutter
@@ -14,8 +16,6 @@ PODS:
   - qr_code_scanner (0.2.0):
     - Flutter
     - MTBBarcodeScanner
-  - share (0.0.1):
-    - Flutter
   - shared_preferences (0.0.1):
     - Flutter
   - url_launcher (0.0.1):
@@ -23,13 +23,13 @@ PODS:
 
 DEPENDENCIES:
   - camera (from `.symlinks/plugins/camera/ios`)
+  - esys_flutter_share (from `.symlinks/plugins/esys_flutter_share/ios`)
   - Flutter (from `Flutter`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - hermez_plugin (from `.symlinks/plugins/hermez_plugin/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
-  - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
 
@@ -40,6 +40,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   camera:
     :path: ".symlinks/plugins/camera/ios"
+  esys_flutter_share:
+    :path: ".symlinks/plugins/esys_flutter_share/ios"
   Flutter:
     :path: Flutter
   flutter_secure_storage:
@@ -52,8 +54,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
   qr_code_scanner:
     :path: ".symlinks/plugins/qr_code_scanner/ios"
-  share:
-    :path: ".symlinks/plugins/share/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
   url_launcher:
@@ -61,14 +61,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   camera: a0ca5080336f7af47b88436e5e26da3dee5568f0
+  esys_flutter_share: 403498dab005b36ce1f8d7aff377e81f0621b0b4
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   hermez_plugin: 0966f2f0258a81bec9dff7258a56e238b0dc3089
   local_auth: 25938960984c3a7f6e3253e3f8d962fdd16852bd
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+  path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
-  share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 

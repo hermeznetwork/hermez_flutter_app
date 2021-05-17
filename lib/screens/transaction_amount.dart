@@ -1321,11 +1321,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       } else {
         addressTo = address;
       }
-      //var success = await transferStore.transfer(address, amount);
       Navigator.pushNamed(context, "/transaction_details",
               arguments: TransactionDetailsArguments(
-                  wallet: widget.arguments.store,
+                  store: widget.arguments.store,
                   transactionType: widget.arguments.transactionType,
+                  transactionLevel: widget.arguments.txLevel,
                   status: TransactionStatus.DRAFT,
                   account: widget.arguments.account,
                   token: widget.arguments.account.token,
@@ -1333,8 +1333,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   addressFrom: widget.arguments.account.hezEthereumAddress,
                   addressTo: addressTo,
                   fee: fee,
-                  feeToken: feeToken,
-                  feeAccount: ethereumAccount,
+                  withdrawEstimatedFee:
+                      (withdrawGasLimit * getGasPrice(selectedWithdrawFeeSpeed))
+                          .toDouble(),
+                  selectedFeeSpeed: selectedFeeSpeed,
+                  selectedWithdrawFeeSpeed: selectedWithdrawFeeSpeed,
                   gasLimit: gasLimit,
                   gasPrice: gasPrice,
                   depositGasLimit: depositGasLimit))

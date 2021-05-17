@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:math';
 
-import 'package:clipboard/clipboard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/setup/wallet_setup_handler.dart';
@@ -748,7 +746,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 30),
+                      /*SizedBox(height: 30),
                       Container(
                         alignment: Alignment.center,
                         child: TextButton.icon(
@@ -784,7 +782,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                             ),
                           ),
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                 ),
@@ -847,28 +845,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
               )
             ],
           ),
-        ) /*ImportWalletForm(
-        errors: store.state.errors.toList(),
-        onImport: !store.state.loading
-            ? (type, value) async {
-                switch (type) {
-                  case WalletImportType.mnemonic:
-                    if (!await store.importFromMnemonic(value)) return;
-                    break;
-                  case WalletImportType.privateKey:
-                    if (!await store.importFromPrivateKey(value)) return;
-                    break;
-                  default:
-                    break;
-                }
-
-                Navigator.pushNamedAndRemoveUntil(
-                    context, "/home", (Route<dynamic> route) => false);
-              }
-            : null,
-      ),
-    );*/
-        );
+        ));
   }
 
   void checkEnabledButton() {

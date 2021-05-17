@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/model/token.dart';
 
@@ -83,14 +84,13 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                          widget.arguments.selectedFee != null
-                              ? 'Select the fee you want to'
+                          'Select the ' +
+                              (widget.arguments.selectedFee == null
+                                  ? 'default'
+                                  : '') +
+                              ' fee you want to'
                                   ' spend to cover the cost of processing'
                                   ' your transaction. Higher fees are '
-                                  'more likely to be processed.'
-                              : 'Select the default fee you want to'
-                                  ' spend to cover the cost of processing'
-                                  ' your transactions. Higher fees are '
                                   'more likely to be processed.',
                           style: TextStyle(
                             color: HermezColors.blueyGreyTwo,
@@ -161,19 +161,18 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                           padding: EdgeInsets.only(
                                               top: 12.0, bottom: 12.0),
                                           child: Text(
-                                            (widget.arguments.estimatedGas
-                                                            .toInt() *
-                                                        gasPrice /
-                                                        pow(
-                                                            10,
-                                                            widget
-                                                                .arguments
-                                                                .ethereumToken
-                                                                .decimals))
-                                                    .toStringAsFixed(6) +
-                                                " " +
+                                            EthAmountFormatter.formatAmount(
+                                                (widget.arguments.estimatedGas
+                                                        .toInt() *
+                                                    gasPrice /
+                                                    pow(
+                                                        10,
+                                                        widget
+                                                            .arguments
+                                                            .ethereumToken
+                                                            .decimals)),
                                                 widget.arguments.ethereumToken
-                                                    .symbol,
+                                                    .symbol),
                                             style: TextStyle(
                                                 fontFamily: 'ModernEra',
                                                 color: HermezColors.blackTwo,

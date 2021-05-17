@@ -8,6 +8,7 @@ import 'package:hermez/screens/home.dart';
 import 'package:hermez/screens/import.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/intro.dart';
+import 'package:hermez/screens/move_info.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/qrcode_scanner.dart';
@@ -102,6 +103,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
     },
     '/remove_account_info': (BuildContext context) {
       return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);
+    },
+    '/move_info': (BuildContext context) {
+      return MoveInfoPage(arguments: ModalRoute.of(context).settings.arguments);
     },
     /*'/account_details': (BuildContext context) {
       // Cast the arguments to the correct type: ScreenArguments.

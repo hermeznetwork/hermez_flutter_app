@@ -4,18 +4,20 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:another_flushbar/flushbar.dart';
+import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/components/dialog/alert.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/model/token.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:share/share.dart';
+
+//import 'package:share/share.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'transaction_amount.dart';
@@ -54,7 +56,7 @@ class QRCodePage extends StatefulWidget {
 }
 
 class _QRCodePageState extends State<QRCodePage> {
-  static GlobalKey _globalKey = GlobalKey();
+  static GlobalKey qrCodeKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     String title;
@@ -78,8 +80,8 @@ class _QRCodePageState extends State<QRCodePage> {
           centerTitle: true,
           elevation: 0.0,
           backgroundColor: HermezColors.lightOrange,
-          actions: Platform.isAndroid &&
-                  widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT
+          actions:
+          widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT
               ? <Widget>[
                   IconButton(
                     icon: Image.asset("assets/share.png",
@@ -106,7 +108,7 @@ class _QRCodePageState extends State<QRCodePage> {
                         Stack(
                           children: [
                             RepaintBoundary(
-                              key: _globalKey,
+                              key: qrCodeKey,
                               child: QrImage(
                                 size: 250,
                                 padding: EdgeInsets.all(0),
@@ -465,25 +467,15 @@ class _QRCodePageState extends State<QRCodePage> {
   Future<Null> shareScreenshot() async {
     try {
       RenderRepaintBoundary boundary =
-          _globalKey.currentContext.findRenderObject();
-      if (boundary.debugNeedsPaint) {
-        Timer(Duration(seconds: 1), () => shareScreenshot());
-        return null;
-      }
-      ui.Image image = await boundary.toImage();
-      final directory = (await getExternalStorageDirectory()).path;
+      qrCodeKey.currentContext.findRenderObject();
+      ui.Image image = await boundary.toImage(pixelRatio: 2);
       ByteData byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData.buffer.asUint8List();
-      File imgFile = new File('$directory/screenshot.png');
-      imgFile.writeAsBytes(pngBytes);
-      final RenderBox box = context.findRenderObject();
-      Share.shareFiles(List.filled(1, '$directory/screenshot.png'),
-          subject: 'My Code',
-          text: 'Hello, here is my Hermez code!',
-          sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+      await Share.file('Hermez QR Code', 'hermez_qrcode.png', pngBytes, 'image/png', text: 'Hello, here is my Hermez code!');
     } on PlatformException catch (e) {
       print("Exception while taking screenshot:" + e.toString());
+      Alert(title: 'Error', text: e.toString()).show(context);
     }
   }
 }

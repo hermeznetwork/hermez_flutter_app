@@ -655,26 +655,27 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 }
                 int offset = GAS_LIMIT_OFFSET;
                 gasLimit += BigInt.from(offset);
-                Token feeToken = await getEthereumToken();
-                Account feeAccount = await getEthereumAccount();
+                //Token ethereumToken = await getEthereumToken();
+                //Account ethereumAccount = await getEthereumAccount();
 
                 Navigator.of(widget.arguments.parentContext)
                     .pushNamed("/transaction_details",
                         arguments: TransactionDetailsArguments(
-                          wallet: widget.arguments.store,
+                          store: widget.arguments.store,
                           transactionType: TransactionType.WITHDRAW,
+                          transactionLevel: TransactionLevel.LEVEL1,
                           status: TransactionStatus.DRAFT,
                           token: exit.token,
-                          fee: gasLimit.toInt() * gasPrice.toDouble(),
-                          feeToken: feeToken,
-                          feeAccount: feeAccount,
-                          gasLimit: gasLimit.toInt(),
-                          gasPrice: gasPrice.toInt(),
                           exit: exit,
                           amount: amountWithdraw.toDouble() /
                               pow(10, exit.token.decimals),
                           addressFrom: addressFrom,
                           addressTo: addressTo,
+                          selectedFeeSpeed:
+                              widget.arguments.store.state.defaultFee,
+                          gasLimit: gasLimit.toInt(),
+                          gasPrice: gasPrice.toInt(),
+                          gasPriceResponse: gasPriceResponse,
                         ))
                     .then((value) => _onRefresh());
               });
@@ -742,8 +743,6 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             getCurrentEnvironment().contracts['Hermez'];
 
                         BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-                        Token feeToken = await getEthereumToken();
-                        Account feeAccount = await getEthereumAccount();
                         try {
                           final amountWithdraw = getTokenAmountBigInt(
                               double.parse(exit.balance) /
@@ -766,20 +765,19 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         Navigator.of(widget.arguments.parentContext)
                             .pushNamed("/transaction_details",
                                 arguments: TransactionDetailsArguments(
-                                  wallet: widget.arguments.store,
+                                  store: widget.arguments.store,
                                   transactionType: TransactionType.WITHDRAW,
+                                  transactionLevel: TransactionLevel.LEVEL1,
                                   status: TransactionStatus.DRAFT,
                                   token: exit.token,
-                                  fee: gasLimit.toInt() * gasPrice.toDouble(),
-                                  feeToken: feeToken,
-                                  feeAccount: feeAccount,
-                                  gasLimit: gasLimit.toInt(),
-                                  gasPrice: gasPrice.toInt(),
                                   exit: exit,
                                   amount: double.parse(exit.balance) /
                                       pow(10, exit.token.decimals),
                                   addressFrom: addressFrom,
                                   addressTo: addressTo,
+                                  gasLimit: gasLimit.toInt(),
+                                  gasPrice: gasPrice.toInt(),
+                                  gasPriceResponse: gasPriceResponse,
                                 ))
                             .then((value) => _onRefresh());
                       }
@@ -876,14 +874,5 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));
     return result;
-  }
-
-  Future<Token> getEthereumToken() async {
-    return await widget.arguments.store.getTokenById(0);
-  }
-
-  Future<Account> getEthereumAccount() async {
-    Account ethereumAccount = await widget.arguments.store.getL1Account(0);
-    return ethereumAccount;
   }
 }
