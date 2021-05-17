@@ -144,7 +144,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         child: FutureBuilder(
           future: fetchData(),
           builder: (context, snapshot) {
-            if (snapshot.hasData && ethereumAccount != null) {
+            if (snapshot.hasData) {
               var transferStore = useWalletTransfer(context);
               bool enoughFee = isFeeEnough();
               return Column(
@@ -1401,7 +1401,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
   Future<bool> fetchData() async {
     //if (needRefresh == true) {
-    ethereumAccount = await getEthereumAccount();
+    if (widget.arguments.status == TransactionStatus.DRAFT) {
+      ethereumAccount = await getEthereumAccount();
+    }
 
     //needRefresh = false;
     //}
