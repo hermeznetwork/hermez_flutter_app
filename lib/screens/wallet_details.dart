@@ -675,7 +675,6 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               widget.arguments.store.state.defaultFee,
                           gasLimit: gasLimit.toInt(),
                           gasPrice: gasPrice.toInt(),
-                          gasPriceResponse: gasPriceResponse,
                         ))
                     .then((value) => _onRefresh());
               });
@@ -777,7 +776,6 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   addressTo: addressTo,
                                   gasLimit: gasLimit.toInt(),
                                   gasPrice: gasPrice.toInt(),
-                                  gasPriceResponse: gasPriceResponse,
                                 ))
                             .then((value) => _onRefresh());
                       }

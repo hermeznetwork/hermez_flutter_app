@@ -554,7 +554,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                   pow(10, exit.token.decimals),
                               addressFrom: addressFrom,
                               addressTo: addressTo,
-                              gasPriceResponse: gasPriceResponse,
                               gasLimit: gasLimit.toInt(),
                               gasPrice: gasPrice.toInt(),
                             ))

@@ -1311,6 +1311,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
               isReceive: true));
     } else {
       String addressTo;
+      double withdrawEstimatedFee = 0;
       if (widget.arguments.transactionType == TransactionType.DEPOSIT) {
         addressTo = getCurrentEnvironment().contracts['Hermez'];
       } else if ((widget.arguments.transactionType == TransactionType.EXIT ||
@@ -1318,6 +1319,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           address.isEmpty) {
         addressTo =
             getEthereumAddress(widget.arguments.account.hezEthereumAddress);
+        withdrawEstimatedFee =
+            (withdrawGasLimit * getGasPrice(selectedWithdrawFeeSpeed))
+                .toDouble();
       } else {
         addressTo = address;
       }
@@ -1333,9 +1337,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   addressFrom: widget.arguments.account.hezEthereumAddress,
                   addressTo: addressTo,
                   fee: fee,
-                  withdrawEstimatedFee:
-                      (withdrawGasLimit * getGasPrice(selectedWithdrawFeeSpeed))
-                          .toDouble(),
+                  withdrawEstimatedFee: withdrawEstimatedFee,
                   selectedFeeSpeed: selectedFeeSpeed,
                   selectedWithdrawFeeSpeed: selectedWithdrawFeeSpeed,
                   gasLimit: gasLimit,
@@ -1375,7 +1377,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       // fee l1 (withdraw)
       withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-      if (widget.arguments.account.token.id != 0) {
+      if (widget.arguments.account != null &&
+          widget.arguments.account.token.id != 0) {
         withdrawGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
       }
 
@@ -1404,7 +1407,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       ethereumAccount = await getEthereumAccount();
       withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-      if (widget.arguments.account.token.id != 0) {
+      if (widget.arguments.account != null &&
+          widget.arguments.account.token.id != 0) {
         withdrawGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
       }
 
@@ -1438,7 +1442,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         ethereumToken = await getEthereumToken();
         ethereumAccount = await getEthereumAccount();
         gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-        if (widget.arguments.account.token.id != 0) {
+        if (widget.arguments.account != null &&
+            widget.arguments.account.token.id != 0) {
           gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
         }
         gasPrice = getGasPrice(selectedFeeSpeed);
@@ -1507,13 +1512,15 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         ethereumAccount = await getEthereumAccount();
         withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-        if (widget.arguments.account.token.id != 0) {
+        if (widget.arguments.account != null &&
+            widget.arguments.account.token.id != 0) {
           withdrawGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
         }
       } else if (widget.arguments.transactionType == TransactionType.WITHDRAW) {
         gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-        if (widget.arguments.account.token.id != 0) {
+        if (widget.arguments.account != null &&
+            widget.arguments.account.token.id != 0) {
           gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
         }
         gasPrice = getGasPrice(selectedFeeSpeed);

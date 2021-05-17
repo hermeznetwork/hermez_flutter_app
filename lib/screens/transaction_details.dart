@@ -43,7 +43,6 @@ class TransactionDetailsArguments {
 
   double fee;
   final double withdrawEstimatedFee;
-  final GasPriceResponse gasPriceResponse;
   WalletDefaultFee selectedFeeSpeed;
   WalletDefaultFee selectedWithdrawFeeSpeed;
 
@@ -75,7 +74,6 @@ class TransactionDetailsArguments {
     this.fee,
     this.withdrawEstimatedFee,
     this.selectedFeeSpeed,
-    this.gasPriceResponse,
     this.selectedWithdrawFeeSpeed,
     this.gasLimit,
     this.gasPrice,
@@ -99,6 +97,7 @@ class TransactionDetailsPage extends StatefulWidget {
 
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Account ethereumAccount;
+  GasPriceResponse gasPriceResponse;
 
   @override
   void initState() {
@@ -866,18 +865,15 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         BigInt gasPrice = BigInt.one;
         switch (widget.arguments.selectedFeeSpeed) {
           case WalletDefaultFee.SLOW:
-            int gasPriceFloor =
-                widget.arguments.gasPriceResponse.safeLow * pow(10, 8);
+            int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
             gasPrice = BigInt.from(gasPriceFloor);
             break;
           case WalletDefaultFee.AVERAGE:
-            int gasPriceFloor =
-                widget.arguments.gasPriceResponse.average * pow(10, 8);
+            int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
             gasPrice = BigInt.from(gasPriceFloor);
             break;
           case WalletDefaultFee.FAST:
-            int gasPriceFloor =
-                widget.arguments.gasPriceResponse.fast * pow(10, 8);
+            int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
             gasPrice = BigInt.from(gasPriceFloor);
             break;
         }
@@ -1380,6 +1376,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   bool isFeeEnough() {
+    if (widget.arguments.transactionType == TransactionType.SEND &&
+        widget.arguments.transactionLevel == TransactionLevel.LEVEL2) {
+      return true;
+    }
     if (widget.arguments.status == TransactionStatus.DRAFT) {
       double fee =
           widget.arguments.gasLimit * widget.arguments.gasPrice.toDouble();
@@ -1403,6 +1403,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     //if (needRefresh == true) {
     if (widget.arguments.status == TransactionStatus.DRAFT) {
       ethereumAccount = await getEthereumAccount();
+      gasPriceResponse = await getGasPriceResponse();
     }
 
     //needRefresh = false;
