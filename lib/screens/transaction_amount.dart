@@ -69,6 +69,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   bool needRefresh = true;
   bool amountIsValid = true;
   bool addressIsValid = true;
+  bool accountIsCreated = true;
   bool showEstimatedFees = false;
   bool defaultCurrencySelected;
   Token ethereumToken;
@@ -947,9 +948,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                     controller: addressController,
                     layerOne:
                         widget.arguments.txLevel == TransactionLevel.LEVEL1,
-                    onChanged: (value) {
+                    onChanged: (value) async {
+                      bool valid = await isAddressValid(value);
+                      bool accountCreated = await isCreatedHermezAccount(value);
                       setState(() {
-                        addressIsValid = isAddressValid();
+                        addressIsValid = valid;
+                        accountIsCreated = accountCreated;
                         if (addressIsValid) {
                           amountController.clear();
                           needRefresh = true;
@@ -972,11 +976,15 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                 ),
                               ),
                               onPressed: () {
-                                getClipBoardData().then((String result) {
+                                getClipBoardData().then((String result) async {
+                                  bool valid = await isAddressValid(result);
+                                  bool accountCreated =
+                                      await isCreatedHermezAccount(result);
                                   setState(() {
                                     addressController.clear();
                                     addressController.text = result;
-                                    addressIsValid = isAddressValid();
+                                    addressIsValid = valid;
+                                    accountIsCreated = accountCreated;
                                     if (addressIsValid) {
                                       amountController.clear();
                                       needRefresh = true;
@@ -998,11 +1006,17 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                             ? QRCodeScannerType.ETHEREUM_ADDRESS
                                             : QRCodeScannerType.HERMEZ_ADDRESS,
                                         onScanned: (scannedAddress) async {
+                                          bool valid = await isAddressValid(
+                                              scannedAddress.toString());
+                                          bool accountCreated =
+                                              await isCreatedHermezAccount(
+                                                  scannedAddress.toString());
                                           setState(() {
                                             addressController.clear();
                                             addressController.text =
                                                 scannedAddress.toString();
-                                            addressIsValid = isAddressValid();
+                                            addressIsValid = valid;
+                                            accountIsCreated = accountCreated;
                                             if (addressIsValid) {
                                               amountController.clear();
                                               needRefresh = true;
@@ -1020,15 +1034,21 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                       )
                     : IconButton(
                         icon: new Icon(Icons.close),
-                        onPressed: () => setState(() {
-                          addressController.clear();
-                          addressIsValid = isAddressValid();
-                          if (addressIsValid) {
-                            amountController.clear();
-                            needRefresh = true;
-                          }
+                        onPressed: () async {
+                          bool valid = await isAddressValid("");
+
+                          setState(
+                            () {
+                              addressController.clear();
+                              addressIsValid = valid;
+                              accountIsCreated = false;
+                              if (addressIsValid) {
+                                amountController.clear();
+                                needRefresh = true;
+                              }
+                            },
+                          );
                         }),
-                      ),
               ],
             ),
           ),
@@ -1062,7 +1082,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                       ),
                     ),
                     Text(
-                      'Please enter a valid address.',
+                      accountIsCreated == false
+                          ? 'Please enter an existing address.'
+                          : 'Please enter a valid address.',
                       style: TextStyle(
                         color: HermezColors.redError,
                         fontFamily: 'ModernEra',
@@ -1592,13 +1614,21 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     }
   }
 
-  bool isAddressValid() {
-    return addressController.value.text.isEmpty ||
+  Future<bool> isAddressValid(String address) async {
+    return address.isEmpty ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            AddressUtils.isValidEthereumAddress(
-                addressController.value.text)) ||
+            AddressUtils.isValidEthereumAddress(address)) ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL2 &&
-            isHermezEthereumAddress(addressController.value.text));
+            isHermezEthereumAddress(address) &&
+            await isCreatedHermezAccount(address));
+  }
+
+  Future<bool> isCreatedHermezAccount(String value) async {
+    accountIsCreated = isHermezEthereumAddress(value)
+        ? await widget.arguments.store
+            .getCreateAccountAuthorization(getEthereumAddress(value))
+        : true;
+    return accountIsCreated;
   }
 
   bool isAmountValid(String value) {

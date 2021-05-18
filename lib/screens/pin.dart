@@ -295,12 +295,12 @@ class _PinPageState extends State<PinPage> {
                                       onPressed: () {
                                         checkBiometrics();
                                       },
-                                      child: Icon(
+                                      child: Image.asset(
                                         faceEnabled
-                                            ? Icons.face_unlock_rounded
-                                            : Icons.fingerprint,
-                                        color: Colors.black,
-                                        size: 30,
+                                            ? 'assets/face.png'
+                                            : 'assets/fingerprint.png',
+                                        width: 20,
+                                        height: 20,
                                       ),
                                     )
                                   : Container(
