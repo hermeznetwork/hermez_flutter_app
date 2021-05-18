@@ -1,4 +1,4 @@
-import 'package:flutter/services.dart' show PlatformException, rootBundle;
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:local_auth/local_auth.dart';
 
 class BiometricsUtils {

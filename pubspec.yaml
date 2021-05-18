@@ -64,7 +64,6 @@ dependencies:
 
   web_socket_channel: ^1.1.0
   intl: ^0.17.0
-  flutter_spinkit: "^4.1.1+1"
   # firebase_analytics: ^7.1.1
   # firebase_core: ^1.0.2
   # firebase_ml_vision: ^0.11.0
@@ -164,10 +163,10 @@ flutter:
     - arrow_up.svg
     - deposit.png
 
-    - partialERC20ABI.json
+    # Smart Contracts
     - ERC20ABI.json
     - HermezABI.json
-    - WithdrawalDelayerABI.json
+
     - account.png
     - wallet.png
     - search.png

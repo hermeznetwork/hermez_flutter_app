@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
@@ -46,15 +48,7 @@ class SettingsDetailsPage extends StatefulWidget {
 }
 
 class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
-  bool showBiometrics = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.arguments.type == SettingsDetailsType.SECURITY) {
-      shouldShowBiometrics();
-    }
-  }
+  List<BiometricType> availableBiometrics;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +77,12 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
           backgroundColor: Colors.white,
         ),
         backgroundColor: Colors.white,
-        body: SafeArea(child: buildSettingsList()));
+        body: FutureBuilder(
+          future: fetchBiometrics(),
+          builder: (context, snapshot) {
+            return SafeArea(child: buildSettingsList());
+          },
+        ));
   }
 
   buildSettingsList() {
@@ -94,7 +93,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
         break;
       case SettingsDetailsType.SECURITY:
         count = 2;
-        if (showBiometrics) {
+        if (availableBiometrics != null && availableBiometrics.length > 0) {
           count++;
         }
         break;
@@ -162,15 +161,44 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   icon = "assets/settings_lock_wallet.svg";
                   break;
                 case SettingsDetailsType.SECURITY:
-                  title = widget.configurationService.getBiometricsFace()
-                      ? "Disable Face ID"
-                      : widget.configurationService.getBiometricsFingerprint()
-                          ? "Disable fingerprint"
-                          : "Enable fingerprint";
-                  icon = widget.configurationService.getBiometricsFace()
-                      ? "assets/settings_face.svg"
-                      : "assets/settings_fingerprint.svg";
-                  break;
+                  {
+                    String enabledName = "Enable";
+                    String biometricName = "biometrics";
+                    icon = "assets/settings_fingerprint.svg";
+                    if (availableBiometrics != null &&
+                        availableBiometrics.length > 1) {
+                      biometricName = 'biometrics';
+                      enabledName =
+                          (widget.configurationService.getBiometricsFace() ==
+                                      false &&
+                                  widget.configurationService
+                                          .getBiometricsFingerprint() ==
+                                      false)
+                              ? "Enable"
+                              : "Disable";
+                    } else if (availableBiometrics != null &&
+                        availableBiometrics
+                            .contains(BiometricType.fingerprint)) {
+                      biometricName = 'fingerprint';
+                      enabledName = (widget.configurationService
+                                  .getBiometricsFingerprint() ==
+                              false)
+                          ? "Enable"
+                          : "Disable";
+                      icon = "assets/settings_fingerprint.svg";
+                    } else if (availableBiometrics != null &&
+                        availableBiometrics.contains(BiometricType.face)) {
+                      biometricName = Platform.isIOS ? 'Face ID' : 'face';
+                      enabledName =
+                          (widget.configurationService.getBiometricsFace() ==
+                                  false)
+                              ? "Enable"
+                              : "Disable";
+                      icon = "assets/settings_face.svg";
+                    }
+                    title = enabledName + " " + biometricName;
+                    break;
+                  }
                 case SettingsDetailsType.ADVANCED:
                   title = "Remove account";
                   icon = "assets/settings_remove_account.svg";
@@ -336,53 +364,43 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
   }
 
   Future<void> checkBiometrics() async {
-    if (await BiometricsUtils.canCheckBiometrics() &&
-        await BiometricsUtils.isDeviceSupported()) {
-      List<BiometricType> availableBiometrics =
-          await BiometricsUtils.getAvailableBiometrics();
-      if (availableBiometrics.contains(BiometricType.face)) {
-        // Face ID.
-        bool authenticated =
-            await BiometricsUtils.authenticateWithBiometrics('Scan your face'
-                ' to authenticate');
-        if (authenticated) {
-          setState(() {
-            widget.configurationService.setBiometricsFace(
-                !widget.configurationService.getBiometricsFace());
-          });
-        }
-      } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
-        // Touch ID.
-        bool authenticated = await BiometricsUtils.authenticateWithBiometrics(
-            'Scan your fingerprint'
-            ' to authenticate');
-        if (authenticated) {
-          setState(() {
-            widget.configurationService.setBiometricsFingerprint(
-                !widget.configurationService.getBiometricsFingerprint());
-          });
+    if (widget.arguments.type == SettingsDetailsType.SECURITY) {
+      if (await BiometricsUtils.canCheckBiometrics() &&
+          await BiometricsUtils.isDeviceSupported()) {
+        availableBiometrics = await BiometricsUtils.getAvailableBiometrics();
+        if (availableBiometrics.contains(BiometricType.face)) {
+          // Face ID.
+          bool authenticated =
+              await BiometricsUtils.authenticateWithBiometrics('Scan your face'
+                  ' to authenticate');
+          if (authenticated) {
+            setState(() {
+              widget.configurationService.setBiometricsFace(
+                  !widget.configurationService.getBiometricsFace());
+            });
+          }
+        } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
+          // Touch ID.
+          bool authenticated = await BiometricsUtils.authenticateWithBiometrics(
+              'Scan your fingerprint'
+              ' to authenticate');
+          if (authenticated) {
+            setState(() {
+              widget.configurationService.setBiometricsFingerprint(
+                  !widget.configurationService.getBiometricsFingerprint());
+            });
+          }
         }
       }
     }
   }
 
-  Future<void> shouldShowBiometrics() async {
-    if (await BiometricsUtils.canCheckBiometrics() &&
+  Future<void> fetchBiometrics() async {
+    availableBiometrics = null;
+    if (widget.arguments.type == SettingsDetailsType.SECURITY &&
+        await BiometricsUtils.canCheckBiometrics() &&
         await BiometricsUtils.isDeviceSupported()) {
-      List<BiometricType> availableBiometrics =
-          await BiometricsUtils.getAvailableBiometrics();
-      if (availableBiometrics.contains(BiometricType.face) ||
-          availableBiometrics.contains(BiometricType.fingerprint)) {
-        setState(() {
-          showBiometrics = true;
-        });
-
-        return;
-      }
+      availableBiometrics = await BiometricsUtils.getAvailableBiometrics();
     }
-    setState(() {
-      showBiometrics = false;
-    });
-    return;
   }
 }
