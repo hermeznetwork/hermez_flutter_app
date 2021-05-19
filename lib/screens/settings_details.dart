@@ -285,11 +285,12 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       Navigator.pushNamed(
                           widget.arguments.parentContext, "/transaction_amount",
                           arguments: TransactionAmountArguments(
-                            widget.arguments.store,
-                            TransactionLevel.LEVEL2,
-                            TransactionType.FORCEEXIT,
-                            //account: account,
-                          ));
+                              widget.arguments.store,
+                              TransactionLevel.LEVEL2,
+                              TransactionType.FORCEEXIT,
+                              allowChangeLevel: false
+                              //account: account,
+                              ));
                       break;
                   }
                   break;

@@ -1279,7 +1279,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         ? fees.existingAccount
         : fees.createAccount;
 
-    return fee / widget.arguments.token.USD;
+    return double.parse((fee / widget.arguments.token.USD).toStringAsFixed(6));
   }
 
   /// Bubbles up an event to send the transaction accordingly

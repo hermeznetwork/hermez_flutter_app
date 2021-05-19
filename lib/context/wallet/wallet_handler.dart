@@ -525,7 +525,7 @@ class WalletHandler {
     accountPendingDeposits.removeWhere(
         (pendingDeposit) => depositIds.contains(pendingDeposit['hash']));
 
-    return accountPendingDeposits;
+    return accountPendingDeposits.reversed.toList();
   }
 
   Future<List<dynamic>> getPendingWithdraws() async {
@@ -770,6 +770,7 @@ class WalletHandler {
 
     final exitTx = {
       'from': account.accountIndex,
+      'type': 'Exit',
       'amount': HermezCompressedAmount.compressAmount(amount),
       'fee': fee,
     };
@@ -794,10 +795,10 @@ class WalletHandler {
     final transferTx = {
       'from': from.accountIndex,
       'to': to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
-      'toBjj': null,
+      //'toBjj': null,
       'amount': HermezCompressedAmount.compressAmount(amount),
       'fee': fee,
-      'nonce': from.nonce
+      //'nonce': from.nonce
     };
 
     final success = await _hermezService.generateAndSendL2Tx(

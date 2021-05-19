@@ -450,6 +450,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                 children: <Widget>[
                   widget.arguments.transactionType == TransactionType.EXIT ||
                           widget.arguments.transactionType ==
+                              TransactionType.FORCEEXIT ||
+                          widget.arguments.transactionType ==
                               TransactionType.DEPOSIT
                       ? MoveRow(
                           widget.arguments.txLevel,

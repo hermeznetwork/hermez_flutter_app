@@ -733,7 +733,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       addressFrom = transaction.fromHezEthereumAddress;
                       addressTo = getEthereumAddress(
                           transaction.fromHezEthereumAddress);
-                    } else if (transaction.type == "Transfer") {
+                    } else if (transaction.type == "Transfer" ||
+                        transaction.type == "TransferToEthAddr") {
                       value = transaction.amount.toString();
                       if (transaction.fromAccountIndex ==
                           widget.arguments.account.accountIndex) {

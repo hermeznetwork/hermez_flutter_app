@@ -165,14 +165,23 @@ class HermezService implements IHermezService {
   @override
   Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token) async {
-    final l2TxResult = tx.generateAndSendL2Tx(transaction, wallet, token);
-    return l2TxResult != null;
+    try {
+      final l2TxResult =
+          await tx.generateAndSendL2Tx(transaction, wallet, token);
+      return l2TxResult != null;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
   Future<bool> sendL2Transaction(Transaction transaction, String bjj) async {
-    final response = await tx.sendL2Transaction(transaction.toJson(), bjj);
-    return response.isNotEmpty;
+    try {
+      final response = await tx.sendL2Transaction(transaction.toJson(), bjj);
+      return response.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
