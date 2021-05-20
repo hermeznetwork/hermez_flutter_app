@@ -79,7 +79,7 @@ class StorageService implements IStorageService {
             ? chainIdStorage[hermezEthereumAddress]
             : [];
 
-    final List newAccountStorage = List()..addAll(accountStorage);
+    List newAccountStorage = List.of(accountStorage, growable: true);
     newAccountStorage.add(item);
 
     final Map<String, dynamic> newChainIdStorage = Map<String, dynamic>()

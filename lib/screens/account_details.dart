@@ -55,11 +55,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   List<dynamic> transactions = [];
   List<Exit> exits = [];
   List<Exit> filteredExits = [];
-  List<dynamic> poolTxs = [];
+  List<dynamic> pendingTransfers = [];
   List<dynamic> pendingExits = [];
   List<dynamic> pendingWithdraws = [];
   List<dynamic> pendingDeposits = [];
-  List<dynamic> pendingTransfers = [];
+
   final ScrollController _controller = ScrollController();
 
   double balance = 0.0;
@@ -68,12 +68,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     fromItem = 0;
     exits = [];
     filteredExits = [];
-    //poolTxs = []; // L2 Transfers
-    //pendingExits = []; // L2 Exits
-    //pendingDeposits = [];
-    //pendingTransfers = [];
     pendingWithdraws = [];
     transactions = [];
+    //pendingTransfers = []; // Transfers
+    //pendingExits = []; // L2 Exits
+    //pendingDeposits = [];
 
     setState(() {
       _isLoading = true;
@@ -391,17 +390,15 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         pow(10, widget.arguments.account.token.decimals);
     double poolAmount = 0;
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
-      poolTxs.forEach((poolTransaction) {
-        if (poolTransaction.type == "Transfer") {
-          var amount = (getTokenAmountBigInt(
-                      double.parse(poolTransaction.amount) /
-                          pow(10, widget.arguments.account.token.decimals),
-                      widget.arguments.account.token.decimals)
-                  .toDouble() /
-              pow(10, widget.arguments.account.token.decimals));
-          var fee = poolTransaction.fee / pow(10, 3);
-          poolAmount = poolAmount + amount + fee;
-        }
+      pendingTransfers.forEach((poolTransaction) {
+        var amount = (getTokenAmountBigInt(
+                    double.parse(poolTransaction.amount) /
+                        pow(10, widget.arguments.account.token.decimals),
+                    widget.arguments.account.token.decimals)
+                .toDouble() /
+            pow(10, widget.arguments.account.token.decimals));
+        var fee = poolTransaction.fee / pow(10, 3);
+        poolAmount = poolAmount + amount + fee;
       });
       pendingExits.forEach((poolTransaction) {
         var amount = (getTokenAmountBigInt(
@@ -462,24 +459,22 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       resultValue = resultValue + value;
     }
 
-    poolTxs.forEach((poolTransaction) {
-      if (poolTransaction.type == "Transfer") {
-        var amount = (getTokenAmountBigInt(
-                    double.parse(poolTransaction.amount) /
-                        pow(10, widget.arguments.account.token.decimals),
-                    widget.arguments.account.token.decimals)
-                .toDouble() /
-            pow(10, widget.arguments.account.token.decimals));
-        var fee = (getTokenAmountBigInt(
-                    (poolTransaction.fee *
-                            pow(10,
-                                widget.arguments.account.token.decimals - 3)) /
-                        pow(10, widget.arguments.account.token.decimals),
-                    widget.arguments.account.token.decimals)
-                .toDouble() /
-            pow(10, widget.arguments.account.token.decimals));
-        resultValue = resultValue - amount - fee;
-      }
+    pendingTransfers.forEach((poolTransaction) {
+      var amount = (getTokenAmountBigInt(
+                  double.parse(poolTransaction.amount) /
+                      pow(10, widget.arguments.account.token.decimals),
+                  widget.arguments.account.token.decimals)
+              .toDouble() /
+          pow(10, widget.arguments.account.token.decimals));
+      var fee = (getTokenAmountBigInt(
+                  (poolTransaction.fee *
+                          pow(10,
+                              widget.arguments.account.token.decimals - 3)) /
+                      pow(10, widget.arguments.account.token.decimals),
+                  widget.arguments.account.token.decimals)
+              .toDouble() /
+          pow(10, widget.arguments.account.token.decimals));
+      resultValue = resultValue - amount - fee;
     });
 
     //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
@@ -490,12 +485,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   //widget that builds the list
   Widget _buildTransactionsList() {
-    if (_isLoading &&
-        transactions.isEmpty &&
-        poolTxs.isEmpty &&
-        pendingExits.isEmpty &&
-        exits.isEmpty &&
-        pendingWithdraws.isEmpty) {
+    if (_isLoading && transactions.isEmpty
+        //poolTxs.isEmpty &&
+        //pendingExits.isEmpty &&
+        //exits.isEmpty &&
+        /*pendingWithdraws.isEmpty*/) {
       return Container(
         color: Colors.white,
         child: Center(
@@ -504,7 +498,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       );
     } else if (!_isLoading &&
         transactions.isEmpty &&
-        poolTxs.isEmpty &&
         pendingExits.isEmpty &&
         exits.isEmpty &&
         pendingWithdraws.isEmpty) {
@@ -1070,10 +1063,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   Future<void> fetchData() async {
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
-      poolTxs =
-          await fetchPoolTransactions(widget.arguments.account.accountIndex);
-      final List<ForgedTransaction> pendingPoolTxs =
-          poolTxs.map((poolTransaction) {
+      pendingTransfers =
+          await fetchL2PendingTransfers(widget.arguments.account.accountIndex);
+      final List<ForgedTransaction> pendingTransfersTxs =
+          pendingTransfers.map((poolTransaction) {
         return ForgedTransaction(
             id: poolTransaction.id,
             amount: poolTransaction.amount,
@@ -1087,7 +1080,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             timestamp: poolTransaction.timestamp);
       }).toList();
       pendingExits =
-          await fetchPendingExits(widget.arguments.account.accountIndex);
+          await fetchL2PendingExits(widget.arguments.account.accountIndex);
       exits = await fetchExits(widget.arguments.account.token.id);
       filteredExits = exits.toList();
       pendingWithdraws =
@@ -1114,7 +1107,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             timestamp: pendingDeposit['timestamp']);
       }).toList();
       if (transactions.isEmpty) {
-        transactions.addAll(pendingPoolTxs);
+        transactions.addAll(pendingTransfersTxs);
         transactions.addAll(pendingDepositsTxs);
       }
       List<dynamic> historyTransactions = await fetchHistoryTransactions();
@@ -1130,38 +1123,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         _isLoading = false;
       });
     } else {
-      poolTxs = await fetchPoolTransactionsByTokenId(
-          widget.arguments.account.token.id);
-      final List<ForgedTransaction> pendingPoolTxs =
-          poolTxs.map((poolTransaction) {
-        return ForgedTransaction(
-            id: poolTransaction.id,
-            amount: poolTransaction.amount,
-            type: poolTransaction.type,
-            L1orL2: "L2",
-            l2info: L2Info(fee: poolTransaction.fee),
-            fromHezEthereumAddress: poolTransaction.fromHezEthereumAddress,
-            fromAccountIndex: poolTransaction.fromAccountIndex,
-            toAccountIndex: poolTransaction.toAccountIndex,
-            toHezEthereumAddress: poolTransaction.toHezEthereumAddress,
-            timestamp: poolTransaction.timestamp);
-      }).toList();
-      pendingExits =
-          await fetchPendingExitsByTokenId(widget.arguments.account.token.id);
-      exits = await fetchExits(widget.arguments.account.token.id);
-      filteredExits = exits.toList();
-      pendingWithdraws =
-          await fetchPendingWithdraws(widget.arguments.account.token.id);
-      filteredExits.removeWhere((Exit exit) {
-        for (dynamic pendingWithdraw in pendingWithdraws) {
-          if (pendingWithdraw["id"] ==
-              (exit.accountIndex + exit.batchNum.toString())) {
-            return true;
-          }
-        }
-        return false;
-      });
-
       pendingTransfers =
           await fetchPendingTransfers(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingTransfersTxs =
@@ -1177,6 +1138,21 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             toHezEthereumAddress: pendingTransfer['toHezEthereumAddress'],
             timestamp: pendingTransfer['timestamp']);
       }).toList();
+      pendingExits =
+          await fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
+      exits = await fetchExits(widget.arguments.account.token.id);
+      filteredExits = exits.toList();
+      pendingWithdraws =
+          await fetchPendingWithdraws(widget.arguments.account.token.id);
+      filteredExits.removeWhere((Exit exit) {
+        for (dynamic pendingWithdraw in pendingWithdraws) {
+          if (pendingWithdraw["id"] ==
+              (exit.accountIndex + exit.batchNum.toString())) {
+            return true;
+          }
+        }
+        return false;
+      });
       pendingDeposits =
           await fetchPendingDeposits(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingDepositsTxs =
@@ -1225,23 +1201,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     }
   }
 
-  Future<List<PoolTransaction>> fetchPoolTransactionsByTokenId(
-      int tokenId) async {
-    List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions();
-    poolTxs.removeWhere((transaction) => transaction.token.id != tokenId);
-    return poolTxs;
-  }
-
-  Future<List<PoolTransaction>> fetchPendingExitsByTokenId(int tokenId) async {
-    List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions();
-    poolTxs.removeWhere((transaction) =>
-        transaction.type != 'Exit' || transaction.token.id != tokenId);
-    return poolTxs;
-  }
-
-  Future<List<PoolTransaction>> fetchPoolTransactions(
+  Future<List<PoolTransaction>> fetchL2PendingTransfers(
       String accountIndex) async {
     List<PoolTransaction> poolTxs =
         await widget.arguments.store.getPoolTransactions(accountIndex);
@@ -1249,10 +1209,19 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     return poolTxs;
   }
 
-  Future<List<PoolTransaction>> fetchPendingExits(String accountIndex) async {
+  Future<List<PoolTransaction>> fetchL2PendingExits(String accountIndex) async {
     List<PoolTransaction> poolTxs =
         await widget.arguments.store.getPoolTransactions(accountIndex);
     poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
+    return poolTxs;
+  }
+
+  Future<List<PoolTransaction>> fetchL2PendingExitsByTokenId(
+      int tokenId) async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions();
+    poolTxs.removeWhere((transaction) =>
+        transaction.type != 'Exit' || transaction.token.id != tokenId);
     return poolTxs;
   }
 

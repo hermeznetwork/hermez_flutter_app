@@ -17,7 +17,6 @@ import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_plugin/addresses.dart' as addresses;
 import 'package:hermez_plugin/api.dart';
-import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/hermez_compressed_amount.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
@@ -504,7 +503,9 @@ class WalletHandler {
           await _configurationService.removePendingDeposit(transactionHash);
         } else {
           final hermezContract = await ContractParser.fromAssets(
-              'HermezABI.json', contractAddresses['Hermez'], "Hermez");
+              'HermezABI.json',
+              getCurrentEnvironment().contracts['Hermez'],
+              "Hermez");
           final contractEvent = hermezContract.event('L1UserTxEvent');
           for (var log in receipt.logs) {
             List<String> topics = List<String>.from(

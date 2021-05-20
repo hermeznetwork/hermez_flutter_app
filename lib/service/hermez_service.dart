@@ -326,7 +326,7 @@ class HermezService implements IHermezService {
         bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
 
         // get client nonce
-        final credentials = await client.credentialsFromPrivateKey(privateKey);
+        /*final credentials = await client.credentialsFromPrivateKey(privateKey);
         final from = await credentials.extractAddress();
         int clientNonce = await client.getTransactionCount(from);
         int nonce = _configService.getLatestNonce();
@@ -334,7 +334,7 @@ class HermezService implements IHermezService {
           nonce = clientNonce + 1;
         } else {
           nonce += 1;
-        }
+        }*/
 
         final txHash = await tx
             .withdraw(
@@ -348,12 +348,12 @@ class HermezService implements IHermezService {
                 privateKey,
                 isInstant: isIntant,
                 gasLimit: gasLimit,
-                gasPrice: gasPrice,
-                nonce: nonce)
+                gasPrice: gasPrice)
+            //,nonce: nonce)
             .then((txHash) async {
           if (txHash != null) {
             // update nonce
-            _configService.setLatestNonce(clientNonce);
+            //_configService.setLatestNonce(clientNonce);
 
             if (isIntant) {
               _configService.addPendingWithdraw({
