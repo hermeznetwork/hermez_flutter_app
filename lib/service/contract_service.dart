@@ -5,7 +5,9 @@ import 'dart:typed_data';
 import 'package:hermez/service/network/api_eth_gas_station_client.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/contract_parser.dart';
+import 'package:hermez_plugin/api.dart';
 import 'package:hermez_plugin/environment.dart';
+import 'package:hermez_plugin/model/token.dart';
 import 'package:web3dart/web3dart.dart';
 
 import 'configuration_service.dart';
@@ -15,20 +17,19 @@ typedef TransferEvent = void Function(
 
 abstract class IContractService {
   Future<Credentials> getCredentials(String privateKey);
-  Future<String> send(
-      String privateKey,
-      EthereumAddress receiver,
-      BigInt amount,
-      EthereumAddress tokenContractAddress,
-      String tokenContractName,
-      {TransferEvent onTransfer,
-      Function onError});
+  Future<bool> sendEth(
+      String privateKey, EthereumAddress receiverAddress, BigInt amountInWei,
+      {TransferEvent onTransfer, Function onError});
+  Future<bool> send(String privateKey, EthereumAddress receiverAddress,
+      BigInt amountInWei, Token token,
+      {TransferEvent onTransfer, Function onError});
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName);
   Future<EtherAmount> getEthBalance(EthereumAddress from);
   Future<void> dispose();
   StreamSubscription listenTransfer(
       TransferEvent onTransfer, DeployedContract contract);
+  //StreamSubscription listenPendingTransactions();
 }
 
 class ContractService implements IContractService {
@@ -59,12 +60,12 @@ class ContractService implements IContractService {
   Future<Credentials> getCredentials(String privateKey) =>
       client.credentialsFromPrivateKey(privateKey);
 
-  Future<String> sendEth(
+  Future<bool> sendEth(
       String privateKey, EthereumAddress receiverAddress, BigInt amountInWei,
       {TransferEvent onTransfer, Function onError}) async {
-    /*final credentials = await this.getCredentials(privateKey);
-    final from = await credentials.extractAddress();*/
-
+    final credentials = await this.getCredentials(privateKey);
+    final from = await credentials.extractAddress();
+    Token token = await getToken(0);
     /*bool isApproved = await _approveCb;
     if (!isApproved) {
       throw 'transaction not approved';
@@ -73,17 +74,70 @@ class ContractService implements IContractService {
     EtherAmount amount =
         EtherAmount.fromUnitAndValue(EtherUnit.wei, amountInWei);
 
-    try {
-      String txHash =
-          await _sendTransaction(privateKey, receiverAddress, amount);
-      print('transaction $txHash successful');
-      return txHash;
-    } catch (ex) {
+    //try {
+    final txHash = await _sendTransaction(privateKey, receiverAddress, amount)
+        .then((txHash) {
+      if (txHash != null) {
+        _configService.addPendingTransfer({
+          'hash': txHash,
+          'fromHezEthereumAddress': from.hex,
+          'toHezEthereumAddress': receiverAddress.hex,
+          'token': token,
+          'amount': amountInWei.toDouble(),
+          'state': 'pend',
+          'timestamp': DateTime.now().toIso8601String(),
+          'type': 'Transfer'
+        });
+      }
+      return txHash != null;
+    });
+    return txHash;
+    /*} catch (ex) {
       if (onError != null) {
         onError(ex);
       }
       return null;
-    }
+    }*/
+  }
+
+  Future<bool> send(String privateKey, EthereumAddress receiverAddress,
+      BigInt amountInWei, Token token,
+      {TransferEvent onTransfer, Function onError}) async {
+    final credentials = await this.getCredentials(privateKey);
+    final from = await credentials.extractAddress();
+
+    EthereumAddress tokenContractAddress =
+        EthereumAddress.fromHex(token.ethereumAddress);
+    String tokenContractName = token.symbol;
+    final contract = await ContractParser.fromAssets(
+        'ERC20ABI.json', tokenContractAddress.toString(), tokenContractName);
+
+    final txHash = await client
+        .sendTransaction(
+      credentials,
+      Transaction.callContract(
+        contract: contract,
+        function: _sendFunction(contract),
+        parameters: [receiverAddress, amountInWei],
+        from: from,
+      ),
+    )
+        .then((txHash) {
+      if (txHash != null) {
+        _configService.addPendingTransfer({
+          'hash': txHash,
+          'fromHezEthereumAddress': from.hex,
+          'toHezEthereumAddress': receiverAddress.hex,
+          'token': token,
+          'amount': amountInWei.toDouble(),
+          'state': 'pend',
+          'timestamp': DateTime.now().toIso8601String(),
+          'type': 'Transfer'
+        });
+      }
+      return txHash != null;
+    });
+    return txHash;
   }
 
   Future<String> _sendTransaction(String privateKey,
@@ -92,7 +146,6 @@ class ContractService implements IContractService {
 
     final credentials = await this.getCredentials(privateKey);
     final from = await credentials.extractAddress();
-    final networkId = await client.getNetworkId();
 
     final gasPrice = await client.getGasPrice();
     final maxGas = await client.estimateGas(
@@ -106,10 +159,16 @@ class ContractService implements IContractService {
         value: amount);
 
     print(
-        'transfer --> privateKey: $privateKey, sender: $from, receiver: $receiverAddress, amountInWei: $amount');
+        'transfer L1 --> privateKey: $privateKey, sender: $from, receiver: $receiverAddress, amountInWei: $amount');
+    String txHash;
+    try {
+      txHash = await client.sendTransaction(credentials, transaction,
+          chainId: getCurrentEnvironment().chainId);
+    } catch (e) {
+      print(e.toString());
+    }
 
-    String txHash = await client.sendTransaction(credentials, transaction,
-        chainId: networkId);
+    print(txHash);
 
     return txHash;
   }
@@ -195,60 +254,6 @@ class ContractService implements IContractService {
       }
     }
     return txHash;
-  }
-
-  Future<String> send(
-      String privateKey,
-      EthereumAddress receiver,
-      BigInt amount,
-      EthereumAddress tokenContractAddress,
-      String tokenContractName,
-      {TransferEvent onTransfer,
-      Function onError}) async {
-    final credentials = await this.getCredentials(privateKey);
-    final from = await credentials.extractAddress();
-    final networkId = await client.getNetworkId();
-
-    GasPriceResponse gasPrice = await _apiEthGasStationClient().getGasPrice();
-
-    EtherAmount etherAmount = await client.getGasPrice();
-
-    final contract = await ContractParser.fromAssets(
-        'ERC20ABI.json', tokenContractAddress.toString(), tokenContractName);
-
-    StreamSubscription event;
-    // Workaround once sendTransacton doesn't return a Promise containing confirmation / receipt
-    if (onTransfer != null) {
-      event = listenTransfer(
-        (from, to, value) async {
-          onTransfer(from, to, value);
-          await event.cancel();
-        },
-        contract,
-        take: 1,
-      );
-    }
-
-    try {
-      //client.getBlockNumber()
-      final transactionId = await client.sendTransaction(
-        credentials,
-        Transaction.callContract(
-          contract: contract,
-          function: _sendFunction(contract),
-          parameters: [receiver, amount],
-          from: from,
-        ),
-        chainId: networkId,
-      );
-      print('transact started $transactionId');
-      return transactionId;
-    } catch (ex) {
-      if (onError != null) {
-        onError(ex);
-      }
-      return null;
-    }
   }
 
   Future<EtherAmount> getEthBalance(EthereumAddress from) async {
@@ -347,11 +352,23 @@ class ContractService implements IContractService {
       final to = decoded[1] as EthereumAddress;
       final value = decoded[2] as BigInt;
 
-      print('$from}');
-      print('$to}');
-      print('$value}');
+      print('$from');
+      print('$to');
+      print('$value');
 
       onTransfer(from, to, value);
+    });
+  }
+
+  StreamSubscription listenPendingTransactions({int take}) {
+    var pendingTransactions = client.pendingTransactions();
+
+    if (take != null) {
+      pendingTransactions = pendingTransactions.take(take);
+    }
+
+    return pendingTransactions.listen((event) {
+      print('$event');
     });
   }
 

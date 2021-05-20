@@ -17,8 +17,6 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-//import 'package:share/share.dart';
-
 import '../context/wallet/wallet_handler.dart';
 import 'transaction_amount.dart';
 
@@ -81,8 +79,8 @@ class _QRCodePageState extends State<QRCodePage> {
           elevation: 0.0,
           backgroundColor: HermezColors.lightOrange,
           actions:
-          widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT
-              ? <Widget>[
+          //widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT
+               <Widget>[
                   IconButton(
                     icon: Image.asset("assets/share.png",
                         color: HermezColors.blackTwo,
@@ -93,7 +91,7 @@ class _QRCodePageState extends State<QRCodePage> {
                     },
                   ),
                 ]
-              : null),
+              ),
       body: SafeArea(
         child: Column(
           children: [
@@ -472,7 +470,9 @@ class _QRCodePageState extends State<QRCodePage> {
       ByteData byteData =
       await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData.buffer.asUint8List();
-      await Share.file('Hermez QR Code', 'hermez_qrcode.png', pngBytes, 'image/png', text: 'Hello, here is my Hermez code!');
+      await Share.file('Hermez QR Code', 'hermez_qrcode.png', pngBytes, 'image/png', text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ? 'Hello, scan this Hermez code to send me ' + EthAmountFormatter.removeDecimalZeroFormat(
+          double.parse(
+              widget.arguments.amount.toStringAsFixed(6))) + ' ' + widget.arguments.token.symbol :'Hello, here is my Hermez code!');
     } on PlatformException catch (e) {
       print("Exception while taking screenshot:" + e.toString());
       Alert(title: 'Error', text: e.toString()).show(context);

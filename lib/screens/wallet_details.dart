@@ -67,6 +67,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   Future<List<Account>> fetchAccounts() async {
+    fetchPendingTransactions();
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
       /*const accountPendingDeposits = storage.getItemsByHermezAddress(
           pendingDeposits,
@@ -74,37 +75,39 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
           wallet.hermezEthereumAddress
       )*/
 
-      /*const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
-          pendingDelayedWithdraws,
-          ethereumNetworkTask.data.chainId,
-          wallet.hermezEthereumAddress
-      )
+      /*
       const pendingOnTopDeposits = accountPendingDeposits
           .filter(deposit => deposit.type === TxType.Deposit)
       const pendingCreateAccountDeposits = accountPendingDeposits
           .filter(deposit => deposit.type === TxType.CreateAccountDeposit)*/
-
-      try {
-        _poolTxs = await fetchPendingExits();
-      } catch (e) {}
-      _exits = await fetchExits();
-      _filteredExits = _exits.toList();
-      _pendingWithdraws = await fetchPendingWithdraws();
-      _filteredExits.removeWhere((Exit exit) {
-        for (dynamic pendingWithdraw in _pendingWithdraws) {
-          if (pendingWithdraw["id"] ==
-              (exit.accountIndex + exit.batchNum.toString())) {
-            return true;
-          }
-        }
-        return false;
-      });
       _pendingDeposits = await fetchPendingDeposits();
-
       return widget.arguments.store.getAccounts();
     } else {
       return widget.arguments.store.getL1Accounts(true);
     }
+  }
+
+  void fetchPendingTransactions() async {
+    try {
+      _poolTxs = await fetchPendingExits();
+    } catch (e) {}
+    _exits = await fetchExits();
+    _filteredExits = _exits.toList();
+    _pendingWithdraws = await fetchPendingWithdraws();
+    _filteredExits.removeWhere((Exit exit) {
+      for (dynamic pendingWithdraw in _pendingWithdraws) {
+        if (pendingWithdraw["id"] ==
+            (exit.accountIndex + exit.batchNum.toString())) {
+          return true;
+        }
+      }
+      return false;
+    });
+    /*const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
+          pendingDelayedWithdraws,
+          ethereumNetworkTask.data.chainId,
+          wallet.hermezEthereumAddress
+      )*/
   }
 
   Future<List<dynamic>> fetchPendingExits() async {
@@ -601,8 +604,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .split('.')
                   .last;
 
-              return WithdrawalRow(exit, 1, currency,
-                  widget.arguments.store.state.exchangeRatio, () async {});
+              return WithdrawalRow(
+                  exit,
+                  1,
+                  currency,
+                  widget.arguments.store.state.exchangeRatio,
+                  () async {},
+                  widget.arguments.store.state.txLevel);
             } else if (i == 0 && _filteredExits.length > 0) {
               final index = i;
               final Exit exit = _filteredExits[index];
@@ -635,28 +643,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 }
                 String addressFrom = exit.hezEthereumAddress;
                 String addressTo = getCurrentEnvironment().contracts['Hermez'];
-
-                BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
                 final amountWithdraw = getTokenAmountBigInt(
                     double.parse(exit.balance) / pow(10, exit.token.decimals),
                     exit.token.decimals);
-                try {
-                  gasLimit = await widget.arguments.store.withdrawGasLimit(
-                      amountWithdraw, null, exit, false, true);
-                } catch (e) {
-                  // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
-                  gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
-                  exit.merkleProof.siblings.forEach((element) {
-                    gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
-                  });
-                  if (exit.token.id != 0) {
-                    gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
-                  }
-                }
-                int offset = GAS_LIMIT_OFFSET;
-                gasLimit += BigInt.from(offset);
-                //Token ethereumToken = await getEthereumToken();
-                //Account ethereumAccount = await getEthereumAccount();
+                BigInt gasLimit = await widget.arguments.store
+                    .withdrawGasLimit(amountWithdraw, null, exit, false, true);
 
                 Navigator.of(widget.arguments.parentContext)
                     .pushNamed("/transaction_details",
@@ -677,7 +668,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           gasPrice: gasPrice.toInt(),
                         ))
                     .then((value) => _onRefresh());
-              });
+              }, widget.arguments.store.state.txLevel);
             } else if (i == 0 && _pendingWithdraws.length > 0) {
               final index = i;
               final pendingWithdraw = _pendingWithdraws[index];
@@ -780,6 +771,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             .then((value) => _onRefresh());
                       }
                     : () {},
+                widget.arguments.store.state.txLevel,
                 retry: pendingWithdraw['status'] == 'fail',
               );
             } // final index = i ~/ 2; //get the actual index excluding dividers.

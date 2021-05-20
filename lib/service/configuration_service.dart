@@ -48,6 +48,9 @@ abstract class IConfigurationService {
   void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
   void addPendingDeposit(dynamic pendingDeposit);
   void removePendingDeposit(String pendingDepositId);
+  // L1 Transfers
+  void addPendingTransfer(dynamic pendingTransfer);
+  void removePendingTransfer(String pendingTransferId);
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -475,6 +478,30 @@ class ConfigurationService implements IConfigurationService {
     /*pendingDepositsTxReceipts.forEach((List txReceipts) {
       txReceipts.removeWhere((txReceipt) => txReceipt != null && txReceipt.logs && txReceipt.logs.length > 0)
     });*/
+  }
+
+  /// Adds a pendingTransfer to the pendingTransfers store
+  /// @param {string} pendingTransfer - The pendingTransfer to add to the store
+  /// @returns {void}
+  @override
+  void addPendingTransfer(dynamic pendingTransfer) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    _storageService.addItem(PENDING_TRANSFERS_KEY, chainId, ethereumAddress,
+        pendingTransfer, false);
+  }
+
+  /// Removes a pendingTransfer from the pendingTransfer store
+  /// @param {string} transactionId - The transaction identifier used to remove a pendingTransfer from the store
+  /// @returns {void}
+  @override
+  void removePendingTransfer(String transactionHash) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    _storageService.removeItem(PENDING_TRANSFERS_KEY, chainId, ethereumAddress,
+        'hash', transactionHash, false);
   }
 
   /*function checkPendingDeposits () {

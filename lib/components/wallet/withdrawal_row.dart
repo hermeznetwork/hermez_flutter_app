@@ -2,13 +2,14 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/model/exit.dart';
 
 class WithdrawalRow extends StatelessWidget {
-  WithdrawalRow(
-      this.exit, this.step, this.currency, this.exchangeRatio, this.onPressed,
+  WithdrawalRow(this.exit, this.step, this.currency, this.exchangeRatio,
+      this.onPressed, this.transactionLevel,
       {this.retry = false});
 
   final Exit exit;
@@ -16,6 +17,7 @@ class WithdrawalRow extends StatelessWidget {
   final String currency;
   final double exchangeRatio;
   final bool retry;
+  final TransactionLevel transactionLevel;
   final void Function() onPressed;
 
   Widget build(BuildContext context) {
@@ -77,7 +79,10 @@ class WithdrawalRow extends StatelessWidget {
                       ),
                       SizedBox(height: 16.0),
                       Container(
-                        child: Text("Move to\nEthereum Wallet",
+                        child: Text(
+                            transactionLevel == TransactionLevel.LEVEL2
+                                ? "Move to\nEthereum Wallet"
+                                : "Move from\nHermez Wallet",
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: Colors.white,

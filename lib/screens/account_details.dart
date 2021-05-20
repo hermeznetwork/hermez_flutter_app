@@ -19,6 +19,7 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/forged_transaction.dart';
 import 'package:hermez_plugin/model/l1info.dart';
+import 'package:hermez_plugin/model/l2info.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/utils.dart';
@@ -58,6 +59,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   List<dynamic> pendingExits = [];
   List<dynamic> pendingWithdraws = [];
   List<dynamic> pendingDeposits = [];
+  List<dynamic> pendingTransfers = [];
   final ScrollController _controller = ScrollController();
 
   double balance = 0.0;
@@ -66,10 +68,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     fromItem = 0;
     exits = [];
     filteredExits = [];
-    poolTxs = [];
-    pendingExits = [];
+    //poolTxs = []; // L2 Transfers
+    //pendingExits = []; // L2 Exits
+    //pendingDeposits = [];
+    //pendingTransfers = [];
     pendingWithdraws = [];
-    pendingDeposits = [];
     transactions = [];
 
     setState(() {
@@ -194,24 +197,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 ? BlinkingTextAnimation(
                                     arguments: BlinkingTextAnimationArguments(
                                         HermezColors.blackTwo,
-                                        EthAmountFormatter.formatAmount(
-                                            double.parse(widget.arguments
-                                                    .account.balance) /
-                                                pow(
-                                                    10,
-                                                    widget.arguments.account
-                                                        .token.decimals),
-                                            widget.arguments.account.token
-                                                .symbol),
+                                        calculateBalance(widget
+                                            .arguments.account.token.symbol),
                                         32,
                                         FontWeight.w800))
                                 : Text(
-                                    EthAmountFormatter.formatAmount(
-                                        double.parse(widget.arguments.account.balance) /
-                                            pow(
-                                                10,
-                                                widget.arguments.account.token
-                                                    .decimals),
+                                    calculateBalance(
                                         widget.arguments.account.token.symbol),
                                     style: TextStyle(
                                         color: HermezColors.blackTwo,
@@ -224,11 +215,20 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       ? BlinkingTextAnimation(
                           arguments: BlinkingTextAnimationArguments(
                               HermezColors.steel,
-                              accountBalance(),
+                              calculateBalance(widget
+                                  .arguments.store.state.defaultCurrency
+                                  .toString()
+                                  .split('.')
+                                  .last),
                               18,
                               FontWeight.w500),
                         )
-                      : Text(accountBalance(),
+                      : Text(
+                          calculateBalance(widget
+                              .arguments.store.state.defaultCurrency
+                              .toString()
+                              .split('.')
+                              .last),
                           style: TextStyle(
                               fontFamily: 'ModernEra',
                               fontWeight: FontWeight.w500,
@@ -373,6 +373,63 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     ]);
   }
 
+  String calculateBalance(String symbol) {
+    bool isCurrency = false;
+    if (symbol == "EUR") {
+      isCurrency = true;
+    } else if (symbol == "CNY") {
+      isCurrency = true;
+    } else if (symbol == "JPY") {
+      isCurrency = true;
+    } else if (symbol == "GBP") {
+      isCurrency = true;
+    } else if (symbol == "USD") {
+      isCurrency = true;
+    }
+    double resultAmount = 0;
+    double balanceAmount = double.parse(widget.arguments.account.balance) /
+        pow(10, widget.arguments.account.token.decimals);
+    double poolAmount = 0;
+    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
+      poolTxs.forEach((poolTransaction) {
+        if (poolTransaction.type == "Transfer") {
+          var amount = (getTokenAmountBigInt(
+                      double.parse(poolTransaction.amount) /
+                          pow(10, widget.arguments.account.token.decimals),
+                      widget.arguments.account.token.decimals)
+                  .toDouble() /
+              pow(10, widget.arguments.account.token.decimals));
+          var fee = poolTransaction.fee / pow(10, 3);
+          poolAmount = poolAmount + amount + fee;
+        }
+      });
+      pendingExits.forEach((poolTransaction) {
+        var amount = (getTokenAmountBigInt(
+                    double.parse(poolTransaction.amount) /
+                        pow(10, widget.arguments.account.token.decimals),
+                    widget.arguments.account.token.decimals)
+                .toDouble() /
+            pow(10, widget.arguments.account.token.decimals));
+        var fee = poolTransaction.fee / pow(10, 3);
+        poolAmount = poolAmount + amount + fee;
+      });
+    } else {
+      // rest pending deposits
+    }
+    debugPrint("balance amount:" + balanceAmount.toString());
+    debugPrint("pool amount:" + poolAmount.toString());
+    resultAmount = balanceAmount - poolAmount;
+
+    if (isCurrency && widget.arguments.account.token.USD != null) {
+      resultAmount = widget.arguments.account.token.USD * resultAmount;
+      if (symbol != "USD") {
+        resultAmount *= widget.arguments.store.state.exchangeRatio;
+      }
+    }
+
+    return EthAmountFormatter.formatAmount(resultAmount, symbol);
+  }
+
   String accountBalance() {
     double resultValue = 0;
     String result = "";
@@ -405,9 +462,29 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       resultValue = resultValue + value;
     }
 
+    poolTxs.forEach((poolTransaction) {
+      if (poolTransaction.type == "Transfer") {
+        var amount = (getTokenAmountBigInt(
+                    double.parse(poolTransaction.amount) /
+                        pow(10, widget.arguments.account.token.decimals),
+                    widget.arguments.account.token.decimals)
+                .toDouble() /
+            pow(10, widget.arguments.account.token.decimals));
+        var fee = (getTokenAmountBigInt(
+                    (poolTransaction.fee *
+                            pow(10,
+                                widget.arguments.account.token.decimals - 3)) /
+                        pow(10, widget.arguments.account.token.decimals),
+                    widget.arguments.account.token.decimals)
+                .toDouble() /
+            pow(10, widget.arguments.account.token.decimals));
+        resultValue = resultValue - amount - fee;
+      }
+    });
+
     //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
     result = NumberFormat.currency(locale: locale, symbol: symbol)
-        .format(resultValue / pow(10, 18));
+        .format(resultValue / pow(10, widget.arguments.account.token.decimals));
     return result;
   }
 
@@ -478,8 +555,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       .split('.')
                       .last;
 
-                  return WithdrawalRow(exit, 1, currency,
-                      widget.arguments.store.state.exchangeRatio, () async {});
+                  return WithdrawalRow(
+                      exit,
+                      1,
+                      currency,
+                      widget.arguments.store.state.exchangeRatio,
+                      () async {},
+                      widget.arguments.store.state.txLevel);
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
                 else if ((pendingExits.isNotEmpty || exits.isNotEmpty
                             /*||
@@ -529,23 +611,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     //Token ethereumToken =
                     //await widget.arguments.store.getTokenById(0);
                     //Account ethereumAccount = await getEthereumAccount();
-                    try {
-                      final amountWithdraw = getTokenAmountBigInt(
-                          double.parse(exit.balance) /
-                              pow(10, exit.token.decimals),
-                          exit.token.decimals);
-                      gasLimit = await widget.arguments.store.withdrawGasLimit(
-                          amountWithdraw, null, exit, false, true);
-                    } catch (e) {
-                      // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
-                      gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
-                      exit.merkleProof.siblings.forEach((element) {
-                        gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
-                      });
-                      if (exit.token.id != 0) {
-                        gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
-                      }
-                    }
+                    final amountWithdraw = getTokenAmountBigInt(
+                        double.parse(exit.balance) /
+                            pow(10, exit.token.decimals),
+                        exit.token.decimals);
+                    gasLimit = await widget.arguments.store.withdrawGasLimit(
+                        amountWithdraw, null, exit, false, true);
 
                     Navigator.of(widget.arguments.parentContext)
                         .pushNamed("/transaction_details",
@@ -564,7 +635,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               gasPrice: gasPrice.toInt(),
                             ))
                         .then((value) => _onRefresh());
-                  });
+                  }, widget.arguments.store.state.txLevel);
                 } else if (i == 0 && pendingWithdraws.length > 0) {
                   final index = i;
                   final pendingWithdraw = pendingWithdraws[index];
@@ -627,26 +698,15 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             String addressTo =
                                 getCurrentEnvironment().contracts['Hermez'];
 
-                            BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
                             final amountWithdraw = getTokenAmountBigInt(
                                 double.parse(exit.balance) /
                                     pow(10, exit.token.decimals),
                                 exit.token.decimals);
-                            try {
-                              gasLimit = await widget.arguments.store
-                                  .withdrawGasLimit(
-                                      amountWithdraw, null, exit, false, true);
-                            } catch (e) {
-                              gasLimit = BigInt.from(
-                                  GAS_LIMIT_WITHDRAW_DEFAULT +
-                                      (GAS_LIMIT_WITHDRAW_SIBLING *
-                                          exit.merkleProof.siblings.length));
-                              if (exit.token.id != 0) {
-                                gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
-                              }
-                            }
-                            int offset = GAS_LIMIT_OFFSET;
-                            gasLimit += BigInt.from(offset);
+
+                            BigInt gasLimit = await widget.arguments.store
+                                .withdrawGasLimit(
+                                    amountWithdraw, null, exit, false, true);
+
                             Navigator.of(widget.arguments.parentContext)
                                 .pushNamed("/transaction_details",
                                     arguments: TransactionDetailsArguments(
@@ -666,6 +726,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 .then((value) => _onRefresh());
                           }
                         : () {},
+                    widget.arguments.store.state.txLevel,
                     retry: true,
                   );
                 } else {
@@ -689,10 +750,17 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   var addressFrom = 'from';
                   var addressTo = 'to';
                   var value = '0';
+                  var feeValue = '0';
                   if (element.runtimeType == ForgedTransaction) {
                     ForgedTransaction transaction = element;
                     if (transaction.id != null) {
                       txId = transaction.id;
+                    }
+                    if (transaction.hash != null) {
+                      txHash = transaction.hash;
+                    }
+                    if (transaction.L1orL2 == "L2") {
+                      feeValue = transaction.l2info.fee.toString();
                     }
                     if (transaction.type == "CreateAccountDeposit" ||
                         transaction.type == "Deposit") {
@@ -711,9 +779,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         final DateTime dateTimeFromStr =
                             formatter.parse(transaction.timestamp);
                         timestamp = dateTimeFromStr.millisecondsSinceEpoch;
-                        if (transaction.hash != null) {
-                          txHash = transaction.hash;
-                        }
                       }
                       addressFrom = getEthereumAddress(
                           transaction.fromHezEthereumAddress);
@@ -736,8 +801,24 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     } else if (transaction.type == "Transfer" ||
                         transaction.type == "TransferToEthAddr") {
                       value = transaction.amount.toString();
-                      if (transaction.fromAccountIndex ==
-                          widget.arguments.account.accountIndex) {
+                      /*if (transaction.L1orL2 == 'L1') {
+                        if (transaction.fromHezEthereumAddress.toLowerCase() ==
+                            widget.arguments.store.state.ethereumAddress
+                                .toLowerCase()) {
+                          type = "SEND";
+                        } else if (transaction.toHezEthereumAddress
+                                .toLowerCase() ==
+                            widget.arguments.store.state.ethereumAddress
+                                .toLowerCase()) {}
+                      } else {*/
+                      if ((transaction.fromAccountIndex != null &&
+                              transaction.fromAccountIndex ==
+                                  widget.arguments.account.accountIndex) ||
+                          (transaction.fromHezEthereumAddress != null &&
+                              transaction.fromHezEthereumAddress
+                                      .toLowerCase() ==
+                                  widget.arguments.store.state.ethereumAddress
+                                      .toLowerCase())) {
                         type = "SEND";
                         if (transaction.batchNum != null) {
                           status = "CONFIRMED";
@@ -755,8 +836,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         }
                         addressFrom = transaction.fromHezEthereumAddress;
                         addressTo = transaction.toHezEthereumAddress;
-                      } else if (transaction.toAccountIndex ==
-                          widget.arguments.account.accountIndex) {
+                      } else if ((transaction.toAccountIndex != null &&
+                              transaction.toAccountIndex ==
+                                  widget.arguments.account.accountIndex) ||
+                          (transaction.toHezEthereumAddress != null &&
+                              transaction.toHezEthereumAddress.toLowerCase() ==
+                                  widget.arguments.store.state.ethereumAddress
+                                      .toLowerCase())) {
                         type = "RECEIVE";
                         if (transaction.timestamp.isNotEmpty) {
                           status = "CONFIRMED";
@@ -770,6 +856,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         addressTo = transaction.toHezEthereumAddress;
                       }
                     }
+                    //}
                   } else {
                     LinkedHashMap event = element;
                     type = event['type'];
@@ -807,6 +894,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               widget.arguments.account.token.decimals)
                           .toDouble()) /
                       pow(10, widget.arguments.account.token.decimals);
+
+                  var fee = double.parse(feeValue) *
+                      pow(10, widget.arguments.account.token.decimals - 3);
                   var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
                   //var format = DateFormat('dd MMM');
                   var format = DateFormat('dd/MM/yyyy');
@@ -960,6 +1050,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                     account: widget.arguments.account,
                                     token: widget.arguments.account.token,
                                     amount: amount,
+                                    fee: fee,
                                     transactionId: txId,
                                     transactionHash: txHash,
                                     addressFrom: addressFrom,
@@ -987,6 +1078,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             id: poolTransaction.id,
             amount: poolTransaction.amount,
             type: poolTransaction.type,
+            L1orL2: "L2",
+            l2info: L2Info(fee: poolTransaction.fee),
             fromHezEthereumAddress: poolTransaction.fromHezEthereumAddress,
             fromAccountIndex: poolTransaction.fromAccountIndex,
             toAccountIndex: poolTransaction.toAccountIndex,
@@ -1029,6 +1122,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         historyTransactions,
         exits,
       );
+      widget.arguments.account = await fetchAccount();
       setState(() {
         pendingItems = pendingItems;
         fromItem = filteredTransactions.last.itemId;
@@ -1036,6 +1130,53 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         _isLoading = false;
       });
     } else {
+      poolTxs = await fetchPoolTransactionsByTokenId(
+          widget.arguments.account.token.id);
+      final List<ForgedTransaction> pendingPoolTxs =
+          poolTxs.map((poolTransaction) {
+        return ForgedTransaction(
+            id: poolTransaction.id,
+            amount: poolTransaction.amount,
+            type: poolTransaction.type,
+            L1orL2: "L2",
+            l2info: L2Info(fee: poolTransaction.fee),
+            fromHezEthereumAddress: poolTransaction.fromHezEthereumAddress,
+            fromAccountIndex: poolTransaction.fromAccountIndex,
+            toAccountIndex: poolTransaction.toAccountIndex,
+            toHezEthereumAddress: poolTransaction.toHezEthereumAddress,
+            timestamp: poolTransaction.timestamp);
+      }).toList();
+      pendingExits =
+          await fetchPendingExitsByTokenId(widget.arguments.account.token.id);
+      exits = await fetchExits(widget.arguments.account.token.id);
+      filteredExits = exits.toList();
+      pendingWithdraws =
+          await fetchPendingWithdraws(widget.arguments.account.token.id);
+      filteredExits.removeWhere((Exit exit) {
+        for (dynamic pendingWithdraw in pendingWithdraws) {
+          if (pendingWithdraw["id"] ==
+              (exit.accountIndex + exit.batchNum.toString())) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      pendingTransfers =
+          await fetchPendingTransfers(widget.arguments.account.token.id);
+      final List<ForgedTransaction> pendingTransfersTxs =
+          pendingTransfers.map((pendingTransfer) {
+        return ForgedTransaction(
+            id: pendingTransfer['id'],
+            hash: pendingTransfer['hash'],
+            L1orL2: "L1",
+            l1info: L1Info(depositAmount: pendingTransfer['amount'].toString()),
+            amount: pendingTransfer['amount'].toString(),
+            type: pendingTransfer['type'],
+            fromHezEthereumAddress: pendingTransfer['fromHezEthereumAddress'],
+            toHezEthereumAddress: pendingTransfer['toHezEthereumAddress'],
+            timestamp: pendingTransfer['timestamp']);
+      }).toList();
       pendingDeposits =
           await fetchPendingDeposits(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingDepositsTxs =
@@ -1051,6 +1192,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       List<dynamic> historyTransactions = await fetchHistoryTransactions();
       if (transactions.isEmpty) {
         for (ForgedTransaction forgedTransaction in pendingDepositsTxs) {
+          historyTransactions.firstWhere(
+              (element) => element['txHash'] == forgedTransaction.hash,
+              orElse: () => transactions.add(forgedTransaction));
+        }
+        for (ForgedTransaction forgedTransaction in pendingTransfersTxs) {
           historyTransactions.firstWhere(
               (element) => element['txHash'] == forgedTransaction.hash,
               orElse: () => transactions.add(forgedTransaction));
@@ -1079,10 +1225,34 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     }
   }
 
-  Future<List<dynamic>> fetchPoolTransactions(String accountIndex) async {
+  Future<List<PoolTransaction>> fetchPoolTransactionsByTokenId(
+      int tokenId) async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions();
+    poolTxs.removeWhere((transaction) => transaction.token.id != tokenId);
+    return poolTxs;
+  }
+
+  Future<List<PoolTransaction>> fetchPendingExitsByTokenId(int tokenId) async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions();
+    poolTxs.removeWhere((transaction) =>
+        transaction.type != 'Exit' || transaction.token.id != tokenId);
+    return poolTxs;
+  }
+
+  Future<List<PoolTransaction>> fetchPoolTransactions(
+      String accountIndex) async {
     List<PoolTransaction> poolTxs =
         await widget.arguments.store.getPoolTransactions(accountIndex);
     poolTxs.removeWhere((transaction) => transaction.type == 'Exit');
+    return poolTxs;
+  }
+
+  Future<List<PoolTransaction>> fetchPendingExits(String accountIndex) async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions(accountIndex);
+    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
     return poolTxs;
   }
 
@@ -1094,11 +1264,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     return accountPendingDeposits;
   }
 
-  Future<List<dynamic>> fetchPendingExits(String accountIndex) async {
-    List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions(accountIndex);
-    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
-    return poolTxs;
+  Future<List<dynamic>> fetchPendingTransfers(int tokenId) async {
+    final accountPendingTransfers =
+        await widget.arguments.store.getPendingTransfers();
+    accountPendingTransfers.removeWhere((pendingDeposit) =>
+        Token.fromJson(pendingDeposit['token']).id != tokenId);
+    return accountPendingTransfers;
   }
 
   Future<List<Exit>> fetchExits(int tokenId) {

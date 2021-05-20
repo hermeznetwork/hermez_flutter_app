@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/context/transfer/wallet_transfer_handler.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/info.dart';
@@ -98,6 +99,7 @@ class TransactionDetailsPage extends StatefulWidget {
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Account ethereumAccount;
   GasPriceResponse gasPriceResponse;
+  WalletTransferHandler transferStore;
 
   @override
   void initState() {
@@ -120,6 +122,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    transferStore = useWalletTransfer(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: new AppBar(
@@ -144,7 +147,6 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           future: fetchData(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              var transferStore = useWalletTransfer(context);
               bool enoughFee = isFeeEnough();
               return Column(
                 children: [
@@ -162,9 +164,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                 _buildStatusRow(),
                                 _buildFromRow(),
                                 _buildToRow(),
+                                _buildDateRow(),
                                 _buildFeeRow(context),
                                 _buildWithdrawFeeRow(context),
-                                _buildDateRow(),
                                 _buildViewExplorerRow()
                               ]).toList())))),
                   widget.arguments.status == TransactionStatus.DRAFT
@@ -181,41 +183,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                   ),
                                   onPressed: enoughFee
                                       ? () async {
-                                          var success = false;
-                                          if (widget.arguments.store.state
-                                                      .txLevel ==
-                                                  TransactionLevel.LEVEL1 &&
-                                              widget.arguments
-                                                      .transactionType ==
-                                                  TransactionType.SEND) {
-                                            if (widget.arguments.token.id ==
-                                                0) {
-                                              success = await transferStore
-                                                  .transferEth(
-                                                      widget
-                                                          .arguments
-                                                          .store
-                                                          .state
-                                                          .ethereumPrivateKey,
-                                                      widget
-                                                          .arguments.addressTo,
-                                                      widget.arguments.amount
-                                                          .toString());
-                                            } else {
-                                              success =
-                                                  await transferStore.transfer(
-                                                      widget
-                                                          .arguments.addressTo,
-                                                      widget.arguments.amount
-                                                          .toString(),
-                                                      widget.arguments.token
-                                                          .ethereumAddress,
-                                                      widget.arguments.token
-                                                          .symbol);
-                                            }
-                                          } else {
-                                            success = await handleFormSubmit();
-                                          }
+                                          var success =
+                                              await handleFormSubmit();
 
                                           if (success) {
                                             if (widget.arguments
@@ -1285,97 +1254,115 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   /// Bubbles up an event to send the transaction accordingly
   /// @returns {void}
   Future<bool> handleFormSubmit() async {
-    switch (widget.arguments.transactionType) {
-      case TransactionType.DEPOSIT:
-        {
-          // check getCreateAccountAuth
-          final amountDeposit =
-              getTokenAmountBigInt(widget.arguments.amount, 18);
+    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
+        widget.arguments.transactionType == TransactionType.SEND) {
+      if (widget.arguments.token.id == 0) {
+        return await transferStore.transferEth(
+            widget.arguments.store.state.ethereumPrivateKey,
+            widget.arguments.addressTo,
+            widget.arguments.amount.toString());
+      } else {
+        return await transferStore.transfer(
+            widget.arguments.store.state.ethereumPrivateKey,
+            widget.arguments.addressTo,
+            widget.arguments.amount.toString(),
+            widget.arguments.token,
+            widget.arguments.token.ethereumAddress,
+            widget.arguments.token.symbol);
+      }
+    } else {
+      switch (widget.arguments.transactionType) {
+        case TransactionType.DEPOSIT:
+          {
+            // check getCreateAccountAuth
+            final amountDeposit =
+                getTokenAmountBigInt(widget.arguments.amount, 18);
 
-          final accounts = await widget.arguments.store.getAccounts();
+            final accounts = await widget.arguments.store.getAccounts();
 
-          if (accounts == null || accounts.length == 0) {
-            await widget.arguments.store.authorizeAccountCreation();
+            if (accounts == null || accounts.length == 0) {
+              await widget.arguments.store.authorizeAccountCreation();
+            }
+
+            return await widget.arguments.store.deposit(
+                amountDeposit, widget.arguments.token,
+                approveGasLimit:
+                    widget.arguments.depositGasLimit['approveGasLimit'],
+                depositGasLimit:
+                    widget.arguments.depositGasLimit['depositGasLimit'],
+                gasPrice: widget.arguments.gasPrice);
           }
+          break;
+        case TransactionType.FORCEEXIT:
+          {
+            final amountExit = getTokenAmountBigInt(
+                widget.arguments.amount, widget.arguments.token.decimals);
 
-          return await widget.arguments.store.deposit(
-              amountDeposit, widget.arguments.token,
-              approveGasLimit:
-                  widget.arguments.depositGasLimit['approveGasLimit'],
-              depositGasLimit:
-                  widget.arguments.depositGasLimit['depositGasLimit'],
-              gasPrice: widget.arguments.gasPrice);
-        }
-        break;
-      case TransactionType.FORCEEXIT:
-        {
-          final amountExit = getTokenAmountBigInt(
-              widget.arguments.amount, widget.arguments.token.decimals);
-
-          return await widget.arguments.store.forceExit(
-              amountExit, widget.arguments.account,
-              gasLimit: widget.arguments.gasLimit,
-              gasPrice: widget.arguments.gasPrice);
-        }
-        break;
-      case TransactionType.WITHDRAW:
-        {
-          final amountWithdraw = getTokenAmountBigInt(
-              widget.arguments.amount, widget.arguments.token.decimals);
-
-          return await widget.arguments.store.withdraw(
-              amountWithdraw,
-              widget.arguments.account,
-              widget.arguments.exit,
-              widget.arguments.completeDelayedWithdrawal,
-              widget.arguments.instantWithdrawal,
-              gasLimit: widget.arguments.gasLimit,
-              gasPrice: widget.arguments.gasPrice);
-        }
-        break;
-      case TransactionType.EXIT:
-        {
-          final fees = await widget.arguments.store.fetchFees();
-          final transactionFee = getFee(fees, true);
-
-          final amountExit = getTokenAmountBigInt(
-              widget.arguments.amount, widget.arguments.token.decimals);
-
-          return await widget.arguments.store.exit(
-              widget.arguments.amount *
-                  pow(10, widget.arguments.token.decimals),
-              widget.arguments.account,
-              transactionFee);
-        }
-        break;
-      default:
-        {
-          final ethereumAddress =
-              getEthereumAddress(widget.arguments.addressTo);
-          final accounts = await widget.arguments.store.getAccounts(
-              ethereumAddress: ethereumAddress,
-              tokenIds: [widget.arguments.token.id]);
-          final accountCreated = await widget.arguments.store
-              .getCreateAccountAuthorization(ethereumAddress);
-          var receiverAccount;
-          final fees = await widget.arguments.store.fetchFees();
-          var transactionFee;
-          if (accounts != null && accounts.length > 0 && accountCreated) {
-            receiverAccount = accounts[0];
-            transactionFee = getFee(fees, receiverAccount != null);
-          } else {
-            receiverAccount =
-                Account(hezEthereumAddress: widget.arguments.addressTo);
-            transactionFee = getFee(fees, false);
+            return await widget.arguments.store.forceExit(
+                amountExit, widget.arguments.account,
+                gasLimit: widget.arguments.gasLimit,
+                gasPrice: widget.arguments.gasPrice);
           }
+          break;
+        case TransactionType.WITHDRAW:
+          {
+            final amountWithdraw = getTokenAmountBigInt(
+                widget.arguments.amount, widget.arguments.token.decimals);
 
-          return await widget.arguments.store.transfer(
-              widget.arguments.amount *
-                  pow(10, widget.arguments.token.decimals),
-              widget.arguments.account,
-              receiverAccount,
-              transactionFee);
-        }
+            return await widget.arguments.store.withdraw(
+                amountWithdraw,
+                widget.arguments.account,
+                widget.arguments.exit,
+                widget.arguments.completeDelayedWithdrawal,
+                widget.arguments.instantWithdrawal,
+                gasLimit: widget.arguments.gasLimit,
+                gasPrice: widget.arguments.gasPrice);
+          }
+          break;
+        case TransactionType.EXIT:
+          {
+            final fees = await widget.arguments.store.fetchFees();
+            final transactionFee = getFee(fees, true);
+
+            final amountExit = getTokenAmountBigInt(
+                widget.arguments.amount, widget.arguments.token.decimals);
+
+            return await widget.arguments.store.exit(
+                widget.arguments.amount *
+                    pow(10, widget.arguments.token.decimals),
+                widget.arguments.account,
+                transactionFee);
+          }
+          break;
+        default:
+          {
+            final ethereumAddress =
+                getEthereumAddress(widget.arguments.addressTo);
+            final accounts = await widget.arguments.store.getAccounts(
+                ethereumAddress: ethereumAddress,
+                tokenIds: [widget.arguments.token.id]);
+            final accountCreated = await widget.arguments.store
+                .getCreateAccountAuthorization(ethereumAddress);
+            var receiverAccount;
+            final fees = await widget.arguments.store.fetchFees();
+            var transactionFee;
+            if (accounts != null && accounts.length > 0 && accountCreated) {
+              receiverAccount = accounts[0];
+              transactionFee = getFee(fees, receiverAccount != null);
+            } else {
+              receiverAccount =
+                  Account(hezEthereumAddress: widget.arguments.addressTo);
+              transactionFee = getFee(fees, false);
+            }
+
+            return await widget.arguments.store.transfer(
+                widget.arguments.amount *
+                    pow(10, widget.arguments.token.decimals),
+                widget.arguments.account,
+                receiverAccount,
+                transactionFee);
+          }
+      }
     }
   }
 

@@ -329,12 +329,12 @@ class HermezService implements IHermezService {
         final credentials = await client.credentialsFromPrivateKey(privateKey);
         final from = await credentials.extractAddress();
         int clientNonce = await client.getTransactionCount(from);
-        /*int nonce = _configService.getLatestNonce();
+        int nonce = _configService.getLatestNonce();
         if (nonce <= clientNonce) {
           nonce = clientNonce + 1;
         } else {
           nonce += 1;
-        }*/
+        }
 
         final txHash = await tx
             .withdraw(
@@ -349,7 +349,7 @@ class HermezService implements IHermezService {
                 isInstant: isIntant,
                 gasLimit: gasLimit,
                 gasPrice: gasPrice,
-                nonce: clientNonce)
+                nonce: nonce)
             .then((txHash) async {
           if (txHash != null) {
             // update nonce
@@ -363,6 +363,8 @@ class HermezService implements IHermezService {
                 'itemId': exit.itemId,
                 'accountIndex': exit.accountIndex,
                 'batchNum': exit.batchNum,
+                'instant': true,
+                'date': DateTime.now().millisecondsSinceEpoch,
                 'amount': amount.toDouble(),
                 'token': exit.token.toJson(),
                 'status': 'pending'
@@ -376,7 +378,7 @@ class HermezService implements IHermezService {
                 'accountIndex': exit.accountIndex,
                 'batchNum': exit.batchNum,
                 'instant': false,
-                'date': DateTime.now(),
+                'date': DateTime.now().millisecondsSinceEpoch,
                 'amount': amount.toDouble(),
                 'token': exit.token.toJson(),
                 'status': 'pending'

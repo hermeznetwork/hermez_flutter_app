@@ -172,7 +172,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               arguments:
                                                   BlinkingTextAnimationArguments(
                                                       Colors.white,
-                                                      '0.0',
+                                                      totalBalance(null),
                                                       32,
                                                       FontWeight.w700))
                                     ],
@@ -450,7 +450,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               arguments:
                                                   BlinkingTextAnimationArguments(
                                                       Colors.white,
-                                                      '0.0',
+                                                      totalBalance(null),
                                                       32,
                                                       FontWeight.w700))
                                     ],

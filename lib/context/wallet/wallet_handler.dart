@@ -450,6 +450,31 @@ class WalletHandler {
     return exits;
   }
 
+  Future<List<dynamic>> getPendingTransfers() async {
+    final storage =
+        await _storageService.getStorage(PENDING_TRANSFERS_KEY, false);
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await _configurationService.getEthereumAddress();
+    final List accountPendingTransfers = _storageService
+        .getItemsByHermezAddress(storage, chainId, ethereumAddress);
+
+    List transferIds = [];
+    for (final pendingTransfer in accountPendingTransfers) {
+      final transactionHash = pendingTransfer['hash'];
+      web3.TransactionReceipt receipt =
+          await _contractService.getTxReceipt(transactionHash);
+      if (receipt != null) {
+        transferIds.add(transactionHash);
+        await _configurationService.removePendingTransfer(transactionHash);
+      }
+    }
+
+    accountPendingTransfers.removeWhere(
+        (pendingTransfer) => transferIds.contains(pendingTransfer['hash']));
+
+    return accountPendingTransfers.reversed.toList();
+  }
+
   Future<List<dynamic>> getPendingDeposits() async {
     final storage =
         await _storageService.getStorage(PENDING_DEPOSITS_KEY, false);
@@ -562,11 +587,24 @@ class WalletHandler {
         try {
           txInfo = await _contractService.getTransactionByHash(transactionHash);
         } catch (e) {
-          // TODO maybe remove this?
-          if (exit == null) {
-            removeWithdawalHashes.add(transactionHash);
-            _configurationService.removePendingWithdraw(transactionHash,
-                name: 'hash');
+          // wait an hour and if not, it failed
+          if (pendingWithdraw['instant'] = true &&
+              (DateTime.now().subtract(Duration(hours: 1)).isAfter(
+                  DateTime.fromMillisecondsSinceEpoch(
+                      pendingWithdraw['date'])))) {
+            if (exit == null) {
+              removeWithdawalHashes.add(transactionHash);
+              _configurationService.removePendingWithdraw(transactionHash,
+                  name: 'hash');
+            } else {
+              String status = 'fail';
+              pendingWithdraw['status'] = status;
+              final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+              updateWithdawalIds.add(withdrawalId);
+              updatePendingWithdraws.add(withdrawalId);
+              _configurationService.updatePendingWithdrawStatus(
+                  status, withdrawalId);
+            }
           }
         }
         if (txInfo != null) {
