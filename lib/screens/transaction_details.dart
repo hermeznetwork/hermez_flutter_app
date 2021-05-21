@@ -1256,20 +1256,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Future<bool> handleFormSubmit() async {
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
         widget.arguments.transactionType == TransactionType.SEND) {
-      if (widget.arguments.token.id == 0) {
-        return await transferStore.transferEth(
-            widget.arguments.store.state.ethereumPrivateKey,
-            widget.arguments.addressTo,
-            widget.arguments.amount.toString());
-      } else {
-        return await transferStore.transfer(
-            widget.arguments.store.state.ethereumPrivateKey,
-            widget.arguments.addressTo,
-            widget.arguments.amount.toString(),
-            widget.arguments.token,
-            widget.arguments.token.ethereumAddress,
-            widget.arguments.token.symbol);
-      }
+      return await transferStore.transfer(
+          widget.arguments.store.state.ethereumPrivateKey,
+          widget.arguments.addressTo,
+          widget.arguments.amount.toString(),
+          widget.arguments.token,
+          gasLimit: widget.arguments.gasLimit,
+          gasPrice: widget.arguments.gasPrice);
     } else {
       switch (widget.arguments.transactionType) {
         case TransactionType.DEPOSIT:

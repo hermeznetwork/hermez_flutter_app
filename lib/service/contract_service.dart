@@ -5,9 +5,10 @@ import 'dart:typed_data';
 import 'package:hermez/service/network/api_eth_gas_station_client.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/contract_parser.dart';
-import 'package:hermez_plugin/api.dart';
+import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_plugin/tokens.dart';
 import 'package:web3dart/web3dart.dart';
 
 import 'configuration_service.dart';
@@ -17,12 +18,8 @@ typedef TransferEvent = void Function(
 
 abstract class IContractService {
   Future<Credentials> getCredentials(String privateKey);
-  Future<bool> sendEth(
-      String privateKey, EthereumAddress receiverAddress, BigInt amountInWei,
-      {TransferEvent onTransfer, Function onError});
-  Future<bool> send(String privateKey, EthereumAddress receiverAddress,
-      BigInt amountInWei, Token token,
-      {TransferEvent onTransfer, Function onError});
+  Future<bool> transfer(String privateKey, EthereumAddress receiverAddress,
+      BigInt amountInWei, Token token);
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName);
   Future<EtherAmount> getEthBalance(EthereumAddress from);
@@ -60,84 +57,76 @@ class ContractService implements IContractService {
   Future<Credentials> getCredentials(String privateKey) =>
       client.credentialsFromPrivateKey(privateKey);
 
-  Future<bool> sendEth(
-      String privateKey, EthereumAddress receiverAddress, BigInt amountInWei,
-      {TransferEvent onTransfer, Function onError}) async {
-    final credentials = await this.getCredentials(privateKey);
-    final from = await credentials.extractAddress();
-    Token token = await getToken(0);
-    /*bool isApproved = await _approveCb;
-    if (!isApproved) {
-      throw 'transaction not approved';
-    }*/
-
-    EtherAmount amount =
-        EtherAmount.fromUnitAndValue(EtherUnit.wei, amountInWei);
-
-    //try {
-    final txHash = await _sendTransaction(privateKey, receiverAddress, amount)
-        .then((txHash) {
-      if (txHash != null) {
-        _configService.addPendingTransfer({
-          'hash': txHash,
-          'fromHezEthereumAddress': from.hex,
-          'toHezEthereumAddress': receiverAddress.hex,
-          'token': token,
-          'amount': amountInWei.toDouble(),
-          'state': 'pend',
-          'timestamp': DateTime.now().toIso8601String(),
-          'type': 'Transfer'
-        });
-      }
-      return txHash != null;
-    });
-    return txHash;
-    /*} catch (ex) {
-      if (onError != null) {
-        onError(ex);
-      }
-      return null;
-    }*/
-  }
-
-  Future<bool> send(String privateKey, EthereumAddress receiverAddress,
+  Future<bool> transfer(String privateKey, EthereumAddress receiverAddress,
       BigInt amountInWei, Token token,
-      {TransferEvent onTransfer, Function onError}) async {
+      {int gasLimit, int gasPrice}) async {
     final credentials = await this.getCredentials(privateKey);
     final from = await credentials.extractAddress();
 
-    EthereumAddress tokenContractAddress =
-        EthereumAddress.fromHex(token.ethereumAddress);
-    String tokenContractName = token.symbol;
-    final contract = await ContractParser.fromAssets(
-        'ERC20ABI.json', tokenContractAddress.toString(), tokenContractName);
-
-    final txHash = await client
-        .sendTransaction(
-      credentials,
-      Transaction.callContract(
+    if (token.id == 0) {
+      EtherAmount amount =
+          EtherAmount.fromUnitAndValue(EtherUnit.wei, amountInWei);
+      final txHash = await _sendTransaction(privateKey, receiverAddress, amount)
+          .then((txHash) {
+        if (txHash != null) {
+          _configService.addPendingTransfer({
+            'hash': txHash,
+            'fromHezEthereumAddress': from.hex,
+            'toHezEthereumAddress': receiverAddress.hex,
+            'token': token,
+            'amount': amountInWei.toDouble(),
+            //'fee':
+            'state': 'pend',
+            'timestamp': DateTime.now().toIso8601String(),
+            'type': 'Transfer'
+          });
+        }
+        return txHash != null;
+      });
+      return txHash;
+    } else {
+      EtherAmount ethGasPrice;
+      if (gasLimit == null) {
+        gasLimit = GAS_LIMIT_HIGH;
+      }
+      if (gasPrice == null) {
+        ethGasPrice = await client.getGasPrice();
+      } else {
+        ethGasPrice = EtherAmount.fromUnitAndValue(EtherUnit.wei, gasPrice);
+      }
+      String tokenContractName = token.symbol;
+      final contract = await ContractParser.fromAssets(
+          'ERC20ABI.json', token.ethereumAddress, tokenContractName);
+      final transaction = Transaction.callContract(
         contract: contract,
         function: _sendFunction(contract),
         parameters: [receiverAddress, amountInWei],
         from: from,
-      ),
-    )
-        .then((txHash) {
-      if (txHash != null) {
-        _configService.addPendingTransfer({
-          'hash': txHash,
-          'fromHezEthereumAddress': from.hex,
-          'toHezEthereumAddress': receiverAddress.hex,
-          'token': token,
-          'amount': amountInWei.toDouble(),
-          'state': 'pend',
-          'timestamp': DateTime.now().toIso8601String(),
-          'type': 'Transfer'
-        });
-      }
-      return txHash != null;
-    });
-    return txHash;
+        maxGas: gasLimit,
+        gasPrice: ethGasPrice,
+      );
+
+      final txHash = await client
+          .sendTransaction(credentials, transaction,
+              chainId: getCurrentEnvironment().chainId)
+          .then((txHash) {
+        if (txHash != null) {
+          _configService.addPendingTransfer({
+            'hash': txHash,
+            'fromHezEthereumAddress': from.hex,
+            'toHezEthereumAddress': receiverAddress.hex,
+            'token': token,
+            'amount': amountInWei.toDouble(),
+            'state': 'pend',
+            'timestamp': DateTime.now().toIso8601String(),
+            'type': 'Transfer'
+          });
+        }
+        print(txHash);
+        return txHash != null;
+      });
+      return txHash;
+    }
   }
 
   Future<String> _sendTransaction(String privateKey,
@@ -277,10 +266,40 @@ class ContractService implements IContractService {
   Future<BigInt> getEstimatedGas(
     EthereumAddress from,
     EthereumAddress to,
-    EtherAmount value,
+    BigInt value,
     Uint8List data,
+    Token token,
   ) async {
-    return client.estimateGas(sender: from, to: to, value: value, data: data);
+    if (token != null) {
+      if (token.id == 0) {
+        BigInt result = BigInt.zero;
+        try {
+          result = await client.estimateGas(
+              sender: from,
+              to: to,
+              value: EtherAmount.fromUnitAndValue(EtherUnit.wei, value),
+              data: data);
+        } catch (e) {
+          print(e.toString());
+        }
+        if (result == BigInt.zero) {
+          result = BigInt.from(GAS_STANDARD_ETH_TX);
+        }
+        return result;
+      } else {
+        String fromAddress;
+        String toAddress;
+        if (from != null) {
+          fromAddress = from.hex;
+        }
+        if (to != null) {
+          toAddress = to.hex;
+        }
+        return transferGasLimit(value, fromAddress, toAddress,
+            token.ethereumAddress, token.symbol, client);
+      }
+    }
+    return BigInt.from(GAS_STANDARD_ERC20_TX);
   }
 
   Future<int> getNetworkId() {

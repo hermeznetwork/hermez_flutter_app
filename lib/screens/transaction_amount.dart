@@ -735,6 +735,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                         } else {
                           amountIsValid = isAmountValid('0');
                         }
+                        needRefresh = true;
                       });
                     },
                     enabled: widget.arguments.account != null ||
@@ -957,7 +958,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                         addressIsValid = valid;
                         accountIsCreated = accountCreated;
                         if (addressIsValid) {
-                          amountController.clear();
+                          //amountController.clear();
                           needRefresh = true;
                         }
                       });
@@ -988,7 +989,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                     addressIsValid = valid;
                                     accountIsCreated = accountCreated;
                                     if (addressIsValid) {
-                                      amountController.clear();
+                                      //amountController.clear();
                                       needRefresh = true;
                                     }
                                   });
@@ -1019,10 +1020,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                 scannedAddress.toString();
                                             addressIsValid = valid;
                                             accountIsCreated = accountCreated;
-                                            if (addressIsValid) {
+                                            /*if (addressIsValid) {
                                               amountController.clear();
                                               needRefresh = true;
-                                            }
+                                            }*/
                                           });
                                         }));
                               }, // handle your image tap here
@@ -1038,14 +1039,13 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                         icon: new Icon(Icons.close),
                         onPressed: () async {
                           bool valid = await isAddressValid("");
-
                           setState(
                             () {
                               addressController.clear();
                               addressIsValid = valid;
                               accountIsCreated = false;
                               if (addressIsValid) {
-                                amountController.clear();
+                                //amountController.clear();
                                 needRefresh = true;
                               }
                             },
@@ -1465,14 +1465,6 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         gasPriceResponse = await widget.arguments.store.getGasPrice();
         ethereumToken = await getEthereumToken();
         ethereumAccount = await getEthereumAccount();
-        gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-        if (widget.arguments.account != null &&
-            widget.arguments.account.token.id != 0) {
-          gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
-        }
-        gasPrice = getGasPrice(selectedFeeSpeed);
-        enoughGas = await isEnoughGas(gasLimit * gasPrice);
-
         double amount = 0;
         if (widget.arguments.account != null) {
           if (amountController.value.text.isNotEmpty) {
@@ -1482,6 +1474,23 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                     widget.arguments.account.token.USD;
           }
         }
+        String from = widget.arguments.store.state.ethereumAddress;
+        String to = getCurrentEnvironment().contracts['Hermez'];
+        if (isEthereumAddress(addressController.value.text)) {
+          to = addressController.value.text;
+        } else if (widget.arguments.account.token.id != 0) {
+          to = widget.arguments.account.token.ethereumAddress;
+        }
+        BigInt value = BigInt.one;
+        if (amount > 0) {
+          value = BigInt.from(
+              amount * pow(10, widget.arguments.account.token.decimals));
+        }
+
+        gasLimit = await widget.arguments.store
+            .getGasLimit(from, to, value, widget.arguments.account.token);
+        gasPrice = getGasPrice(selectedFeeSpeed);
+        enoughGas = await isEnoughGas(gasLimit * gasPrice);
         amountIsValid =
             isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
       } else {

@@ -412,10 +412,24 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       });
     } else {
       // rest pending deposits
+      pendingTransfers.forEach((pendingTransfer) {
+        var amount = pendingTransfer['amount'] /
+            pow(10, widget.arguments.account.token.decimals);
+        if (widget.arguments.account.token.id == 0) {
+          //rest fees
+          //var fee = pendingTransfer['fee'] / pow(10, 3);
+        }
+        var fee = 0;
+        poolAmount = poolAmount + amount + fee;
+      });
     }
     debugPrint("balance amount:" + balanceAmount.toString());
     debugPrint("pool amount:" + poolAmount.toString());
     resultAmount = balanceAmount - poolAmount;
+
+    if (resultAmount.isNegative) {
+      resultAmount = 0.0;
+    }
 
     if (isCurrency && widget.arguments.account.token.USD != null) {
       resultAmount = widget.arguments.account.token.USD * resultAmount;
@@ -1131,7 +1145,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             id: pendingTransfer['id'],
             hash: pendingTransfer['hash'],
             L1orL2: "L1",
-            l1info: L1Info(depositAmount: pendingTransfer['amount'].toString()),
+            l1info: L1Info(depositAmount: pendingTransfer['fee'].toString()),
             amount: pendingTransfer['amount'].toString(),
             type: pendingTransfer['type'],
             fromHezEthereumAddress: pendingTransfer['fromHezEthereumAddress'],

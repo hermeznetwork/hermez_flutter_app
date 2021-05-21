@@ -870,7 +870,7 @@ class WalletHandler {
     return gasPrice;
   }
 
-  Future<BigInt> getGasLimit(String from, String to, BigInt amount,
+  Future<BigInt> getGasLimit(String from, String to, BigInt amount, Token token,
       {Uint8List data}) async {
     web3.EthereumAddress fromAddress;
     web3.EthereumAddress toAddress;
@@ -880,19 +880,14 @@ class WalletHandler {
     if (to != null && to.isNotEmpty) {
       toAddress = web3.EthereumAddress.fromHex(to);
     }
+
     BigInt maxGas = await _contractService.getEstimatedGas(
-        fromAddress,
-        toAddress,
-        web3.EtherAmount.fromUnitAndValue(
-          web3.EtherUnit.wei,
-          amount,
-        ),
-        data);
+        fromAddress, toAddress, amount, data, token);
     return maxGas;
   }
 
-  Future<BigInt> getEstimatedGas(
-      String from, String to, BigInt amount, WalletDefaultFee feeSpeed,
+  Future<BigInt> getEstimatedGas(String from, String to, BigInt amount,
+      Token token, WalletDefaultFee feeSpeed,
       {Uint8List data}) async {
     web3.EthereumAddress fromAddress;
     web3.EthereumAddress toAddress;
@@ -904,13 +899,7 @@ class WalletHandler {
     }
     GasPriceResponse gasPriceResponse = await getGasPrice();
     BigInt maxGas = await _contractService.getEstimatedGas(
-        fromAddress,
-        toAddress,
-        web3.EtherAmount.fromUnitAndValue(
-          web3.EtherUnit.wei,
-          amount,
-        ),
-        data);
+        fromAddress, toAddress, amount, data, token);
 
     BigInt gasPrice = BigInt.zero;
     switch (feeSpeed) {
