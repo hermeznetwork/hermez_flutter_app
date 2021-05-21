@@ -12,9 +12,7 @@ typedef TransferEvent = void Function(
 
 abstract class IExplorerService {
   Future<List<dynamic>> getTokenTransferEventsByAccountAddress(
-      String tokenAddress, String accountAddress,
-      {String sort = 'desc', int startblock = 0});
-  Future<List<dynamic>> getTransferEventsByAccountAddress(String address,
+      String address, String tokenAddress,
       {String sort = 'desc', int startblock = 0});
   Future<BigInt> getTokenBalanceByAccountAddress(
       String tokenAddress, String accountAddress);
@@ -31,44 +29,6 @@ class ExplorerService implements IExplorerService {
     _base = base;
     _apiKey = apiKey;
     _client = new Client();
-  }
-
-  Future<List<dynamic>> getTokenTransferEventsByAccountAddress(
-      String tokenAddress, String accountAddress,
-      {String sort = 'desc', int startblock = 0}) async {
-    try {
-      Map<String, dynamic> resp = await _get(
-          '?module=account&action=tokentx&contractaddress=$tokenAddress&address=$accountAddress&startblock=$startblock&sort=$sort');
-      if (resp['message'] == 'OK' && resp['status'] == '1') {
-        List transfers = [];
-        for (dynamic transferEvent in resp['result']) {
-          transfers.add({
-            'blockNumber': num.parse(transferEvent['blockNumber']),
-            'txHash': transferEvent['hash'],
-            'to': transferEvent['to'],
-            'from': transferEvent["from"],
-            'status': "CONFIRMED",
-            'timestamp': DateTime.fromMillisecondsSinceEpoch(
-                    DateTime.fromMillisecondsSinceEpoch(
-                                int.parse(transferEvent['timeStamp']))
-                            .millisecondsSinceEpoch *
-                        1000)
-                .millisecondsSinceEpoch,
-            'value': transferEvent['value'],
-            'tokenAddress': tokenAddress,
-            'type': transferEvent["from"].toString().toLowerCase() ==
-                    accountAddress.toLowerCase()
-                ? 'SEND'
-                : 'RECEIVE',
-          });
-        }
-        return transfers;
-      } else {
-        return [];
-      }
-    } catch (e) {
-      throw 'Error! Get token transfers events failed for - accountAddress: $accountAddress --- $e';
-    }
   }
 
   Future<List<dynamic>> getTransactionsByAccountAddress(String address,
@@ -172,11 +132,12 @@ class ExplorerService implements IExplorerService {
     return parsedData.data;
   }
 
-  Future<List<dynamic>> getTransferEventsByAccountAddress(String address,
+  Future<List<dynamic>> getTokenTransferEventsByAccountAddress(
+      String address, String tokenAddress,
       {String sort = 'desc', int startblock = 0}) async {
     try {
       Map<String, dynamic> resp = await _get(
-          '?module=account&action=tokentx&address=$address&startblock=$startblock&sort=$sort');
+          '?module=account&action=tokentx&contractaddress=$tokenAddress&address=$address&startblock=$startblock&sort=$sort');
       if (resp['message'] == 'OK' && resp['status'] == '1') {
         List transfers = [];
         for (dynamic transferEvent in resp['result']) {

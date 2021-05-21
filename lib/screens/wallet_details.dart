@@ -748,7 +748,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
                           });
                           if (exit.token.id != 0) {
-                            gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+                            gasLimit +=
+                                BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
                           }
                         }
 

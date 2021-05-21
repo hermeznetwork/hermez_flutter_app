@@ -943,10 +943,9 @@ class WalletHandler {
       return _explorerService.getTransactionsByAccountAddress(address);
     } else {
       List<dynamic> transactions =
-          await _explorerService.getTransferEventsByAccountAddress(address);
-      return transactions
-          .where((element) => element['tokenAddress'] == token.ethereumAddress)
-          .toList();
+          await _explorerService.getTokenTransferEventsByAccountAddress(
+              address, token.ethereumAddress);
+      return transactions;
     }
   }
 

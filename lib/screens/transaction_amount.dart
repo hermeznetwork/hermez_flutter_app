@@ -1403,7 +1403,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
       if (widget.arguments.account != null &&
           widget.arguments.account.token.id != 0) {
-        withdrawGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+        withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
       }
 
       gasPrice = getGasPrice(selectedFeeSpeed);
@@ -1433,7 +1433,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
       if (widget.arguments.account != null &&
           widget.arguments.account.token.id != 0) {
-        withdrawGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+        withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
       }
 
       // fee l2
@@ -1547,14 +1547,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
         if (widget.arguments.account != null &&
             widget.arguments.account.token.id != 0) {
-          withdrawGasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+          withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
         }
       } else if (widget.arguments.transactionType == TransactionType.WITHDRAW) {
         gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
         if (widget.arguments.account != null &&
             widget.arguments.account.token.id != 0) {
-          gasLimit += BigInt.from(GAS_STANDARD_ERC20_TX);
+          gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
         }
         gasPrice = getGasPrice(selectedFeeSpeed);
         enoughGas = await isEnoughGas(gasLimit * gasPrice);

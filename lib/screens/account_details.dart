@@ -758,6 +758,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   var addressTo = 'to';
                   var value = '0';
                   var feeValue = '0';
+                  var amount;
                   if (element.runtimeType == ForgedTransaction) {
                     ForgedTransaction transaction = element;
                     if (transaction.id != null) {
@@ -863,7 +864,17 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         addressTo = transaction.toHezEthereumAddress;
                       }
                     }
-                    //}
+                    amount = double.parse(value) /
+                        pow(10, widget.arguments.account.token.decimals);
+                    /*amount = (getTokenAmountBigInt(
+                                double.parse(value) /
+                                    pow(
+                                        10,
+                                        widget
+                                            .arguments.account.token.decimals),
+                                widget.arguments.account.token.decimals)
+                            .toDouble()) /
+                        pow(10, widget.arguments.account.token.decimals);*/
                   } else {
                     LinkedHashMap event = element;
                     type = event['type'];
@@ -873,6 +884,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     addressFrom = event['from'];
                     addressTo = event['to'];
                     value = event['value'];
+                    amount = double.parse(value) /
+                        pow(10, widget.arguments.account.token.decimals);
                   }
 
                   final String currency = widget
@@ -893,14 +906,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   } else {
                     symbol = "\$";
                   }
-
-                  var amount = (getTokenAmountBigInt(
-                              double.parse(value) /
-                                  pow(10,
-                                      widget.arguments.account.token.decimals),
-                              widget.arguments.account.token.decimals)
-                          .toDouble()) /
-                      pow(10, widget.arguments.account.token.decimals);
 
                   var fee = double.parse(feeValue) *
                       pow(10, widget.arguments.account.token.decimals - 3);
@@ -1026,14 +1031,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               padding: EdgeInsets.all(5.0),
                               child: Text(
                                 (isNegative ? "- " : "") +
-                                    symbol +
-                                    (amount *
+                                    EthAmountFormatter.formatAmount(
+                                        (amount *
                                             widget.arguments.account.token.USD *
                                             (currency != 'USD'
                                                 ? widget.arguments.store.state
                                                     .exchangeRatio
-                                                : 1))
-                                        .toStringAsFixed(2),
+                                                : 1)),
+                                        currency),
                                 style: TextStyle(
                                   color: isNegative
                                       ? HermezColors.blueyGreyTwo
