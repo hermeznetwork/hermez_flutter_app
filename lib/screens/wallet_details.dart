@@ -25,7 +25,6 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/utils.dart';
 import 'package:intl/intl.dart';
 
 import 'account_details.dart';
@@ -50,9 +49,11 @@ class WalletDetailsPage extends StatefulWidget {
 
 class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<Account> _accounts;
-  List<Exit> _exits = [];
+
   List<Exit> _filteredExits = [];
-  List<dynamic> _poolTxs = [];
+
+  List<dynamic> _pendingExits = [];
+  List<dynamic> _pendingForceExits = [];
   List<dynamic> _pendingWithdraws = [];
   List<dynamic> _pendingDeposits = [];
 
@@ -67,7 +68,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   Future<List<Account>> fetchAccounts() async {
-    fetchPendingTransactions();
+    await fetchPendingTransactions();
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
       /*const accountPendingDeposits = storage.getItemsByHermezAddress(
           pendingDeposits,
@@ -88,11 +89,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   void fetchPendingTransactions() async {
-    try {
-      _poolTxs = await fetchPendingExits();
-    } catch (e) {}
-    _exits = await fetchExits();
+    _pendingExits = await fetchPendingExits();
+    List<Exit> _exits = await fetchExits();
     _filteredExits = _exits.toList();
+    _pendingForceExits = await fetchPendingForceExits(_exits, _pendingExits);
     _pendingWithdraws = await fetchPendingWithdraws();
     _filteredExits.removeWhere((Exit exit) {
       for (dynamic pendingWithdraw in _pendingWithdraws) {
@@ -117,8 +117,31 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     return poolTxs;
   }
 
+  Future<List<dynamic>> fetchPendingForceExits(
+      List<Exit> exits, List<PoolTransaction> pendingExits) async {
+    final accountPendingForceExits =
+        await widget.arguments.store.getPendingForceExits();
+
+    /*exits.forEach((exit) {
+      var pendingExit = pendingExits.firstWhere(
+          (pendingExit) => pendingExit.fromAccountIndex == exit.accountIndex,
+          orElse: () => null);
+      if (pendingExit == null) {
+        var pendingForceExit = accountPendingForceExits.firstWhere(
+            (pendingForceExit) =>
+                pendingForceExit['amount'].toString() == exit.balance,
+            orElse: null);
+        if (pendingForceExit != null) {
+          accountPendingForceExits.remove(pendingForceExit);
+        }
+      }
+    });*/
+
+    return accountPendingForceExits;
+  }
+
   Future<List<Exit>> fetchExits() {
-    return widget.arguments.store.getExits(); // TODO : only pending withdraws?
+    return widget.arguments.store.getExits();
   }
 
   Future<List<dynamic>> fetchPendingWithdraws() {
@@ -580,23 +603,31 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       child: RefreshIndicator(
         child: ListView.builder(
           shrinkWrap: true,
-          itemCount: (_poolTxs.isNotEmpty ||
-                      _exits.isNotEmpty ||
-                      _pendingWithdraws.isNotEmpty
+          itemCount: _accounts.length +
+              _pendingExits.length +
+              _pendingForceExits.length +
+              _filteredExits.length +
+              _pendingWithdraws
+                  .length /* + (_isLoading
                   ? 1
-                  : 0) +
-              _accounts.length,
+                  : 0)*/
+          ,
           //set the item count so that index won't be out of range
           padding: const EdgeInsets.all(16.0),
           //add some padding to make it look good
           itemBuilder: (context, i) {
-            //item builder returns a row for each index i=0,1,2,3,4
-            // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
-            if (i == 0 && _poolTxs.length > 0 && i < _poolTxs.length) {
-              final index = i;
-              final PoolTransaction transaction = _poolTxs[index];
-
-              final Exit exit = Exit.fromTransaction(transaction);
+            if ((_pendingExits.length > 0 || _pendingForceExits.length > 0) &&
+                i < _pendingExits.length + _pendingForceExits.length) {
+              var index = i;
+              Exit exit;
+              if (i >= _pendingExits.length) {
+                index = i - _pendingExits.length;
+                var transaction = _pendingForceExits[index];
+                exit = Exit.fromL1Transaction(transaction);
+              } else {
+                final PoolTransaction transaction = _pendingExits[index];
+                exit = Exit.fromTransaction(transaction);
+              }
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency
@@ -611,8 +642,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   widget.arguments.store.state.exchangeRatio,
                   () async {},
                   widget.arguments.store.state.txLevel);
-            } else if (i == 0 && _filteredExits.length > 0) {
-              final index = i;
+            } else if (_filteredExits.length > 0 &&
+                i <
+                    _filteredExits.length +
+                        _pendingExits.length +
+                        _pendingForceExits.length) {
+              final index =
+                  i - _pendingExits.length - _pendingForceExits.length;
               final Exit exit = _filteredExits[index];
 
               final String currency = widget
@@ -643,9 +679,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 }
                 String addressFrom = exit.hezEthereumAddress;
                 String addressTo = getCurrentEnvironment().contracts['Hermez'];
-                final amountWithdraw = getTokenAmountBigInt(
+                final amountWithdraw = double.parse(exit.balance);
+                /*getTokenAmountBigInt(
                     double.parse(exit.balance) / pow(10, exit.token.decimals),
-                    exit.token.decimals);
+                    exit.token.decimals);*/
                 BigInt gasLimit = await widget.arguments.store
                     .withdrawGasLimit(amountWithdraw, null, exit, false, true);
 
@@ -662,20 +699,28 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               pow(10, exit.token.decimals),
                           addressFrom: addressFrom,
                           addressTo: addressTo,
-                          selectedFeeSpeed:
-                              widget.arguments.store.state.defaultFee,
+                          /*selectedFeeSpeed:
+                              widget.arguments.store.state.defaultFee,*/
                           gasLimit: gasLimit.toInt(),
                           gasPrice: gasPrice.toInt(),
                         ))
                     .then((value) => _onRefresh());
               }, widget.arguments.store.state.txLevel);
-            } else if (i == 0 && _pendingWithdraws.length > 0) {
-              final index = i;
+            } else if (_pendingWithdraws.length > 0 &&
+                i <
+                    _pendingWithdraws.length +
+                        _filteredExits.length +
+                        _pendingExits.length +
+                        _pendingForceExits.length) {
+              final index = i -
+                  _filteredExits.length -
+                  _pendingExits.length -
+                  _pendingForceExits.length;
               final pendingWithdraw = _pendingWithdraws[index];
               final Token token =
                   Token.fromJson(_pendingWithdraws[index]['token']);
 
-              final Exit exit = _exits.firstWhere(
+              final Exit exit = _filteredExits.firstWhere(
                   (exit) => exit.itemId == pendingWithdraw['itemId'],
                   orElse: () => Exit(
                       hezEthereumAddress:
@@ -696,8 +741,6 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 step = 3;
               } else if (pendingWithdraw['status'] == 'fail') {
                 step = 2;
-              } else if (pendingWithdraw['status'] == 'initiated') {
-                step = 1;
               }
 
               return WithdrawalRow(
@@ -734,10 +777,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
                         BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
                         try {
-                          final amountWithdraw = getTokenAmountBigInt(
+                          final amountWithdraw = double.parse(exit.balance);
+                          /*getTokenAmountBigInt(
                               double.parse(exit.balance) /
                                   pow(10, exit.token.decimals),
-                              exit.token.decimals);
+                              exit.token.decimals);*/
                           gasLimit = await widget.arguments.store
                               .withdrawGasLimit(
                                   amountWithdraw, null, exit, false, true);
@@ -778,11 +822,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
             } // final index = i ~/ 2; //get the actual index excluding dividers.
             else {
               final index = i -
-                  (_poolTxs.isNotEmpty ||
-                          _exits.isNotEmpty ||
-                          _pendingWithdraws.isNotEmpty
-                      ? 1
-                      : 0);
+                  _pendingExits.length -
+                  _pendingForceExits.length -
+                  _filteredExits.length -
+                  _pendingWithdraws.length;
               final Account account = _accounts[index];
 
               final String currency = widget

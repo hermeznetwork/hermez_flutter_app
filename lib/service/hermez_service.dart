@@ -40,6 +40,7 @@ abstract class IHermezService {
       int limit = DEFAULT_PAGE_SIZE});
   Future<Account> getAccount(String accountIndex);
   Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress);
+  Future<Exit> getExit(int batchNum, String accountIndex);
   Future<List<Coordinator>> getCoordinators(
       String forgerAddr, String bidderAddr);
   Future<ForgedTransactionsResponse> getForgedTransactions(
@@ -54,7 +55,7 @@ abstract class IHermezService {
       BigInt depositGasLimit,
       int gasPrice = GAS_MULTIPLIER});
   Future<bool> withdraw(
-      BigInt amount,
+      double amount,
       Account account,
       Exit exit,
       bool completeDelayedWithdrawal,
@@ -130,7 +131,7 @@ class HermezService implements IHermezService {
   Future<List<Token>> getTokens() async {
     final TokensRequest tokensRequest = null;
     final tokensResponse = await api.getTokens(
-        tokenIds: tokensRequest != null ? tokensRequest.ids : List());
+        tokenIds: tokensRequest != null ? tokensRequest.ids : List.empty());
     return tokensResponse.tokens;
   }
 
@@ -278,7 +279,7 @@ class HermezService implements IHermezService {
   }
 
   Future<BigInt> withdrawGasLimit(
-      BigInt amount,
+      double amount,
       Account account,
       Exit exit,
       bool completeDelayedWithdrawal,
@@ -308,7 +309,7 @@ class HermezService implements IHermezService {
 
   @override
   Future<bool> withdraw(
-      BigInt amount,
+      double amount,
       Account account,
       Exit exit,
       bool completeDelayedWithdrawal,
@@ -319,22 +320,17 @@ class HermezService implements IHermezService {
       {int gasLimit = GAS_LIMIT_HIGH,
       int gasPrice = GAS_MULTIPLIER}) async {
     final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-
+    /*HermezCompressedAmount compressedAmount;
+    try {
+      compressedAmount =
+          HermezCompressedAmount.compressAmount(amount.toDouble());
+    } catch (e) {
+      return false;
+    }*/
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       try {
         bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
-
-        // get client nonce
-        /*final credentials = await client.credentialsFromPrivateKey(privateKey);
-        final from = await credentials.extractAddress();
-        int clientNonce = await client.getTransactionCount(from);
-        int nonce = _configService.getLatestNonce();
-        if (nonce <= clientNonce) {
-          nonce = clientNonce + 1;
-        } else {
-          nonce += 1;
-        }*/
 
         final txHash = await tx
             .withdraw(
@@ -349,12 +345,8 @@ class HermezService implements IHermezService {
                 isInstant: isIntant,
                 gasLimit: gasLimit,
                 gasPrice: gasPrice)
-            //,nonce: nonce)
             .then((txHash) async {
           if (txHash != null) {
-            // update nonce
-            //_configService.setLatestNonce(clientNonce);
-
             if (isIntant) {
               _configService.addPendingWithdraw({
                 'id': withdrawalId,
@@ -429,19 +421,18 @@ class HermezService implements IHermezService {
               gasLimit: gasLimit, gasPrice: gasPrice)
           .then((txHash) async {
         if (txHash != null) {
-          String withdrawalId = account.accountIndex +
-              ":" +
-              account.token.symbol +
-              ":" +
-              amount.toString();
-          _configService.addPendingWithdraw({
-            'id': withdrawalId,
+          _configService.addPendingForceExit({
             'hash': txHash,
-            'hermezEthereumAddress': hezEthereumAddress,
             'accountIndex': account.accountIndex,
-            'amount': amount.toDouble(),
+            'fromHezEthereumAddress': hezEthereumAddress,
+            'toHezEthereumAddress': hezEthereumAddress,
             'token': account.token.toJson(),
-            'status': 'initiated'
+            'amount': amount.toDouble(),
+            'state': 'pend',
+            'timestamp': DateTime.now().toIso8601String(),
+            'type': TxType.Exit.toString().split('.').last
+            /*'hermezEthereumAddress': hezEthereumAddress,
+            ,*/
           });
         }
         return txHash;

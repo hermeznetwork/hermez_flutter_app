@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
@@ -14,6 +15,7 @@ import 'package:hermez_plugin/environment.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../constants.dart';
 import 'transaction_amount.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -270,7 +272,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/pin",
                               arguments: PinArguments(
-                                  "Show Recovery Phrase", false, null))
+                                  "Show Recovery Phrase", false, false, null))
                           .then((value) {
                         if (value.toString() == "true") {
                           Navigator.of(widget.arguments.parentContext)
@@ -305,13 +307,46 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/pin",
                               arguments: PinArguments(
-                                  "Enter old passcode", false, null))
+                                  "Enter old passcode", false, false, null))
                           .then((value) {
                         if (value.toString() == "true") {
                           Navigator.of(widget.arguments.parentContext)
                               .pushNamed("/pin",
                                   arguments: PinArguments(
-                                      "Enter new passcode", true, null));
+                                      "Enter new passcode", true, true, null))
+                              .then((value) {
+                            if (value.toString() == "true") {
+                              Flushbar(
+                                messageText: Text(
+                                  'Your passcode has been changed',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: HermezColors.blackTwo,
+                                    fontSize: 16,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                boxShadows: [
+                                  BoxShadow(
+                                    color:
+                                        HermezColors.blueyGreyTwo.withAlpha(64),
+                                    offset: Offset(0, 4),
+                                    blurRadius: 16,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                                borderColor:
+                                    HermezColors.blueyGreyTwo.withAlpha(64),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                                backgroundColor: Colors.white,
+                                margin: EdgeInsets.all(16.0),
+                                duration: Duration(
+                                    seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+                              ).show(context);
+                            }
+                          });
                         }
                       });
                       break;
@@ -379,6 +414,35 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               widget.configurationService.setBiometricsFace(
                   !widget.configurationService.getBiometricsFace());
             });
+            Flushbar(
+              messageText: Text(
+                (Platform.isIOS ? 'Face ID' : 'Face') +
+                    ' has been ' +
+                    (widget.configurationService.getBiometricsFace()
+                        ? 'enabled'
+                        : 'disabled'),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: HermezColors.blackTwo,
+                  fontSize: 16,
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              boxShadows: [
+                BoxShadow(
+                  color: HermezColors.blueyGreyTwo.withAlpha(64),
+                  offset: Offset(0, 4),
+                  blurRadius: 16,
+                  spreadRadius: 0,
+                ),
+              ],
+              borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              backgroundColor: Colors.white,
+              margin: EdgeInsets.all(16.0),
+              duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+            ).show(context);
           }
         } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
           // Touch ID.
@@ -390,6 +454,34 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               widget.configurationService.setBiometricsFingerprint(
                   !widget.configurationService.getBiometricsFingerprint());
             });
+            Flushbar(
+              messageText: Text(
+                'Fingerprint has been ' +
+                    (widget.configurationService.getBiometricsFingerprint()
+                        ? 'enabled'
+                        : 'disabled'),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: HermezColors.blackTwo,
+                  fontSize: 16,
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              boxShadows: [
+                BoxShadow(
+                  color: HermezColors.blueyGreyTwo.withAlpha(64),
+                  offset: Offset(0, 4),
+                  blurRadius: 16,
+                  spreadRadius: 0,
+                ),
+              ],
+              borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              backgroundColor: Colors.white,
+              margin: EdgeInsets.all(16.0),
+              duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+            ).show(context);
           }
         }
       }

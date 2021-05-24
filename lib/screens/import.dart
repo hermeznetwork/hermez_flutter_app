@@ -800,31 +800,76 @@ class _ImportWalletState extends State<ImportWalletPage> {
                       ),
                       onPressed: buttonEnabled
                           ? () {
-                              Navigator.of(context).pushNamed("/pin",
-                                  arguments: PinArguments(null, true, () async {
-                                    String mnemonic = json.encode(words);
-                                    mnemonic = mnemonic.replaceAll(",", " ");
-                                    mnemonic = mnemonic.replaceAll("[", "");
-                                    mnemonic = mnemonic.replaceAll("]", "");
-                                    mnemonic = mnemonic.replaceAll("\"", "");
-                                    bool imported = await widget.store
-                                        .importFromMnemonic(mnemonic);
-                                    if (imported) {
-                                      Navigator.of(context).pushNamed(
-                                        "/info",
+                              String mnemonic = json.encode(words);
+                              mnemonic = mnemonic.replaceAll(",", " ");
+                              mnemonic = mnemonic.replaceAll("[", "");
+                              mnemonic = mnemonic.replaceAll("]", "");
+                              mnemonic = mnemonic.replaceAll("\"", "");
+                              bool validMnemonic =
+                                  widget.store.isValidMnemonic(mnemonic);
+                              if (validMnemonic) {
+                                Navigator.of(context).pushNamed("/pin",
+                                    arguments: PinArguments(null, true, false,
+                                        () async {
+                                      bool imported = await widget.store
+                                          .importFromMnemonic(mnemonic);
+                                      if (imported) {
+                                        Navigator.of(context).pushNamed(
+                                          "/info",
+                                          arguments: InfoArguments(
+                                              "info_success.png",
+                                              false,
+                                              "Wallet imported successfully",
+                                              onFinished: () {
+                                            Navigator.pushNamedAndRemoveUntil(
+                                                context,
+                                                "/home",
+                                                (Route<dynamic> route) =>
+                                                    false);
+                                          }),
+                                        );
+                                      } else {
+                                        Navigator.of(context)
+                                            .pushNamed("/info",
+                                                arguments: InfoArguments(
+                                                    "info_failure.png",
+                                                    false,
+                                                    "Invalid recovery phrase",
+                                                    onFinished: () {
+                                                  Navigator
+                                                      .pushNamedAndRemoveUntil(
+                                                          context,
+                                                          "/home",
+                                                          (Route<dynamic>
+                                                                  route) =>
+                                                              false);
+                                                }))
+                                            .then((value) {
+                                          if (Navigator.canPop(context)) {
+                                            Navigator.pop(context, false);
+                                          }
+                                        });
+                                      }
+                                    }));
+                              } else {
+                                Navigator.of(context)
+                                    .pushNamed("/info",
                                         arguments: InfoArguments(
-                                            "info_success.png",
+                                            "info_failure.png",
                                             false,
-                                            "Wallet imported successfully",
+                                            "Invalid recovery phrase",
                                             onFinished: () {
                                           Navigator.pushNamedAndRemoveUntil(
                                               context,
                                               "/home",
                                               (Route<dynamic> route) => false);
-                                        }),
-                                      );
-                                    } else {}
-                                  }));
+                                        }))
+                                    .then((value) {
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context, false);
+                                  }
+                                });
+                              }
                             }
                           : null,
                       padding: EdgeInsets.only(

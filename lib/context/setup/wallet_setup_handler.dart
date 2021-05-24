@@ -41,6 +41,15 @@ class WalletSetupHandler {
     _store.dispatch(WalletSetupChangeStep(step));
   }
 
+  bool isValidMnemonic(String mnemonic) {
+    if (_validateMnemonic(mnemonic)) {
+      final normalisedMnemonic = _mnemonicNormalise(mnemonic);
+      return _addressService.isValidMnemonic(normalisedMnemonic);
+    } else {
+      return false;
+    }
+  }
+
   Future<bool> importFromMnemonic(String mnemonic) async {
     try {
       _store.dispatch(WalletSetupStarted());

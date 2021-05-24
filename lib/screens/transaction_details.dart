@@ -1299,8 +1299,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           break;
         case TransactionType.WITHDRAW:
           {
-            final amountWithdraw = getTokenAmountBigInt(
-                widget.arguments.amount, widget.arguments.token.decimals);
+            final amountWithdraw = widget.arguments.amount *
+                pow(10, widget.arguments.token.decimals);
+            /*getTokenAmountBigInt(
+                widget.arguments.amount, widget.arguments.token.decimals);*/
 
             return await widget.arguments.store.withdraw(
                 amountWithdraw,

@@ -80,7 +80,7 @@ class IntroPage extends HookWidget {
                       onPressed: () {
                         Navigator.of(context).pushNamed(
                           "/pin",
-                          arguments: PinArguments(null, true, () async {
+                          arguments: PinArguments(null, true, false, () async {
                             String mnemonic = await store.generateMnemonic();
                             Navigator.of(context).pushNamed("/info",
                                 arguments: InfoArguments(

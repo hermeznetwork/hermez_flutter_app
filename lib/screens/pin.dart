@@ -12,8 +12,10 @@ import 'info.dart';
 class PinArguments {
   final String title;
   final bool creatingPin;
+  final bool changePasscode;
   final Function onSuccess;
-  PinArguments(this.title, this.creatingPin, this.onSuccess);
+  PinArguments(
+      this.title, this.creatingPin, this.changePasscode, this.onSuccess);
 }
 
 class PinPage extends StatefulWidget {
@@ -584,7 +586,8 @@ class _PinPageState extends State<PinPage> {
                       widget.arguments.title == null
                           ? "Passcode created"
                           : "Passcode changed"));*/
-              if (await BiometricsUtils.canCheckBiometrics() &&
+              if (!widget.arguments.changePasscode &&
+                  await BiometricsUtils.canCheckBiometrics() &&
                   await BiometricsUtils.isDeviceSupported()) {
                 List<BiometricType> availableBiometrics =
                     await BiometricsUtils.getAvailableBiometrics();

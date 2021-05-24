@@ -53,12 +53,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   int fromItem = 0;
   int pendingItems = 0;
   List<dynamic> transactions = [];
-  List<Exit> exits = [];
+  //List<Exit> exits = [];
   List<Exit> filteredExits = [];
-  List<dynamic> pendingTransfers = [];
+
   List<dynamic> pendingExits = [];
+  List<dynamic> pendingForceExits = [];
   List<dynamic> pendingWithdraws = [];
   List<dynamic> pendingDeposits = [];
+  List<dynamic> pendingTransfers = [];
 
   final ScrollController _controller = ScrollController();
 
@@ -66,7 +68,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   Future<void> _onRefresh() {
     fromItem = 0;
-    exits = [];
+    //exits = [];
     filteredExits = [];
     pendingWithdraws = [];
     transactions = [];
@@ -411,7 +413,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         poolAmount = poolAmount + amount + fee;
       });
     } else {
-      // rest pending deposits
       pendingTransfers.forEach((pendingTransfer) {
         var amount = pendingTransfer['amount'] /
             pow(10, widget.arguments.account.token.decimals);
@@ -423,6 +424,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         poolAmount = poolAmount + amount + fee;
       });
     }
+    pendingDeposits.forEach((pendingDeposit) {
+      var amount = pendingDeposit['amount'] /
+          pow(10, widget.arguments.account.token.decimals);
+      poolAmount = poolAmount + amount;
+    });
     debugPrint("balance amount:" + balanceAmount.toString());
     debugPrint("pool amount:" + poolAmount.toString());
     resultAmount = balanceAmount - poolAmount;
@@ -499,11 +505,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   //widget that builds the list
   Widget _buildTransactionsList() {
-    if (_isLoading && transactions.isEmpty
-        //poolTxs.isEmpty &&
-        //pendingExits.isEmpty &&
-        //exits.isEmpty &&
-        /*pendingWithdraws.isEmpty*/) {
+    if (_isLoading && transactions.isEmpty) {
       return Container(
         color: Colors.white,
         child: Center(
@@ -513,7 +515,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     } else if (!_isLoading &&
         transactions.isEmpty &&
         pendingExits.isEmpty &&
-        exits.isEmpty &&
+        filteredExits.isEmpty &&
         pendingWithdraws.isEmpty) {
       return Container(
           width: double.infinity,
@@ -539,22 +541,28 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
               // To make listView scrollable
               // even if there is only a single item.
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: (pendingExits.isNotEmpty ||
-                          exits.isNotEmpty ||
-                          pendingWithdraws.isNotEmpty
-                      ? 1
-                      : 0) +
-                  transactions.length +
+              itemCount: transactions.length +
+                  pendingExits.length +
+                  pendingForceExits.length +
+                  filteredExits.length +
+                  pendingWithdraws.length +
                   (_isLoading ? 1 : 0),
               //set the item count so that index won't be out of range
               padding: const EdgeInsets.all(16.0),
               //add some padding to make it look good
               itemBuilder: (context, i) {
-                if (i == 0 && pendingExits.length > 0) {
-                  final index = i;
-                  final PoolTransaction transaction = pendingExits[index];
-
-                  final Exit exit = Exit.fromTransaction(transaction);
+                if ((pendingExits.length > 0 || pendingForceExits.length > 0) &&
+                    i < pendingExits.length + pendingForceExits.length) {
+                  var index = i;
+                  Exit exit;
+                  if (i >= pendingExits.length) {
+                    index = i - pendingExits.length;
+                    var transaction = pendingForceExits[index];
+                    exit = Exit.fromL1Transaction(transaction);
+                  } else {
+                    final PoolTransaction transaction = pendingExits[index];
+                    exit = Exit.fromTransaction(transaction);
+                  }
 
                   final String currency = widget
                       .arguments.store.state.defaultCurrency
@@ -570,16 +578,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       () async {},
                       widget.arguments.store.state.txLevel);
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
-                else if ((pendingExits.isNotEmpty || exits.isNotEmpty
-                            /*||
-                _pendingWithdraws.isNotEmpty*/
-                            ? 1
-                            : 0) +
-                        transactions.length ==
-                    i) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (i == 0 && filteredExits.length > 0) {
-                  final index = i;
+                else if (filteredExits.length > 0 &&
+                    i <
+                        filteredExits.length +
+                            pendingExits.length +
+                            pendingForceExits.length) {
+                  final index =
+                      i - pendingExits.length - pendingForceExits.length;
                   final Exit exit = filteredExits[index];
 
                   final String currency = widget
@@ -615,13 +620,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         getCurrentEnvironment().contracts['Hermez'];
 
                     BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
-                    //Token ethereumToken =
-                    //await widget.arguments.store.getTokenById(0);
-                    //Account ethereumAccount = await getEthereumAccount();
-                    final amountWithdraw = getTokenAmountBigInt(
+                    final amountWithdraw = double.parse(exit.balance);
+                    /*getTokenAmountBigInt(
                         double.parse(exit.balance) /
                             pow(10, exit.token.decimals),
-                        exit.token.decimals);
+                        exit.token.decimals);*/
                     gasLimit = await widget.arguments.store.withdrawGasLimit(
                         amountWithdraw, null, exit, false, true);
 
@@ -643,12 +646,20 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             ))
                         .then((value) => _onRefresh());
                   }, widget.arguments.store.state.txLevel);
-                } else if (i == 0 && pendingWithdraws.length > 0) {
-                  final index = i;
+                } else if (pendingWithdraws.length > 0 &&
+                    i <
+                        pendingWithdraws.length +
+                            filteredExits.length +
+                            pendingExits.length +
+                            pendingForceExits.length) {
+                  final index = i -
+                      filteredExits.length -
+                      pendingExits.length -
+                      pendingForceExits.length;
                   final pendingWithdraw = pendingWithdraws[index];
                   final Token token = Token.fromJson(pendingWithdraw['token']);
 
-                  final Exit exit = exits.firstWhere(
+                  final Exit exit = filteredExits.firstWhere(
                       (exit) => exit.itemId == pendingWithdraw['itemId'],
                       orElse: () => Exit(
                           hezEthereumAddress:
@@ -669,8 +680,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     step = 3;
                   } else if (pendingWithdraw['status'] == 'fail') {
                     step = 2;
-                  } else if (pendingWithdraw['status'] == 'initiated') {
-                    step = 1;
                   }
 
                   return WithdrawalRow(
@@ -705,10 +714,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             String addressTo =
                                 getCurrentEnvironment().contracts['Hermez'];
 
-                            final amountWithdraw = getTokenAmountBigInt(
+                            final amountWithdraw = double.parse(exit.balance);
+                            /*getTokenAmountBigInt(
                                 double.parse(exit.balance) /
                                     pow(10, exit.token.decimals),
-                                exit.token.decimals);
+                                exit.token.decimals);*/
 
                             BigInt gasLimit = await widget.arguments.store
                                 .withdrawGasLimit(
@@ -734,8 +744,15 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           }
                         : () {},
                     widget.arguments.store.state.txLevel,
-                    retry: true,
+                    retry: pendingWithdraw['status'] == 'fail',
                   );
+                } else if (pendingExits.length +
+                        pendingForceExits.length +
+                        filteredExits.length +
+                        pendingWithdraws.length +
+                        transactions.length ==
+                    i) {
+                  return Center(child: CircularProgressIndicator());
                 } else {
                   Color statusColor = HermezColors.statusOrange;
                   Color statusBackgroundColor =
@@ -743,10 +760,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   var title = "";
                   var subtitle = "";
                   final index = i -
-                      (pendingExits.isNotEmpty || exits.isNotEmpty //||
-                          //_pendingWithdraws.isNotEmpty
-                          ? 1
-                          : 0);
+                      pendingExits.length -
+                      pendingForceExits.length -
+                      filteredExits.length -
+                      pendingWithdraws.length;
                   dynamic element = transactions.elementAt(index);
                   var type = 'type';
                   var txType;
@@ -1100,10 +1117,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       }).toList();
       pendingExits =
           await fetchL2PendingExits(widget.arguments.account.accountIndex);
-      exits = await fetchExits(widget.arguments.account.token.id);
-      filteredExits = exits.toList();
+      List<dynamic> exits = await fetchExits(widget.arguments.account.token.id);
+      pendingForceExits = await fetchPendingForceExits(
+          widget.arguments.account.token.id, exits, pendingExits);
       pendingWithdraws =
           await fetchPendingWithdraws(widget.arguments.account.token.id);
+      filteredExits = List.from(exits);
       filteredExits.removeWhere((Exit exit) {
         for (dynamic pendingWithdraw in pendingWithdraws) {
           if (pendingWithdraw["id"] ==
@@ -1159,7 +1178,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       }).toList();
       pendingExits =
           await fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
-      exits = await fetchExits(widget.arguments.account.token.id);
+      List<Exit> exits = await fetchExits(widget.arguments.account.token.id);
+      pendingForceExits = await fetchPendingForceExits(
+          widget.arguments.account.token.id, exits, pendingExits);
       filteredExits = exits.toList();
       pendingWithdraws =
           await fetchPendingWithdraws(widget.arguments.account.token.id);
@@ -1244,6 +1265,31 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     return poolTxs;
   }
 
+  Future<List<dynamic>> fetchPendingForceExits(
+      int tokenId, List<Exit> exits, List<PoolTransaction> pendingExits) async {
+    final accountPendingForceExits =
+        await widget.arguments.store.getPendingForceExits();
+    accountPendingForceExits.removeWhere((pendingForceExit) =>
+        Token.fromJson(pendingForceExit['token']).id != tokenId);
+
+    /*exits.forEach((exit) {
+      var pendingExit = pendingExits.firstWhere(
+          (pendingExit) => pendingExit.fromAccountIndex == exit.accountIndex,
+          orElse: () => null);
+      if (pendingExit == null) {
+        var pendingForceExit = accountPendingForceExits.firstWhere(
+            (pendingForceExit) =>
+                pendingForceExit['amount'].toString() == exit.balance,
+            orElse: null);
+        if (pendingForceExit != null) {
+          accountPendingForceExits.remove(pendingForceExit);
+        }
+      }
+    });*/
+
+    return accountPendingForceExits;
+  }
+
   Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
     final accountPendingDeposits =
         await widget.arguments.store.getPendingDeposits();
@@ -1255,8 +1301,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   Future<List<dynamic>> fetchPendingTransfers(int tokenId) async {
     final accountPendingTransfers =
         await widget.arguments.store.getPendingTransfers();
-    accountPendingTransfers.removeWhere((pendingDeposit) =>
-        Token.fromJson(pendingDeposit['token']).id != tokenId);
+    accountPendingTransfers.removeWhere((pendingTransfer) =>
+        Token.fromJson(pendingTransfer['token']).id != tokenId);
     return accountPendingTransfers;
   }
 

@@ -474,6 +474,79 @@ class WalletHandler {
     return accountPendingTransfers.reversed.toList();
   }
 
+  Future<List<dynamic>> getPendingForceExits() async {
+    final storage =
+        await _storageService.getStorage(PENDING_FORCE_EXITS_KEY, false);
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await _configurationService.getEthereumAddress();
+    final List accountPendingForceExits = _storageService
+        .getItemsByHermezAddress(storage, chainId, ethereumAddress);
+
+    List forceExitIds = [];
+    for (final pendingForceExit in accountPendingForceExits) {
+      final transactionHash = pendingForceExit['hash'];
+      web3.TransactionReceipt receipt =
+          await _contractService.getTxReceipt(transactionHash);
+      if (receipt != null) {
+        if (receipt.status == false) {
+          // Tx didn't pass
+          if (pendingForceExit['id'] == null) {
+            pendingForceExit['id'] = transactionHash;
+            accountPendingForceExits[accountPendingForceExits.indexWhere(
+                    (element) => element['hash'] == pendingForceExit['hash'])] =
+                pendingForceExit;
+            await _configurationService.updatePendingForceExitId(
+                transactionHash, transactionHash);
+          }
+          forceExitIds.add(transactionHash);
+          await _configurationService.removePendingForceExit(transactionHash);
+        } else {
+          final hermezContract = await ContractParser.fromAssets(
+              'HermezABI.json',
+              getCurrentEnvironment().contracts['Hermez'],
+              "Hermez");
+          final contractEvent = hermezContract.event('L1UserTxEvent');
+          for (var log in receipt.logs) {
+            List<String> topics = List<String>.from(
+                log['topics'].map((topic) => topic.toString()));
+            try {
+              List l1UserTxEvent =
+                  contractEvent.decodeResults(topics, log['data']);
+              final transactionId =
+                  getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
+
+              if (pendingForceExit['id'] == null) {
+                pendingForceExit['id'] = transactionId;
+                accountPendingForceExits[accountPendingForceExits.indexWhere(
+                        (element) =>
+                            element['hash'] == pendingForceExit['hash'])] =
+                    pendingForceExit;
+                _configurationService.updatePendingForceExitId(
+                    transactionHash, transactionId);
+              }
+
+              final forgedTransaction =
+                  await getHistoryTransaction(transactionId);
+              if (forgedTransaction != null &&
+                  forgedTransaction.batchNum != null) {
+                forceExitIds.add(transactionHash);
+                _configurationService.removePendingForceExit(transactionHash,
+                    name: 'hash');
+              }
+            } catch (e) {
+              print(e.toString());
+            }
+          }
+        }
+      }
+    }
+
+    accountPendingForceExits.removeWhere(
+        (pendingForceExit) => forceExitIds.contains(pendingForceExit['hash']));
+
+    return accountPendingForceExits.reversed.toList();
+  }
+
   Future<List<dynamic>> getPendingDeposits() async {
     final storage =
         await _storageService.getStorage(PENDING_DEPOSITS_KEY, false);
@@ -738,7 +811,7 @@ class WalletHandler {
         gasPrice: gasPrice);
   }
 
-  Future<BigInt> withdrawGasLimit(BigInt amount, Account account, Exit exit,
+  Future<BigInt> withdrawGasLimit(double amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
     //_store.dispatch(TransactionStarted());
 
@@ -756,7 +829,7 @@ class WalletHandler {
         hermezWallet.publicKeyCompressedHex);
   }
 
-  Future<bool> withdraw(BigInt amount, Account account, Exit exit,
+  Future<bool> withdraw(double amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
       {int gasLimit, int gasPrice}) async {
     _store.dispatch(TransactionStarted());
@@ -794,6 +867,7 @@ class WalletHandler {
       {int gasLimit, int gasPrice}) async {
     _store.dispatch(TransactionStarted());
     final hermezAddress = await _configurationService.getHermezAddress();
+
     return _hermezService.forceExit(
         amount, hermezAddress, account, state.ethereumPrivateKey,
         gasLimit: gasLimit, gasPrice: gasPrice);
@@ -863,6 +937,27 @@ class WalletHandler {
     final result = await _hermezService.sendL2Transaction(
         transaction, await _configurationService.getBabyJubJubHex());
     return result;
+  }
+
+  /// Calculates the fee for the transaction.
+  /// It takes the appropriate recomended fee in USD from the coordinator
+  /// and converts it to token value.
+  /// @param {Object} fees - The recommended Fee object returned by the Coordinator
+  /// @param {Boolean} iExistingAccount - Whether it's a existingAccount transfer
+  /// @returns {number} - Transaction fee
+  double getFee(RecommendedFee fees, bool isExistingAccount, Token token,
+      TransactionType transactionType) {
+    if (token.USD == 0) {
+      return 0;
+    }
+
+    final fee = (isExistingAccount ||
+            transactionType == TransactionType.EXIT ||
+            transactionType == TransactionType.FORCEEXIT)
+        ? fees.existingAccount
+        : fees.createAccount;
+
+    return double.parse((fee / token.USD).toStringAsFixed(6));
   }
 
   Future<GasPriceResponse> getGasPrice() async {

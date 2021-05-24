@@ -51,6 +51,9 @@ abstract class IConfigurationService {
   // L1 Transfers
   void addPendingTransfer(dynamic pendingTransfer);
   void removePendingTransfer(String pendingTransferId);
+  // L1 Force Exit
+  void addPendingForceExit(dynamic pendingForceExit);
+  void removePendingForceExit(String value, {String name = 'id'});
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -426,7 +429,7 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.addItem(PENDING_DEPOSITS_KEY, chainId,
+    await _storageService.addItem(PENDING_DEPOSITS_KEY, chainId,
         hermezEthereumAddress, pendingDeposit, false);
   }
 
@@ -438,7 +441,7 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.removeItem(PENDING_DEPOSITS_KEY, chainId,
+    await _storageService.removeItem(PENDING_DEPOSITS_KEY, chainId,
         hermezEthereumAddress, 'id', transactionId, false);
   }
 
@@ -488,8 +491,8 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final ethereumAddress = await getEthereumAddress();
 
-    _storageService.addItem(PENDING_TRANSFERS_KEY, chainId, ethereumAddress,
-        pendingTransfer, false);
+    await _storageService.addItem(PENDING_TRANSFERS_KEY, chainId,
+        ethereumAddress, pendingTransfer, false);
   }
 
   /// Removes a pendingTransfer from the pendingTransfer store
@@ -500,8 +503,46 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final ethereumAddress = await getEthereumAddress();
 
-    _storageService.removeItem(PENDING_TRANSFERS_KEY, chainId, ethereumAddress,
-        'hash', transactionHash, false);
+    await _storageService.removeItem(PENDING_TRANSFERS_KEY, chainId,
+        ethereumAddress, 'hash', transactionHash, false);
+  }
+
+  /// Adds a pendingTransfer to the pendingTransfers store
+  /// @param {string} pendingTransfer - The pendingTransfer to add to the store
+  /// @returns {void}
+  @override
+  void addPendingForceExit(dynamic pendingForceExit) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    await _storageService.addItem(PENDING_FORCE_EXITS_KEY, chainId,
+        ethereumAddress, pendingForceExit, false);
+  }
+
+  /// Removes a pendingTransfer from the pendingTransfer store
+  /// @param {string} transactionId - The transaction identifier used to remove a pendingTransfer from the store
+  /// @returns {void}
+  @override
+  void removePendingForceExit(String value, {String name = 'id'}) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    await _storageService.removeItem(
+        PENDING_FORCE_EXITS_KEY, chainId, ethereumAddress, name, value, false);
+  }
+
+  void updatePendingForceExitId(
+      String transactionHash, String transactionId) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    _storageService.updatePartialItemByCustomProp(
+        PENDING_FORCE_EXITS_KEY,
+        chainId,
+        hermezEthereumAddress,
+        {'name': 'hash', 'value': transactionHash},
+        {'id': transactionId},
+        false);
   }
 
   /*function checkPendingDeposits () {

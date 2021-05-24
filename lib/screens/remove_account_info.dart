@@ -90,8 +90,8 @@ class RemoveAccountInfoPage extends HookWidget {
                     ),
                     onPressed: () {
                       Navigator.of(context).pushNamed("/pin",
-                          arguments:
-                              PinArguments("Remove account", false, () async {
+                          arguments: PinArguments(
+                              "Remove account", false, false, () async {
                             await arguments.store.resetWallet();
                             Navigator.pushNamedAndRemoveUntil(
                                 context, "/", (Route<dynamic> route) => false);

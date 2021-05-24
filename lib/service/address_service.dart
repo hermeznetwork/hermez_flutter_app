@@ -35,6 +35,20 @@ class AddressService implements IAddressService {
     return bip39.entropyToMnemonic(entropyMnemonic);
   }
 
+  bool isValidMnemonic(String mnemonic) {
+    try {
+      final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
+      final privateKey = getPrivateKey(mnemonic);
+      return cryptMnemonic != null &&
+          privateKey != null &&
+          cryptMnemonic.isNotEmpty &&
+          privateKey.isNotEmpty;
+    } catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
   @override
   Future<String> setupFromMnemonic(String mnemonic) async {
     try {
