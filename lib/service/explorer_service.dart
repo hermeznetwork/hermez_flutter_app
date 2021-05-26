@@ -11,6 +11,8 @@ typedef TransferEvent = void Function(
     EthereumAddress from, EthereumAddress to, BigInt value);
 
 abstract class IExplorerService {
+  Future<List<dynamic>> getTransactionsByAccountAddress(String address,
+      {String sort = 'desc', int startblock = 0});
   Future<List<dynamic>> getTokenTransferEventsByAccountAddress(
       String address, String tokenAddress,
       {String sort = 'desc', int startblock = 0});
@@ -86,6 +88,9 @@ class ExplorerService implements IExplorerService {
                             1000)
                     .millisecondsSinceEpoch,
                 'value': value,
+                'fee': (int.parse(transferEvent['gasUsed']) *
+                        int.parse(transferEvent['gasPrice']))
+                    .toString(),
                 'tokenAddress': transferEvent['contractAddress'],
                 'type': type,
               });
@@ -174,6 +179,9 @@ class ExplorerService implements IExplorerService {
                         1000)
                 .millisecondsSinceEpoch,
             'value': transferEvent['value'],
+            'fee': (int.parse(transferEvent['gasUsed']) *
+                    int.parse(transferEvent['gasPrice']))
+                .toString(),
             'tokenAddress': transferEvent['contractAddress'],
             'type': type,
           });

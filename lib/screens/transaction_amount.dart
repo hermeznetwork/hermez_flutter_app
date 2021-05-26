@@ -607,7 +607,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           // We can show the loading view until the data comes back.
           //debugPrint('Step 1, build loading widget');
           return new Center(
-            child: new CircularProgressIndicator(),
+            child: new CircularProgressIndicator(color: HermezColors.orange),
           );
         }
       },

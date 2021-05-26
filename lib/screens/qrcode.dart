@@ -247,7 +247,7 @@ class _QRCodePageState extends State<QRCodePage> {
             widget.arguments.isReceive
                 ? Container()
                 : Container(
-                    margin: EdgeInsets.all(20),
+                    margin: EdgeInsets.only(left: 30, right: 30),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15.0),
                         color: HermezColors.mediumOrange),
@@ -307,7 +307,9 @@ class _QRCodePageState extends State<QRCodePage> {
                       ],
                     ),
                   ),
-            widget.arguments.isReceive
+            (widget.arguments.isReceive &&
+                widget.arguments.qrCodeType !=
+                    QRCodeType.REQUEST_PAYMENT) || !widget.arguments.isReceive
                 ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 30.0, bottom: 0.0),

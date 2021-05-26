@@ -22,6 +22,7 @@ import 'package:hermez_plugin/model/l1info.dart';
 import 'package:hermez_plugin/model/l2info.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_plugin/tx_utils.dart';
 import 'package:hermez_plugin/utils.dart';
 import 'package:intl/intl.dart';
 
@@ -399,7 +400,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     widget.arguments.account.token.decimals)
                 .toDouble() /
             pow(10, widget.arguments.account.token.decimals));
-        var fee = poolTransaction.fee / pow(10, 3);
+        var fee =
+            getFeeValue(poolTransaction.fee, int.parse(poolTransaction.amount))
+                    .toDouble() /
+                pow(10, widget.arguments.account.token.decimals);
         poolAmount = poolAmount + amount + fee;
       });
       pendingExits.forEach((poolTransaction) {
@@ -409,7 +413,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     widget.arguments.account.token.decimals)
                 .toDouble() /
             pow(10, widget.arguments.account.token.decimals));
-        var fee = poolTransaction.fee / pow(10, 3);
+        var fee =
+            getFeeValue(poolTransaction.fee, int.parse(poolTransaction.amount))
+                    .toDouble() /
+                pow(10, widget.arguments.account.token.decimals);
         poolAmount = poolAmount + amount + fee;
       });
     } else {
@@ -509,7 +516,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       return Container(
         color: Colors.white,
         child: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: HermezColors.orange),
         ),
       );
     } else if (!_isLoading &&
@@ -535,6 +542,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       return Container(
         color: Colors.white,
         child: RefreshIndicator(
+          color: HermezColors.orange,
           child: ListView.builder(
               controller: _controller,
               shrinkWrap: true,
@@ -752,7 +760,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         pendingWithdraws.length +
                         transactions.length ==
                     i) {
-                  return Center(child: CircularProgressIndicator());
+                  return Center(
+                    child:
+                        CircularProgressIndicator(color: HermezColors.orange),
+                  );
                 } else {
                   Color statusColor = HermezColors.statusOrange;
                   Color statusBackgroundColor =
@@ -775,6 +786,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   var addressTo = 'to';
                   var value = '0';
                   var feeValue = '0';
+                  var fee = 0.0;
                   var amount;
                   if (element.runtimeType == ForgedTransaction) {
                     ForgedTransaction transaction = element;
@@ -784,9 +796,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     if (transaction.hash != null) {
                       txHash = transaction.hash;
                     }
-                    if (transaction.L1orL2 == "L2") {
-                      feeValue = transaction.l2info.fee.toString();
-                    }
+
                     if (transaction.type == "CreateAccountDeposit" ||
                         transaction.type == "Deposit") {
                       type = "DEPOSIT";
@@ -810,7 +820,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       addressTo = transaction.fromHezEthereumAddress;
                     } else if (transaction.type == "Exit" ||
                         transaction.type == "ForceExit") {
-                      type = "WITHDRAW";
+                      type = transaction.type.toUpperCase();
                       value = transaction.amount.toString();
                       if (transaction.timestamp.isNotEmpty) {
                         status = "CONFIRMED";
@@ -883,15 +893,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     }
                     amount = double.parse(value) /
                         pow(10, widget.arguments.account.token.decimals);
-                    /*amount = (getTokenAmountBigInt(
-                                double.parse(value) /
-                                    pow(
-                                        10,
-                                        widget
-                                            .arguments.account.token.decimals),
-                                widget.arguments.account.token.decimals)
-                            .toDouble()) /
-                        pow(10, widget.arguments.account.token.decimals);*/
+                    if (transaction.L1orL2 == "L2") {
+                      feeValue = getFeeValue(
+                              transaction.l2info.fee, double.parse(value))
+                          .toInt()
+                          .toString();
+                    }
+                    fee = double.parse(feeValue);
                   } else {
                     LinkedHashMap event = element;
                     type = event['type'];
@@ -901,8 +909,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     addressFrom = event['from'];
                     addressTo = event['to'];
                     value = event['value'];
+                    feeValue = event['fee'];
                     amount = double.parse(value) /
                         pow(10, widget.arguments.account.token.decimals);
+                    fee = double.parse(feeValue);
                   }
 
                   final String currency = widget
@@ -924,8 +934,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     symbol = "\$";
                   }
 
-                  var fee = double.parse(feeValue) *
-                      pow(10, widget.arguments.account.token.decimals - 3);
                   var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
                   //var format = DateFormat('dd MMM');
                   var format = DateFormat('dd/MM/yyyy');
@@ -944,6 +952,20 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       title = "Sent";
                       icon = "assets/tx_send.png";
                       isNegative = true;
+                      break;
+                    case 'EXIT':
+                      txType = TransactionType.EXIT;
+                      title = "Moved";
+                      icon = "assets/tx_move.png";
+                      isNegative = widget.arguments.store.state.txLevel ==
+                          TransactionLevel.LEVEL2;
+                      break;
+                    case 'FORCEEXIT':
+                      txType = TransactionType.FORCEEXIT;
+                      title = "Moved";
+                      icon = "assets/tx_move.png";
+                      isNegative = widget.arguments.store.state.txLevel ==
+                          TransactionLevel.LEVEL2;
                       break;
                     case "WITHDRAW":
                       txType = TransactionType.WITHDRAW;

@@ -164,9 +164,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                 _buildStatusRow(),
                                 _buildFromRow(),
                                 _buildToRow(),
-                                _buildDateRow(),
                                 _buildFeeRow(context),
                                 _buildWithdrawFeeRow(context),
+                                _buildDateRow(),
                                 _buildViewExplorerRow()
                               ]).toList())))),
                   widget.arguments.status == TransactionStatus.DRAFT
@@ -302,7 +302,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 _buildAmountRow(),
                 Expanded(
                   child: Center(
-                    child: new CircularProgressIndicator(),
+                    child: new CircularProgressIndicator(
+                        color: HermezColors.orange),
                   ),
                 )
               ]);
@@ -423,8 +424,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   Widget _buildExitInfoRow(BuildContext context) {
-    if (widget.arguments.transactionType == TransactionType.EXIT ||
-        widget.arguments.transactionType == TransactionType.FORCEEXIT) {
+    if ((widget.arguments.transactionType == TransactionType.EXIT ||
+            widget.arguments.transactionType == TransactionType.FORCEEXIT) &&
+        widget.arguments.status == TransactionStatus.DRAFT) {
       return Card(
         margin: EdgeInsets.only(bottom: 15),
         color: HermezColors.blackTwo,
@@ -493,7 +495,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         ),
       );
     } else {
-      return Container();
+      return null;
     }
   }
 
@@ -515,7 +517,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     }
 
     return widget.arguments.status == TransactionStatus.DRAFT
-        ? Container()
+        ? null
         : ListTile(
             contentPadding: EdgeInsets.only(top: 20, bottom: 20),
             title: Text('Status',
@@ -815,7 +817,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   Widget _buildFeeRow(BuildContext context) {
-    if (widget.arguments.transactionDate == null) {
+    if (widget.arguments.status == TransactionStatus.DRAFT ||
+        (widget.arguments.status != TransactionStatus.DRAFT &&
+            widget.arguments.transactionType != TransactionType.DEPOSIT &&
+            widget.arguments.transactionType != TransactionType.RECEIVE &&
+            widget.arguments.transactionType != TransactionType.FORCEEXIT)) {
       bool enoughFee = isFeeEnough();
       final String currency = widget.arguments.store.state.defaultCurrency
           .toString()
@@ -828,70 +834,107 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       String speed = "Average";
       bool showSpeed = false;
       bool allowSelectSpeed =
-          widget.arguments.transactionType == TransactionType.WITHDRAW;
-      if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
-          widget.arguments.transactionType == TransactionType.DEPOSIT ||
-          widget.arguments.transactionType == TransactionType.WITHDRAW ||
-          (widget.arguments.transactionType == TransactionType.SEND &&
-              widget.arguments.transactionLevel == TransactionLevel.LEVEL1)) {
-        title = 'Ethereum fee';
-        BigInt gasPrice = BigInt.one;
-        switch (widget.arguments.selectedFeeSpeed) {
-          case WalletDefaultFee.SLOW:
-            int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
-            gasPrice = BigInt.from(gasPriceFloor);
-            break;
-          case WalletDefaultFee.AVERAGE:
-            int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
-            gasPrice = BigInt.from(gasPriceFloor);
-            break;
-          case WalletDefaultFee.FAST:
-            int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
-            gasPrice = BigInt.from(gasPriceFloor);
-            break;
+          widget.arguments.transactionType == TransactionType.WITHDRAW &&
+              widget.arguments.status == TransactionStatus.DRAFT;
+      if (widget.arguments.status == TransactionStatus.DRAFT) {
+        if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+            widget.arguments.transactionType == TransactionType.DEPOSIT ||
+            widget.arguments.transactionType == TransactionType.WITHDRAW ||
+            (widget.arguments.transactionType == TransactionType.SEND &&
+                widget.arguments.transactionLevel == TransactionLevel.LEVEL1)) {
+          title = 'Ethereum fee';
+          BigInt gasPrice = BigInt.one;
+          switch (widget.arguments.selectedFeeSpeed) {
+            case WalletDefaultFee.SLOW:
+              int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
+              gasPrice = BigInt.from(gasPriceFloor);
+              break;
+            case WalletDefaultFee.AVERAGE:
+              int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
+              gasPrice = BigInt.from(gasPriceFloor);
+              break;
+            case WalletDefaultFee.FAST:
+              int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
+              gasPrice = BigInt.from(gasPriceFloor);
+              break;
+          }
+          double fee = widget.arguments.gasLimit * gasPrice.toDouble();
+          currencyFee = EthAmountFormatter.formatAmount(
+              fee.toDouble() /
+                  pow(10, ethereumAccount.token.decimals) *
+                  (ethereumAccount.token.USD *
+                      (currency != "USD"
+                          ? widget.arguments.store.state.exchangeRatio
+                          : 1)),
+              currency);
+
+          tokenFee = EthAmountFormatter.formatAmount(
+              fee.toDouble() / pow(10, ethereumAccount.token.decimals),
+              ethereumAccount.token.symbol);
+          showSpeed = true;
+          speed = widget.arguments.selectedFeeSpeed
+                  .toString()
+                  .split(".")
+                  .last
+                  .substring(0, 1) +
+              widget.arguments.selectedFeeSpeed
+                  .toString()
+                  .split(".")
+                  .last
+                  .substring(1)
+                  .toLowerCase();
+        } else {
+          title = 'Hermez fee';
+          //double fee =
+          //    widget.arguments.gasLimit * widget.arguments.gasPrice.toDouble();
+          currencyFee = EthAmountFormatter.formatAmount(
+              widget.arguments.fee /
+                  pow(10, widget.arguments.account.token.decimals) *
+                  (widget.arguments.account.token.USD *
+                      (currency != "USD"
+                          ? widget.arguments.store.state.exchangeRatio
+                          : 1)),
+              currency);
+
+          tokenFee = EthAmountFormatter.formatAmount(
+              widget.arguments.fee /
+                  pow(10, widget.arguments.account.token.decimals),
+              widget.arguments.account.token.symbol);
         }
-        double fee = widget.arguments.gasLimit * gasPrice.toDouble();
-        currencyFee = EthAmountFormatter.formatAmount(
-            fee.toDouble() /
-                pow(10, ethereumAccount.token.decimals) *
-                (ethereumAccount.token.USD *
-                    (currency != "USD"
-                        ? widget.arguments.store.state.exchangeRatio
-                        : 1)),
-            currency);
-
-        tokenFee = EthAmountFormatter.formatAmount(
-            fee.toDouble() / pow(10, ethereumAccount.token.decimals),
-            ethereumAccount.token.symbol);
-        showSpeed = true;
-        speed = widget.arguments.selectedFeeSpeed
-                .toString()
-                .split(".")
-                .last
-                .substring(0, 1) +
-            widget.arguments.selectedFeeSpeed
-                .toString()
-                .split(".")
-                .last
-                .substring(1)
-                .toLowerCase();
       } else {
-        title = 'Hermez fee';
-        //double fee =
-        //    widget.arguments.gasLimit * widget.arguments.gasPrice.toDouble();
-        currencyFee = EthAmountFormatter.formatAmount(
-            widget.arguments.fee /
-                pow(10, widget.arguments.account.token.decimals) *
-                (widget.arguments.account.token.USD *
-                    (currency != "USD"
-                        ? widget.arguments.store.state.exchangeRatio
-                        : 1)),
-            currency);
+        if (widget.arguments.transactionLevel == TransactionLevel.LEVEL2) {
+          title = 'Hermez fee';
+          double fee = widget.arguments.fee;
+          currencyFee = EthAmountFormatter.formatAmount(
+              fee.toDouble() /
+                  pow(10, widget.arguments.account.token.decimals) *
+                  (widget.arguments.account.token.USD *
+                      (currency != "USD"
+                          ? widget.arguments.store.state.exchangeRatio
+                          : 1)),
+              currency);
 
-        tokenFee = EthAmountFormatter.formatAmount(
-            widget.arguments.fee /
-                pow(10, widget.arguments.account.token.decimals),
-            widget.arguments.account.token.symbol);
+          tokenFee = EthAmountFormatter.formatAmount(
+              fee.toDouble() / pow(10, widget.arguments.account.token.decimals),
+              widget.arguments.account.token.symbol);
+          showSpeed = false;
+        } else {
+          title = 'Ethereum fee';
+          double fee = widget.arguments.fee;
+          currencyFee = EthAmountFormatter.formatAmount(
+              fee.toDouble() /
+                  pow(10, ethereumAccount.token.decimals) *
+                  (ethereumAccount.token.USD *
+                      (currency != "USD"
+                          ? widget.arguments.store.state.exchangeRatio
+                          : 1)),
+              currency);
+
+          tokenFee = EthAmountFormatter.formatAmount(
+              fee.toDouble() / pow(10, ethereumAccount.token.decimals),
+              ethereumAccount.token.symbol);
+          showSpeed = false;
+        }
       }
 
       if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
@@ -1017,7 +1060,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             : null,
       );
     } else {
-      return Container();
+      return null;
     }
   }
 
@@ -1150,7 +1193,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         ),
       );
     } else {
-      return Container();
+      return null;
     }
   }
 
@@ -1179,7 +1222,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                   fontWeight: FontWeight.w700,
                 )),
           )
-        : Container();
+        : null;
   }
 
   Widget _buildViewExplorerRow() {
@@ -1390,6 +1433,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     if (widget.arguments.status == TransactionStatus.DRAFT) {
       ethereumAccount = await getEthereumAccount();
       gasPriceResponse = await getGasPriceResponse();
+    } else if (widget.arguments.transactionLevel == TransactionLevel.LEVEL1 &&
+        widget.arguments.transactionType != TransactionType.RECEIVE) {
+      ethereumAccount = await getEthereumAccount();
     }
 
     //needRefresh = false;

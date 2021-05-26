@@ -495,7 +495,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
   Widget handleAccountsList(AsyncSnapshot snapshot) {
     if (snapshot.connectionState == ConnectionState.waiting) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+          child: CircularProgressIndicator(color: HermezColors.orange));
     } else {
       if (snapshot.hasError) {
         // while data is loading:
@@ -601,6 +602,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     return Container(
       color: Colors.white,
       child: RefreshIndicator(
+        color: HermezColors.orange,
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: _accounts.length +

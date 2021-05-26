@@ -108,7 +108,7 @@ class AccountSelectorPage extends HookWidget {
   Widget handleAccountsList(AsyncSnapshot snapshot, BuildContext context) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(color: HermezColors.orange),
       );
     } else {
       if (snapshot.hasError) {
@@ -356,6 +356,7 @@ class AccountSelectorPage extends HookWidget {
           child: Container(
             color: Colors.white,
             child: RefreshIndicator(
+              color: HermezColors.orange,
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: arguments.transactionType == TransactionType.RECEIVE
