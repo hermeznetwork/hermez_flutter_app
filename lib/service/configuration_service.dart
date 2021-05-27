@@ -7,7 +7,6 @@ import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web3dart/web3dart.dart';
 
 abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
@@ -437,12 +436,12 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} transactionId - The transaction identifier used to remove a pendingDeposit from the store
   /// @returns {void}
   @override
-  void removePendingDeposit(String transactionId) async {
+  void removePendingDeposit(String transactionHash) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
     await _storageService.removeItem(PENDING_DEPOSITS_KEY, chainId,
-        hermezEthereumAddress, 'id', transactionId, false);
+        hermezEthereumAddress, 'hash', transactionHash, false);
   }
 
   void updatePendingDepositId(
@@ -450,7 +449,7 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.updatePartialItemByCustomProp(
+    await _storageService.updatePartialItemByCustomProp(
         PENDING_DEPOSITS_KEY,
         chainId,
         hermezEthereumAddress,
@@ -459,7 +458,7 @@ class ConfigurationService implements IConfigurationService {
         false);
   }
 
-  void checkPendingDeposits(Web3Client web3Client) async {
+  /*void checkPendingDeposits(Web3Client web3Client) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
     final storage =
@@ -481,7 +480,7 @@ class ConfigurationService implements IConfigurationService {
     /*pendingDepositsTxReceipts.forEach((List txReceipts) {
       txReceipts.removeWhere((txReceipt) => txReceipt != null && txReceipt.logs && txReceipt.logs.length > 0)
     });*/
-  }
+  }*/
 
   /// Adds a pendingTransfer to the pendingTransfers store
   /// @param {string} pendingTransfer - The pendingTransfer to add to the store
@@ -536,7 +535,7 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.updatePartialItemByCustomProp(
+    await _storageService.updatePartialItemByCustomProp(
         PENDING_FORCE_EXITS_KEY,
         chainId,
         hermezEthereumAddress,

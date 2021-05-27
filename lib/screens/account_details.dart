@@ -53,6 +53,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   bool _isLoading = true;
   int fromItem = 0;
   int pendingItems = 0;
+  List<dynamic> historyTransactions = [];
   List<dynamic> transactions = [];
   //List<Exit> exits = [];
   List<Exit> filteredExits = [];
@@ -391,7 +392,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     double resultAmount = 0;
     double balanceAmount = double.parse(widget.arguments.account.balance) /
         pow(10, widget.arguments.account.token.decimals);
-    double poolAmount = 0;
+    double withdrawsAmount = 0;
+    double depositsAmount = 0;
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
       pendingTransfers.forEach((poolTransaction) {
         var amount = (getTokenAmountBigInt(
@@ -404,7 +406,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             getFeeValue(poolTransaction.fee, int.parse(poolTransaction.amount))
                     .toDouble() /
                 pow(10, widget.arguments.account.token.decimals);
-        poolAmount = poolAmount + amount + fee;
+        withdrawsAmount = withdrawsAmount + amount + fee;
       });
       pendingExits.forEach((poolTransaction) {
         var amount = (getTokenAmountBigInt(
@@ -417,28 +419,41 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             getFeeValue(poolTransaction.fee, int.parse(poolTransaction.amount))
                     .toDouble() /
                 pow(10, widget.arguments.account.token.decimals);
-        poolAmount = poolAmount + amount + fee;
+        withdrawsAmount = withdrawsAmount + amount + fee;
+      });
+      pendingDeposits.forEach((pendingDeposit) {
+        var amount = pendingDeposit['amount'] /
+            pow(10, widget.arguments.account.token.decimals);
+        depositsAmount = depositsAmount + amount;
       });
     } else {
       pendingTransfers.forEach((pendingTransfer) {
         var amount = pendingTransfer['amount'] /
             pow(10, widget.arguments.account.token.decimals);
+
         if (widget.arguments.account.token.id == 0) {
           //rest fees
           //var fee = pendingTransfer['fee'] / pow(10, 3);
         }
         var fee = 0;
-        poolAmount = poolAmount + amount + fee;
+        withdrawsAmount = withdrawsAmount + amount + fee;
+      });
+      pendingDeposits.forEach((pendingDeposit) {
+        historyTransactions.firstWhere(
+            (forgedTransaction) =>
+                forgedTransaction['txHash'] == pendingDeposit['hash'],
+            orElse: () {
+          var amount = pendingDeposit['amount'] /
+              pow(10, widget.arguments.account.token.decimals);
+          withdrawsAmount = withdrawsAmount + amount;
+        });
       });
     }
-    pendingDeposits.forEach((pendingDeposit) {
-      var amount = pendingDeposit['amount'] /
-          pow(10, widget.arguments.account.token.decimals);
-      poolAmount = poolAmount + amount;
-    });
+
     debugPrint("balance amount:" + balanceAmount.toString());
-    debugPrint("pool amount:" + poolAmount.toString());
-    resultAmount = balanceAmount - poolAmount;
+    debugPrint("withdraws amount:" + withdrawsAmount.toString());
+    debugPrint("deposits amount:" + depositsAmount.toString());
+    resultAmount = balanceAmount - withdrawsAmount + depositsAmount;
 
     if (resultAmount.isNegative) {
       resultAmount = 0.0;
@@ -1170,7 +1185,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         transactions.addAll(pendingTransfersTxs);
         transactions.addAll(pendingDepositsTxs);
       }
-      List<dynamic> historyTransactions = await fetchHistoryTransactions();
+      historyTransactions = await fetchHistoryTransactions();
       final filteredTransactions = filterExitsFromHistoryTransactions(
         historyTransactions,
         exits,
@@ -1227,15 +1242,17 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             fromHezEthereumAddress: pendingDeposit['fromHezEthereumAddress'],
             timestamp: pendingDeposit['timestamp']);
       }).toList();
-      List<dynamic> historyTransactions = await fetchHistoryTransactions();
+      historyTransactions = await fetchHistoryTransactions();
+      List<dynamic> fullTxs = List.from(historyTransactions);
       if (transactions.isEmpty) {
         for (ForgedTransaction forgedTransaction in pendingDepositsTxs) {
-          historyTransactions.firstWhere(
-              (element) => element['txHash'] == forgedTransaction.hash,
-              orElse: () => transactions.add(forgedTransaction));
+          fullTxs.removeWhere(
+              (element) => element['txHash'] == forgedTransaction.hash);
+          transactions.add(forgedTransaction);
+          //orElse: () => transactions.add(forgedTransaction));
         }
         for (ForgedTransaction forgedTransaction in pendingTransfersTxs) {
-          historyTransactions.firstWhere(
+          fullTxs.firstWhere(
               (element) => element['txHash'] == forgedTransaction.hash,
               orElse: () => transactions.add(forgedTransaction));
         }
@@ -1243,7 +1260,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       widget.arguments.account = await fetchAccount();
       setState(() {
         pendingItems = 0;
-        transactions.addAll(historyTransactions);
+        transactions.addAll(fullTxs);
         _isLoading = false;
       });
     }

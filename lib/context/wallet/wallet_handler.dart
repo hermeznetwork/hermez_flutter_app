@@ -507,34 +507,36 @@ class WalletHandler {
               "Hermez");
           final contractEvent = hermezContract.event('L1UserTxEvent');
           for (var log in receipt.logs) {
-            List<String> topics = List<String>.from(
-                log['topics'].map((topic) => topic.toString()));
-            try {
-              List l1UserTxEvent =
-                  contractEvent.decodeResults(topics, log['data']);
-              final transactionId =
-                  getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
+            if (log['address'] == hermezContract.address.hex) {
+              try {
+                List<String> topics = List<String>.from(
+                    log['topics'].map((topic) => topic.toString()));
+                List l1UserTxEvent =
+                    contractEvent.decodeResults(topics, log['data']);
+                final transactionId =
+                    getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
 
-              if (pendingForceExit['id'] == null) {
-                pendingForceExit['id'] = transactionId;
-                accountPendingForceExits[accountPendingForceExits.indexWhere(
-                        (element) =>
-                            element['hash'] == pendingForceExit['hash'])] =
-                    pendingForceExit;
-                _configurationService.updatePendingForceExitId(
-                    transactionHash, transactionId);
-              }
+                if (pendingForceExit['id'] == null) {
+                  pendingForceExit['id'] = transactionId;
+                  accountPendingForceExits[accountPendingForceExits.indexWhere(
+                          (element) =>
+                              element['hash'] == pendingForceExit['hash'])] =
+                      pendingForceExit;
+                  _configurationService.updatePendingForceExitId(
+                      transactionHash, transactionId);
+                }
 
-              final forgedTransaction =
-                  await getHistoryTransaction(transactionId);
-              if (forgedTransaction != null &&
-                  forgedTransaction.batchNum != null) {
-                forceExitIds.add(transactionHash);
-                _configurationService.removePendingForceExit(transactionHash,
-                    name: 'hash');
+                final forgedTransaction =
+                    await getHistoryTransaction(transactionId);
+                if (forgedTransaction != null &&
+                    forgedTransaction.batchNum != null) {
+                  forceExitIds.add(transactionHash);
+                  _configurationService.removePendingForceExit(transactionHash,
+                      name: 'hash');
+                }
+              } catch (e) {
+                print(e.toString());
               }
-            } catch (e) {
-              print(e.toString());
             }
           }
         }
@@ -569,11 +571,11 @@ class WalletHandler {
             accountPendingDeposits[accountPendingDeposits.indexWhere(
                     (element) => element['hash'] == pendingDeposit['hash'])] =
                 pendingDeposit;
-            await _configurationService.updatePendingDepositId(
+            _configurationService.updatePendingDepositId(
                 transactionHash, transactionHash);
           }
           depositIds.add(transactionHash);
-          await _configurationService.removePendingDeposit(transactionHash);
+          _configurationService.removePendingDeposit(transactionHash);
         } else {
           final hermezContract = await ContractParser.fromAssets(
               'HermezABI.json',
@@ -581,33 +583,35 @@ class WalletHandler {
               "Hermez");
           final contractEvent = hermezContract.event('L1UserTxEvent');
           for (var log in receipt.logs) {
-            List<String> topics = List<String>.from(
-                log['topics'].map((topic) => topic.toString()));
-            try {
-              List l1UserTxEvent =
-                  contractEvent.decodeResults(topics, log['data']);
-              final transactionId =
-                  getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
+            if (log['address'] == hermezContract.address.hex) {
+              try {
+                List<String> topics = List<String>.from(
+                    log['topics'].map((topic) => topic.toString()));
+                List l1UserTxEvent =
+                    contractEvent.decodeResults(topics, log['data']);
+                final transactionId =
+                    getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
 
-              if (pendingDeposit['id'] == null) {
-                pendingDeposit['id'] = transactionId;
-                accountPendingDeposits[accountPendingDeposits.indexWhere(
-                        (element) =>
-                            element['hash'] == pendingDeposit['hash'])] =
-                    pendingDeposit;
-                _configurationService.updatePendingDepositId(
-                    transactionHash, transactionId);
-              }
+                if (pendingDeposit['id'] == null) {
+                  pendingDeposit['id'] = transactionId;
+                  accountPendingDeposits[accountPendingDeposits.indexWhere(
+                          (element) =>
+                              element['hash'] == pendingDeposit['hash'])] =
+                      pendingDeposit;
+                  _configurationService.updatePendingDepositId(
+                      transactionHash, transactionId);
+                }
 
-              final forgedTransaction =
-                  await getHistoryTransaction(transactionId);
-              if (forgedTransaction != null &&
-                  forgedTransaction.batchNum != null) {
-                depositIds.add(transactionHash);
-                _configurationService.removePendingDeposit(transactionId);
+                final forgedTransaction =
+                    await getHistoryTransaction(transactionId);
+                if (forgedTransaction != null &&
+                    forgedTransaction.batchNum != null) {
+                  depositIds.add(transactionHash);
+                  _configurationService.removePendingDeposit(transactionHash);
+                }
+              } catch (e) {
+                print(e.toString());
               }
-            } catch (e) {
-              print(e.toString());
             }
           }
         }
