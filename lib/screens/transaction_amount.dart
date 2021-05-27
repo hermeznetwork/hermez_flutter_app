@@ -25,6 +25,7 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/recommended_fee.dart';
 import 'package:hermez_plugin/model/state_response.dart';
 import 'package:hermez_plugin/model/token.dart';
+import 'package:web3dart/crypto.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'account_selector.dart';
@@ -1628,9 +1629,15 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   Future<bool> isAddressValid(String address) async {
     return address.isEmpty ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            AddressUtils.isValidEthereumAddress(address)) ||
+            AddressUtils.isValidEthereumAddress(address) &&
+            strip0x(widget.arguments.store.state.ethereumAddress
+                    .toLowerCase()) !=
+                strip0x(address.toLowerCase())) ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL2 &&
             isHermezEthereumAddress(address) &&
+            getHermezAddress(widget.arguments.store.state.ethereumAddress)
+                    .toLowerCase() !=
+                address.toLowerCase() &&
             await isCreatedHermezAccount(address));
   }
 
