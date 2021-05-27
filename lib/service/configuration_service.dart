@@ -10,8 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
-  Future<void> setupDone(bool value);
-  Future<void> backupDone(bool value);
   Future<void> setPrivateKey(String value);
   Future<void> setHermezPrivateKey(String value);
   Future<void> setBabyJubJubHex(String value);
@@ -23,6 +21,10 @@ abstract class IConfigurationService {
   Future<void> setPasscode(String value);
   Future<void> setBiometricsFingerprint(bool value);
   Future<void> setBiometricsFace(bool value);
+  Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value);
+  Future<void> setLevelSelected(TransactionLevel value);
+  Future<void> setupDone(bool value);
+  Future<void> backupDone(bool value);
   Future<String> getMnemonic();
   Future<String> getPrivateKey();
   Future<String> getHermezPrivateKey();
@@ -35,16 +37,19 @@ abstract class IConfigurationService {
   Future<String> getPasscode();
   bool getBiometricsFingerprint();
   bool getBiometricsFace();
+  double getExchangeRatio(String currency);
+  Future<TransactionLevel> getLevelSelected();
   bool didSetupWallet();
   bool didBackupWallet();
-  Future<bool> setLatestNonce(int value);
-  int getLatestNonce();
+  /*Future<bool> setLatestNonce(int value);
+  int getLatestNonce();*/
   dynamic getPendingWithdraw(String pendingWithdrawId);
   void addPendingWithdraw(dynamic pendingWithdraw);
   void removePendingWithdraw(String value, {String name = 'id'});
   dynamic getPendingDelayedWithdraw(String pendingWithdrawId);
   void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
   void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
+  // L1 Deposits
   void addPendingDeposit(dynamic pendingDeposit);
   void removePendingDeposit(String pendingDepositId);
   // L1 Transfers
@@ -124,6 +129,7 @@ class ConfigurationService implements IConfigurationService {
     await _preferences.setBool('biometrics_face', value);
   }
 
+  @override
   Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value) async {
     List<String> exchangeRatios = List.empty(growable: true);
     value.forEach(
@@ -258,14 +264,14 @@ class ConfigurationService implements IConfigurationService {
     return _preferences.getBool("didBackupWallet") ?? false;
   }
 
-  @override
+  /*@override
   int getLatestNonce() {
     return _preferences.getInt("latest_nonce") ?? 1;
   }
 
   Future<bool> setLatestNonce(int value) async {
     return await _preferences.setInt("latest_nonce", value);
-  }
+  }*/
 
   /// Gets a pendingWithdraw from the pendingWithdraw pool
   /// @param {string} pendingWithdrawId - The pendingWithdraw id

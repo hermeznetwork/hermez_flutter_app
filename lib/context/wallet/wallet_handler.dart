@@ -1070,7 +1070,8 @@ class WalletHandler {
     await _configurationService.setPasscode("");
     await _configurationService.setBiometricsFingerprint(false);
     await _configurationService.setBiometricsFace(false);
-    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.EUR);
+    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.USD);
+    await _configurationService.setDefaultFee(WalletDefaultFee.AVERAGE);
     await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
     await _configurationService.setupDone(false);
     await _configurationService.backupDone(false);

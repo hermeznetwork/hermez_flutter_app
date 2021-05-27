@@ -402,10 +402,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     widget.arguments.account.token.decimals)
                 .toDouble() /
             pow(10, widget.arguments.account.token.decimals));
-        var fee =
-            getFeeValue(poolTransaction.fee, int.parse(poolTransaction.amount))
-                    .toDouble() /
-                pow(10, widget.arguments.account.token.decimals);
+        var fee = getFeeValue(
+                    poolTransaction.fee, double.parse(poolTransaction.amount))
+                .toDouble() /
+            pow(10, widget.arguments.account.token.decimals);
         withdrawsAmount = withdrawsAmount + amount + fee;
       });
       pendingExits.forEach((poolTransaction) {
@@ -415,10 +415,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     widget.arguments.account.token.decimals)
                 .toDouble() /
             pow(10, widget.arguments.account.token.decimals));
-        var fee =
-            getFeeValue(poolTransaction.fee, int.parse(poolTransaction.amount))
-                    .toDouble() /
-                pow(10, widget.arguments.account.token.decimals);
+        var fee = getFeeValue(
+                    poolTransaction.fee, double.parse(poolTransaction.amount))
+                .toDouble() /
+            pow(10, widget.arguments.account.token.decimals);
         withdrawsAmount = withdrawsAmount + amount + fee;
       });
       pendingDeposits.forEach((pendingDeposit) {

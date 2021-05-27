@@ -55,7 +55,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..tokensBalance = BuiltMap<String, BigInt>().toMap()
     ..ethBalance = BigInt.from(0)
     ..ethUSDPrice = 0
-    ..defaultCurrency = WalletDefaultCurrency.EUR
+    ..defaultCurrency = WalletDefaultCurrency.USD
     ..defaultFee = WalletDefaultFee.AVERAGE
     ..exchangeRatio = 0.0
     ..txLevel = TransactionLevel.LEVEL1
