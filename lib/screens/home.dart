@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
+import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode_scanner.dart';
 import 'package:hermez/screens/settings.dart';
 import 'package:hermez/screens/settings_currency.dart';
@@ -72,6 +73,9 @@ class _HomePageState extends State<HomePage> {
             page = SettingsDetailsPage(
                 arguments: settings.arguments,
                 configurationService: configurationService);
+          } else if (settings.name == 'account_selector') {
+            final AccountSelectorArguments args = settings.arguments;
+            page = AccountSelectorPage(arguments: args);
           } else if (settings.name == 'currency_selector') {
             page = SettingsCurrencyPage(store: widget.arguments.store);
           } else if (settings.name == 'fee_selector') {
@@ -247,6 +251,9 @@ class _HomePageState extends State<HomePage> {
                     page = SettingsDetailsPage(
                         arguments: settings.arguments,
                         configurationService: configurationService);
+                  } else if (settings.name == 'account_selector') {
+                    final AccountSelectorArguments args = settings.arguments;
+                    page = AccountSelectorPage(arguments: args);
                   } else if (settings.name == 'currency_selector') {
                     page = SettingsCurrencyPage(store: widget.arguments.store);
                   } else if (settings.name == 'fee_selector') {

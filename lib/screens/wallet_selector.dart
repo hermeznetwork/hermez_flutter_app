@@ -12,6 +12,7 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:intl/intl.dart';
 
 import '../context/wallet/wallet_handler.dart';
+import 'account_selector.dart';
 import 'transaction_amount.dart';
 
 // You can pass any object to the arguments parameter.
@@ -264,7 +265,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30)),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             if (!isLoading) {
                               if ((l1Accounts == null ||
                                       l1Accounts.length == 0) &&
@@ -278,65 +279,95 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   l1Accounts.length > 0) {
                                 widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL1);
-                                Account account;
+                                var selectedAccount;
                                 if (l1Accounts.length == 1) {
-                                  account = l1Accounts[0];
+                                  selectedAccount = l1Accounts[0];
+                                } else {
+                                  selectedAccount = await Navigator.pushNamed(
+                                      widget.arguments.parentContext,
+                                      "/account_selector",
+                                      arguments: AccountSelectorArguments(
+                                          TransactionLevel.LEVEL1,
+                                          TransactionType.DEPOSIT,
+                                          widget.arguments.store));
                                 }
-                                Navigator.pushNamed(
-                                    widget.arguments.parentContext,
-                                    "/transaction_amount",
-                                    arguments: TransactionAmountArguments(
-                                      widget.arguments.store,
-                                      TransactionLevel.LEVEL1,
-                                      TransactionType.DEPOSIT,
-                                      account: account,
-                                      allowChangeLevel: true,
-                                    )).then((value) {
-                                  setState(() {
-                                    l1Accounts = null;
-                                    l2Accounts = null;
+                                if (selectedAccount != null) {
+                                  Navigator.pushNamed(
+                                      widget.arguments.parentContext,
+                                      "/transaction_amount",
+                                      arguments: TransactionAmountArguments(
+                                        widget.arguments.store,
+                                        TransactionLevel.LEVEL1,
+                                        TransactionType.DEPOSIT,
+                                        account: selectedAccount,
+                                        allowChangeLevel: true,
+                                      )).then((value) {
+                                    setState(() {
+                                      l1Accounts = null;
+                                      l2Accounts = null;
+                                    });
                                   });
-                                });
+                                }
                               } else if (l2Accounts != null &&
                                   l2Accounts.length > 0) {
                                 widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL2);
-                                Account account;
+                                var selectedAccount;
                                 if (l2Accounts.length == 1) {
-                                  account = l2Accounts[0];
+                                  selectedAccount = l2Accounts[0];
+                                } else {
+                                  selectedAccount = await Navigator.of(
+                                          widget.arguments.parentContext)
+                                      .pushNamed("/account_selector",
+                                          arguments: AccountSelectorArguments(
+                                              TransactionLevel.LEVEL2,
+                                              TransactionType.EXIT,
+                                              widget.arguments.store));
                                 }
-                                Navigator.pushNamed(
-                                    widget.arguments.parentContext,
-                                    "/transaction_amount",
-                                    arguments: TransactionAmountArguments(
-                                      widget.arguments.store,
-                                      TransactionLevel.LEVEL2,
-                                      TransactionType.EXIT,
-                                      account: account,
-                                      allowChangeLevel: true,
-                                    )).then((value) {
-                                  setState(() {
-                                    l1Accounts = null;
-                                    l2Accounts = null;
+                                if (selectedAccount != null) {
+                                  Navigator.pushNamed(
+                                      widget.arguments.parentContext,
+                                      "/transaction_amount",
+                                      arguments: TransactionAmountArguments(
+                                        widget.arguments.store,
+                                        TransactionLevel.LEVEL2,
+                                        TransactionType.EXIT,
+                                        account: selectedAccount,
+                                        allowChangeLevel: true,
+                                      )).then((value) {
+                                    setState(() {
+                                      l1Accounts = null;
+                                      l2Accounts = null;
+                                    });
                                   });
-                                });
+                                }
                               } else {
                                 widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL1);
-                                Navigator.pushNamed(
-                                    widget.arguments.parentContext,
-                                    "/transaction_amount",
-                                    arguments: TransactionAmountArguments(
-                                      widget.arguments.store,
-                                      TransactionLevel.LEVEL1,
-                                      TransactionType.DEPOSIT,
-                                      allowChangeLevel: true,
-                                    )).then((value) {
-                                  setState(() {
-                                    l1Accounts = null;
-                                    l2Accounts = null;
+                                final selectedAccount =
+                                    await Navigator.of(context).pushNamed(
+                                        "/account_selector",
+                                        arguments: AccountSelectorArguments(
+                                            TransactionLevel.LEVEL1,
+                                            TransactionType.DEPOSIT,
+                                            widget.arguments.store));
+                                if (selectedAccount != null) {
+                                  Navigator.pushNamed(
+                                      widget.arguments.parentContext,
+                                      "/transaction_amount",
+                                      arguments: TransactionAmountArguments(
+                                        widget.arguments.store,
+                                        TransactionLevel.LEVEL1,
+                                        TransactionType.DEPOSIT,
+                                        account: selectedAccount,
+                                        allowChangeLevel: true,
+                                      )).then((value) {
+                                    setState(() {
+                                      l1Accounts = null;
+                                      l2Accounts = null;
+                                    });
                                   });
-                                });
+                                }
                               }
                             }
                           },

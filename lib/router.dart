@@ -168,23 +168,25 @@ Map<String, WidgetBuilder> getRoutes(context) {
     //'/amount': (BuildContext context) => AmountPage(),
     /*'/receiver': (BuildContext context) =>
         ReceiverPage(arguments: ModalRoute.of(context).settings.arguments),*/
-    '/account_selector': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
+    '/transaction_amount': (BuildContext context) => TransactionAmountPage(
+        arguments: ModalRoute.of(context).settings.arguments),
+    '/account_selector': (BuildContext context) =>
+        /*var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())
-        return WalletProvider(builder: (context, store) {
-          return AccountSelectorPage(ModalRoute.of(context).settings.arguments);
-        });
+        return WalletProvider(builder: (context, store) {*/
+        AccountSelectorPage(
+            arguments: ModalRoute.of(context).settings.arguments),
+    /*});
       return WalletSetupProvider(builder: (context, store) {
         return IntroPage();
       });
-    },
+    },*/
     /*'/transfer': (BuildContext context) => WalletTransferProvider(
           builder: (context, store) {
             return WalletTransferPage(title: "Send Tokens");
           },
         ),*/
-    '/transaction_amount': (BuildContext context) => TransactionAmountPage(
-        arguments: ModalRoute.of(context).settings.arguments),
+
     '/transaction_details': (BuildContext context) => WalletTransferProvider(
           builder: (context, store) {
             return TransactionDetailsPage(

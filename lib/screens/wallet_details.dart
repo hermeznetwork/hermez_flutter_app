@@ -844,6 +844,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               });
 
               return AccountRow(
+                  account,
+                  null,
                   account.token.name,
                   account.token.symbol,
                   currency != "USD"
@@ -856,7 +858,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   false,
                   true,
                   isPendingDeposit,
-                  false, (token, amount) async {
+                  false, (Account account, Token token, tokenId, amount) async {
                 Navigator.of(context)
                     .pushNamed("account_details",
                         arguments: AccountDetailsArguments(

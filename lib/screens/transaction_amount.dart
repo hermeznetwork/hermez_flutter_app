@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:after_layout/after_layout.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,7 +40,7 @@ enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 class TransactionAmountArguments {
   TransactionLevel txLevel;
   TransactionType transactionType;
-  Account account;
+  final Account account;
   Token token;
   final double amount;
   final String addressTo;
@@ -66,7 +65,8 @@ class TransactionAmountPage extends StatefulWidget {
 }
 
 class _TransactionAmountPageState extends State<TransactionAmountPage>
-    with AfterLayoutMixin<TransactionAmountPage> {
+/*with AfterLayoutMixin<TransactionAmountPage>*/ {
+  Account selectedAccount;
   bool needRefresh = true;
   bool amountIsValid = true;
   bool addressIsValid = true;
@@ -86,34 +86,6 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   final TextEditingController addressController = TextEditingController();
 
   @override
-  Future<void> afterFirstLayout(BuildContext context) {
-    if (widget.arguments.transactionType != TransactionType.RECEIVE &&
-        widget.arguments.account == null) {
-      Navigator.of(context).pushNamed("/account_selector",
-          arguments: AccountSelectorArguments(
-              widget.arguments.txLevel,
-              widget.arguments.transactionType,
-              widget.arguments.store, onAccountSelected: (selectedAccount) {
-            setState(() {
-              amountController.clear();
-              needRefresh = true;
-              if (selectedAccount != null) {
-                widget.arguments.account = selectedAccount;
-              }
-            });
-          }, onTokenSelected: (selectedToken) {
-            setState(() {
-              amountController.clear();
-              needRefresh = true;
-              if (selectedToken != null) {
-                widget.arguments.token = selectedToken;
-              }
-            });
-          }));
-    }
-  }
-
-  @override
   void initState() {
     super.initState();
     defaultCurrencySelected = false;
@@ -131,6 +103,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     showEstimatedFees = false;
     selectedFeeSpeed = widget.arguments.store.state.defaultFee;
     selectedWithdrawFeeSpeed = widget.arguments.store.state.defaultFee;
+    selectedAccount = widget.arguments.account;
   }
 
   @override
@@ -145,7 +118,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: getAppBar(),
-      body: _buildAmountForm(),
+      body: _buildAmountForm(context),
     );
   }
 
@@ -222,7 +195,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     );
   }
 
-  FutureBuilder _buildAmountForm() {
+  FutureBuilder _buildAmountForm(BuildContext parentContext) {
     return FutureBuilder(
       future: fetchData(),
       builder: (context, snapshot) {
@@ -260,10 +233,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                               : double.parse((double.parse(
                                                           amountController
                                                               .value.text) /
-                                                      (widget.arguments.account !=
-                                                              null
-                                                          ? widget.arguments
-                                                              .account.token.USD
+                                                      (selectedAccount != null
+                                                          ? selectedAccount
+                                                              .token.USD
                                                           : widget.arguments
                                                               .token.USD) *
                                                       (currency != "USD"
@@ -274,15 +246,15 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                               .exchangeRatio
                                                           : 1))
                                                   .toStringAsFixed(6)),
-                                          widget.arguments.account != null
-                                              ? widget.arguments.account.token
+                                          selectedAccount != null
+                                              ? selectedAccount.token
                                               : widget.arguments.token,
                                           estimatedFee.toDouble(),
                                           widget.arguments.txLevel ==
                                                   TransactionLevel.LEVEL1
                                               ? ethereumToken
-                                              : widget.arguments.account != null
-                                                  ? widget.arguments.account.token
+                                              : selectedAccount != null
+                                                  ? selectedAccount.token
                                                   : widget.arguments.token,
                                           addressController.value.text,
                                           gasLimit.toInt(),
@@ -314,7 +286,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           ),
                         ),
                       ),
-                      widget.arguments.account != null
+                      selectedAccount != null
                           ? Container(
                               alignment: Alignment.center,
                               margin: EdgeInsets.only(top: 24.0),
@@ -442,7 +414,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           : Container(),
                       showEstimatedFees &&
                               needRefresh == false &&
-                              widget.arguments.account != null
+                              selectedAccount != null
                           ? buildFeesList()
                           : Container(),
                     ],
@@ -474,59 +446,59 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                           TransactionType.DEPOSIT;
                                     }
                                     defaultCurrencySelected = true;
-                                    widget.arguments.account = null;
+                                    selectedAccount = null;
                                     amountController.clear();
                                   });
                                 }
                               : null,
                         )
                       : Container(),
-                  widget.arguments.account != null ||
-                          widget.arguments.token != null
+                  selectedAccount != null || widget.arguments.token != null
                       ? AccountRow(
-                          widget.arguments.account != null
-                              ? widget.arguments.account.token.name
+                          selectedAccount,
+                          widget.arguments.token,
+                          selectedAccount != null
+                              ? selectedAccount.token.name
                               : widget.arguments.token.name,
-                          widget.arguments.account != null
-                              ? widget.arguments.account.token.symbol
+                          selectedAccount != null
+                              ? selectedAccount.token.symbol
                               : widget.arguments.token.symbol,
                           currency != "USD"
-                              ? (widget.arguments.account != null
-                                      ? widget.arguments.account.token.USD
+                              ? (selectedAccount != null
+                                      ? selectedAccount.token.USD
                                       : widget.arguments.token.USD) *
                                   widget.arguments.store.state.exchangeRatio
-                              : widget.arguments.account != null
-                                  ? widget.arguments.account.token.USD
+                              : selectedAccount != null
+                                  ? selectedAccount.token.USD
                                   : widget.arguments.token.USD,
                           currency,
-                          widget.arguments.account != null
-                              ? double.parse(widget.arguments.account.balance) /
-                                  pow(10,
-                                      widget.arguments.account.token.decimals)
+                          selectedAccount != null
+                              ? double.parse(selectedAccount.balance) /
+                                  pow(10, selectedAccount.token.decimals)
                               : 0,
                           true,
                           defaultCurrencySelected,
                           false,
                           widget.arguments.token != null,
-                          (_, amount) async {
-                            Navigator.of(context).pushNamed("/account_selector",
-                                arguments: AccountSelectorArguments(
-                                    widget.arguments.txLevel,
-                                    widget.arguments.transactionType,
-                                    widget.arguments.store,
-                                    onAccountSelected: (selectedAccount) {
-                                  setState(() {
-                                    amountController.clear();
-                                    needRefresh = true;
-                                    widget.arguments.account = selectedAccount;
-                                  });
-                                }, onTokenSelected: (selectedToken) {
-                                  setState(() {
-                                    amountController.clear();
-                                    needRefresh = true;
-                                    widget.arguments.token = selectedToken;
-                                  });
-                                }));
+                          (account, token, _, amount) async {
+                            final account = await Navigator.of(parentContext)
+                                .pushNamed("/account_selector",
+                                    arguments: AccountSelectorArguments(
+                                      widget.arguments.txLevel,
+                                      widget.arguments.transactionType,
+                                      widget.arguments.store,
+                                    ));
+                            if (account != null) {
+                              setState(() {
+                                amountController.clear();
+                                needRefresh = true;
+                                if (account is Account) {
+                                  selectedAccount = account;
+                                } else if (account is Token) {
+                                  widget.arguments.token = account;
+                                }
+                              });
+                            }
                           },
                         )
                       : Container(
@@ -536,27 +508,24 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                 borderRadius: BorderRadius.circular(12.0),
                                 side:
                                     BorderSide(color: HermezColors.lightGrey)),
-                            onPressed: () {
-                              Navigator.of(context).pushNamed(
-                                  "/account_selector",
-                                  arguments: AccountSelectorArguments(
-                                      widget.arguments.txLevel,
-                                      widget.arguments.transactionType,
-                                      widget.arguments.store,
-                                      onAccountSelected: (selectedAccount) {
-                                    setState(() {
-                                      amountController.clear();
-                                      needRefresh = true;
-                                      widget.arguments.account =
-                                          selectedAccount;
-                                    });
-                                  }, onTokenSelected: (selectedToken) {
-                                    setState(() {
-                                      amountController.clear();
-                                      needRefresh = true;
-                                      widget.arguments.token = selectedToken;
-                                    });
-                                  }));
+                            onPressed: () async {
+                              final account = await Navigator.of(parentContext)
+                                  .pushNamed("/account_selector",
+                                      arguments: AccountSelectorArguments(
+                                          widget.arguments.txLevel,
+                                          widget.arguments.transactionType,
+                                          widget.arguments.store));
+                              if (account != null) {
+                                setState(() {
+                                  amountController.clear();
+                                  needRefresh = true;
+                                  if (account is Account) {
+                                    selectedAccount = account;
+                                  } else if (account is Token) {
+                                    widget.arguments.token = account;
+                                  }
+                                });
+                              }
                             },
                             padding: EdgeInsets.all(20.0),
                             color: HermezColors.lightGrey,
@@ -592,7 +561,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   TransactionType.EXIT) &&
                           enoughGas == false &&
                           !needRefresh &&
-                          widget.arguments.account != null
+                          selectedAccount != null
                       ? _buildNoGasRow()
                       : Container(),
                   _buildAmountRow(
@@ -697,7 +666,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             border: Border.all(
               color: (amountIsValid && enoughGas) ||
                       needRefresh ||
-                      widget.arguments.account == null
+                      selectedAccount == null
                   ? HermezColors.blueyGreyThree
                   : HermezColors.redError,
               width: 2,
@@ -711,11 +680,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                 Container(
                   child: Text(
                     defaultCurrencySelected ||
-                            widget.arguments.account == null &&
+                            selectedAccount == null &&
                                 widget.arguments.token == null
                         ? currency
-                        : widget.arguments.account != null
-                            ? widget.arguments.account.token.symbol
+                        : selectedAccount != null
+                            ? selectedAccount.token.symbol
                             : widget.arguments.token.symbol,
                     style: TextStyle(
                       color: HermezColors.black,
@@ -729,17 +698,19 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   margin: EdgeInsets.only(top: 10.0),
                   child: AmountInput(
                     onChanged: (value) {
+                      bool valid = false;
+                      if (value.isNotEmpty) {
+                        double amount = double.parse(value);
+                        valid = isAmountValid(amount.toString());
+                      } else {
+                        valid = isAmountValid('0');
+                      }
                       setState(() {
-                        if (value.isNotEmpty) {
-                          double amount = double.parse(value);
-                          amountIsValid = isAmountValid(amount.toString());
-                        } else {
-                          amountIsValid = isAmountValid('0');
-                        }
+                        amountIsValid = valid;
                         needRefresh = true;
                       });
                     },
-                    enabled: widget.arguments.account != null ||
+                    enabled: selectedAccount != null ||
                         widget.arguments.transactionType ==
                             TransactionType.RECEIVE,
                     controller: amountController,
@@ -747,13 +718,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   ),
                 ),
                 SizedBox(
-                  height: widget.arguments.account != null ||
-                          widget.arguments.token != null
-                      ? 16.0
-                      : 25,
+                  height:
+                      selectedAccount != null || widget.arguments.token != null
+                          ? 16.0
+                          : 25,
                 ),
-                widget.arguments.account != null ||
-                        widget.arguments.token != null
+                selectedAccount != null || widget.arguments.token != null
                     ? Divider(
                         color: HermezColors.blueyGreyThree,
                         height: 2,
@@ -764,7 +734,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      widget.arguments.account != null ||
+                      selectedAccount != null ||
                               widget.arguments.token != null &&
                                   widget.arguments.transactionType !=
                                       TransactionType.RECEIVE
@@ -823,8 +793,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               ),
                             )
                           : Container(),
-                      widget.arguments.account != null ||
-                              widget.arguments.token != null
+                      selectedAccount != null || widget.arguments.token != null
                           ? Expanded(
                               child: Container(
                                 height: 48,
@@ -839,7 +808,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                 ),
                                 child: FlatButton.icon(
                                   onPressed: () {
-                                    if (widget.arguments.account != null ||
+                                    if (selectedAccount != null ||
                                         widget.arguments.token != null) {
                                       setState(() {
                                         amountController.clear();
@@ -854,7 +823,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   ),
                                   label: Text(
                                     defaultCurrencySelected
-                                        ? widget.arguments.account != null
+                                        ? selectedAccount != null
                                             ? widget
                                                 .arguments.account.token.symbol
                                             : widget.arguments.token.symbol
@@ -884,7 +853,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                             TransactionType.FORCEEXIT) &&
                     !enoughGas) ||
                 needRefresh ||
-                widget.arguments.account == null
+                selectedAccount == null
             ? SizedBox(
                 height: 40,
               )
@@ -913,7 +882,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                       ),
                     ),
                     Text(
-                      (enoughGas || widget.arguments.account.token.id == 0)
+                      (enoughGas || selectedAccount.token.id == 0)
                           ? 'You don’t have enough funds.'
                           : 'Insufficient ETH to cover gas fee.',
                       style: TextStyle(
@@ -1124,7 +1093,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             Token token;
             if (widget.arguments.transactionType == TransactionType.EXIT) {
               title = "Hermez fee";
-              token = widget.arguments.account.token;
+              token = selectedAccount.token;
             } else if (widget.arguments.transactionType ==
                 TransactionType.FORCEEXIT) {
               title = "Ethereum fee";
@@ -1342,8 +1311,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       } else if ((widget.arguments.transactionType == TransactionType.EXIT ||
               widget.arguments.transactionType == TransactionType.FORCEEXIT) &&
           address.isEmpty) {
-        addressTo =
-            getEthereumAddress(widget.arguments.account.hezEthereumAddress);
+        addressTo = getEthereumAddress(selectedAccount.hezEthereumAddress);
         withdrawEstimatedFee =
             (withdrawGasLimit * getGasPrice(selectedWithdrawFeeSpeed))
                 .toDouble();
@@ -1356,10 +1324,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   transactionType: widget.arguments.transactionType,
                   transactionLevel: widget.arguments.txLevel,
                   status: TransactionStatus.DRAFT,
-                  account: widget.arguments.account,
-                  token: widget.arguments.account.token,
+                  account: selectedAccount,
+                  token: selectedAccount.token,
                   amount: amount,
-                  addressFrom: widget.arguments.account.hezEthereumAddress,
+                  addressFrom: selectedAccount.hezEthereumAddress,
                   addressTo: addressTo,
                   fee: fee,
                   withdrawEstimatedFee: withdrawEstimatedFee,
@@ -1392,18 +1360,17 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       gasPriceResponse = await widget.arguments.store.getGasPrice();
       ethereumToken = await getEthereumToken();
       ethereumAccount = await getEthereumAccount();
-      if (widget.arguments.account != null) {
+      if (selectedAccount != null) {
         BigInt amountToEstimate = BigInt.one;
         gasLimit = await widget.arguments.store
-            .forceExitGasLimit(amountToEstimate, widget.arguments.account);
+            .forceExitGasLimit(amountToEstimate, selectedAccount);
       }
       gasPrice = getGasPrice(selectedFeeSpeed);
 
       // fee l1 (withdraw)
       withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-      if (widget.arguments.account != null &&
-          widget.arguments.account.token.id != 0) {
+      if (selectedAccount != null && selectedAccount.token.id != 0) {
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
       }
 
@@ -1413,12 +1380,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           (gasLimit * gasPrice) + (withdrawGasLimit * withdrawGasPrice));
 
       double amount = 0;
-      if (widget.arguments.account != null) {
+      if (selectedAccount != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  widget.arguments.account.token.USD;
+                  selectedAccount.token.USD;
         }
       }
       amountIsValid =
@@ -1432,30 +1399,29 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       ethereumAccount = await getEthereumAccount();
       withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-      if (widget.arguments.account != null &&
-          widget.arguments.account.token.id != 0) {
+      if (selectedAccount != null && selectedAccount.token.id != 0) {
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
       }
 
       // fee l2
       gasLimit = BigInt.zero;
-      if (widget.arguments.account != null) {
+      if (selectedAccount != null) {
         StateResponse state = await widget.arguments.store.getState();
         RecommendedFee fees = state.recommendedFee;
         gasLimit = BigInt.from(fees.existingAccount /
-            widget.arguments.account.token.USD *
-            pow(10, widget.arguments.account.token.decimals));
+            selectedAccount.token.USD *
+            pow(10, selectedAccount.token.decimals));
       }
       gasPrice = getGasPrice(selectedWithdrawFeeSpeed);
       enoughGas = await isEnoughGas(withdrawGasLimit * gasPrice);
 
       double amount = 0;
-      if (widget.arguments.account != null) {
+      if (selectedAccount != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  widget.arguments.account.token.USD;
+                  selectedAccount.token.USD;
         }
       }
       amountIsValid =
@@ -1467,29 +1433,28 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         ethereumToken = await getEthereumToken();
         ethereumAccount = await getEthereumAccount();
         double amount = 0;
-        if (widget.arguments.account != null) {
+        if (selectedAccount != null) {
           if (amountController.value.text.isNotEmpty) {
             amount = !defaultCurrencySelected
                 ? double.parse(amountController.value.text)
                 : double.parse(amountController.value.text) /
-                    widget.arguments.account.token.USD;
+                    selectedAccount.token.USD;
           }
         }
         String from = widget.arguments.store.state.ethereumAddress;
         String to = getCurrentEnvironment().contracts['Hermez'];
         if (isEthereumAddress(addressController.value.text)) {
           to = addressController.value.text;
-        } else if (widget.arguments.account.token.id != 0) {
-          to = widget.arguments.account.token.ethereumAddress;
+        } else if (selectedAccount.token.id != 0) {
+          to = selectedAccount.token.ethereumAddress;
         }
         BigInt value = BigInt.one;
         if (amount > 0) {
-          value = BigInt.from(
-              amount * pow(10, widget.arguments.account.token.decimals));
+          value = BigInt.from(amount * pow(10, selectedAccount.token.decimals));
         }
 
         gasLimit = await widget.arguments.store
-            .getGasLimit(from, to, value, widget.arguments.account.token);
+            .getGasLimit(from, to, value, selectedAccount.token);
         gasPrice = getGasPrice(selectedFeeSpeed);
         enoughGas = await isEnoughGas(gasLimit * gasPrice);
         amountIsValid =
@@ -1497,22 +1462,22 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       } else {
         // calculate fee L2
         gasLimit = BigInt.zero;
-        if (widget.arguments.account != null) {
+        if (selectedAccount != null) {
           StateResponse state = await widget.arguments.store.getState();
           RecommendedFee fees = state.recommendedFee;
           gasLimit = BigInt.from(fees.existingAccount /
-              widget.arguments.account.token.USD *
-              pow(10, widget.arguments.account.token.decimals));
+              selectedAccount.token.USD *
+              pow(10, selectedAccount.token.decimals));
         }
         enoughGas = await isEnoughGas(gasLimit);
 
         double amount = 0;
-        if (widget.arguments.account != null) {
+        if (selectedAccount != null) {
           if (amountController.value.text.isNotEmpty) {
             amount = !defaultCurrencySelected
                 ? double.parse(amountController.value.text)
                 : double.parse(amountController.value.text) /
-                    widget.arguments.account.token.USD;
+                    selectedAccount.token.USD;
           }
         }
         amountIsValid =
@@ -1528,10 +1493,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       if (widget.arguments.transactionType == TransactionType.DEPOSIT) {
         String addressTo = getCurrentEnvironment().contracts['Hermez'];
         gasLimit = BigInt.zero;
-        if (widget.arguments.account != null) {
+        if (selectedAccount != null) {
           BigInt amountToEstimate = BigInt.one;
-          depositGasLimit = await widget.arguments.store.depositGasLimit(
-              amountToEstimate, widget.arguments.account.token);
+          depositGasLimit = await widget.arguments.store
+              .depositGasLimit(amountToEstimate, selectedAccount.token);
           depositGasLimit.forEach((String key, BigInt value) {
             gasLimit += value;
           });
@@ -1546,15 +1511,13 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         ethereumAccount = await getEthereumAccount();
         withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-        if (widget.arguments.account != null &&
-            widget.arguments.account.token.id != 0) {
+        if (selectedAccount != null && selectedAccount.token.id != 0) {
           withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
         }
       } else if (widget.arguments.transactionType == TransactionType.WITHDRAW) {
         gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-        if (widget.arguments.account != null &&
-            widget.arguments.account.token.id != 0) {
+        if (selectedAccount != null && selectedAccount.token.id != 0) {
           gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
         }
         gasPrice = getGasPrice(selectedFeeSpeed);
@@ -1562,12 +1525,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       }
 
       double amount = 0;
-      if (widget.arguments.account != null) {
+      if (selectedAccount != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  widget.arguments.account.token.USD;
+                  selectedAccount.token.USD;
         }
       }
       amountIsValid =
@@ -1654,12 +1617,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     BigInt estimatedFee = BigInt.zero;
     double balance = 1;
 
-    if (widget.arguments.account != null) {
+    if (selectedAccount != null) {
       if (widget.arguments.transactionType == TransactionType.DEPOSIT &&
-              widget.arguments.account.token.id == 0 ||
+              selectedAccount.token.id == 0 ||
           (widget.arguments.transactionType != TransactionType.DEPOSIT &&
               widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-              widget.arguments.account.token.id == 0) ||
+              selectedAccount.token.id == 0) ||
           widget.arguments.transactionType == TransactionType.EXIT ||
           (widget.arguments.transactionType == TransactionType.SEND &&
               widget.arguments.txLevel == TransactionLevel.LEVEL2)) {
@@ -1671,38 +1634,38 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           .split('.')
           .last;
       double currencyValue = 0;
-      if (widget.arguments.account != null) {
+      if (selectedAccount != null) {
         currencyValue = defaultCurrencySelected
-            ? widget.arguments.account.token.USD *
+            ? selectedAccount.token.USD *
                 (currency != 'USD'
                     ? widget.arguments.store.state.exchangeRatio
                     : 1)
             : 1;
 
-        balance = double.parse((double.parse(widget.arguments.account.balance) /
-                pow(10, widget.arguments.account.token.decimals) *
+        balance = double.parse((double.parse(selectedAccount.balance) /
+                pow(10, selectedAccount.token.decimals) *
                 currencyValue)
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
 
         amount = double.parse((double.parse(value) +
                 (currencyValue *
                     estimatedFee.toDouble() /
-                    pow(10, widget.arguments.account.token.decimals)))
+                    pow(10, selectedAccount.token.decimals)))
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
       }
     }
     return value.isEmpty ||
-        (widget.arguments.account != null ? amount <= balance : true);
+        (selectedAccount != null ? amount <= balance : true);
   }
 
   double getMaxAmount() {
     double amount = 0;
     BigInt estimatedFee = BigInt.zero;
     if (widget.arguments.transactionType == TransactionType.DEPOSIT &&
-            widget.arguments.account.token.id == 0 ||
+            selectedAccount.token.id == 0 ||
         (widget.arguments.transactionType != TransactionType.DEPOSIT &&
             widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            widget.arguments.account.token.id == 0) ||
+            selectedAccount.token.id == 0) ||
         widget.arguments.transactionType == TransactionType.EXIT ||
         (widget.arguments.transactionType == TransactionType.SEND &&
             widget.arguments.txLevel == TransactionLevel.LEVEL2)) {
@@ -1711,24 +1674,23 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
     final String currency =
         widget.arguments.store.state.defaultCurrency.toString().split('.').last;
-    if (widget.arguments.account != null) {
+    if (selectedAccount != null) {
       double currencyValue = defaultCurrencySelected
-          ? widget.arguments.account.token.USD *
+          ? selectedAccount.token.USD *
               (currency != 'USD'
                   ? widget.arguments.store.state.exchangeRatio
                   : 1)
           : 1;
 
-      double balance = double.parse(
-          (double.parse(widget.arguments.account.balance) /
-                  pow(10, widget.arguments.account.token.decimals) *
-                  currencyValue)
-              .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
+      double balance = double.parse((double.parse(selectedAccount.balance) /
+              pow(10, selectedAccount.token.decimals) *
+              currencyValue)
+          .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
 
       amount = double.parse((balance -
               (currencyValue *
                   estimatedFee.toDouble() /
-                  pow(10, widget.arguments.account.token.decimals)))
+                  pow(10, selectedAccount.token.decimals)))
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
     }
     if (amount < 0) {
@@ -1792,7 +1754,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   String getFeeText(ConnectionState connectionState) {
-    if (widget.arguments.account == null ||
+    if (selectedAccount == null ||
         widget.arguments.transactionType == TransactionType.RECEIVE) {
       return "";
     } else {
@@ -1841,7 +1803,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       // calculate fee l2 (exit) and l1 (withdraw)
 
       // fee l2 (exit)
-      Token token = widget.arguments.account.token;
+      Token token = selectedAccount.token;
       double exitFee = estimatedFee.toDouble() /
           pow(10, token.decimals) *
           (token.USD *
@@ -1868,7 +1830,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       if (widget.arguments.txLevel == TransactionLevel.LEVEL1) {
         token = ethereumToken;
       } else {
-        token = widget.arguments.account.token;
+        token = selectedAccount.token;
       }
       String feeSend = EthAmountFormatter.formatAmount(
           estimatedFee.toDouble() /

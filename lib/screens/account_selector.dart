@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
@@ -17,32 +16,35 @@ class AccountSelectorArguments {
   final TransactionLevel txLevel;
   final TransactionType transactionType;
   final WalletHandler store;
-  final void Function(Account selectedAccount) onAccountSelected;
-  final void Function(Token selectedToken) onTokenSelected;
 
-  AccountSelectorArguments(this.txLevel, this.transactionType, this.store,
-      {this.onAccountSelected, this.onTokenSelected});
+  AccountSelectorArguments(this.txLevel, this.transactionType, this.store);
 }
 
-class AccountSelectorPage extends HookWidget {
-  AccountSelectorPage(this.arguments);
+class AccountSelectorPage extends StatefulWidget {
+  AccountSelectorPage({Key key, this.arguments}) : super(key: key);
 
   final AccountSelectorArguments arguments;
+
+  @override
+  _AccountSelectorPageState createState() => _AccountSelectorPageState();
+}
+
+class _AccountSelectorPageState extends State<AccountSelectorPage> {
   List<Account> _accounts;
   List<Token> _tokens;
 
   Future<List<Account>> getAccounts() {
-    if ((arguments.txLevel == TransactionLevel.LEVEL1 &&
-            arguments.transactionType != TransactionType.FORCEEXIT) ||
-        arguments.transactionType == TransactionType.DEPOSIT) {
-      return arguments.store.getL1Accounts(false);
+    if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+            widget.arguments.transactionType != TransactionType.FORCEEXIT) ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT) {
+      return widget.arguments.store.getL1Accounts(false);
     } else {
-      return arguments.store.getAccounts();
+      return widget.arguments.store.getAccounts();
     }
   }
 
   Future<List<Token>> getTokens() {
-    return arguments.store.getTokens();
+    return widget.arguments.store.getTokens();
   }
 
   Future<void> _onRefresh() async {
@@ -52,14 +54,14 @@ class AccountSelectorPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     String operation;
-    if (arguments.transactionType == TransactionType.SEND) {
+    if (widget.arguments.transactionType == TransactionType.SEND) {
       operation = "send";
-    } else if (arguments.transactionType == TransactionType.EXIT ||
-        arguments.transactionType == TransactionType.FORCEEXIT ||
-        arguments.transactionType == TransactionType.DEPOSIT ||
-        arguments.transactionType == TransactionType.WITHDRAW) {
+    } else if (widget.arguments.transactionType == TransactionType.EXIT ||
+        widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT ||
+        widget.arguments.transactionType == TransactionType.WITHDRAW) {
       operation = "move";
-    } else if (arguments.transactionType == TransactionType.RECEIVE) {
+    } else if (widget.arguments.transactionType == TransactionType.RECEIVE) {
       operation = "receive";
     }
 
@@ -77,16 +79,14 @@ class AccountSelectorPage extends HookWidget {
           new IconButton(
             icon: new Icon(Icons.close),
             onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
+              Navigator.of(context).maybePop();
             },
           ),
         ],
         leading: new Container(),
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: arguments.transactionType == TransactionType.RECEIVE
+        future: widget.arguments.transactionType == TransactionType.RECEIVE
             ? getTokens()
             : getAccounts(),
         builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -167,11 +167,11 @@ class AccountSelectorPage extends HookWidget {
       } else {
         if (snapshot.hasData && (snapshot.data as List).length > 0) {
           // data loaded:
-          if (arguments.transactionType == TransactionType.RECEIVE) {
+          if (widget.arguments.transactionType == TransactionType.RECEIVE) {
             _tokens = snapshot.data;
           } else {
             _accounts = snapshot.data;
-            buildAccountsList();
+            buildAccountsList(context);
           }
         } else {
           return Container(
@@ -179,11 +179,11 @@ class AccountSelectorPage extends HookWidget {
             child: Column(children: [
               Text(
                 'Make a deposit first in your ' +
-                    (arguments.txLevel == TransactionLevel.LEVEL1
+                    (widget.arguments.txLevel == TransactionLevel.LEVEL1
                         ? 'Ethereum wallet'
                         : 'Hermez wallet') +
                     ' to ' +
-                    (arguments.transactionType == TransactionType.SEND
+                    (widget.arguments.transactionType == TransactionType.SEND
                         ? 'send tokens.'
                         : 'move your funds.'),
                 textAlign: TextAlign.left,
@@ -203,14 +203,15 @@ class AccountSelectorPage extends HookWidget {
                   Navigator.of(context).pushNamed(
                     "/qrcode",
                     arguments: QRCodeArguments(
-                      qrCodeType: arguments.txLevel == TransactionLevel.LEVEL1
-                          ? QRCodeType.ETHEREUM
-                          : QRCodeType.HERMEZ,
-                      code: arguments.txLevel == TransactionLevel.LEVEL1
-                          ? arguments.store.state.ethereumAddress
+                      qrCodeType:
+                          widget.arguments.txLevel == TransactionLevel.LEVEL1
+                              ? QRCodeType.ETHEREUM
+                              : QRCodeType.HERMEZ,
+                      code: widget.arguments.txLevel == TransactionLevel.LEVEL1
+                          ? widget.arguments.store.state.ethereumAddress
                           : getHermezAddress(
-                              arguments.store.state.ethereumAddress),
-                      store: arguments.store,
+                              widget.arguments.store.state.ethereumAddress),
+                      store: widget.arguments.store,
                     ),
                   );
                 },
@@ -218,7 +219,7 @@ class AccountSelectorPage extends HookWidget {
                   height: 200,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16.0),
-                      color: arguments.txLevel == TransactionLevel.LEVEL1
+                      color: widget.arguments.txLevel == TransactionLevel.LEVEL1
                           ? HermezColors.blueyGreyTwo
                           : HermezColors.darkOrange),
                   padding: EdgeInsets.all(24.0),
@@ -228,7 +229,8 @@ class AccountSelectorPage extends HookWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              arguments.txLevel == TransactionLevel.LEVEL1
+                              widget.arguments.txLevel ==
+                                      TransactionLevel.LEVEL1
                                   ? 'Ethereum wallet'
                                   : 'Hermez wallet',
                               style: TextStyle(
@@ -242,14 +244,15 @@ class AccountSelectorPage extends HookWidget {
                           Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16.0),
-                                color:
-                                    arguments.txLevel == TransactionLevel.LEVEL1
-                                        ? Colors.white
-                                        : HermezColors.orange),
+                                color: widget.arguments.txLevel ==
+                                        TransactionLevel.LEVEL1
+                                    ? Colors.white
+                                    : HermezColors.orange),
                             padding: EdgeInsets.only(
                                 left: 12.0, right: 12.0, top: 6, bottom: 6),
                             child: Text(
-                              arguments.txLevel == TransactionLevel.LEVEL1
+                              widget.arguments.txLevel ==
+                                      TransactionLevel.LEVEL1
                                   ? 'L1'
                                   : 'L2',
                               style: TextStyle(
@@ -279,7 +282,7 @@ class AccountSelectorPage extends HookWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Image.asset(
-                            arguments.txLevel == TransactionLevel.LEVEL1
+                            widget.arguments.txLevel == TransactionLevel.LEVEL1
                                 ? 'assets/ethereum_logo.png'
                                 : 'assets/hermez_logo_white.png',
                             width: 30,
@@ -297,20 +300,20 @@ class AccountSelectorPage extends HookWidget {
       }
     }
 
-    return buildAccountsList();
+    return buildAccountsList(context);
   }
 
   //widget that builds the list
-  Widget buildAccountsList() {
+  Widget buildAccountsList(BuildContext parentContext) {
     String operation;
-    if (arguments.transactionType == TransactionType.SEND) {
+    if (widget.arguments.transactionType == TransactionType.SEND) {
       operation = "send";
-    } else if (arguments.transactionType == TransactionType.EXIT ||
-        arguments.transactionType == TransactionType.FORCEEXIT ||
-        arguments.transactionType == TransactionType.DEPOSIT ||
-        arguments.transactionType == TransactionType.WITHDRAW) {
+    } else if (widget.arguments.transactionType == TransactionType.EXIT ||
+        widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT ||
+        widget.arguments.transactionType == TransactionType.WITHDRAW) {
       operation = "move";
-    } else if (arguments.transactionType == TransactionType.RECEIVE) {
+    } else if (widget.arguments.transactionType == TransactionType.RECEIVE) {
       operation = "receive";
     }
 
@@ -338,7 +341,9 @@ class AccountSelectorPage extends HookWidget {
               padding:
                   EdgeInsets.only(left: 12.0, right: 12.0, top: 4, bottom: 4),
               child: Text(
-                arguments.txLevel == TransactionLevel.LEVEL1 ? "L1" : "L2",
+                widget.arguments.txLevel == TransactionLevel.LEVEL1
+                    ? "L1"
+                    : "L2",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -359,9 +364,10 @@ class AccountSelectorPage extends HookWidget {
               color: HermezColors.orange,
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: arguments.transactionType == TransactionType.RECEIVE
-                    ? _tokens.length
-                    : _accounts.length,
+                itemCount:
+                    widget.arguments.transactionType == TransactionType.RECEIVE
+                        ? _tokens.length
+                        : _accounts.length,
                 //set the item count so that index won't be out of range
                 padding: const EdgeInsets.all(16.0),
                 //add some padding to make it look good
@@ -371,39 +377,42 @@ class AccountSelectorPage extends HookWidget {
 
                   // final index = i ~/ 2; //get the actual index excluding dividers.
                   final index = i;
-                  final String currency = arguments.store.state.defaultCurrency
+                  final String currency = widget
+                      .arguments.store.state.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
-                  if (arguments.transactionType == TransactionType.RECEIVE) {
+                  if (widget.arguments.transactionType ==
+                      TransactionType.RECEIVE) {
                     final Token token = _tokens[index];
                     return AccountRow(
+                        null,
+                        token,
                         token.name,
                         token.symbol,
                         currency != "USD"
-                            ? token.USD * arguments.store.state.exchangeRatio
+                            ? token.USD *
+                                widget.arguments.store.state.exchangeRatio
                             : token.USD,
                         currency,
                         0,
                         false,
                         true,
                         false,
-                        true, (String tokenId, String amount) async {
-                      if (arguments.onTokenSelected != null) {
-                        arguments.onTokenSelected(token);
-                      }
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
+                        true, (Account account, Token token, String tokenId,
+                            String amount) async {
+                      Navigator.maybePop(parentContext, token);
                     });
                   } else {
                     final Account account = _accounts[index];
                     return AccountRow(
+                        account,
+                        null,
                         account.token.name,
                         account.token.symbol,
                         currency != "USD"
                             ? account.token.USD *
-                                arguments.store.state.exchangeRatio
+                                widget.arguments.store.state.exchangeRatio
                             : account.token.USD,
                         currency,
                         double.parse(account.balance) /
@@ -411,13 +420,9 @@ class AccountSelectorPage extends HookWidget {
                         false,
                         true,
                         false,
-                        false, (String token, String amount) async {
-                      if (arguments.onAccountSelected != null) {
-                        arguments.onAccountSelected(account);
-                      }
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
+                        false, (Account account, Token token, String tokenId,
+                            String amount) {
+                      Navigator.maybePop(parentContext, account);
                     });
                   }
                 },
