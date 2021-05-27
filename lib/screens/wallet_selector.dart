@@ -93,7 +93,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                           onTap: () {
                             widget.arguments.store
                                 .updateLevel(TransactionLevel.LEVEL2);
-                            Future.delayed(const Duration(milliseconds: 500),
+                            Future.delayed(const Duration(milliseconds: 100),
                                 () {
                               Navigator.pushNamed(context, 'wallet_details',
                                   arguments: WalletDetailsArguments(
@@ -108,6 +108,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                               });
                             });
                           },
+                          onDoubleTap: null,
                           child: Container(
                             height: width * 0.58,
                             decoration: BoxDecoration(
@@ -401,7 +402,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                           onTap: () {
                             widget.arguments.store
                                 .updateLevel(TransactionLevel.LEVEL1);
-                            Future.delayed(const Duration(milliseconds: 500),
+                            Future.delayed(const Duration(milliseconds: 100),
                                 () {
                               Navigator.pushNamed(context, 'wallet_details',
                                   arguments: WalletDetailsArguments(
@@ -416,6 +417,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                               });
                             });
                           },
+                          onDoubleTap: null,
                           child: Container(
                             height: width * 0.58,
                             decoration: BoxDecoration(

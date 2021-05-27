@@ -16,6 +16,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants.dart';
+import 'account_selector.dart';
 import 'transaction_amount.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -283,16 +284,26 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       });
                       break;
                     case SettingsDetailsType.ADVANCED:
-                      // Force withdrawal
-                      Navigator.pushNamed(
-                          widget.arguments.parentContext, "/transaction_amount",
-                          arguments: TransactionAmountArguments(
-                              widget.arguments.store,
-                              TransactionLevel.LEVEL2,
-                              TransactionType.FORCEEXIT,
-                              allowChangeLevel: false
-                              //account: account,
-                              ));
+                      Navigator.pushNamed(widget.arguments.parentContext,
+                              "/account_selector",
+                              arguments: AccountSelectorArguments(
+                                  TransactionLevel.LEVEL2,
+                                  TransactionType.FORCEEXIT,
+                                  widget.arguments.store))
+                          .then((selectedAccount) {
+                        if (selectedAccount != null) {
+                          // Force withdrawal
+                          Navigator.pushNamed(widget.arguments.parentContext,
+                              "/transaction_amount",
+                              arguments: TransactionAmountArguments(
+                                  widget.arguments.store,
+                                  TransactionLevel.LEVEL2,
+                                  TransactionType.FORCEEXIT,
+                                  account: selectedAccount,
+                                  allowChangeLevel: false));
+                        }
+                      });
+
                       break;
                   }
                   break;
