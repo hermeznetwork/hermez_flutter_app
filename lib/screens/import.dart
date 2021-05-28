@@ -4,8 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/setup/wallet_setup_handler.dart';
 import 'package:hermez/screens/pin.dart';
+import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:local_auth/local_auth.dart';
 
+import 'biometrics.dart';
 import 'info.dart';
 
 class ImportWalletPage extends StatefulWidget {
@@ -799,7 +802,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                         borderRadius: BorderRadius.circular(100.0),
                       ),
                       onPressed: buttonEnabled
-                          ? () {
+                          ? () async {
                               String mnemonic = json.encode(words);
                               mnemonic = mnemonic.replaceAll(",", " ");
                               mnemonic = mnemonic.replaceAll("[", "");
@@ -808,67 +811,47 @@ class _ImportWalletState extends State<ImportWalletPage> {
                               bool validMnemonic =
                                   widget.store.isValidMnemonic(mnemonic);
                               if (validMnemonic) {
-                                Navigator.of(context).pushNamed("/pin",
-                                    arguments: PinArguments(null, true, false,
-                                        () async {
-                                      bool imported = await widget.store
-                                          .importFromMnemonic(mnemonic);
-                                      if (imported) {
-                                        Navigator.of(context).pushNamed(
-                                          "/info",
-                                          arguments: InfoArguments(
-                                              "info_success.png",
-                                              false,
-                                              "Wallet imported successfully",
-                                              onFinished: () {
-                                            Navigator.pushNamedAndRemoveUntil(
-                                                context,
-                                                "/home",
-                                                (Route<dynamic> route) =>
-                                                    false);
-                                          }),
-                                        );
-                                      } else {
-                                        Navigator.of(context)
-                                            .pushNamed("/info",
-                                                arguments: InfoArguments(
-                                                    "info_failure.png",
-                                                    false,
-                                                    "Invalid recovery phrase",
-                                                    onFinished: () {
-                                                  Navigator
-                                                      .pushNamedAndRemoveUntil(
-                                                          context,
-                                                          "/home",
-                                                          (Route<dynamic>
-                                                                  route) =>
-                                                              false);
-                                                }))
-                                            .then((value) {
-                                          if (Navigator.canPop(context)) {
-                                            Navigator.pop(context, false);
-                                          }
-                                        });
+                                var success = await Navigator.of(context)
+                                    .pushNamed(
+                                        "/pin",
+                                        arguments: PinArguments(
+                                            null, true, false, null));
+                                if (success) {
+                                  var imported = await widget.store
+                                      .importFromMnemonic(mnemonic);
+                                  if (imported) {
+                                    if (await BiometricsUtils
+                                            .canCheckBiometrics() &&
+                                        await BiometricsUtils
+                                            .isDeviceSupported()) {
+                                      List<BiometricType> availableBiometrics =
+                                          await BiometricsUtils
+                                              .getAvailableBiometrics();
+                                      if (availableBiometrics
+                                          .contains(BiometricType.face)) {
+                                        // Face ID.
+                                        var result = await Navigator.of(context)
+                                            .pushNamed("/biometrics",
+                                                arguments:
+                                                    BiometricsArguments(false));
+                                      } else if (availableBiometrics.contains(
+                                          BiometricType.fingerprint)) {
+                                        // Touch ID.
+                                        var result = await Navigator.of(context)
+                                            .pushNamed("/biometrics",
+                                                arguments:
+                                                    BiometricsArguments(true));
                                       }
-                                    }));
-                              } else {
-                                Navigator.of(context)
-                                    .pushNamed("/info",
-                                        arguments: InfoArguments(
-                                            "info_failure.png",
-                                            false,
-                                            "Invalid recovery phrase",
-                                            onFinished: () {
-                                          Navigator.pushNamedAndRemoveUntil(
-                                              context,
-                                              "/home",
-                                              (Route<dynamic> route) => false);
-                                        }))
-                                    .then((value) {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context, false);
+                                      showInfoScreen(imported);
+                                    } else {
+                                      showInfoScreen(imported);
+                                    }
+                                  } else {
+                                    showInfoScreen(imported);
                                   }
-                                });
+                                }
+                              } else {
+                                showInfoScreen(validMnemonic);
                               }
                             }
                           : null,
@@ -903,5 +886,29 @@ class _ImportWalletState extends State<ImportWalletPage> {
       }
     }
     buttonEnabled = isEnabled;
+  }
+
+  void showInfoScreen(bool imported) async {
+    if (imported) {
+      Navigator.of(context).pushNamed(
+        "/info",
+        arguments: InfoArguments(
+            "info_success.png", false, "Wallet imported successfully",
+            onFinished: () {
+          Navigator.pushNamedAndRemoveUntil(
+              context, "/home", (Route<dynamic> route) => false);
+        }),
+      );
+    } else {
+      Navigator.of(context).pushNamed(
+        "/info",
+        arguments:
+            InfoArguments("info_failure.png", false, "Invalid recovery phrase",
+                onFinished: () {
+          Navigator.pushNamedAndRemoveUntil(
+              context, "/home", (Route<dynamic> route) => false);
+        }),
+      );
+    }
   }
 }

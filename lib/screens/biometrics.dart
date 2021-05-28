@@ -112,9 +112,13 @@ class _BiometricsPageState extends State<BiometricsPage> {
                                         : 'face') +
                                     ' to authenticate');
                             if (authenticated) {
-                              widget.configurationService
-                                  .setBiometricsFace(true);
-                              Navigator.of(context).pop(authenticated);
+                              try {
+                                await widget.configurationService
+                                    .setBiometricsFace(true);
+                                Navigator.of(context).pop(authenticated);
+                              } catch (e) {
+                                print(e.toString());
+                              }
                             }
                           } else if (widget.arguments.isFingerprint &&
                               availableBiometrics
@@ -127,7 +131,7 @@ class _BiometricsPageState extends State<BiometricsPage> {
                                         : 'face') +
                                     ' to authenticate');
                             if (authenticated) {
-                              widget.configurationService
+                              await widget.configurationService
                                   .setBiometricsFingerprint(true);
                               Navigator.of(context).pop(authenticated);
                             }

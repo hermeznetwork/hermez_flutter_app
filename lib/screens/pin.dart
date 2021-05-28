@@ -6,7 +6,6 @@ import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:local_auth/local_auth.dart';
 
-import 'biometrics.dart';
 import 'info.dart';
 
 class PinArguments {
@@ -579,56 +578,10 @@ class _PinPageState extends State<PinPage> {
           } else {
             if (pinString == confirmPinString) {
               await widget.configurationService.setPasscode(pinString);
-              /*var value = await Navigator.of(context).pushNamed("/info",
-                  arguments: InfoArguments(
-                      "info_success.png",
-                      false,
-                      widget.arguments.title == null
-                          ? "Passcode created"
-                          : "Passcode changed"));*/
-              if (!widget.arguments.changePasscode &&
-                  await BiometricsUtils.canCheckBiometrics() &&
-                  await BiometricsUtils.isDeviceSupported()) {
-                List<BiometricType> availableBiometrics =
-                    await BiometricsUtils.getAvailableBiometrics();
-                if (availableBiometrics.contains(BiometricType.face)) {
-                  // Face ID.
-                  Navigator.of(context)
-                      .pushReplacementNamed("/biometrics",
-                          arguments: BiometricsArguments(false))
-                      .then((value) {
-                    if (widget.arguments.onSuccess != null) {
-                      widget.arguments.onSuccess();
-                    } else if (Navigator.canPop(context)) {
-                      Navigator.pop(context, true);
-                    }
-                  });
-                } else if (availableBiometrics
-                    .contains(BiometricType.fingerprint)) {
-                  // Touch ID.
-                  Navigator.of(context)
-                      .pushReplacementNamed("/biometrics",
-                          arguments: BiometricsArguments(true))
-                      .then((value) {
-                    if (widget.arguments.onSuccess != null) {
-                      widget.arguments.onSuccess();
-                    } else if (Navigator.canPop(context)) {
-                      Navigator.pop(context, true);
-                    }
-                  });
-                } else {
-                  if (widget.arguments.onSuccess != null) {
-                    widget.arguments.onSuccess();
-                  } else if (Navigator.canPop(context)) {
-                    Navigator.pop(context, true);
-                  }
-                }
-              } else {
-                if (widget.arguments.onSuccess != null) {
-                  widget.arguments.onSuccess();
-                } else if (Navigator.canPop(context)) {
-                  Navigator.pop(context, true);
-                }
+              if (widget.arguments.onSuccess != null) {
+                widget.arguments.onSuccess();
+              } else if (Navigator.canPop(context)) {
+                Navigator.pop(context, true);
               }
             } else {
               pinInfoText = "Passcode doesn\'t match";

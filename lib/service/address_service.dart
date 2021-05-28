@@ -71,7 +71,8 @@ class AddressService implements IAddressService {
       print("Config: ${_configService.getEthereumAddress()}");
       return _configService.getEthereumAddress();
     } catch (e) {
-      throw e;
+      print(e.toString());
+      return null;
     }
   }
 
