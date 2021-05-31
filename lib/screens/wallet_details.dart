@@ -17,6 +17,7 @@ import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/address_utils.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/constants.dart';
@@ -25,7 +26,6 @@ import 'package:hermez_plugin/model/account.dart';
 import 'package:hermez_plugin/model/exit.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
-import 'package:intl/intl.dart';
 
 import 'account_details.dart';
 import 'transaction_details.dart';
@@ -81,19 +81,21 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
           .filter(deposit => deposit.type === TxType.Deposit)
       const pendingCreateAccountDeposits = accountPendingDeposits
           .filter(deposit => deposit.type === TxType.CreateAccountDeposit)*/
-      _pendingDeposits = await fetchPendingDeposits();
-      return widget.arguments.store.getAccounts();
+      _pendingDeposits = fetchPendingDeposits();
+      return widget.arguments.store.state
+          .l2Accounts; //widget.arguments.store.getAccounts();
     } else {
-      return widget.arguments.store.getL1Accounts(true);
+      return widget.arguments.store.state
+          .l1Accounts; //widget.arguments.store.getL1Accounts(true);
     }
   }
 
   void fetchPendingTransactions() async {
-    _pendingExits = await fetchPendingExits();
-    List<Exit> _exits = await fetchExits();
+    _pendingExits = fetchPendingExits();
+    List<Exit> _exits = fetchExits();
     _filteredExits = _exits.toList();
-    _pendingForceExits = await fetchPendingForceExits(_exits, _pendingExits);
-    _pendingWithdraws = await fetchPendingWithdraws();
+    _pendingForceExits = fetchPendingForceExits(_exits, _pendingExits);
+    _pendingWithdraws = fetchPendingWithdraws();
     _filteredExits.removeWhere((Exit exit) {
       for (dynamic pendingWithdraw in _pendingWithdraws) {
         if (pendingWithdraw["id"] ==
@@ -110,17 +112,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       )*/
   }
 
-  Future<List<dynamic>> fetchPendingExits() async {
-    List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions();
+  List<PoolTransaction> fetchPendingExits() {
+    List<PoolTransaction> poolTxs = widget.arguments.store.state.pendingL2Txs;
     poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
     return poolTxs;
   }
 
-  Future<List<dynamic>> fetchPendingForceExits(
-      List<Exit> exits, List<PoolTransaction> pendingExits) async {
+  List<dynamic> fetchPendingForceExits(
+      List<Exit> exits, List<PoolTransaction> pendingExits) {
     final accountPendingForceExits =
-        await widget.arguments.store.getPendingForceExits();
+        widget.arguments.store.state.pendingForceExits;
 
     /*exits.forEach((exit) {
       var pendingExit = pendingExits.firstWhere(
@@ -140,16 +141,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     return accountPendingForceExits;
   }
 
-  Future<List<Exit>> fetchExits() {
-    return widget.arguments.store.getExits();
+  List<Exit> fetchExits() {
+    return widget.arguments.store.state.exits;
   }
 
-  Future<List<dynamic>> fetchPendingWithdraws() {
-    return widget.arguments.store.getPendingWithdraws();
+  List<dynamic> fetchPendingWithdraws() {
+    return widget.arguments.store.state.pendingWithdraws;
   }
 
-  Future<List<dynamic>> fetchPendingDeposits() {
-    return widget.arguments.store.getPendingDeposits();
+  List<dynamic> fetchPendingDeposits() {
+    return widget.arguments.store.state.pendingDeposits;
   }
 
   @override
@@ -348,7 +349,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Text(totalBalance(snapshot),
+                                    Text(
+                                        totalBalance(
+                                            widget.arguments.transactionLevel,
+                                            snapshot),
                                         style: TextStyle(
                                           color: HermezColors.black,
                                           fontSize: 32,
@@ -876,7 +880,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     );
   }
 
-  String totalBalance(AsyncSnapshot snapshot) {
+  String totalBalance(TransactionLevel txLevel, AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
       _accounts = snapshot.data;
@@ -903,20 +907,28 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       locale = 'en';
       symbol = '\$';
     }
-    if (_accounts != null && _accounts.length > 0) {
+
+    result = BalanceUtils.balanceOfAccounts(
+        txLevel,
+        _accounts,
+        currency,
+        widget.arguments.store.state.exchangeRatio,
+        [], // pendingWithdraws
+        widget.arguments.store.state.pendingDeposits);
+    /*if (_accounts != null && _accounts.length > 0) {
       for (Account account in _accounts) {
         if (account.token.USD != null) {
           double value = account.token.USD * double.parse(account.balance);
           if (currency != "USD") {
             value *= widget.arguments.store.state.exchangeRatio;
           }
-          resultValue = resultValue + value;
+          resultValue += value;
         }
       }
     }
-
+    //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
     result = NumberFormat.currency(locale: locale, symbol: symbol)
-        .format(resultValue / pow(10, 18));
+        .format(resultValue / pow(10, 18));*/
     return result;
   }
 }

@@ -3,6 +3,8 @@ import 'package:built_value/built_value.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez_plugin/hermez_wallet.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/exit.dart';
+import 'package:hermez_plugin/model/pool_transaction.dart';
 
 part 'wallet.g.dart';
 
@@ -45,6 +47,20 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   List<Account> get cryptoList;
 
+  List<Account> get l1Accounts;
+
+  List<Account> get l2Accounts;
+
+  List<PoolTransaction> get pendingL2Txs;
+
+  List<dynamic> get pendingDeposits;
+
+  List<dynamic> get pendingWithdraws;
+
+  List<dynamic> get pendingForceExits;
+
+  List<Exit> get exits;
+
   bool get loading;
 
   @nullable
@@ -59,7 +75,14 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..defaultFee = WalletDefaultFee.AVERAGE
     ..exchangeRatio = 0.0
     ..txLevel = TransactionLevel.LEVEL1
-    ..cryptoList = List()
+    ..cryptoList = []
+    ..l1Accounts = []
+    ..l2Accounts = []
+    ..pendingL2Txs = []
+    ..pendingDeposits = []
+    ..pendingWithdraws = []
+    ..pendingForceExits = []
+    ..exits = []
     ..errors = BuiltList<String>().toBuilder()
     ..loading = false
     ..update(updates));

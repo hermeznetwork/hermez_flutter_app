@@ -251,7 +251,7 @@ class HermezService implements IHermezService {
             'hash': txHash,
             'fromHezEthereumAddress': hezEthereumAddress,
             'toHezEthereumAddress': hezEthereumAddress,
-            'token': token,
+            'token': token.toJson(),
             'amount': amount.toDouble(),
             'state': 'pend',
             'timestamp': DateTime.now().toIso8601String(),

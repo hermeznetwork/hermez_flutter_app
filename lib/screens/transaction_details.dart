@@ -1314,7 +1314,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             final amountDeposit =
                 getTokenAmountBigInt(widget.arguments.amount, 18);
 
-            final accounts = await widget.arguments.store.getAccounts();
+            final accounts = await widget.arguments.store.getL2Accounts();
 
             if (accounts == null || accounts.length == 0) {
               await widget.arguments.store.authorizeAccountCreation();
@@ -1376,7 +1376,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           {
             final ethereumAddress =
                 getEthereumAddress(widget.arguments.addressTo);
-            final accounts = await widget.arguments.store.getAccounts(
+            final accounts = await widget.arguments.store.getL2Accounts(
                 ethereumAddress: ethereumAddress,
                 tokenIds: [widget.arguments.token.id]);
             final accountCreated = await widget.arguments.store

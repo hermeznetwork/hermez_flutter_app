@@ -36,6 +36,20 @@ class _$Wallet extends Wallet {
   @override
   final List<Account> cryptoList;
   @override
+  final List<Account> l1Accounts;
+  @override
+  final List<Account> l2Accounts;
+  @override
+  final List<PoolTransaction> pendingL2Txs;
+  @override
+  final List<dynamic> pendingDeposits;
+  @override
+  final List<dynamic> pendingWithdraws;
+  @override
+  final List<dynamic> pendingForceExits;
+  @override
+  final List<Exit> exits;
+  @override
   final bool loading;
   @override
   final BuiltList<String> errors;
@@ -58,6 +72,13 @@ class _$Wallet extends Wallet {
       this.exchangeRatio,
       this.txLevel,
       this.cryptoList,
+      this.l1Accounts,
+      this.l2Accounts,
+      this.pendingL2Txs,
+      this.pendingDeposits,
+      this.pendingWithdraws,
+      this.pendingForceExits,
+      this.exits,
       this.loading,
       this.errors})
       : super._() {
@@ -97,6 +118,13 @@ class _$Wallet extends Wallet {
         exchangeRatio == other.exchangeRatio &&
         txLevel == other.txLevel &&
         cryptoList == other.cryptoList &&
+        l1Accounts == other.l1Accounts &&
+        l2Accounts == other.l2Accounts &&
+        pendingL2Txs == other.pendingL2Txs &&
+        pendingDeposits == other.pendingDeposits &&
+        pendingWithdraws == other.pendingWithdraws &&
+        pendingForceExits == other.pendingForceExits &&
+        exits == other.exits &&
         loading == other.loading &&
         errors == other.errors;
   }
@@ -119,25 +147,26 @@ class _$Wallet extends Wallet {
                                                         $jc(
                                                             $jc(
                                                                 $jc(
-                                                                    0,
-                                                                    ethereumAddress
-                                                                        .hashCode),
-                                                                ethereumPrivateKey
-                                                                    .hashCode),
-                                                            hermezWallet
-                                                                .hashCode),
-                                                        hermezAddress.hashCode),
-                                                    hermezPublicKeyHex
-                                                        .hashCode),
-                                                hermezPublicKeyBase64.hashCode),
-                                            tokensBalance.hashCode),
-                                        ethBalance.hashCode),
-                                    ethUSDPrice.hashCode),
-                                defaultCurrency.hashCode),
-                            defaultFee.hashCode),
-                        exchangeRatio.hashCode),
-                    txLevel.hashCode),
-                cryptoList.hashCode),
+                                                                    $jc(
+                                                                        $jc(
+                                                                            $jc($jc($jc($jc($jc(0, ethereumAddress.hashCode), ethereumPrivateKey.hashCode), hermezWallet.hashCode), hermezAddress.hashCode),
+                                                                                hermezPublicKeyHex.hashCode),
+                                                                            hermezPublicKeyBase64.hashCode),
+                                                                        tokensBalance.hashCode),
+                                                                    ethBalance.hashCode),
+                                                                ethUSDPrice.hashCode),
+                                                            defaultCurrency.hashCode),
+                                                        defaultFee.hashCode),
+                                                    exchangeRatio.hashCode),
+                                                txLevel.hashCode),
+                                            cryptoList.hashCode),
+                                        l1Accounts.hashCode),
+                                    l2Accounts.hashCode),
+                                pendingL2Txs.hashCode),
+                            pendingDeposits.hashCode),
+                        pendingWithdraws.hashCode),
+                    pendingForceExits.hashCode),
+                exits.hashCode),
             loading.hashCode),
         errors.hashCode));
   }
@@ -159,6 +188,13 @@ class _$Wallet extends Wallet {
           ..add('exchangeRatio', exchangeRatio)
           ..add('txLevel', txLevel)
           ..add('cryptoList', cryptoList)
+          ..add('l1Accounts', l1Accounts)
+          ..add('l2Accounts', l2Accounts)
+          ..add('pendingL2Txs', pendingL2Txs)
+          ..add('pendingDeposits', pendingDeposits)
+          ..add('pendingWithdraws', pendingWithdraws)
+          ..add('pendingForceExits', pendingForceExits)
+          ..add('exits', exits)
           ..add('loading', loading)
           ..add('errors', errors))
         .toString();
@@ -226,6 +262,38 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   List<Account> get cryptoList => _$this._cryptoList;
   set cryptoList(List<Account> cryptoList) => _$this._cryptoList = cryptoList;
 
+  List<Account> _l1Accounts;
+  List<Account> get l1Accounts => _$this._l1Accounts;
+  set l1Accounts(List<Account> l1Accounts) => _$this._l1Accounts = l1Accounts;
+
+  List<Account> _l2Accounts;
+  List<Account> get l2Accounts => _$this._l2Accounts;
+  set l2Accounts(List<Account> l2Accounts) => _$this._l2Accounts = l2Accounts;
+
+  List<PoolTransaction> _pendingL2Txs;
+  List<PoolTransaction> get pendingL2Txs => _$this._pendingL2Txs;
+  set pendingL2Txs(List<PoolTransaction> pendingL2Txs) =>
+      _$this._pendingL2Txs = pendingL2Txs;
+
+  List<dynamic> _pendingDeposits;
+  List<dynamic> get pendingDeposits => _$this._pendingDeposits;
+  set pendingDeposits(List<dynamic> pendingDeposits) =>
+      _$this._pendingDeposits = pendingDeposits;
+
+  List<dynamic> _pendingWithdraws;
+  List<dynamic> get pendingWithdraws => _$this._pendingWithdraws;
+  set pendingWithdraws(List<dynamic> pendingWithdraws) =>
+      _$this._pendingWithdraws = pendingWithdraws;
+
+  List<dynamic> _pendingForceExits;
+  List<dynamic> get pendingForceExits => _$this._pendingForceExits;
+  set pendingForceExits(List<dynamic> pendingForceExits) =>
+      _$this._pendingForceExits = pendingForceExits;
+
+  List<Exit> _exits;
+  List<Exit> get exits => _$this._exits;
+  set exits(List<Exit> exits) => _$this._exits = exits;
+
   BigInt _ethBalance;
   BigInt get ethBalance => _$this._ethBalance;
   set ethBalance(BigInt ethBalance) => _$this._ethBalance = ethBalance;
@@ -261,6 +329,13 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _exchangeRatio = _$v.exchangeRatio;
       _txLevel = _$v.txLevel;
       _cryptoList = _$v.cryptoList;
+      _l1Accounts = _$v.l1Accounts;
+      _l2Accounts = _$v.l2Accounts;
+      _pendingL2Txs = _$v.pendingL2Txs;
+      _pendingDeposits = _$v.pendingDeposits;
+      _pendingWithdraws = _$v.pendingWithdraws;
+      _pendingForceExits = _$v.pendingForceExits;
+      _exits = _$v.exits;
       _loading = _$v.loading;
       _errors = _$v.errors?.toBuilder();
       _$v = null;
@@ -301,6 +376,13 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               exchangeRatio: exchangeRatio,
               txLevel: txLevel,
               cryptoList: cryptoList,
+              l1Accounts: l1Accounts,
+              l2Accounts: l2Accounts,
+              pendingL2Txs: pendingL2Txs,
+              pendingDeposits: pendingDeposits,
+              pendingWithdraws: pendingWithdraws,
+              pendingForceExits: pendingForceExits,
+              exits: exits,
               loading: loading,
               errors: _errors?.build());
     } catch (_) {

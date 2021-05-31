@@ -177,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                 if (scannedStrings.length > 2) {
                   bool accountFound = false;
                   List<Account> accounts =
-                      await widget.arguments.store.getAccounts();
+                      await widget.arguments.store.getL2Accounts();
                   for (Account account in accounts) {
                     if (account.token.symbol == scannedStrings[2]) {
                       accountFound = true;

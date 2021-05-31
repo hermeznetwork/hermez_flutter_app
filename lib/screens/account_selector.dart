@@ -39,7 +39,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
         widget.arguments.transactionType == TransactionType.DEPOSIT) {
       return widget.arguments.store.getL1Accounts(false);
     } else {
-      return widget.arguments.store.getAccounts();
+      return widget.arguments.store.getL2Accounts();
     }
   }
 
@@ -415,8 +415,8 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                                 widget.arguments.store.state.exchangeRatio
                             : account.token.USD,
                         currency,
-                        double.parse(account.balance) /
-                            pow(10, account.token.decimals),
+                        (double.parse(account.balance) /
+                            pow(10, account.token.decimals)),
                         false,
                         true,
                         false,

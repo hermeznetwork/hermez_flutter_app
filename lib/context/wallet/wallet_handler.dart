@@ -166,7 +166,7 @@ class WalletHandler {
     });*/
   }
 
-  Future<void> fetchOwnL1Balance() async {
+  /*Future<void> fetchOwnL1Balance() async {
     if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
       _store.dispatch(UpdatingBalance());
@@ -265,6 +265,20 @@ class WalletHandler {
 
     _store.dispatch(
         BalanceUpdated(ethBalance.getInWei, tokensBalance, L2accounts));
+  }*/
+
+  Future<bool> getAccounts() async {
+    _store.dispatch(UpdatingWallet());
+    List<Account> l1Accounts = await getL1Accounts(true);
+    List<Account> l2Accounts = await getL2Accounts();
+    List<Exit> exits = await getExits();
+    List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
+    List<dynamic> pendingDeposits = await getPendingDeposits();
+    List<dynamic> pendingWithdraws = await getPendingWithdraws();
+    List<dynamic> pendingForceExits = await getPendingForceExits();
+
+    _store.dispatch(WalletUpdated(l1Accounts, l2Accounts, exits, pendingL2Txs,
+        pendingDeposits, pendingWithdraws, pendingForceExits));
   }
 
   Future<List<Account>> getL1Accounts(bool showZeroBalanceAccounts) async {
@@ -355,7 +369,7 @@ class WalletHandler {
     return accounts;
   }
 
-  Future<List<Account>> getAccounts(
+  Future<List<Account>> getL2Accounts(
       {String ethereumAddress, List<int> tokenIds}) async {
     if (ethereumAddress == null) {
       ethereumAddress = state.ethereumAddress;
@@ -365,6 +379,7 @@ class WalletHandler {
     }
     final accounts = await _hermezService.getAccounts(
         web3.EthereumAddress.fromHex(ethereumAddress), tokenIds);
+
     return accounts;
   }
 

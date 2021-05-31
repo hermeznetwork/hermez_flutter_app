@@ -1,15 +1,14 @@
-import 'dart:math';
-
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/utils/address_utils.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
-import 'package:intl/intl.dart';
+import 'package:hermez_plugin/model/pool_transaction.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'account_selector.dart';
@@ -40,8 +39,14 @@ class WalletSelectorPage extends StatefulWidget {
 
 class _WalletSelectorPageState extends State<WalletSelectorPage>
     with AfterLayoutMixin<WalletSelectorPage> {
-  List<Account> l1Accounts;
-  List<Account> l2Accounts;
+  //List<Account> l1Accounts;
+  //List<Account> l2Accounts;
+
+  List<dynamic> pendingExits = [];
+  List<dynamic> pendingForceExits = [];
+  List<dynamic> pendingWithdraws = [];
+  List<dynamic> pendingDeposits = [];
+  //List<dynamic> pendingTransfers = [];
 
   bool isLoading = false;
 
@@ -67,10 +72,88 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
     if (widget.arguments.store.state.ethereumAddress == null) {
       await widget.arguments.store.initialise();
     }
-    l1Accounts = await widget.arguments.store.getL1Accounts(false);
-    l2Accounts = await widget.arguments.store.getAccounts();
+    /*l2Accounts =*/ await widget.arguments.store.getAccounts();
+    //pendingTransfers = await fetchL2PendingTransfersAndExits();
+    pendingDeposits = fetchPendingDeposits();
+
+    //l1Accounts = await widget.arguments.store.getL1Accounts(false);
+
     isLoading = false;
   }
+
+  Future<List<PoolTransaction>> fetchL2PendingTransfersAndExits() async {
+    List<PoolTransaction> poolTxs = widget.arguments.store.state.pendingL2Txs;
+    return poolTxs;
+  }
+
+  List<dynamic> fetchPendingDeposits() {
+    final accountPendingDeposits = widget.arguments.store.state.pendingDeposits;
+    return accountPendingDeposits;
+  }
+
+  /*void fetchPendingTransactions() async {
+    _pendingExits = await fetchPendingExits();
+    List<Exit> _exits = await fetchExits();
+    _filteredExits = _exits.toList();
+    _pendingForceExits = await fetchPendingForceExits(_exits, _pendingExits);
+    _pendingWithdraws = await fetchPendingWithdraws();
+    _filteredExits.removeWhere((Exit exit) {
+      for (dynamic pendingWithdraw in _pendingWithdraws) {
+        if (pendingWithdraw["id"] ==
+            (exit.accountIndex + exit.batchNum.toString())) {
+          return true;
+        }
+      }
+      return false;
+    });
+    /*const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
+          pendingDelayedWithdraws,
+          ethereumNetworkTask.data.chainId,
+          wallet.hermezEthereumAddress
+      )*/
+  }
+
+  Future<List<dynamic>> fetchPendingExits() async {
+    List<PoolTransaction> poolTxs =
+        await widget.arguments.store.getPoolTransactions();
+    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
+    return poolTxs;
+  }
+
+  /*Future<List<dynamic>> fetchPendingForceExits(
+      List<Exit> exits, List<PoolTransaction> pendingExits) async {
+    final accountPendingForceExits =
+    await widget.arguments.store.getPendingForceExits();
+
+    /*exits.forEach((exit) {
+      var pendingExit = pendingExits.firstWhere(
+          (pendingExit) => pendingExit.fromAccountIndex == exit.accountIndex,
+          orElse: () => null);
+      if (pendingExit == null) {
+        var pendingForceExit = accountPendingForceExits.firstWhere(
+            (pendingForceExit) =>
+                pendingForceExit['amount'].toString() == exit.balance,
+            orElse: null);
+        if (pendingForceExit != null) {
+          accountPendingForceExits.remove(pendingForceExit);
+        }
+      }
+    });*/
+
+    return accountPendingForceExits;
+  }
+
+  Future<List<Exit>> fetchExits() {
+    return widget.arguments.store.getExits();
+  }
+
+  Future<List<dynamic>> fetchPendingWithdraws() {
+    return widget.arguments.store.getPendingWithdraws();
+  }
+
+  Future<List<dynamic>> fetchPendingDeposits() {
+    return widget.arguments.store.getPendingDeposits();
+  }*/*/
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +185,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                     widget.arguments.parentContext,
                                   )).then((value) {
                                 setState(() {
-                                  l1Accounts = null;
-                                  l2Accounts = null;
+                                  //l1Accounts = null;
+                                  //l2Accounts = null;
                                 });
                               });
                             });
@@ -162,8 +245,13 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      l2Accounts != null
-                                          ? Text(totalBalance(l2Accounts),
+                                      widget.arguments.store.state.l2Accounts !=
+                                              null
+                                          ? Text(
+                                              totalBalance(
+                                                  TransactionLevel.LEVEL2,
+                                                  widget.arguments.store.state
+                                                      .l2Accounts),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 32,
@@ -174,7 +262,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               arguments:
                                                   BlinkingTextAnimationArguments(
                                                       Colors.white,
-                                                      totalBalance(null),
+                                                      totalBalance(
+                                                          TransactionLevel
+                                                              .LEVEL2,
+                                                          null),
                                                       32,
                                                       FontWeight.w700))
                                     ],
@@ -268,21 +359,34 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                           ),
                           onPressed: () async {
                             if (!isLoading) {
-                              if ((l1Accounts == null ||
-                                      l1Accounts.length == 0) &&
-                                  (l2Accounts == null ||
-                                      l2Accounts.length == 0)) {
+                              if ((widget.arguments.store.state.l1Accounts ==
+                                          null ||
+                                      widget.arguments.store.state.l1Accounts
+                                              .length ==
+                                          0) &&
+                                  (widget.arguments.store.state.l2Accounts ==
+                                          null ||
+                                      widget.arguments.store.state.l2Accounts
+                                              .length ==
+                                          0)) {
                                 Navigator.pushNamed(
                                     widget.arguments.parentContext,
                                     "/first_deposit",
                                     arguments: false);
-                              } else if (l1Accounts != null &&
-                                  l1Accounts.length > 0) {
+                              } else if (widget
+                                          .arguments.store.state.l1Accounts !=
+                                      null &&
+                                  widget.arguments.store.state.l1Accounts
+                                          .length >
+                                      0) {
                                 widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL1);
                                 var selectedAccount;
-                                if (l1Accounts.length == 1) {
-                                  selectedAccount = l1Accounts[0];
+                                if (widget.arguments.store.state.l1Accounts
+                                        .length ==
+                                    1) {
+                                  selectedAccount = widget
+                                      .arguments.store.state.l1Accounts[0];
                                 } else {
                                   selectedAccount = await Navigator.pushNamed(
                                       widget.arguments.parentContext,
@@ -303,19 +407,26 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         account: selectedAccount,
                                         allowChangeLevel: true,
                                       )).then((value) {
-                                    setState(() {
+                                    /*setState(() {
                                       l1Accounts = null;
                                       l2Accounts = null;
-                                    });
+                                    });*/
                                   });
                                 }
-                              } else if (l2Accounts != null &&
-                                  l2Accounts.length > 0) {
+                              } else if (widget
+                                          .arguments.store.state.l2Accounts !=
+                                      null &&
+                                  widget.arguments.store.state.l2Accounts
+                                          .length >
+                                      0) {
                                 widget.arguments.store
                                     .updateLevel(TransactionLevel.LEVEL2);
                                 var selectedAccount;
-                                if (l2Accounts.length == 1) {
-                                  selectedAccount = l2Accounts[0];
+                                if (widget.arguments.store.state.l2Accounts
+                                        .length ==
+                                    1) {
+                                  selectedAccount = widget
+                                      .arguments.store.state.l2Accounts[0];
                                 } else {
                                   selectedAccount = await Navigator.of(
                                           widget.arguments.parentContext)
@@ -336,10 +447,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         account: selectedAccount,
                                         allowChangeLevel: true,
                                       )).then((value) {
-                                    setState(() {
+                                    /*setState(() {
                                       l1Accounts = null;
                                       l2Accounts = null;
-                                    });
+                                    });*/
                                   });
                                 }
                               } else {
@@ -363,10 +474,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         account: selectedAccount,
                                         allowChangeLevel: true,
                                       )).then((value) {
-                                    setState(() {
+                                    /*setState(() {
                                       l1Accounts = null;
                                       l2Accounts = null;
-                                    });
+                                    });*/
                                   });
                                 }
                               }
@@ -410,10 +521,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                     TransactionLevel.LEVEL1,
                                     widget.arguments.parentContext,
                                   )).then((value) {
-                                setState(() {
+                                /*setState(() {
                                   l1Accounts = null;
                                   l2Accounts = null;
-                                });
+                                });*/
                               });
                             });
                           },
@@ -471,8 +582,13 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      l1Accounts != null
-                                          ? Text(totalBalance(l1Accounts),
+                                      widget.arguments.store.state.l1Accounts !=
+                                              null
+                                          ? Text(
+                                              totalBalance(
+                                                  TransactionLevel.LEVEL1,
+                                                  widget.arguments.store.state
+                                                      .l1Accounts),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 32,
@@ -483,7 +599,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               arguments:
                                                   BlinkingTextAnimationArguments(
                                                       Colors.white,
-                                                      totalBalance(null),
+                                                      totalBalance(
+                                                          TransactionLevel
+                                                              .LEVEL1,
+                                                          null),
                                                       32,
                                                       FontWeight.w700))
                                     ],
@@ -569,7 +688,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
     );
   }
 
-  String totalBalance(List<Account> _accounts) {
+  String totalBalance(TransactionLevel txLevel, List<Account> _accounts) {
     double resultValue = 0;
     String result = "";
     String locale = "";
@@ -592,7 +711,15 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
       locale = 'en';
       symbol = '\$';
     }
-    if (_accounts != null && _accounts.length > 0) {
+
+    result = BalanceUtils.balanceOfAccounts(
+        txLevel,
+        _accounts,
+        currency,
+        widget.arguments.store.state.exchangeRatio,
+        pendingWithdraws,
+        pendingDeposits);
+    /*if (_accounts != null && _accounts.length > 0) {
       for (Account account in _accounts) {
         if (account.token.USD != null) {
           double value = account.token.USD * double.parse(account.balance);
@@ -605,7 +732,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
     }
     //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
     result = NumberFormat.currency(locale: locale, symbol: symbol)
-        .format(resultValue / pow(10, 18));
+        .format(resultValue / pow(10, 18));*/
     return result;
   }
 }

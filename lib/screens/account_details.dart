@@ -450,10 +450,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       });
     }
 
+    resultAmount = balanceAmount - withdrawsAmount + depositsAmount;
     debugPrint("balance amount:" + balanceAmount.toString());
     debugPrint("withdraws amount:" + withdrawsAmount.toString());
     debugPrint("deposits amount:" + depositsAmount.toString());
-    resultAmount = balanceAmount - withdrawsAmount + depositsAmount;
+    debugPrint("result amount:" + resultAmount.toString());
 
     if (resultAmount.isNegative) {
       resultAmount = 0.0;
@@ -1345,13 +1346,15 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     return accountPendingTransfers;
   }
 
-  Future<List<Exit>> fetchExits(int tokenId) {
-    return widget.arguments.store.getExits(tokenId: tokenId);
+  List<Exit> fetchExits(int tokenId) {
+    List<Exit> exits = List.from(widget.arguments.store.state.exits);
+    exits.removeWhere((exit) => exit.token.id != tokenId);
+    return exits;
   }
 
   Future<List<dynamic>> fetchPendingWithdraws(int tokenId) async {
     final accountPendingWithdraws =
-        await widget.arguments.store.getPendingWithdraws();
+        List.from(widget.arguments.store.state.pendingWithdraws);
     accountPendingWithdraws.removeWhere((pendingWithdraw) =>
         Token.fromJson(pendingWithdraw['token']).id != tokenId);
     return accountPendingWithdraws;
