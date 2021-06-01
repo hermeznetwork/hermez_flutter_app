@@ -52,6 +52,8 @@ class _$Wallet extends Wallet {
   @override
   final bool loading;
   @override
+  final bool walletInitialized;
+  @override
   final BuiltList<String> errors;
 
   factory _$Wallet([void Function(WalletBuilder) updates]) =>
@@ -80,6 +82,7 @@ class _$Wallet extends Wallet {
       this.pendingForceExits,
       this.exits,
       this.loading,
+      this.walletInitialized,
       this.errors})
       : super._() {
     if (tokensBalance == null) {
@@ -126,6 +129,7 @@ class _$Wallet extends Wallet {
         pendingForceExits == other.pendingForceExits &&
         exits == other.exits &&
         loading == other.loading &&
+        walletInitialized == other.walletInitialized &&
         errors == other.errors;
   }
 
@@ -149,25 +153,25 @@ class _$Wallet extends Wallet {
                                                                 $jc(
                                                                     $jc(
                                                                         $jc(
-                                                                            $jc($jc($jc($jc($jc(0, ethereumAddress.hashCode), ethereumPrivateKey.hashCode), hermezWallet.hashCode), hermezAddress.hashCode),
-                                                                                hermezPublicKeyHex.hashCode),
-                                                                            hermezPublicKeyBase64.hashCode),
-                                                                        tokensBalance.hashCode),
-                                                                    ethBalance.hashCode),
-                                                                ethUSDPrice.hashCode),
-                                                            defaultCurrency.hashCode),
-                                                        defaultFee.hashCode),
-                                                    exchangeRatio.hashCode),
-                                                txLevel.hashCode),
-                                            cryptoList.hashCode),
-                                        l1Accounts.hashCode),
-                                    l2Accounts.hashCode),
-                                pendingL2Txs.hashCode),
-                            pendingDeposits.hashCode),
-                        pendingWithdraws.hashCode),
-                    pendingForceExits.hashCode),
-                exits.hashCode),
-            loading.hashCode),
+                                                                            $jc($jc($jc($jc($jc($jc(0, ethereumAddress.hashCode), ethereumPrivateKey.hashCode), hermezWallet.hashCode), hermezAddress.hashCode), hermezPublicKeyHex.hashCode),
+                                                                                hermezPublicKeyBase64.hashCode),
+                                                                            tokensBalance.hashCode),
+                                                                        ethBalance.hashCode),
+                                                                    ethUSDPrice.hashCode),
+                                                                defaultCurrency.hashCode),
+                                                            defaultFee.hashCode),
+                                                        exchangeRatio.hashCode),
+                                                    txLevel.hashCode),
+                                                cryptoList.hashCode),
+                                            l1Accounts.hashCode),
+                                        l2Accounts.hashCode),
+                                    pendingL2Txs.hashCode),
+                                pendingDeposits.hashCode),
+                            pendingWithdraws.hashCode),
+                        pendingForceExits.hashCode),
+                    exits.hashCode),
+                loading.hashCode),
+            walletInitialized.hashCode),
         errors.hashCode));
   }
 
@@ -196,6 +200,7 @@ class _$Wallet extends Wallet {
           ..add('pendingForceExits', pendingForceExits)
           ..add('exits', exits)
           ..add('loading', loading)
+          ..add('walletInitialized', walletInitialized)
           ..add('errors', errors))
         .toString();
   }
@@ -306,6 +311,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   bool get loading => _$this._loading;
   set loading(bool loading) => _$this._loading = loading;
 
+  bool _walletInitialized;
+  bool get walletInitialized => _$this._walletInitialized;
+  set walletInitialized(bool walletInitialized) =>
+      _$this._walletInitialized = walletInitialized;
+
   ListBuilder<String> _errors;
   ListBuilder<String> get errors =>
       _$this._errors ??= new ListBuilder<String>();
@@ -337,6 +347,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _pendingForceExits = _$v.pendingForceExits;
       _exits = _$v.exits;
       _loading = _$v.loading;
+      _walletInitialized = _$v.walletInitialized;
       _errors = _$v.errors?.toBuilder();
       _$v = null;
     }
@@ -384,6 +395,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               pendingForceExits: pendingForceExits,
               exits: exits,
               loading: loading,
+              walletInitialized: walletInitialized,
               errors: _errors?.build());
     } catch (_) {
       String _$failedField;

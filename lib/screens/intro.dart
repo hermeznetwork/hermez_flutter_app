@@ -77,25 +77,25 @@ class IntroPage extends HookWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(100.0),
                       ),
-                      onPressed: () {
-                        Navigator.of(context).pushNamed(
-                          "/pin",
-                          arguments: PinArguments(null, true, false, () async {
-                            String mnemonic = await store.generateMnemonic();
-                            Navigator.of(context).pushNamed("/info",
-                                arguments: InfoArguments(
-                                    "info_backup_success.png",
-                                    false,
-                                    "Your wallet has been created",
-                                    iconSize: 300, onFinished: () {
-                                  Navigator.pushNamedAndRemoveUntil(
-                                      context,
-                                      "/first_deposit",
-                                      (Route<dynamic> route) => false,
-                                      arguments: true);
-                                }));
-                          }),
-                        );
+                      onPressed: () async {
+                        var success = await Navigator.of(context).pushNamed(
+                            "/pin",
+                            arguments: PinArguments(null, true, false));
+                        if (success != null && success == true) {
+                          String mnemonic = await store.generateMnemonic();
+                          Navigator.of(context).pushNamed("/info",
+                              arguments: InfoArguments(
+                                  "info_backup_success.png",
+                                  false,
+                                  "Your wallet has been created",
+                                  iconSize: 300, onFinished: () {
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    "/first_deposit",
+                                    (Route<dynamic> route) => false,
+                                    arguments: true);
+                              }));
+                        }
                       },
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

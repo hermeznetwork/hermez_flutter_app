@@ -273,7 +273,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/pin",
                               arguments: PinArguments(
-                                  "Show Recovery Phrase", false, false, null))
+                                  "Show Recovery Phrase", false, false))
                           .then((value) {
                         if (value.toString() == "true") {
                           Navigator.of(widget.arguments.parentContext)
@@ -318,13 +318,13 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/pin",
                               arguments: PinArguments(
-                                  "Enter old passcode", false, false, null))
+                                  "Enter old passcode", false, false))
                           .then((value) {
                         if (value.toString() == "true") {
                           Navigator.of(widget.arguments.parentContext)
                               .pushNamed("/pin",
                                   arguments: PinArguments(
-                                      "Enter new passcode", true, true, null))
+                                      "Enter new passcode", true, true))
                               .then((value) {
                             if (value.toString() == "true") {
                               Flushbar(

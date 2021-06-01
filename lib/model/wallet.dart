@@ -63,6 +63,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   bool get loading;
 
+  bool get walletInitialized;
+
   @nullable
   BuiltList<String> get errors;
 
@@ -85,5 +87,6 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..exits = []
     ..errors = BuiltList<String>().toBuilder()
     ..loading = false
+    ..walletInitialized = false
     ..update(updates));
 }

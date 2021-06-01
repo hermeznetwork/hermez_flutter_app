@@ -31,7 +31,8 @@ Map<String, WidgetBuilder> getRoutes(context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
         return PinPage(
-            arguments: PinArguments("Enter passcode", false, false, () {
+            arguments:
+                PinArguments("Enter passcode", false, false, onSuccess: () {
               Navigator.pushReplacementNamed(context, '/home');
             }),
             configurationService: configurationService);

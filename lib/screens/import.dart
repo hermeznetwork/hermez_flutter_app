@@ -814,8 +814,8 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                 var success = await Navigator.of(context)
                                     .pushNamed(
                                         "/pin",
-                                        arguments: PinArguments(
-                                            null, true, false, null));
+                                        arguments:
+                                            PinArguments(null, true, false));
                                 if (success) {
                                   var imported = await widget.store
                                       .importFromMnemonic(mnemonic);

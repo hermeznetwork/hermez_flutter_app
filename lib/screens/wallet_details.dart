@@ -19,6 +19,7 @@ import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/pop_result.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/environment.dart';
@@ -64,6 +65,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   Future<void> _onRefresh() async {
+    await widget.arguments.store.getAccounts();
     setState(() {});
   }
 
@@ -286,7 +288,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                                         .ethereumAddress
                                                         .substring(
                                                             widget.arguments.store.state.ethereumAddress.length -
-                                                                5,
+                                                                4,
                                                             widget
                                                                 .arguments
                                                                 .store
@@ -302,7 +304,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                                     " ･･･ " +
                                                     widget.arguments.store.state
                                                         .ethereumAddress
-                                                        .substring(widget.arguments.store.state.ethereumAddress.length - 5, widget.arguments.store.state.ethereumAddress.length)
+                                                        .substring(widget.arguments.store.state.ethereumAddress.length - 4, widget.arguments.store.state.ethereumAddress.length)
                                                         .toUpperCase() ??
                                                 "")
                                         : "",
@@ -403,7 +405,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         if (accounts.length == 1) {
                           account = accounts[0];
                         }
-                        Navigator.pushNamed(widget.arguments.parentContext,
+                        var results = await Navigator.pushNamed(
+                            widget.arguments.parentContext,
                             "/transaction_amount",
                             arguments: TransactionAmountArguments(
                               widget.arguments.store,
@@ -411,6 +414,15 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               TransactionType.SEND,
                               account: account,
                             ));
+                        if (results is PopWithResults) {
+                          PopWithResults popResult = results;
+                          if (popResult.toPage == "/home") {
+                            // TODO do stuff
+                            _onRefresh();
+                          } else {
+                            Navigator.of(context).pop(results);
+                          }
+                        }
                       },
                       padding: EdgeInsets.all(10.0),
                       color: Colors.transparent,
@@ -692,7 +704,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 BigInt gasLimit = await widget.arguments.store
                     .withdrawGasLimit(amountWithdraw, null, exit, false, true);
 
-                Navigator.of(widget.arguments.parentContext)
+                var results = await Navigator.of(widget.arguments.parentContext)
                     .pushNamed("/transaction_details",
                         arguments: TransactionDetailsArguments(
                           store: widget.arguments.store,
@@ -709,8 +721,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               widget.arguments.store.state.defaultFee,*/
                           gasLimit: gasLimit.toInt(),
                           gasPrice: gasPrice.toInt(),
-                        ))
-                    .then((value) => _onRefresh());
+                        ));
+                if (results is PopWithResults) {
+                  PopWithResults popResult = results;
+                  if (popResult.toPage == "/home") {
+                    // TODO do stuff
+                    _onRefresh();
+                  } else {
+                    Navigator.of(context).pop(results);
+                  }
+                }
               }, widget.arguments.store.state.txLevel);
             } else if (_pendingWithdraws.length > 0 &&
                 i <
@@ -803,23 +823,32 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           }
                         }
 
-                        Navigator.of(widget.arguments.parentContext)
-                            .pushNamed("/transaction_details",
-                                arguments: TransactionDetailsArguments(
-                                  store: widget.arguments.store,
-                                  transactionType: TransactionType.WITHDRAW,
-                                  transactionLevel: TransactionLevel.LEVEL1,
-                                  status: TransactionStatus.DRAFT,
-                                  token: exit.token,
-                                  exit: exit,
-                                  amount: double.parse(exit.balance) /
-                                      pow(10, exit.token.decimals),
-                                  addressFrom: addressFrom,
-                                  addressTo: addressTo,
-                                  gasLimit: gasLimit.toInt(),
-                                  gasPrice: gasPrice.toInt(),
-                                ))
-                            .then((value) => _onRefresh());
+                        var results =
+                            await Navigator.of(widget.arguments.parentContext)
+                                .pushNamed("/transaction_details",
+                                    arguments: TransactionDetailsArguments(
+                                      store: widget.arguments.store,
+                                      transactionType: TransactionType.WITHDRAW,
+                                      transactionLevel: TransactionLevel.LEVEL1,
+                                      status: TransactionStatus.DRAFT,
+                                      token: exit.token,
+                                      exit: exit,
+                                      amount: double.parse(exit.balance) /
+                                          pow(10, exit.token.decimals),
+                                      addressFrom: addressFrom,
+                                      addressTo: addressTo,
+                                      gasLimit: gasLimit.toInt(),
+                                      gasPrice: gasPrice.toInt(),
+                                    ));
+                        if (results is PopWithResults) {
+                          PopWithResults popResult = results;
+                          if (popResult.toPage == "/home") {
+                            // TODO do stuff
+                            _onRefresh();
+                          } else {
+                            Navigator.of(context).pop(results);
+                          }
+                        }
                       }
                     : () {},
                 widget.arguments.store.state.txLevel,
@@ -863,13 +892,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   true,
                   isPendingDeposit,
                   false, (Account account, Token token, tokenId, amount) async {
-                Navigator.of(context)
-                    .pushNamed("account_details",
-                        arguments: AccountDetailsArguments(
-                            widget.arguments.store,
-                            account,
-                            widget.arguments.parentContext))
-                    .then((value) => _onRefresh());
+                var needRefresh = await Navigator.of(context).pushNamed(
+                    "account_details",
+                    arguments: AccountDetailsArguments(widget.arguments.store,
+                        account, widget.arguments.parentContext));
+                if (needRefresh != null && needRefresh == true) {
+                  _onRefresh();
+                }
               }); //iterate through indexes and get the next colour
             }
           },

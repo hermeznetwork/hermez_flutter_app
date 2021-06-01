@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
@@ -54,7 +55,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    widget.arguments.store.initialise();
+    //widget.arguments.store.initialise();
+    initialize();
     showHermezWallet = widget.arguments.showHermezWallet;
     _currentIndex = ValueNotifier(0);
     updateItems();
@@ -101,26 +103,50 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     updateItems();
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex.value,
-        children: children,
-      ),
-      extendBody: true,
-      bottomNavigationBar: BottomNavigationBar(
-          elevation: 0,
-          selectedItemColor: HermezColors.blackTwo,
-          unselectedItemColor: HermezColors.blueyGreyTwo,
-          backgroundColor: Colors.transparent, // transparent
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          currentIndex: _currentIndex.value,
-          onTap: (int index) => onTabTapped(index, context),
-          items: [
-            for (final tabItem in items)
-              BottomNavigationBarItem(icon: tabItem.icon, label: tabItem.title)
-          ]),
-    );
+    /*return FutureBuilder(
+        future: initialize(),
+        builder: (context, snapshot) {*/
+    if (widget.arguments.store.state.ethereumAddress == null) {
+      return Container(
+          color: HermezColors.lightOrange,
+          child: Center(
+            child: CircularProgressIndicator(color: HermezColors.orange),
+          ));
+    } else {
+      return Scaffold(
+        body: IndexedStack(
+          index: _currentIndex.value,
+          children: children,
+        ),
+        extendBody: true,
+        bottomNavigationBar: BottomNavigationBar(
+            elevation: 0,
+            selectedItemColor: HermezColors.blackTwo,
+            unselectedItemColor: HermezColors.blueyGreyTwo,
+            backgroundColor: Colors.transparent, // transparent
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            currentIndex: _currentIndex.value,
+            onTap: (int index) => onTabTapped(index, context),
+            items: [
+              for (final tabItem in items)
+                BottomNavigationBarItem(
+                    icon: tabItem.icon, label: tabItem.title)
+            ]),
+      );
+    }
+    //});
+  }
+
+  Future<void> initialize() async {
+    if (widget.arguments.store.state.walletInitialized == false &&
+        widget.arguments.store.state.loading == false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Add Your Code here.
+        widget.arguments.store.initialise();
+      });
+    }
+    return;
   }
 
   void onTabTapped(int index, BuildContext context) {

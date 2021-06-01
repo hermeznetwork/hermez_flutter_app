@@ -13,8 +13,8 @@ class PinArguments {
   final bool creatingPin;
   final bool changePasscode;
   final Function onSuccess;
-  PinArguments(
-      this.title, this.creatingPin, this.changePasscode, this.onSuccess);
+  PinArguments(this.title, this.creatingPin, this.changePasscode,
+      {this.onSuccess});
 }
 
 class PinPage extends StatefulWidget {
@@ -667,8 +667,7 @@ class _PinPageState extends State<PinPage> {
           if (authenticated) {
             if (widget.arguments.onSuccess != null) {
               widget.arguments.onSuccess();
-            }
-            if (Navigator.canPop(context)) {
+            } else if (Navigator.canPop(context)) {
               Navigator.pop(context, true);
             }
           }
@@ -684,8 +683,7 @@ class _PinPageState extends State<PinPage> {
           if (authenticated) {
             if (widget.arguments.onSuccess != null) {
               widget.arguments.onSuccess();
-            }
-            if (Navigator.canPop(context)) {
+            } else if (Navigator.canPop(context)) {
               Navigator.pop(context, true);
             }
           }

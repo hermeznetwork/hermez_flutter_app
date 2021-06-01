@@ -6,11 +6,13 @@ import 'package:hermez_plugin/model/pool_transaction.dart';
 
 abstract class WalletAction {}
 
-class InitialiseWallet extends WalletAction {
-  InitialiseWallet(this.address, this.privateKey);
+class WalletInitialized extends WalletAction {
+  WalletInitialized(this.address, this.privateKey);
   final String address;
   final String privateKey;
 }
+
+class InitializingWallet extends WalletAction {}
 
 class BalanceUpdated extends WalletAction {
   BalanceUpdated(this.ethBalance, this.tokensBalance, this.cryptoList);
@@ -20,8 +22,6 @@ class BalanceUpdated extends WalletAction {
 }
 
 class UpdatingBalance extends WalletAction {}
-
-// TODO use this
 
 class WalletUpdated extends WalletAction {
   WalletUpdated(
@@ -77,10 +77,16 @@ class TransactionStarted extends WalletAction {}
 class TransactionFinished extends WalletAction {}
 
 Wallet reducer(Wallet state, WalletAction action) {
-  if (action is InitialiseWallet) {
+  if (action is WalletInitialized) {
     return state.rebuild((b) => b
+      ..loading = false
+      ..walletInitialized = true
       ..ethereumAddress = action.address
       ..ethereumPrivateKey = action.privateKey);
+  }
+
+  if (action is InitializingWallet) {
+    return state.rebuild((b) => b..loading = true);
   }
 
   if (action is UpdatingBalance) {

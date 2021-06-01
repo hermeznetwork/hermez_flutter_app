@@ -12,6 +12,7 @@ import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/pop_result.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/environment.dart';
@@ -51,6 +52,7 @@ class AccountDetailsPage extends StatefulWidget {
 
 class _AccountDetailsPageState extends State<AccountDetailsPage> {
   bool _isLoading = true;
+  bool _needRefresh = false;
   int fromItem = 0;
   int pendingItems = 0;
   List<dynamic> historyTransactions = [];
@@ -77,9 +79,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     //pendingTransfers = []; // Transfers
     //pendingExits = []; // L2 Exits
     //pendingDeposits = [];
-
     setState(() {
       _isLoading = true;
+      _needRefresh = true;
       fetchData();
     });
     return Future.value(null);
@@ -258,14 +260,17 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),
-            onPressed: () {
-              Navigator.pushNamed(
+            onPressed: () async {
+              var needRefresh = await Navigator.pushNamed(
                 widget.arguments.parentContext,
                 "/transaction_amount",
                 arguments: TransactionAmountArguments(widget.arguments.store,
                     widget.arguments.store.state.txLevel, TransactionType.SEND,
                     account: widget.arguments.account, allowChangeLevel: false),
-              ).then((value) => _onRefresh());
+              );
+              if (needRefresh != null && needRefresh == true) {
+                _onRefresh();
+              }
             },
             padding: EdgeInsets.all(10.0),
             color: Colors.transparent,
@@ -340,8 +345,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(
+                onPressed: () async {
+                  var results = await Navigator.pushNamed(
                     widget.arguments.parentContext,
                     "/transaction_amount",
                     arguments: TransactionAmountArguments(
@@ -353,7 +358,16 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             : TransactionType.EXIT,
                         account: widget.arguments.account,
                         allowChangeLevel: false),
-                  ).then((value) => _onRefresh());
+                  );
+                  if (results is PopWithResults) {
+                    PopWithResults popResult = results;
+                    if (popResult.toPage == "/home") {
+                      // TODO do stuff
+                      _onRefresh();
+                    } else {
+                      Navigator.of(context).pop(results);
+                    }
+                  }
                 },
                 padding: EdgeInsets.all(10.0),
                 color: Colors.transparent,
@@ -393,7 +407,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     double balanceAmount = double.parse(widget.arguments.account.balance) /
         pow(10, widget.arguments.account.token.decimals);
     double withdrawsAmount = 0;
-    double depositsAmount = 0;
+    //double depositsAmount = 0;
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
       pendingTransfers.forEach((poolTransaction) {
         var amount = (getTokenAmountBigInt(
@@ -421,11 +435,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             pow(10, widget.arguments.account.token.decimals);
         withdrawsAmount = withdrawsAmount + amount + fee;
       });
-      pendingDeposits.forEach((pendingDeposit) {
+      /*pendingDeposits.forEach((pendingDeposit) {
         var amount = pendingDeposit['amount'] /
             pow(10, widget.arguments.account.token.decimals);
         depositsAmount = depositsAmount + amount;
-      });
+      });*/
     } else {
       pendingTransfers.forEach((pendingTransfer) {
         var amount = pendingTransfer['amount'] /
@@ -450,10 +464,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       });
     }
 
-    resultAmount = balanceAmount - withdrawsAmount + depositsAmount;
+    resultAmount = balanceAmount - withdrawsAmount; //+ depositsAmount;
     debugPrint("balance amount:" + balanceAmount.toString());
     debugPrint("withdraws amount:" + withdrawsAmount.toString());
-    debugPrint("deposits amount:" + depositsAmount.toString());
+    //debugPrint("deposits amount:" + depositsAmount.toString());
     debugPrint("result amount:" + resultAmount.toString());
 
     if (resultAmount.isNegative) {
@@ -470,7 +484,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     return EthAmountFormatter.formatAmount(resultAmount, symbol);
   }
 
-  String accountBalance() {
+  /*String accountBalance() {
     double resultValue = 0;
     String result = "";
     String locale = "";
@@ -524,7 +538,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, widget.arguments.account.token.decimals));
     return result;
-  }
+  }*/
 
   //widget that builds the list
   Widget _buildTransactionsList() {
@@ -652,23 +666,26 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     gasLimit = await widget.arguments.store.withdrawGasLimit(
                         amountWithdraw, null, exit, false, true);
 
-                    Navigator.of(widget.arguments.parentContext)
-                        .pushNamed("/transaction_details",
-                            arguments: TransactionDetailsArguments(
-                              store: widget.arguments.store,
-                              transactionType: TransactionType.WITHDRAW,
-                              transactionLevel: TransactionLevel.LEVEL1,
-                              status: TransactionStatus.DRAFT,
-                              token: exit.token,
-                              exit: exit,
-                              amount: double.parse(exit.balance) /
-                                  pow(10, exit.token.decimals),
-                              addressFrom: addressFrom,
-                              addressTo: addressTo,
-                              gasLimit: gasLimit.toInt(),
-                              gasPrice: gasPrice.toInt(),
-                            ))
-                        .then((value) => _onRefresh());
+                    var needRefresh =
+                        await Navigator.of(widget.arguments.parentContext)
+                            .pushNamed("/transaction_details",
+                                arguments: TransactionDetailsArguments(
+                                  store: widget.arguments.store,
+                                  transactionType: TransactionType.WITHDRAW,
+                                  transactionLevel: TransactionLevel.LEVEL1,
+                                  status: TransactionStatus.DRAFT,
+                                  token: exit.token,
+                                  exit: exit,
+                                  amount: double.parse(exit.balance) /
+                                      pow(10, exit.token.decimals),
+                                  addressFrom: addressFrom,
+                                  addressTo: addressTo,
+                                  gasLimit: gasLimit.toInt(),
+                                  gasPrice: gasPrice.toInt(),
+                                ));
+                    if (needRefresh != null && needRefresh == true) {
+                      _onRefresh();
+                    }
                   }, widget.arguments.store.state.txLevel);
                 } else if (pendingWithdraws.length > 0 &&
                     i <
@@ -748,7 +765,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 .withdrawGasLimit(
                                     amountWithdraw, null, exit, false, true);
 
-                            Navigator.of(widget.arguments.parentContext)
+                            var needRefresh = await Navigator.of(
+                                    widget.arguments.parentContext)
                                 .pushNamed("/transaction_details",
                                     arguments: TransactionDetailsArguments(
                                       store: widget.arguments.store,
@@ -763,8 +781,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                       addressTo: addressTo,
                                       gasLimit: gasLimit.toInt(),
                                       gasPrice: gasPrice.toInt(),
-                                    ))
-                                .then((value) => _onRefresh());
+                                    ));
+                            if (needRefresh != null && needRefresh == true) {
+                              _onRefresh();
+                            }
                           }
                         : () {},
                     widget.arguments.store.state.txLevel,
@@ -1107,23 +1127,26 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             ),
                           ]),
                       onTap: () async {
-                        Navigator.pushNamed(context, "transaction_details",
-                                arguments: TransactionDetailsArguments(
-                                    store: widget.arguments.store,
-                                    transactionType: txType,
-                                    transactionLevel:
-                                        widget.arguments.store.state.txLevel,
-                                    status: txStatus,
-                                    account: widget.arguments.account,
-                                    token: widget.arguments.account.token,
-                                    amount: amount,
-                                    fee: fee,
-                                    transactionId: txId,
-                                    transactionHash: txHash,
-                                    addressFrom: addressFrom,
-                                    addressTo: addressTo,
-                                    transactionDate: date))
-                            .then((value) => _onRefresh());
+                        var needRefresh = await Navigator.pushNamed(
+                            context, "transaction_details",
+                            arguments: TransactionDetailsArguments(
+                                store: widget.arguments.store,
+                                transactionType: txType,
+                                transactionLevel:
+                                    widget.arguments.store.state.txLevel,
+                                status: txStatus,
+                                account: widget.arguments.account,
+                                token: widget.arguments.account.token,
+                                amount: amount,
+                                fee: fee,
+                                transactionId: txId,
+                                transactionHash: txHash,
+                                addressFrom: addressFrom,
+                                addressTo: addressTo,
+                                transactionDate: date));
+                        if (needRefresh != null && needRefresh == true) {
+                          _onRefresh();
+                        }
                       },
                     ),
                   );
@@ -1136,6 +1159,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   }
 
   Future<void> fetchData() async {
+    if (_needRefresh) {
+      await widget.arguments.store.getAccounts();
+    }
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
       pendingTransfers =
           await fetchL2PendingTransfers(widget.arguments.account.accountIndex);
@@ -1155,7 +1181,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       }).toList();
       pendingExits =
           await fetchL2PendingExits(widget.arguments.account.accountIndex);
-      List<dynamic> exits = await fetchExits(widget.arguments.account.token.id);
+      List<dynamic> exits = fetchExits(widget.arguments.account.token.id);
       pendingForceExits = await fetchPendingForceExits(
           widget.arguments.account.token.id, exits, pendingExits);
       pendingWithdraws =
@@ -1307,8 +1333,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   Future<List<dynamic>> fetchPendingForceExits(
       int tokenId, List<Exit> exits, List<PoolTransaction> pendingExits) async {
-    final accountPendingForceExits =
-        await widget.arguments.store.getPendingForceExits();
+    final accountPendingForceExits = List.from(widget
+        .arguments.store.state.pendingForceExits); //getPendingForceExits();
     accountPendingForceExits.removeWhere((pendingForceExit) =>
         Token.fromJson(pendingForceExit['token']).id != tokenId);
 
@@ -1332,7 +1358,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   Future<List<dynamic>> fetchPendingDeposits(int tokenId) async {
     final accountPendingDeposits =
-        await widget.arguments.store.getPendingDeposits();
+        List.from(widget.arguments.store.state.pendingDeposits);
     accountPendingDeposits.removeWhere((pendingDeposit) =>
         Token.fromJson(pendingDeposit['token']).id != tokenId);
     return accountPendingDeposits;

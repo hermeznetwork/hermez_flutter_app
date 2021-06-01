@@ -17,6 +17,7 @@ import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/pop_result.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/constants.dart';
 import 'package:hermez_plugin/environment.dart';
@@ -188,9 +189,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       elevation: 0.0,
       actions: <Widget>[
         new IconButton(
-          icon: new Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(null),
-        ),
+            icon: new Icon(Icons.close),
+            onPressed: () => Navigator.popUntil(context,
+                ModalRoute.withName("/home")) //Navigator.of(context).pop(null),
+            ),
       ],
     );
   }
@@ -437,16 +439,35 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                         TransactionLevel.LEVEL1)) {
                                       widget.arguments.txLevel =
                                           TransactionLevel.LEVEL2;
+                                      if (selectedAccount != null) {
+                                        selectedAccount = widget
+                                            .arguments.store.state.l2Accounts
+                                            .firstWhere(
+                                                (account) =>
+                                                    account.token.symbol ==
+                                                    selectedAccount
+                                                        .token.symbol,
+                                                orElse: () => null);
+                                      }
                                       widget.arguments.transactionType =
                                           TransactionType.EXIT;
                                     } else {
                                       widget.arguments.txLevel =
                                           TransactionLevel.LEVEL1;
+                                      if (selectedAccount != null) {
+                                        selectedAccount = widget
+                                            .arguments.store.state.l1Accounts
+                                            .firstWhere(
+                                                (account) =>
+                                                    account.token.symbol ==
+                                                    selectedAccount
+                                                        .token.symbol,
+                                                orElse: () => null);
+                                      }
                                       widget.arguments.transactionType =
                                           TransactionType.DEPOSIT;
                                     }
                                     defaultCurrencySelected = true;
-                                    selectedAccount = null;
                                     amountController.clear();
                                   });
                                 }
@@ -1290,7 +1311,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       String address,
       int gasLimit,
       int gasPrice,
-      LinkedHashMap<String, BigInt> depositGasLimit) {
+      LinkedHashMap<String, BigInt> depositGasLimit) async {
     if (widget.arguments.transactionType == TransactionType.RECEIVE) {
       Navigator.of(context).pushReplacementNamed("/qrcode",
           arguments: QRCodeArguments(
@@ -1336,9 +1357,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   gasLimit: gasLimit,
                   gasPrice: gasPrice,
                   depositGasLimit: depositGasLimit))
-          .then((value) {
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
+          .then((results) {
+        if (results is PopWithResults) {
+          PopWithResults popResult = results;
+          if (popResult.toPage == "/transaction_amount") {
+            // TODO do stuff
+          } else {
+            Navigator.of(context).pop(results);
+          }
         }
       });
     }

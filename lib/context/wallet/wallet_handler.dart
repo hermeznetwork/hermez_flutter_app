@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
@@ -59,18 +60,26 @@ class WalletHandler {
   Wallet get state => _store.state;
 
   Future<void> initialise() async {
-    final entropyMnemonic = await _configurationService.getMnemonic();
+    try {
+      _store.dispatch(InitializingWallet());
+      print("Initializing Wallet");
+      final entropyMnemonic = await _configurationService.getMnemonic();
 
-    if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
-      _initialiseFromMnemonic(entropyMnemonic);
-      return;
+      if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
+        await _initialiseFromMnemonic(entropyMnemonic);
+        return;
+      }
+
+      final privateKey = await _configurationService.getPrivateKey();
+      await _initialiseFromPrivateKey(privateKey);
+    } catch (e) {
+      print(e.toString());
     }
-
-    final privateKey = await _configurationService.getPrivateKey();
-    _initialiseFromPrivateKey(privateKey);
   }
 
   Future<void> initialiseReadOnly() async {
+    _store.dispatch(InitializingWallet());
+    print("Initializing Wallet");
     final entropyMnemonic = await _configurationService.getMnemonic();
     final privateKey = await _configurationService.getPrivateKey();
     final ethereumAddress = await _configurationService.getEthereumAddress();
@@ -79,12 +88,12 @@ class WalletHandler {
         privateKey.isNotEmpty &&
         ethereumAddress != null &&
         ethereumAddress.isNotEmpty) {
-      _initialiseFromStoredData(privateKey, ethereumAddress);
+      await _initialiseFromStoredData(privateKey, ethereumAddress);
       return;
     }
 
     if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
-      _initialiseFromMnemonic(entropyMnemonic);
+      await _initialiseFromMnemonic(entropyMnemonic);
       return;
     }
 
@@ -95,25 +104,23 @@ class WalletHandler {
     final mnemonic = _addressService.entropyToMnemonic(entropyMnemonic);
     final privateKey = _addressService.getPrivateKey(mnemonic);
     final address = await _addressService.getEthereumAddress(privateKey);
-
-    _store.dispatch(InitialiseWallet(address.toString(), privateKey));
-
     await _initialise();
+    _store.dispatch(WalletInitialized(address.toString(), privateKey));
+    print("Wallet Initialized");
   }
 
   Future<void> _initialiseFromPrivateKey(String privateKey) async {
     final address = await _addressService.getEthereumAddress(privateKey);
-
-    _store.dispatch(InitialiseWallet(address.toString(), privateKey));
-
     await _initialise();
+    _store.dispatch(WalletInitialized(address.toString(), privateKey));
+    print("Wallet Initialized");
   }
 
   Future<void> _initialiseFromStoredData(
       String privateKey, String ethereumAddress) async {
-    _store.dispatch(InitialiseWallet(ethereumAddress, privateKey));
-
     await _initialise();
+    _store.dispatch(WalletInitialized(ethereumAddress, privateKey));
+    print("Wallet Initialized");
   }
 
   Future<void> _initialise() async {
@@ -268,17 +275,22 @@ class WalletHandler {
   }*/
 
   Future<bool> getAccounts() async {
-    _store.dispatch(UpdatingWallet());
-    List<Account> l1Accounts = await getL1Accounts(true);
-    List<Account> l2Accounts = await getL2Accounts();
-    List<Exit> exits = await getExits();
-    List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
-    List<dynamic> pendingDeposits = await getPendingDeposits();
-    List<dynamic> pendingWithdraws = await getPendingWithdraws();
-    List<dynamic> pendingForceExits = await getPendingForceExits();
-
-    _store.dispatch(WalletUpdated(l1Accounts, l2Accounts, exits, pendingL2Txs,
-        pendingDeposits, pendingWithdraws, pendingForceExits));
+    try {
+      //_store.dispatch(UpdatingWallet());
+      print('Updating Wallet');
+      List<Account> l1Accounts = await getL1Accounts(true);
+      List<Account> l2Accounts = await getL2Accounts();
+      List<Exit> exits = await getExits();
+      List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
+      List<dynamic> pendingDeposits = await getPendingDeposits();
+      List<dynamic> pendingWithdraws = await getPendingWithdraws();
+      List<dynamic> pendingForceExits = await getPendingForceExits();
+      _store.dispatch(WalletUpdated(l1Accounts, l2Accounts, exits, pendingL2Txs,
+          pendingDeposits, pendingWithdraws, pendingForceExits));
+      print('Wallet Updated');
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   Future<List<Account>> getL1Accounts(bool showZeroBalanceAccounts) async {

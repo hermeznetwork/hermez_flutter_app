@@ -88,14 +88,16 @@ class RemoveAccountInfoPage extends HookWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(100.0),
                     ),
-                    onPressed: () {
-                      Navigator.of(context).pushNamed("/pin",
-                          arguments: PinArguments(
-                              "Remove account", false, false, () async {
-                            await arguments.store.resetWallet();
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, "/", (Route<dynamic> route) => false);
-                          }));
+                    onPressed: () async {
+                      var success = await Navigator.of(context).pushNamed(
+                          "/pin",
+                          arguments:
+                              PinArguments("Remove account", false, false));
+                      if (success != null && success == true) {
+                        await arguments.store.resetWallet();
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, "/", (Route<dynamic> route) => false);
+                      }
                     },
                     padding: EdgeInsets.only(
                         top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

@@ -33,13 +33,13 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   List<Account> _accounts;
   List<Token> _tokens;
 
-  Future<List<Account>> getAccounts() {
+  List<Account> getAccounts() {
     if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
             widget.arguments.transactionType != TransactionType.FORCEEXIT) ||
         widget.arguments.transactionType == TransactionType.DEPOSIT) {
-      return widget.arguments.store.getL1Accounts(false);
+      return widget.arguments.store.state.l1Accounts; //getL1Accounts(false);
     } else {
-      return widget.arguments.store.getL2Accounts();
+      return widget.arguments.store.state.l2Accounts; //getL2Accounts();
     }
   }
 
@@ -65,6 +65,8 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
       operation = "receive";
     }
 
+    _accounts = getAccounts();
+
     return Scaffold(
       appBar: new AppBar(
         title: new Text(operation[0].toUpperCase() + operation.substring(1),
@@ -85,23 +87,163 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
         ],
         leading: new Container(),
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: widget.arguments.transactionType == TransactionType.RECEIVE
-            ? getTokens()
-            : getAccounts(),
-        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                    color: Colors.white,
-                    child: handleAccountsList(snapshot, context)),
-              ),
-            ],
-          );
-        },
-      ),
+      body: widget.arguments.transactionType == TransactionType.RECEIVE
+          ? FutureBuilder<List<dynamic>>(
+              future: getTokens(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<dynamic>> snapshot) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                          color: Colors.white,
+                          child: handleAccountsList(snapshot, context)),
+                    ),
+                  ],
+                );
+              },
+            )
+          : _accounts != null && _accounts.length > 0
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                          color: Colors.white,
+                          child: buildAccountsList(context)),
+                    ),
+                  ],
+                )
+              : Container(
+                  margin: EdgeInsets.all(20.0),
+                  child: Column(children: [
+                    Text(
+                      'Make a deposit first in your ' +
+                          (widget.arguments.txLevel == TransactionLevel.LEVEL1
+                              ? 'Ethereum wallet'
+                              : 'Hermez wallet') +
+                          ' to ' +
+                          (widget.arguments.transactionType ==
+                                  TransactionType.SEND
+                              ? 'send tokens.'
+                              : 'move your funds.'),
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: HermezColors.blackTwo,
+                        fontSize: 18,
+                        height: 1.5,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    new GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          "/qrcode",
+                          arguments: QRCodeArguments(
+                            qrCodeType: widget.arguments.txLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? QRCodeType.ETHEREUM
+                                : QRCodeType.HERMEZ,
+                            code: widget.arguments.txLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? widget.arguments.store.state.ethereumAddress
+                                : getHermezAddress(widget
+                                    .arguments.store.state.ethereumAddress),
+                            store: widget.arguments.store,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16.0),
+                            color: widget.arguments.txLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? HermezColors.blueyGreyTwo
+                                : HermezColors.darkOrange),
+                        padding: EdgeInsets.all(24.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.arguments.txLevel ==
+                                            TransactionLevel.LEVEL1
+                                        ? 'Ethereum wallet'
+                                        : 'Hermez wallet',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      color: widget.arguments.txLevel ==
+                                              TransactionLevel.LEVEL1
+                                          ? Colors.white
+                                          : HermezColors.orange),
+                                  padding: EdgeInsets.only(
+                                      left: 12.0,
+                                      right: 12.0,
+                                      top: 6,
+                                      bottom: 6),
+                                  child: Text(
+                                    widget.arguments.txLevel ==
+                                            TransactionLevel.LEVEL1
+                                        ? 'L1'
+                                        : 'L2',
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 15,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16),
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Image.asset(
+                                    'assets/deposit3.png',
+                                    width: 75,
+                                    height: 75,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Image.asset(
+                                  widget.arguments.txLevel ==
+                                          TransactionLevel.LEVEL1
+                                      ? 'assets/ethereum_logo.png'
+                                      : 'assets/hermez_logo_white.png',
+                                  width: 30,
+                                  height: 30,
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
     );
   }
 
