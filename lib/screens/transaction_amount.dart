@@ -467,7 +467,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                       widget.arguments.transactionType =
                                           TransactionType.DEPOSIT;
                                     }
-                                    defaultCurrencySelected = true;
+                                    if (selectedAccount == null) {
+                                      defaultCurrencySelected = true;
+                                    }
+                                    needRefresh = true;
                                     amountController.clear();
                                   });
                                 }
@@ -845,8 +848,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   label: Text(
                                     defaultCurrencySelected
                                         ? selectedAccount != null
-                                            ? widget
-                                                .arguments.account.token.symbol
+                                            ? selectedAccount.token.symbol
                                             : widget.arguments.token.symbol
                                         : currency,
                                     textAlign: TextAlign.center,
