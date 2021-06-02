@@ -1490,16 +1490,23 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         String to = getCurrentEnvironment().contracts['Hermez'];
         if (isEthereumAddress(addressController.value.text)) {
           to = addressController.value.text;
-        } else if (selectedAccount.token.id != 0) {
+        } else if (selectedAccount != null && selectedAccount.token.id != 0) {
           to = selectedAccount.token.ethereumAddress;
         }
         BigInt value = BigInt.one;
         if (amount > 0) {
-          value = BigInt.from(amount * pow(10, selectedAccount.token.decimals));
+          value = BigInt.from(amount *
+              pow(
+                  10,
+                  selectedAccount != null
+                      ? selectedAccount.token.decimals
+                      : 18));
         }
 
-        gasLimit = await widget.arguments.store
-            .getGasLimit(from, to, value, selectedAccount.token);
+        gasLimit = selectedAccount != null
+            ? await widget.arguments.store
+                .getGasLimit(from, to, value, selectedAccount.token)
+            : BigInt.zero;
         gasPrice = getGasPrice(selectedFeeSpeed);
         enoughGas = await isEnoughGas(gasLimit * gasPrice);
         amountIsValid =
