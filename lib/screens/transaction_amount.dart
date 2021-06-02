@@ -500,21 +500,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           selectedAccount != null
                               ? BalanceUtils.calculatePendingBalance(
                                       widget.arguments.txLevel,
-                                      double.parse(selectedAccount.balance),
-                                      selectedAccount.token,
+                                      selectedAccount,
                                       selectedAccount.token.symbol,
-                                      selectedAccount.accountIndex,
-                                      widget
-                                          .arguments.store.state.exchangeRatio,
-                                      widget.arguments.store.state.pendingL2Txs,
-                                      widget.arguments.store.state.pendingL2Txs,
-                                      widget.arguments.store.state.exits,
-                                      widget.arguments.store.state
-                                          .pendingWithdraws,
-                                      widget.arguments.store.state
-                                          .pendingDeposits,
-                                      widget.arguments.store.state
-                                          .pendingForceExits) /
+                                      widget.arguments.store) /
                                   pow(10, selectedAccount.token.decimals)
                               : 0,
                           true,

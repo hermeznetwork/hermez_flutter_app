@@ -494,12 +494,20 @@ class WalletHandler {
 
     List transferIds = [];
     for (final pendingTransfer in accountPendingTransfers) {
-      final transactionHash = pendingTransfer['hash'];
-      web3.TransactionReceipt receipt =
-          await _contractService.getTxReceipt(transactionHash);
-      if (receipt != null) {
-        transferIds.add(transactionHash);
-        await _configurationService.removePendingTransfer(transactionHash);
+      try {
+        final transactionHash = pendingTransfer['hash'];
+        web3.TransactionReceipt receipt =
+            await _contractService.getTxReceipt(transactionHash);
+        web3.TransactionInformation transaction =
+            await _contractService.getTransactionByHash(transactionHash);
+        if (receipt != null &&
+            transaction != null &&
+            transaction.transactionIndex != null) {
+          transferIds.add(transactionHash);
+          await _configurationService.removePendingTransfer(transactionHash);
+        }
+      } catch (e) {
+        print(e.toString());
       }
     }
 

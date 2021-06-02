@@ -1,10 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/tx_utils.dart';
 import 'package:hermez_plugin/utils.dart';
@@ -163,19 +162,9 @@ class BalanceUtils {
   static double getDoubleWithPrecision(double input, {int precision = 2}) =>
       (input * pow(10, precision)).truncateToDouble() / pow(10, precision);
 
-  static double calculatePendingBalance(
-      TransactionLevel txLevel,
-      double balance,
-      Token token,
-      String symbol,
-      String accountIndex,
-      double exchangeRatio,
-      List<PoolTransaction> pendingL2Txs,
-      List<dynamic> pendingL1Transfers,
-      List<Exit> exits,
-      List<dynamic> pendingWithdraws,
-      List<dynamic> pendingDeposits,
-      List<dynamic> pendingForceExits) {
+  static double calculatePendingBalance(TransactionLevel txLevel,
+      Account account, String symbol, WalletHandler store,
+      {List<dynamic> historyTransactions}) {
     bool isCurrency = false;
     if (symbol == "EUR") {
       isCurrency = true;
@@ -189,13 +178,14 @@ class BalanceUtils {
       isCurrency = true;
     }
     double resultAmount = 0;
-    double balanceAmount = balance;
+    double balanceAmount = double.parse(account.balance);
     double withdrawsAmount = 0;
     double depositsAmount = 0;
     if (txLevel == TransactionLevel.LEVEL2) {
       // Pending transfers and Pending Exits L2
-      pendingL2Txs
-          .takeWhile((poolTransaction) => token.id == poolTransaction.token.id)
+      store.state.pendingL2Txs
+          .takeWhile(
+              (poolTransaction) => account.token.id == poolTransaction.token.id)
           .forEach((poolTransaction) {
         var amount = double.parse(poolTransaction.amount);
         var fee = getFeeValue(
@@ -216,37 +206,63 @@ class BalanceUtils {
         var amount = pendingWithdraw['amount'];
         withdrawsAmount += amount;
       });*/
-      pendingForceExits
+      store.state.pendingForceExits
           .takeWhile((pendingForceExit) =>
-              accountIndex == pendingForceExit.accountIndex)
+              account.accountIndex == pendingForceExit.accountIndex)
           .forEach((pendingForceExit) {
         var amount = pendingForceExit['amount'];
         withdrawsAmount += amount;
       });
     } else {
-      pendingL1Transfers.forEach((pendingTransfer) {
-        var amount = pendingTransfer['amount'];
-
-        if (token.id == 0) {
-          //rest fees
-          //var fee = pendingTransfer['fee'] / pow(10, 3);
-        }
-        var fee = 0;
-        withdrawsAmount += amount + fee;
-      });
-      pendingDeposits
+      store.state.pendingL1Transfers
           .takeWhile((pendingDeposit) =>
-              Token.fromJson(pendingDeposit['token']).symbol == token.symbol)
-          .forEach((pendingDeposit) {
-        /*historyTransactions.firstWhere(
-            (forgedTransaction) =>
-                forgedTransaction['txHash'] == pendingDeposit['hash'],
-            orElse: () {*/
-        if (pendingDeposit['id'] == null) {
-          var amount = pendingDeposit['amount'];
-          withdrawsAmount += amount;
+              Token.fromJson(pendingDeposit['token']).symbol ==
+              account.token.symbol)
+          .forEach((pendingTransfer) {
+        if (historyTransactions != null) {
+          historyTransactions.firstWhere(
+              (forgedTransaction) =>
+                  forgedTransaction['txHash'] == pendingTransfer['hash'],
+              orElse: () {
+            var amount = pendingTransfer['amount'];
+            if (account.token.id == 0) {
+              //rest fees
+              //var fee = pendingTransfer['fee'] / pow(10, 3);
+            }
+            var fee = 0;
+            withdrawsAmount += amount + fee;
+          });
+        } else {
+          var amount = pendingTransfer['amount'];
+          if (account.token.id == 0) {
+            //rest fees
+            //var fee = pendingTransfer['fee'] / pow(10, 3);
+          }
+          var fee = 0;
+          withdrawsAmount += amount + fee;
         }
-        //});
+      });
+      store.state.pendingDeposits
+          .takeWhile((pendingDeposit) =>
+              Token.fromJson(pendingDeposit['token']).symbol ==
+              account.token.symbol)
+          .forEach((pendingDeposit) {
+        if (historyTransactions != null) {
+          historyTransactions.firstWhere(
+              (forgedTransaction) =>
+                  forgedTransaction['txHash'] == pendingDeposit['hash'],
+              orElse: () {
+            if (pendingDeposit['id'] == null) {
+              var amount = pendingDeposit['amount'];
+              withdrawsAmount += amount;
+            }
+          });
+        } else {
+          if (pendingDeposit['id'] == null) {
+            var amount = pendingDeposit['amount'];
+            withdrawsAmount += amount;
+          }
+        }
       });
     }
 
@@ -259,10 +275,10 @@ class BalanceUtils {
       resultAmount = 0.0;
     }
 
-    if (isCurrency && token.USD != null) {
-      resultAmount = token.USD * resultAmount;
+    if (isCurrency && account.token.USD != null) {
+      resultAmount = account.token.USD * resultAmount;
       if (symbol != "USD") {
-        resultAmount *= exchangeRatio;
+        resultAmount *= store.state.exchangeRatio;
       }
     }
 

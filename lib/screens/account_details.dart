@@ -397,40 +397,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   }
 
   String calculateBalance(String symbol) {
-    bool isCurrency = false;
-    if (symbol == "EUR") {
-      isCurrency = true;
-    } else if (symbol == "CNY") {
-      isCurrency = true;
-    } else if (symbol == "JPY") {
-      isCurrency = true;
-    } else if (symbol == "GBP") {
-      isCurrency = true;
-    } else if (symbol == "USD") {
-      isCurrency = true;
-    }
-
     double resultAmount = BalanceUtils.calculatePendingBalance(
             widget.arguments.store.state.txLevel,
-            double.parse(widget.arguments.account.balance),
-            widget.arguments.account.token,
-            widget.arguments.account.token.symbol,
-            widget.arguments.account.accountIndex,
-            widget.arguments.store.state.exchangeRatio,
-            widget.arguments.store.state.pendingL2Txs,
-            widget.arguments.store.state.pendingL2Txs,
-            widget.arguments.store.state.exits,
-            widget.arguments.store.state.pendingWithdraws,
-            widget.arguments.store.state.pendingDeposits,
-            widget.arguments.store.state.pendingForceExits) /
+            widget.arguments.account,
+            symbol,
+            widget.arguments.store,
+            historyTransactions: historyTransactions) /
         pow(10, widget.arguments.account.token.decimals);
-
-    if (isCurrency && widget.arguments.account.token.USD != null) {
-      resultAmount = widget.arguments.account.token.USD * resultAmount;
-      if (symbol != "USD") {
-        resultAmount *= widget.arguments.store.state.exchangeRatio;
-      }
-    }
 
     return EthAmountFormatter.formatAmount(resultAmount, symbol);
   }
@@ -1191,9 +1164,18 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         pendingItems = pendingItems;
         fromItem = filteredTransactions.last.itemId;
         transactions.addAll(filteredTransactions);
+        transactions.sort((a, b) {
+          final formatter =
+              DateFormat("yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+          final DateTime dateTime1FromStr = formatter.parse(a.timestamp);
+          final DateTime dateTime2FromStr = formatter.parse(b.timestamp);
+
+          return dateTime1FromStr.compareTo(dateTime2FromStr);
+        });
         _isLoading = false;
       });
     } else {
+      // TODO remove ForgedTransactions to map
       pendingTransfers =
           await fetchPendingTransfers(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingTransfersTxs =
@@ -1230,6 +1212,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           await fetchPendingDeposits(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingDepositsTxs =
           pendingDeposits.map((pendingDeposit) {
+        /* return {
+              "txHash" : pendingDeposit['hash']
+            };*/
         return ForgedTransaction(
             id: pendingDeposit['id'],
             hash: pendingDeposit['hash'],
@@ -1247,15 +1232,34 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           transactions.add(forgedTransaction);
         }
         for (ForgedTransaction forgedTransaction in pendingTransfersTxs) {
-          fullTxs.removeWhere(
-              (element) => element['txHash'] == forgedTransaction.hash);
-          transactions.add(forgedTransaction);
+          fullTxs.firstWhere(
+              (element) => element['txHash'] == forgedTransaction.hash,
+              orElse: () => transactions.add(forgedTransaction));
         }
       }
       widget.arguments.account = await fetchAccount();
       setState(() {
         pendingItems = 0;
         transactions.addAll(fullTxs);
+        transactions.sort((a, b) {
+          DateTime dateTime1FromStr;
+          DateTime dateTime2FromStr;
+          final formatter =
+              DateFormat("yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+          if (a is ForgedTransaction) {
+            dateTime1FromStr = formatter.parse(a.timestamp);
+          } else {
+            dateTime1FromStr =
+                DateTime.fromMillisecondsSinceEpoch(a['timestamp']);
+          }
+          if (b is ForgedTransaction) {
+            dateTime2FromStr = formatter.parse(b.timestamp);
+          } else {
+            dateTime2FromStr =
+                DateTime.fromMillisecondsSinceEpoch(b['timestamp']);
+          }
+          return dateTime2FromStr.compareTo(dateTime1FromStr);
+        });
         _isLoading = false;
       });
     }

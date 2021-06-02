@@ -560,18 +560,9 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                         currency,
                         BalanceUtils.calculatePendingBalance(
                                 widget.arguments.txLevel,
-                                double.parse(account.balance),
-                                account.token,
+                                account,
                                 account.token.symbol,
-                                account.accountIndex,
-                                widget.arguments.store.state.exchangeRatio,
-                                widget.arguments.store.state.pendingL2Txs,
-                                widget.arguments.store.state.pendingL2Txs,
-                                widget.arguments.store.state.exits,
-                                widget.arguments.store.state.pendingWithdraws,
-                                widget.arguments.store.state.pendingDeposits,
-                                widget
-                                    .arguments.store.state.pendingForceExits) /
+                                widget.arguments.store) /
                             pow(10, account.token.decimals),
                         false,
                         true,
