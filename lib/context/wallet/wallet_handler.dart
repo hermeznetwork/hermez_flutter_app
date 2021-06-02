@@ -282,11 +282,19 @@ class WalletHandler {
       List<Account> l2Accounts = await getL2Accounts();
       List<Exit> exits = await getExits();
       List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
+      List<dynamic> pendingL1Transfers = await getPendingTransfers();
       List<dynamic> pendingDeposits = await getPendingDeposits();
       List<dynamic> pendingWithdraws = await getPendingWithdraws();
       List<dynamic> pendingForceExits = await getPendingForceExits();
-      _store.dispatch(WalletUpdated(l1Accounts, l2Accounts, exits, pendingL2Txs,
-          pendingDeposits, pendingWithdraws, pendingForceExits));
+      _store.dispatch(WalletUpdated(
+          l1Accounts,
+          l2Accounts,
+          exits,
+          pendingL2Txs,
+          pendingL1Transfers,
+          pendingDeposits,
+          pendingWithdraws,
+          pendingForceExits));
       print('Wallet Updated');
     } catch (e) {
       debugPrint(e.toString());

@@ -9,6 +9,7 @@ import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -24,7 +25,6 @@ import 'package:hermez_plugin/model/l2info.dart';
 import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/tx_utils.dart';
-import 'package:hermez_plugin/utils.dart';
 import 'package:intl/intl.dart';
 
 import '../context/wallet/wallet_handler.dart';
@@ -261,15 +261,21 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
               borderRadius: BorderRadius.circular(10.0),
             ),
             onPressed: () async {
-              var needRefresh = await Navigator.pushNamed(
+              var results = await Navigator.pushNamed(
                 widget.arguments.parentContext,
                 "/transaction_amount",
                 arguments: TransactionAmountArguments(widget.arguments.store,
                     widget.arguments.store.state.txLevel, TransactionType.SEND,
                     account: widget.arguments.account, allowChangeLevel: false),
               );
-              if (needRefresh != null && needRefresh == true) {
-                _onRefresh();
+              if (results is PopWithResults) {
+                PopWithResults popResult = results;
+                if (popResult.toPage == "/home") {
+                  // TODO do stuff
+                  _onRefresh();
+                } else {
+                  Navigator.of(context).pop(results);
+                }
               }
             },
             padding: EdgeInsets.all(10.0),
@@ -403,76 +409,21 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     } else if (symbol == "USD") {
       isCurrency = true;
     }
-    double resultAmount = 0;
-    double balanceAmount = double.parse(widget.arguments.account.balance) /
+
+    double resultAmount = BalanceUtils.calculatePendingBalance(
+            widget.arguments.store.state.txLevel,
+            double.parse(widget.arguments.account.balance),
+            widget.arguments.account.token,
+            widget.arguments.account.token.symbol,
+            widget.arguments.account.accountIndex,
+            widget.arguments.store.state.exchangeRatio,
+            widget.arguments.store.state.pendingL2Txs,
+            widget.arguments.store.state.pendingL2Txs,
+            widget.arguments.store.state.exits,
+            widget.arguments.store.state.pendingWithdraws,
+            widget.arguments.store.state.pendingDeposits,
+            widget.arguments.store.state.pendingForceExits) /
         pow(10, widget.arguments.account.token.decimals);
-    double withdrawsAmount = 0;
-    //double depositsAmount = 0;
-    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
-      pendingTransfers.forEach((poolTransaction) {
-        var amount = (getTokenAmountBigInt(
-                    double.parse(poolTransaction.amount) /
-                        pow(10, widget.arguments.account.token.decimals),
-                    widget.arguments.account.token.decimals)
-                .toDouble() /
-            pow(10, widget.arguments.account.token.decimals));
-        var fee = getFeeValue(
-                    poolTransaction.fee, double.parse(poolTransaction.amount))
-                .toDouble() /
-            pow(10, widget.arguments.account.token.decimals);
-        withdrawsAmount = withdrawsAmount + amount + fee;
-      });
-      pendingExits.forEach((poolTransaction) {
-        var amount = (getTokenAmountBigInt(
-                    double.parse(poolTransaction.amount) /
-                        pow(10, widget.arguments.account.token.decimals),
-                    widget.arguments.account.token.decimals)
-                .toDouble() /
-            pow(10, widget.arguments.account.token.decimals));
-        var fee = getFeeValue(
-                    poolTransaction.fee, double.parse(poolTransaction.amount))
-                .toDouble() /
-            pow(10, widget.arguments.account.token.decimals);
-        withdrawsAmount = withdrawsAmount + amount + fee;
-      });
-      /*pendingDeposits.forEach((pendingDeposit) {
-        var amount = pendingDeposit['amount'] /
-            pow(10, widget.arguments.account.token.decimals);
-        depositsAmount = depositsAmount + amount;
-      });*/
-    } else {
-      pendingTransfers.forEach((pendingTransfer) {
-        var amount = pendingTransfer['amount'] /
-            pow(10, widget.arguments.account.token.decimals);
-
-        if (widget.arguments.account.token.id == 0) {
-          //rest fees
-          //var fee = pendingTransfer['fee'] / pow(10, 3);
-        }
-        var fee = 0;
-        withdrawsAmount = withdrawsAmount + amount + fee;
-      });
-      pendingDeposits.forEach((pendingDeposit) {
-        historyTransactions.firstWhere(
-            (forgedTransaction) =>
-                forgedTransaction['txHash'] == pendingDeposit['hash'],
-            orElse: () {
-          var amount = pendingDeposit['amount'] /
-              pow(10, widget.arguments.account.token.decimals);
-          withdrawsAmount = withdrawsAmount + amount;
-        });
-      });
-    }
-
-    resultAmount = balanceAmount - withdrawsAmount; //+ depositsAmount;
-    debugPrint("balance amount:" + balanceAmount.toString());
-    debugPrint("withdraws amount:" + withdrawsAmount.toString());
-    //debugPrint("deposits amount:" + depositsAmount.toString());
-    debugPrint("result amount:" + resultAmount.toString());
-
-    if (resultAmount.isNegative) {
-      resultAmount = 0.0;
-    }
 
     if (isCurrency && widget.arguments.account.token.USD != null) {
       resultAmount = widget.arguments.account.token.USD * resultAmount;
@@ -666,7 +617,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     gasLimit = await widget.arguments.store.withdrawGasLimit(
                         amountWithdraw, null, exit, false, true);
 
-                    var needRefresh =
+                    var results =
                         await Navigator.of(widget.arguments.parentContext)
                             .pushNamed("/transaction_details",
                                 arguments: TransactionDetailsArguments(
@@ -683,8 +634,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                   gasLimit: gasLimit.toInt(),
                                   gasPrice: gasPrice.toInt(),
                                 ));
-                    if (needRefresh != null && needRefresh == true) {
-                      _onRefresh();
+                    if (results is PopWithResults) {
+                      PopWithResults popResult = results;
+                      if (popResult.toPage == "/home") {
+                        // TODO do stuff
+                        _onRefresh();
+                      } else {
+                        Navigator.of(context).pop(results);
+                      }
                     }
                   }, widget.arguments.store.state.txLevel);
                 } else if (pendingWithdraws.length > 0 &&
@@ -765,7 +722,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 .withdrawGasLimit(
                                     amountWithdraw, null, exit, false, true);
 
-                            var needRefresh = await Navigator.of(
+                            var results = await Navigator.of(
                                     widget.arguments.parentContext)
                                 .pushNamed("/transaction_details",
                                     arguments: TransactionDetailsArguments(
@@ -782,8 +739,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                       gasLimit: gasLimit.toInt(),
                                       gasPrice: gasPrice.toInt(),
                                     ));
-                            if (needRefresh != null && needRefresh == true) {
-                              _onRefresh();
+                            if (results is PopWithResults) {
+                              PopWithResults popResult = results;
+                              if (popResult.toPage == "/home") {
+                                // TODO do stuff
+                                _onRefresh();
+                              } else {
+                                Navigator.of(context).pop(results);
+                              }
                             }
                           }
                         : () {},
@@ -1127,7 +1090,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             ),
                           ]),
                       onTap: () async {
-                        var needRefresh = await Navigator.pushNamed(
+                        var results = await Navigator.pushNamed(
                             context, "transaction_details",
                             arguments: TransactionDetailsArguments(
                                 store: widget.arguments.store,
@@ -1144,8 +1107,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 addressFrom: addressFrom,
                                 addressTo: addressTo,
                                 transactionDate: date));
-                        if (needRefresh != null && needRefresh == true) {
-                          _onRefresh();
+                        if (results is PopWithResults) {
+                          PopWithResults popResult = results;
+                          if (popResult.toPage == "/home") {
+                            // TODO do stuff
+                            _onRefresh();
+                          } else {
+                            Navigator.of(context).pop(results);
+                          }
                         }
                       },
                     ),
@@ -1276,12 +1245,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           fullTxs.removeWhere(
               (element) => element['txHash'] == forgedTransaction.hash);
           transactions.add(forgedTransaction);
-          //orElse: () => transactions.add(forgedTransaction));
         }
         for (ForgedTransaction forgedTransaction in pendingTransfersTxs) {
-          fullTxs.firstWhere(
-              (element) => element['txHash'] == forgedTransaction.hash,
-              orElse: () => transactions.add(forgedTransaction));
+          fullTxs.removeWhere(
+              (element) => element['txHash'] == forgedTransaction.hash);
+          transactions.add(forgedTransaction);
         }
       }
       widget.arguments.account = await fetchAccount();
@@ -1366,7 +1334,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   Future<List<dynamic>> fetchPendingTransfers(int tokenId) async {
     final accountPendingTransfers =
-        await widget.arguments.store.getPendingTransfers();
+        List.from(widget.arguments.store.state.pendingL1Transfers);
     accountPendingTransfers.removeWhere((pendingTransfer) =>
         Token.fromJson(pendingTransfer['token']).id != tokenId);
     return accountPendingTransfers;

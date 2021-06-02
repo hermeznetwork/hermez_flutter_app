@@ -7,6 +7,7 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/model/account.dart';
@@ -557,8 +558,21 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                                 widget.arguments.store.state.exchangeRatio
                             : account.token.USD,
                         currency,
-                        (double.parse(account.balance) /
-                            pow(10, account.token.decimals)),
+                        BalanceUtils.calculatePendingBalance(
+                                widget.arguments.txLevel,
+                                double.parse(account.balance),
+                                account.token,
+                                account.token.symbol,
+                                account.accountIndex,
+                                widget.arguments.store.state.exchangeRatio,
+                                widget.arguments.store.state.pendingL2Txs,
+                                widget.arguments.store.state.pendingL2Txs,
+                                widget.arguments.store.state.exits,
+                                widget.arguments.store.state.pendingWithdraws,
+                                widget.arguments.store.state.pendingDeposits,
+                                widget
+                                    .arguments.store.state.pendingForceExits) /
+                            pow(10, account.token.decimals),
                         false,
                         true,
                         false,

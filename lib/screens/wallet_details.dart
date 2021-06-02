@@ -886,7 +886,19 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           widget.arguments.store.state.exchangeRatio
                       : account.token.USD,
                   currency,
-                  double.parse(account.balance) /
+                  BalanceUtils.calculatePendingBalance(
+                          widget.arguments.transactionLevel,
+                          double.parse(account.balance),
+                          account.token,
+                          account.token.symbol,
+                          account.accountIndex,
+                          widget.arguments.store.state.exchangeRatio,
+                          widget.arguments.store.state.pendingL2Txs,
+                          widget.arguments.store.state.pendingL2Txs,
+                          widget.arguments.store.state.exits,
+                          widget.arguments.store.state.pendingWithdraws,
+                          widget.arguments.store.state.pendingDeposits,
+                          widget.arguments.store.state.pendingForceExits) /
                       pow(10, account.token.decimals),
                   false,
                   true,
@@ -898,6 +910,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         account, widget.arguments.parentContext));
                 if (needRefresh != null && needRefresh == true) {
                   _onRefresh();
+                } else {
+                  setState(() {});
                 }
               }); //iterate through indexes and get the next colour
             }

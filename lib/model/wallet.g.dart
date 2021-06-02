@@ -42,6 +42,8 @@ class _$Wallet extends Wallet {
   @override
   final List<PoolTransaction> pendingL2Txs;
   @override
+  final List<dynamic> pendingL1Transfers;
+  @override
   final List<dynamic> pendingDeposits;
   @override
   final List<dynamic> pendingWithdraws;
@@ -77,6 +79,7 @@ class _$Wallet extends Wallet {
       this.l1Accounts,
       this.l2Accounts,
       this.pendingL2Txs,
+      this.pendingL1Transfers,
       this.pendingDeposits,
       this.pendingWithdraws,
       this.pendingForceExits,
@@ -124,6 +127,7 @@ class _$Wallet extends Wallet {
         l1Accounts == other.l1Accounts &&
         l2Accounts == other.l2Accounts &&
         pendingL2Txs == other.pendingL2Txs &&
+        pendingL1Transfers == other.pendingL1Transfers &&
         pendingDeposits == other.pendingDeposits &&
         pendingWithdraws == other.pendingWithdraws &&
         pendingForceExits == other.pendingForceExits &&
@@ -153,19 +157,19 @@ class _$Wallet extends Wallet {
                                                                 $jc(
                                                                     $jc(
                                                                         $jc(
-                                                                            $jc($jc($jc($jc($jc($jc(0, ethereumAddress.hashCode), ethereumPrivateKey.hashCode), hermezWallet.hashCode), hermezAddress.hashCode), hermezPublicKeyHex.hashCode),
-                                                                                hermezPublicKeyBase64.hashCode),
-                                                                            tokensBalance.hashCode),
-                                                                        ethBalance.hashCode),
-                                                                    ethUSDPrice.hashCode),
-                                                                defaultCurrency.hashCode),
-                                                            defaultFee.hashCode),
-                                                        exchangeRatio.hashCode),
-                                                    txLevel.hashCode),
-                                                cryptoList.hashCode),
-                                            l1Accounts.hashCode),
-                                        l2Accounts.hashCode),
-                                    pendingL2Txs.hashCode),
+                                                                            $jc($jc($jc($jc($jc($jc($jc(0, ethereumAddress.hashCode), ethereumPrivateKey.hashCode), hermezWallet.hashCode), hermezAddress.hashCode), hermezPublicKeyHex.hashCode), hermezPublicKeyBase64.hashCode),
+                                                                                tokensBalance.hashCode),
+                                                                            ethBalance.hashCode),
+                                                                        ethUSDPrice.hashCode),
+                                                                    defaultCurrency.hashCode),
+                                                                defaultFee.hashCode),
+                                                            exchangeRatio.hashCode),
+                                                        txLevel.hashCode),
+                                                    cryptoList.hashCode),
+                                                l1Accounts.hashCode),
+                                            l2Accounts.hashCode),
+                                        pendingL2Txs.hashCode),
+                                    pendingL1Transfers.hashCode),
                                 pendingDeposits.hashCode),
                             pendingWithdraws.hashCode),
                         pendingForceExits.hashCode),
@@ -195,6 +199,7 @@ class _$Wallet extends Wallet {
           ..add('l1Accounts', l1Accounts)
           ..add('l2Accounts', l2Accounts)
           ..add('pendingL2Txs', pendingL2Txs)
+          ..add('pendingL1Transfers', pendingL1Transfers)
           ..add('pendingDeposits', pendingDeposits)
           ..add('pendingWithdraws', pendingWithdraws)
           ..add('pendingForceExits', pendingForceExits)
@@ -280,6 +285,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   set pendingL2Txs(List<PoolTransaction> pendingL2Txs) =>
       _$this._pendingL2Txs = pendingL2Txs;
 
+  List<dynamic> _pendingL1Transfers;
+  List<dynamic> get pendingL1Transfers => _$this._pendingL1Transfers;
+  set pendingL1Transfers(List<dynamic> pendingL1Transfers) =>
+      _$this._pendingL1Transfers = pendingL1Transfers;
+
   List<dynamic> _pendingDeposits;
   List<dynamic> get pendingDeposits => _$this._pendingDeposits;
   set pendingDeposits(List<dynamic> pendingDeposits) =>
@@ -342,6 +352,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _l1Accounts = _$v.l1Accounts;
       _l2Accounts = _$v.l2Accounts;
       _pendingL2Txs = _$v.pendingL2Txs;
+      _pendingL1Transfers = _$v.pendingL1Transfers;
       _pendingDeposits = _$v.pendingDeposits;
       _pendingWithdraws = _$v.pendingWithdraws;
       _pendingForceExits = _$v.pendingForceExits;
@@ -390,6 +401,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               l1Accounts: l1Accounts,
               l2Accounts: l2Accounts,
               pendingL2Txs: pendingL2Txs,
+              pendingL1Transfers: pendingL1Transfers,
               pendingDeposits: pendingDeposits,
               pendingWithdraws: pendingWithdraws,
               pendingForceExits: pendingForceExits,

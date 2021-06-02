@@ -29,6 +29,7 @@ class WalletUpdated extends WalletAction {
     this.l2Accounts,
     this.exits,
     this.pendingL2Txs,
+    this.pendingL1Transfers,
     this.pendingDeposits,
     this.pendingWithdraws,
     this.pendingForceExits,
@@ -39,6 +40,7 @@ class WalletUpdated extends WalletAction {
   final List<Account> l2Accounts;
   final List<Exit> exits;
   final List<PoolTransaction> pendingL2Txs;
+  final List<dynamic> pendingL1Transfers;
   final List<dynamic> pendingDeposits;
   final List<dynamic> pendingWithdraws;
   final List<dynamic> pendingForceExits;
@@ -112,6 +114,7 @@ Wallet reducer(Wallet state, WalletAction action) {
       ..l2Accounts = action.l2Accounts
       ..exits = action.exits
       ..pendingL2Txs = action.pendingL2Txs
+      ..pendingL1Transfers = action.pendingL1Transfers
       ..pendingDeposits = action.pendingDeposits
       ..pendingWithdraws = action.pendingWithdraws
       ..pendingForceExits = action.pendingForceExits);

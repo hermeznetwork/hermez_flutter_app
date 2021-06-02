@@ -15,6 +15,7 @@ import 'package:hermez/screens/qrcode_scanner.dart';
 import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/address_utils.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
@@ -497,7 +498,23 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   : widget.arguments.token.USD,
                           currency,
                           selectedAccount != null
-                              ? double.parse(selectedAccount.balance) /
+                              ? BalanceUtils.calculatePendingBalance(
+                                      widget.arguments.txLevel,
+                                      double.parse(selectedAccount.balance),
+                                      selectedAccount.token,
+                                      selectedAccount.token.symbol,
+                                      selectedAccount.accountIndex,
+                                      widget
+                                          .arguments.store.state.exchangeRatio,
+                                      widget.arguments.store.state.pendingL2Txs,
+                                      widget.arguments.store.state.pendingL2Txs,
+                                      widget.arguments.store.state.exits,
+                                      widget.arguments.store.state
+                                          .pendingWithdraws,
+                                      widget.arguments.store.state
+                                          .pendingDeposits,
+                                      widget.arguments.store.state
+                                          .pendingForceExits) /
                                   pow(10, selectedAccount.token.decimals)
                               : 0,
                           true,

@@ -53,6 +53,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   List<PoolTransaction> get pendingL2Txs;
 
+  List<dynamic> get pendingL1Transfers;
+
   List<dynamic> get pendingDeposits;
 
   List<dynamic> get pendingWithdraws;
@@ -81,6 +83,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..l1Accounts = []
     ..l2Accounts = []
     ..pendingL2Txs = []
+    ..pendingL1Transfers = []
     ..pendingDeposits = []
     ..pendingWithdraws = []
     ..pendingForceExits = []

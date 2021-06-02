@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_plugin/model/exit.dart';
+import 'package:hermez_plugin/model/pool_transaction.dart';
 import 'package:hermez_plugin/model/token.dart';
 import 'package:hermez_plugin/tx_utils.dart';
 import 'package:hermez_plugin/utils.dart';
@@ -166,9 +168,14 @@ class BalanceUtils {
       double balance,
       Token token,
       String symbol,
+      String accountIndex,
       double exchangeRatio,
+      List<PoolTransaction> pendingL2Txs,
+      List<dynamic> pendingL1Transfers,
+      List<Exit> exits,
       List<dynamic> pendingWithdraws,
-      List<dynamic> pendingDeposits) {
+      List<dynamic> pendingDeposits,
+      List<dynamic> pendingForceExits) {
     bool isCurrency = false;
     if (symbol == "EUR") {
       isCurrency = true;
@@ -187,21 +194,37 @@ class BalanceUtils {
     double depositsAmount = 0;
     if (txLevel == TransactionLevel.LEVEL2) {
       // Pending transfers and Pending Exits L2
-      pendingWithdraws.forEach((poolTransaction) {
-        var amount = (getTokenAmountBigInt(
-                double.parse(poolTransaction.amount), token.decimals)
-            .toDouble());
+      pendingL2Txs
+          .takeWhile((poolTransaction) => token.id == poolTransaction.token.id)
+          .forEach((poolTransaction) {
+        var amount = double.parse(poolTransaction.amount);
         var fee = getFeeValue(
                 poolTransaction.fee, double.parse(poolTransaction.amount))
             .toDouble();
-        withdrawsAmount = withdrawsAmount + amount + fee;
+        withdrawsAmount += amount + fee;
       });
-      pendingDeposits.forEach((pendingDeposit) {
-        var amount = pendingDeposit['amount'];
-        depositsAmount = depositsAmount + amount;
+      /*exits
+          .takeWhile((exit) => accountIndex == exit.accountIndex)
+          .forEach((exit) {
+        var amount = double.parse(exit.balance);
+        withdrawsAmount += amount;
+      });*/
+      /*pendingWithdraws
+          .takeWhile((pendingWithdraw) =>
+              accountIndex == pendingWithdraw['accountIndex'])
+          .forEach((pendingWithdraw) {
+        var amount = pendingWithdraw['amount'];
+        withdrawsAmount += amount;
+      });*/
+      pendingForceExits
+          .takeWhile((pendingForceExit) =>
+              accountIndex == pendingForceExit.accountIndex)
+          .forEach((pendingForceExit) {
+        var amount = pendingForceExit['amount'];
+        withdrawsAmount += amount;
       });
     } else {
-      pendingWithdraws.forEach((pendingTransfer) {
+      pendingL1Transfers.forEach((pendingTransfer) {
         var amount = pendingTransfer['amount'];
 
         if (token.id == 0) {
@@ -209,15 +232,20 @@ class BalanceUtils {
           //var fee = pendingTransfer['fee'] / pow(10, 3);
         }
         var fee = 0;
-        withdrawsAmount = withdrawsAmount + amount + fee;
+        withdrawsAmount += amount + fee;
       });
-      pendingDeposits.forEach((pendingDeposit) {
+      pendingDeposits
+          .takeWhile((pendingDeposit) =>
+              Token.fromJson(pendingDeposit['token']).symbol == token.symbol)
+          .forEach((pendingDeposit) {
         /*historyTransactions.firstWhere(
             (forgedTransaction) =>
                 forgedTransaction['txHash'] == pendingDeposit['hash'],
             orElse: () {*/
-        var amount = pendingDeposit['amount'];
-        withdrawsAmount = withdrawsAmount + amount;
+        if (pendingDeposit['id'] == null) {
+          var amount = pendingDeposit['amount'];
+          withdrawsAmount += amount;
+        }
         //});
       });
     }
@@ -225,7 +253,7 @@ class BalanceUtils {
     debugPrint("balance amount:" + balanceAmount.toString());
     debugPrint("withdraws amount:" + withdrawsAmount.toString());
     debugPrint("deposits amount:" + depositsAmount.toString());
-    resultAmount = balanceAmount - withdrawsAmount + depositsAmount;
+    resultAmount = balanceAmount - withdrawsAmount; //+ depositsAmount;
 
     if (resultAmount.isNegative) {
       resultAmount = 0.0;
