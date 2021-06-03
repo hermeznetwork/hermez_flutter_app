@@ -1170,7 +1170,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           final DateTime dateTime1FromStr = formatter.parse(a.timestamp);
           final DateTime dateTime2FromStr = formatter.parse(b.timestamp);
 
-          return dateTime1FromStr.compareTo(dateTime2FromStr);
+          return dateTime2FromStr.compareTo(dateTime1FromStr);
         });
         _isLoading = false;
       });
