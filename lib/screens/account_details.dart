@@ -787,13 +787,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         final formatter = DateFormat(
                             "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
                         final DateTime dateTimeFromStr =
-                            formatter.parse(transaction.timestamp);
+                            formatter.parse(transaction.timestamp, true);
                         timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                       } else if (transaction.timestamp.isNotEmpty) {
                         final formatter = DateFormat(
                             "yyyy-MM-ddThh:mm:ss"); // "2021-03-24T15:42:544802"
                         final DateTime dateTimeFromStr =
-                            formatter.parse(transaction.timestamp);
+                            formatter.parse(transaction.timestamp, true);
                         timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                       }
                       addressFrom = getEthereumAddress(
@@ -808,7 +808,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         final formatter = DateFormat(
                             "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
                         final DateTime dateTimeFromStr =
-                            formatter.parse(transaction.timestamp);
+                            formatter.parse(transaction.timestamp, true);
                         timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                       }
                       addressFrom = transaction.fromHezEthereumAddress;
@@ -841,13 +841,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           final formatter = DateFormat(
                               "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
                           final DateTime dateTimeFromStr =
-                              formatter.parse(transaction.timestamp);
+                              formatter.parse(transaction.timestamp, true);
                           timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                         } else if (transaction.timestamp.isNotEmpty) {
                           final formatter = DateFormat(
                               "yyyy-MM-ddThh:mm:ss"); // "2021-03-24T15:42:544802"
                           final DateTime dateTimeFromStr =
-                              formatter.parse(transaction.timestamp);
+                              formatter.parse(transaction.timestamp, true);
                           timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                         }
                         addressFrom = transaction.fromHezEthereumAddress;
@@ -865,7 +865,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           final formatter = DateFormat(
                               "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
                           final DateTime dateTimeFromStr =
-                              formatter.parse(transaction.timestamp);
+                              formatter.parse(transaction.timestamp, true);
                           timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                         }
                         addressFrom = transaction.fromHezEthereumAddress;
@@ -1121,6 +1121,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           await fetchL2PendingTransfers(widget.arguments.account.accountIndex);
       final List<ForgedTransaction> pendingTransfersTxs =
           pendingTransfers.map((poolTransaction) {
+        final formatter = DateFormat("yyyy-MM-ddThh:mm:ssZ");
+        DateTime date = formatter.parse(poolTransaction.timestamp, true);
+        String timestamp = date.toString().replaceFirst(" ", "T") + "Z";
         return ForgedTransaction(
             id: poolTransaction.id,
             amount: poolTransaction.amount,
@@ -1131,7 +1134,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             fromAccountIndex: poolTransaction.fromAccountIndex,
             toAccountIndex: poolTransaction.toAccountIndex,
             toHezEthereumAddress: poolTransaction.toHezEthereumAddress,
-            timestamp: poolTransaction.timestamp);
+            timestamp: timestamp);
       }).toList();
       pendingExits =
           await fetchL2PendingExits(widget.arguments.account.accountIndex);
@@ -1182,8 +1185,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         transactions.sort((a, b) {
           final formatter =
               DateFormat("yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
-          final DateTime dateTime1FromStr = formatter.parse(a.timestamp);
-          final DateTime dateTime2FromStr = formatter.parse(b.timestamp);
+          final DateTime dateTime1FromStr = formatter.parse(a.timestamp, true);
+          final DateTime dateTime2FromStr = formatter.parse(b.timestamp, true);
 
           return dateTime2FromStr.compareTo(dateTime1FromStr);
         });
@@ -1193,7 +1196,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       pendingTransfers =
           await fetchPendingTransfers(widget.arguments.account.token.id);
       pendingExits =
-          await fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
+          fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
       List<Exit> exits = await fetchExits(widget.arguments.account.token.id);
       pendingForceExits = await fetchPendingForceExits(
           widget.arguments.account.token.id, exits, pendingExits);
@@ -1262,7 +1265,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   Future<List<PoolTransaction>> fetchL2PendingTransfers(
       String accountIndex) async {
     List<PoolTransaction> poolTxs =
-        await widget.arguments.store.state.pendingL2Txs;
+        List.from(widget.arguments.store.state.pendingL2Txs);
     poolTxs.removeWhere((transaction) =>
         transaction.type == 'Exit' &&
         transaction.fromAccountIndex != accountIndex);
@@ -1271,16 +1274,16 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   Future<List<PoolTransaction>> fetchL2PendingExits(String accountIndex) async {
     List<PoolTransaction> poolTxs =
-        await widget.arguments.store.state.pendingL2Txs;
+        List.from(widget.arguments.store.state.pendingL2Txs);
     poolTxs.removeWhere((transaction) =>
         transaction.type != 'Exit' &&
         transaction.fromAccountIndex != accountIndex);
     return poolTxs;
   }
 
-  Future<List<PoolTransaction>> fetchL2PendingExitsByTokenId(
-      int tokenId) async {
-    List<PoolTransaction> poolTxs = widget.arguments.store.state.pendingL2Txs;
+  List<PoolTransaction> fetchL2PendingExitsByTokenId(int tokenId) {
+    List<PoolTransaction> poolTxs =
+        List.from(widget.arguments.store.state.pendingL2Txs);
     poolTxs.removeWhere((transaction) =>
         transaction.type != 'Exit' || transaction.token.id != tokenId);
     return poolTxs;
