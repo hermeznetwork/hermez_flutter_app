@@ -99,7 +99,7 @@ class BalanceUtils {
           //rest fees
           //var fee = pendingTransfer['fee'] / pow(10, 3);
           //}
-          var amount = pendingTransfer['amount'];
+          var amount = double.parse(pendingTransfer['value']);
           var fee = 0;
           double value = token.USD * ((amount + fee) / pow(10, token.decimals));
           if (currency != "USD") {
@@ -116,7 +116,7 @@ class BalanceUtils {
                 forgedTransaction['txHash'] == pendingDeposit['hash'],
             orElse: () {*/
           if (pendingDeposit['id'] == null) {
-            var amount = pendingDeposit['amount'];
+            var amount = double.parse(pendingDeposit['value']);
             double value = token.USD * (amount / pow(10, token.decimals));
             if (currency != "USD") {
               value *= exchangeRatio;
@@ -222,9 +222,9 @@ class BalanceUtils {
         if (historyTransactions != null) {
           historyTransactions.firstWhere(
               (forgedTransaction) =>
-                  forgedTransaction['txHash'] == pendingTransfer['hash'],
+                  forgedTransaction['txHash'] == pendingTransfer['txHash'],
               orElse: () {
-            var amount = pendingTransfer['amount'];
+            var amount = double.parse(pendingTransfer['value']);
             if (account.token.id == 0) {
               //rest fees
               //var fee = pendingTransfer['fee'] / pow(10, 3);
@@ -233,7 +233,7 @@ class BalanceUtils {
             withdrawsAmount += amount + fee;
           });
         } else {
-          var amount = pendingTransfer['amount'];
+          var amount = double.parse(pendingTransfer['value']);
           if (account.token.id == 0) {
             //rest fees
             //var fee = pendingTransfer['fee'] / pow(10, 3);
@@ -250,16 +250,16 @@ class BalanceUtils {
         if (historyTransactions != null) {
           historyTransactions.firstWhere(
               (forgedTransaction) =>
-                  forgedTransaction['txHash'] == pendingDeposit['hash'],
+                  forgedTransaction['txHash'] == pendingDeposit['txHash'],
               orElse: () {
             if (pendingDeposit['id'] == null) {
-              var amount = pendingDeposit['amount'];
+              var amount = double.parse(pendingDeposit['value']);
               withdrawsAmount += amount;
             }
           });
         } else {
           if (pendingDeposit['id'] == null) {
-            var amount = pendingDeposit['amount'];
+            var amount = double.parse(pendingDeposit['value']);
             withdrawsAmount += amount;
           }
         }

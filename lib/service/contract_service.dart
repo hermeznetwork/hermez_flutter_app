@@ -70,15 +70,15 @@ class ContractService implements IContractService {
           .then((txHash) {
         if (txHash != null) {
           _configService.addPendingTransfer({
-            'hash': txHash,
-            'fromHezEthereumAddress': from.hex,
-            'toHezEthereumAddress': receiverAddress.hex,
+            'txHash': txHash,
+            'from': from.hex,
+            'to': receiverAddress.hex,
             'token': token,
-            'amount': amountInWei.toDouble(),
-            //'fee':
-            'state': 'pend',
-            'timestamp': DateTime.now().toIso8601String(),
-            'type': 'Transfer'
+            'value': amountInWei.toDouble().toString(),
+            'fee': '0',
+            'status': 'PENDING',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'type': 'SEND'
           });
         }
         return txHash != null;
@@ -112,14 +112,15 @@ class ContractService implements IContractService {
           .then((txHash) {
         if (txHash != null) {
           _configService.addPendingTransfer({
-            'hash': txHash,
-            'fromHezEthereumAddress': from.hex,
-            'toHezEthereumAddress': receiverAddress.hex,
+            'txHash': txHash,
+            'from': from.hex,
+            'to': receiverAddress.hex,
             'token': token,
-            'amount': amountInWei.toDouble(),
-            'state': 'pend',
-            'timestamp': DateTime.now().toIso8601String(),
-            'type': 'Transfer'
+            'value': amountInWei.toDouble().toString(),
+            'fee': '0',
+            'status': 'PENDING',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'type': 'SEND'
           });
         }
         print(txHash);

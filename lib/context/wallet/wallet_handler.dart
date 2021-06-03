@@ -495,7 +495,7 @@ class WalletHandler {
     List transferIds = [];
     for (final pendingTransfer in accountPendingTransfers) {
       try {
-        final transactionHash = pendingTransfer['hash'];
+        final transactionHash = pendingTransfer['txHash'];
         web3.TransactionReceipt receipt =
             await _contractService.getTxReceipt(transactionHash);
         web3.TransactionInformation transaction =
@@ -512,7 +512,7 @@ class WalletHandler {
     }
 
     accountPendingTransfers.removeWhere(
-        (pendingTransfer) => transferIds.contains(pendingTransfer['hash']));
+        (pendingTransfer) => transferIds.contains(pendingTransfer['txHash']));
 
     return accountPendingTransfers.reversed.toList();
   }
@@ -603,7 +603,7 @@ class WalletHandler {
 
     List depositIds = [];
     for (final pendingDeposit in accountPendingDeposits) {
-      final transactionHash = pendingDeposit['hash'];
+      final transactionHash = pendingDeposit['txHash'];
       web3.TransactionReceipt receipt =
           await _contractService.getTxReceipt(transactionHash);
       if (receipt != null) {
@@ -612,7 +612,8 @@ class WalletHandler {
           if (pendingDeposit['id'] == null) {
             pendingDeposit['id'] = transactionHash;
             accountPendingDeposits[accountPendingDeposits.indexWhere(
-                    (element) => element['hash'] == pendingDeposit['hash'])] =
+                    (element) =>
+                        element['txHash'] == pendingDeposit['txHash'])] =
                 pendingDeposit;
             _configurationService.updatePendingDepositId(
                 transactionHash, transactionHash);
@@ -639,7 +640,7 @@ class WalletHandler {
                   pendingDeposit['id'] = transactionId;
                   accountPendingDeposits[accountPendingDeposits.indexWhere(
                           (element) =>
-                              element['hash'] == pendingDeposit['hash'])] =
+                              element['txHash'] == pendingDeposit['txHash'])] =
                       pendingDeposit;
                   _configurationService.updatePendingDepositId(
                       transactionHash, transactionId);
@@ -669,7 +670,7 @@ class WalletHandler {
     }
 
     accountPendingDeposits.removeWhere(
-        (pendingDeposit) => depositIds.contains(pendingDeposit['hash']));
+        (pendingDeposit) => depositIds.contains(pendingDeposit['txHash']));
 
     return accountPendingDeposits.reversed.toList();
   }

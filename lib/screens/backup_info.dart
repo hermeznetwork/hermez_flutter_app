@@ -52,7 +52,7 @@ class BackupInfoPage extends StatelessWidget {
                               ' to recover your funds with this recovery phrase.',
                               style: TextStyle(
                                 color: HermezColors.blackTwo,
-                                fontSize: 20,
+                                fontSize: 18,
                                 height: 1.5,
                                 fontFamily: 'ModernEra',
                                 fontWeight: FontWeight.w500,

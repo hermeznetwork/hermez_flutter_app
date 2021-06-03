@@ -518,8 +518,12 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
   Widget handleAccountsList(AsyncSnapshot snapshot) {
     if (_isLoading) {
-      return Center(
-          child: CircularProgressIndicator(color: HermezColors.orange));
+      return Container(
+        color: Colors.white,
+        child: Center(
+          child: CircularProgressIndicator(color: HermezColors.orange),
+        ),
+      );
     } else {
       if (snapshot.hasError) {
         // while data is loading:

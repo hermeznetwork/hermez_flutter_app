@@ -248,17 +248,18 @@ class HermezService implements IHermezService {
       if (txHash != null) {
         await api.getAccounts(hezEthereumAddress, [token.id]).then((res) {
           _configService.addPendingDeposit({
-            'hash': txHash,
-            'fromHezEthereumAddress': hezEthereumAddress,
-            'toHezEthereumAddress': hezEthereumAddress,
+            'txHash': txHash,
+            'from': hezEthereumAddress,
+            'to': hezEthereumAddress,
             'token': token.toJson(),
-            'amount': amount.toDouble(),
-            'state': 'pend',
-            'timestamp': DateTime.now().toIso8601String(),
-            'type':
-                res != null && res.accounts != null && res.accounts.length > 0
+            'value': amount.toDouble().toString(),
+            'fee': '0',
+            'status': 'PENDING',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'type': 'DEPOSIT'
+            /*res != null && res.accounts != null && res.accounts.length > 0
                     ? TxType.Deposit.toString().split('.').last
-                    : TxType.CreateAccountDeposit.toString().split('.').last
+                    : TxType.CreateAccountDeposit.toString().split('.').last*/
           });
         });
       }
@@ -429,7 +430,7 @@ class HermezService implements IHermezService {
             'token': account.token.toJson(),
             'amount': amount.toDouble(),
             'state': 'pend',
-            'timestamp': DateTime.now().toIso8601String(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
             'type': TxType.Exit.toString().split('.').last
             /*'hermezEthereumAddress': hezEthereumAddress,
             ,*/

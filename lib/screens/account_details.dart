@@ -778,7 +778,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     }
 
                     if (transaction.type == "CreateAccountDeposit" ||
-                        transaction.type == "Deposit") {
+                        transaction.type == "Deposit" ||
+                        transaction.type == "DEPOSIT") {
                       type = "DEPOSIT";
                       value = transaction.l1info.depositAmount.toString();
                       if (transaction.l1info.depositAmountSuccess == true) {
@@ -890,6 +891,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     addressTo = event['to'];
                     value = event['value'];
                     feeValue = event['fee'];
+                    if (feeValue == null) {
+                      feeValue = '0';
+                    }
                     amount = double.parse(value) /
                         pow(10, widget.arguments.account.token.decimals);
                     fee = double.parse(feeValue);
@@ -1150,13 +1154,16 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           await fetchPendingDeposits(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingDepositsTxs =
           pendingDeposits.map((pendingDeposit) {
+        DateTime date =
+            DateTime.fromMillisecondsSinceEpoch(pendingDeposit['timestamp']);
+        String timestamp = date.toString().replaceFirst(" ", "T") + "Z";
         return ForgedTransaction(
             id: pendingDeposit['id'],
-            hash: pendingDeposit['hash'],
-            l1info: L1Info(depositAmount: pendingDeposit['amount'].toString()),
+            hash: pendingDeposit['txHash'],
+            l1info: L1Info(depositAmount: pendingDeposit['value']),
             type: pendingDeposit['type'],
-            fromHezEthereumAddress: pendingDeposit['fromHezEthereumAddress'],
-            timestamp: pendingDeposit['timestamp']);
+            fromHezEthereumAddress: pendingDeposit['from'],
+            timestamp: timestamp);
       }).toList();
       if (transactions.isEmpty) {
         transactions.addAll(pendingTransfersTxs);
@@ -1183,22 +1190,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         _isLoading = false;
       });
     } else {
-      // TODO remove ForgedTransactions to map
       pendingTransfers =
           await fetchPendingTransfers(widget.arguments.account.token.id);
-      final List<ForgedTransaction> pendingTransfersTxs =
-          pendingTransfers.map((pendingTransfer) {
-        return ForgedTransaction(
-            id: pendingTransfer['id'],
-            hash: pendingTransfer['hash'],
-            L1orL2: "L1",
-            l1info: L1Info(depositAmount: pendingTransfer['fee'].toString()),
-            amount: pendingTransfer['amount'].toString(),
-            type: pendingTransfer['type'],
-            fromHezEthereumAddress: pendingTransfer['fromHezEthereumAddress'],
-            toHezEthereumAddress: pendingTransfer['toHezEthereumAddress'],
-            timestamp: pendingTransfer['timestamp']);
-      }).toList();
       pendingExits =
           await fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
       List<Exit> exits = await fetchExits(widget.arguments.account.token.id);
@@ -1218,31 +1211,18 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       });
       pendingDeposits =
           await fetchPendingDeposits(widget.arguments.account.token.id);
-      final List<ForgedTransaction> pendingDepositsTxs =
-          pendingDeposits.map((pendingDeposit) {
-        /* return {
-              "txHash" : pendingDeposit['hash']
-            };*/
-        return ForgedTransaction(
-            id: pendingDeposit['id'],
-            hash: pendingDeposit['hash'],
-            l1info: L1Info(depositAmount: pendingDeposit['amount'].toString()),
-            type: pendingDeposit['type'],
-            fromHezEthereumAddress: pendingDeposit['fromHezEthereumAddress'],
-            timestamp: pendingDeposit['timestamp']);
-      }).toList();
       historyTransactions = await fetchHistoryTransactions();
       List<dynamic> fullTxs = List.from(historyTransactions);
       if (transactions.isEmpty) {
-        for (ForgedTransaction forgedTransaction in pendingDepositsTxs) {
+        for (dynamic pendingDeposit in pendingDeposits) {
           fullTxs.removeWhere(
-              (element) => element['txHash'] == forgedTransaction.hash);
-          transactions.add(forgedTransaction);
+              (element) => element['txHash'] == pendingDeposit['txHash']);
+          transactions.add(pendingDeposit);
         }
-        for (ForgedTransaction forgedTransaction in pendingTransfersTxs) {
+        for (dynamic pendingTransfer in pendingTransfers) {
           fullTxs.firstWhere(
-              (element) => element['txHash'] == forgedTransaction.hash,
-              orElse: () => transactions.add(forgedTransaction));
+              (element) => element['txHash'] == pendingTransfer['txHash'],
+              orElse: () => transactions.add(pendingTransfer));
         }
       }
       widget.arguments.account = await fetchAccount();
@@ -1254,18 +1234,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           DateTime dateTime2FromStr;
           final formatter =
               DateFormat("yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
-          if (a is ForgedTransaction) {
-            dateTime1FromStr = formatter.parse(a.timestamp);
-          } else {
-            dateTime1FromStr =
-                DateTime.fromMillisecondsSinceEpoch(a['timestamp']);
-          }
-          if (b is ForgedTransaction) {
-            dateTime2FromStr = formatter.parse(b.timestamp);
-          } else {
-            dateTime2FromStr =
-                DateTime.fromMillisecondsSinceEpoch(b['timestamp']);
-          }
+          dateTime1FromStr =
+              DateTime.fromMillisecondsSinceEpoch(a['timestamp']);
+          dateTime2FromStr =
+              DateTime.fromMillisecondsSinceEpoch(b['timestamp']);
           return dateTime2FromStr.compareTo(dateTime1FromStr);
         });
         _isLoading = false;
@@ -1290,22 +1262,25 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   Future<List<PoolTransaction>> fetchL2PendingTransfers(
       String accountIndex) async {
     List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions(accountIndex);
-    poolTxs.removeWhere((transaction) => transaction.type == 'Exit');
+        await widget.arguments.store.state.pendingL2Txs;
+    poolTxs.removeWhere((transaction) =>
+        transaction.type == 'Exit' &&
+        transaction.fromAccountIndex != accountIndex);
     return poolTxs;
   }
 
   Future<List<PoolTransaction>> fetchL2PendingExits(String accountIndex) async {
     List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions(accountIndex);
-    poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
+        await widget.arguments.store.state.pendingL2Txs;
+    poolTxs.removeWhere((transaction) =>
+        transaction.type != 'Exit' &&
+        transaction.fromAccountIndex != accountIndex);
     return poolTxs;
   }
 
   Future<List<PoolTransaction>> fetchL2PendingExitsByTokenId(
       int tokenId) async {
-    List<PoolTransaction> poolTxs =
-        await widget.arguments.store.getPoolTransactions();
+    List<PoolTransaction> poolTxs = widget.arguments.store.state.pendingL2Txs;
     poolTxs.removeWhere((transaction) =>
         transaction.type != 'Exit' || transaction.token.id != tokenId);
     return poolTxs;
