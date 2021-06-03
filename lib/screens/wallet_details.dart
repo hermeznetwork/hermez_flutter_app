@@ -58,6 +58,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<dynamic> _pendingWithdraws = [];
   List<dynamic> _pendingDeposits = [];
 
+  bool _isLoading = false;
+
   @override
   void initState() {
     //fetchAccounts();
@@ -65,8 +67,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   Future<void> _onRefresh() async {
+    setState(() {
+      _isLoading = true;
+    });
     await widget.arguments.store.getAccounts();
-    setState(() {});
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<List<Account>> fetchAccounts() async {
@@ -510,7 +517,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   Widget handleAccountsList(AsyncSnapshot snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
+    if (_isLoading) {
       return Center(
           child: CircularProgressIndicator(color: HermezColors.orange));
     } else {

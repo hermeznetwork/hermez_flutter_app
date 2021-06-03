@@ -1,4 +1,5 @@
 import 'package:after_layout/after_layout.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/wallet_details.dart';
@@ -257,31 +258,35 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                           CrossAxisAlignment.start,
                                       children: [
                                         isLoading == false
-                                            ? Text(
-                                                totalBalance(
-                                                    TransactionLevel.LEVEL2,
-                                                    widget.arguments.store.state
-                                                        .l2Accounts),
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 32,
-                                                  fontFamily: 'ModernEra',
-                                                  fontWeight: FontWeight.w700,
-                                                ))
-                                            : BlinkingTextAnimation(
-                                                arguments:
-                                                    BlinkingTextAnimationArguments(
-                                                        Colors.white,
-                                                        totalBalance(
-                                                            TransactionLevel
-                                                                .LEVEL2,
-                                                            widget
-                                                                .arguments
-                                                                .store
-                                                                .state
-                                                                .l2Accounts),
-                                                        32,
-                                                        FontWeight.w700))
+                                            ? Flexible(
+                                                child: Text(
+                                                  totalBalance(
+                                                      TransactionLevel.LEVEL2,
+                                                      widget.arguments.store
+                                                          .state.l2Accounts),
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 32,
+                                                    fontFamily: 'ModernEra',
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              )
+                                            : Flexible(
+                                                child: BlinkingTextAnimation(
+                                                    arguments:
+                                                        BlinkingTextAnimationArguments(
+                                                            Colors.white,
+                                                            totalBalance(
+                                                                TransactionLevel
+                                                                    .LEVEL2,
+                                                                widget
+                                                                    .arguments
+                                                                    .store
+                                                                    .state
+                                                                    .l2Accounts),
+                                                            32,
+                                                            FontWeight.w700)))
                                       ],
                                     ),
                                   ),
@@ -585,31 +590,34 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                           CrossAxisAlignment.start,
                                       children: [
                                         isLoading == false
-                                            ? Text(
-                                                totalBalance(
-                                                    TransactionLevel.LEVEL1,
-                                                    widget.arguments.store.state
-                                                        .l1Accounts),
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 32,
-                                                  fontFamily: 'ModernEra',
-                                                  fontWeight: FontWeight.w700,
-                                                ))
-                                            : BlinkingTextAnimation(
-                                                arguments:
-                                                    BlinkingTextAnimationArguments(
-                                                        Colors.white,
-                                                        totalBalance(
-                                                            TransactionLevel
-                                                                .LEVEL1,
-                                                            widget
-                                                                .arguments
-                                                                .store
-                                                                .state
-                                                                .l1Accounts),
-                                                        32,
-                                                        FontWeight.w700))
+                                            ? Flexible(
+                                                child: Text(
+                                                    totalBalance(
+                                                        TransactionLevel.LEVEL1,
+                                                        widget.arguments.store
+                                                            .state.l1Accounts),
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 32,
+                                                      fontFamily: 'ModernEra',
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    )))
+                                            : Flexible(
+                                                child: BlinkingTextAnimation(
+                                                    arguments:
+                                                        BlinkingTextAnimationArguments(
+                                                            Colors.white,
+                                                            totalBalance(
+                                                                TransactionLevel
+                                                                    .LEVEL1,
+                                                                widget
+                                                                    .arguments
+                                                                    .store
+                                                                    .state
+                                                                    .l1Accounts),
+                                                            32,
+                                                            FontWeight.w700)))
                                       ],
                                     ),
                                   ),

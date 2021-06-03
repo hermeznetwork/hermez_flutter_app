@@ -114,141 +114,149 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Container(
+      color: HermezColors.lightOrange,
+      child: Scaffold(
         body: NestedScrollView(
-      body: Container(
-        color: Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Expanded(child: _buildTransactionsList()),
-            SafeArea(
-              top: false,
-              bottom: true,
-              child: Container(
-                //height: kBottomNavigationBarHeight,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return <Widget>[
-          SliverAppBar(
-            floating: true,
-            pinned: true,
-            snap: false,
-            collapsedHeight: kToolbarHeight,
-            expandedHeight: 340.0,
-            backgroundColor: HermezColors.lightOrange,
-            elevation: 0,
-            title: Container(
-              padding: EdgeInsets.only(bottom: 20, top: 20),
-              color: HermezColors.lightOrange,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Expanded(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(widget.arguments.account.token.name, // name
-                          style: TextStyle(
-                              fontFamily: 'ModernEra',
-                              color: HermezColors.blackTwo,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20))
-                    ],
-                  )),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16.0),
-                        color: HermezColors.steel),
-                    padding: EdgeInsets.only(
-                        left: 12.0, right: 12.0, top: 4, bottom: 4),
-                    child: Text(
-                      widget.arguments.store.state.txLevel ==
-                              TransactionLevel.LEVEL1
-                          ? "L1"
-                          : "L2",
-                      style: TextStyle(
-                        color: HermezColors.lightOrange,
-                        fontSize: 15,
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+          body: Container(
+            color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(child: _buildTransactionsList()),
+                SafeArea(
+                  top: false,
+                  bottom: true,
+                  child: Container(
+                    //height: kBottomNavigationBarHeight,
+                    color: Colors.white,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            centerTitle: true,
-            flexibleSpace: FlexibleSpaceBar(
-              // here the desired height*/
-              background: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(
-                      height: MediaQuery.of(context).padding.top +
-                          kToolbarHeight +
-                          40),
-                  SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            _isLoading
-                                ? BlinkingTextAnimation(
-                                    arguments: BlinkingTextAnimationArguments(
-                                        HermezColors.blackTwo,
+          ),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                floating: true,
+                pinned: true,
+                snap: false,
+                collapsedHeight: kToolbarHeight,
+                expandedHeight: 340.0,
+                backgroundColor: HermezColors.lightOrange,
+                elevation: 0,
+                title: Container(
+                  padding: EdgeInsets.only(bottom: 20, top: 20),
+                  color: HermezColors.lightOrange,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      Expanded(
+                          child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(widget.arguments.account.token.name, // name
+                              style: TextStyle(
+                                  fontFamily: 'ModernEra',
+                                  color: HermezColors.blackTwo,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 20))
+                        ],
+                      )),
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16.0),
+                            color: HermezColors.steel),
+                        padding: EdgeInsets.only(
+                            left: 12.0, right: 12.0, top: 4, bottom: 4),
+                        child: Text(
+                          widget.arguments.store.state.txLevel ==
+                                  TransactionLevel.LEVEL1
+                              ? "L1"
+                              : "L2",
+                          style: TextStyle(
+                            color: HermezColors.lightOrange,
+                            fontSize: 15,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                centerTitle: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  // here the desired height*/
+                  background: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                          height: MediaQuery.of(context).padding.top +
+                              kToolbarHeight +
+                              40),
+                      SizedBox(
+                          width: double.infinity,
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                _isLoading
+                                    ? BlinkingTextAnimation(
+                                        arguments:
+                                            BlinkingTextAnimationArguments(
+                                                HermezColors.blackTwo,
+                                                calculateBalance(widget
+                                                    .arguments
+                                                    .account
+                                                    .token
+                                                    .symbol),
+                                                32,
+                                                FontWeight.w800))
+                                    : Text(
                                         calculateBalance(widget
                                             .arguments.account.token.symbol),
-                                        32,
-                                        FontWeight.w800))
-                                : Text(
-                                    calculateBalance(
-                                        widget.arguments.account.token.symbol),
-                                    style: TextStyle(
-                                        color: HermezColors.blackTwo,
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 32)),
-                          ])),
-                  SizedBox(height: 10),
-                  _isLoading
-                      ? BlinkingTextAnimation(
-                          arguments: BlinkingTextAnimationArguments(
-                              HermezColors.steel,
+                                        style: TextStyle(
+                                            color: HermezColors.blackTwo,
+                                            fontFamily: 'ModernEra',
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 32)),
+                              ])),
+                      SizedBox(height: 10),
+                      _isLoading
+                          ? BlinkingTextAnimation(
+                              arguments: BlinkingTextAnimationArguments(
+                                  HermezColors.steel,
+                                  calculateBalance(widget
+                                      .arguments.store.state.defaultCurrency
+                                      .toString()
+                                      .split('.')
+                                      .last),
+                                  18,
+                                  FontWeight.w500),
+                            )
+                          : Text(
                               calculateBalance(widget
                                   .arguments.store.state.defaultCurrency
                                   .toString()
                                   .split('.')
                                   .last),
-                              18,
-                              FontWeight.w500),
-                        )
-                      : Text(
-                          calculateBalance(widget
-                              .arguments.store.state.defaultCurrency
-                              .toString()
-                              .split('.')
-                              .last),
-                          style: TextStyle(
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
-                              color: HermezColors.steel,
-                              fontSize: 18)),
-                  SizedBox(height: 30),
-                  buildButtonsRow(context),
-                  SizedBox(height: 20),
-                ],
+                              style: TextStyle(
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                  color: HermezColors.steel,
+                                  fontSize: 18)),
+                      SizedBox(height: 30),
+                      buildButtonsRow(context),
+                      SizedBox(height: 20),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        ];
-      },
-    ));
+            ];
+          },
+        ),
+      ),
+    );
   }
 
   buildButtonsRow(BuildContext context) {
@@ -502,7 +510,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
               shrinkWrap: true,
               // To make listView scrollable
               // even if there is only a single item.
-              //physics: const NeverScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               itemCount: transactions.length +
                   pendingExits.length +
                   pendingForceExits.length +
