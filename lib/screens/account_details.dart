@@ -498,11 +498,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         child: RefreshIndicator(
           color: HermezColors.orange,
           child: ListView.builder(
-              controller: _controller,
+              controller: _controller, // ???
               shrinkWrap: true,
               // To make listView scrollable
               // even if there is only a single item.
-              physics: const AlwaysScrollableScrollPhysics(),
+              //physics: const NeverScrollableScrollPhysics(),
               itemCount: transactions.length +
                   pendingExits.length +
                   pendingForceExits.length +

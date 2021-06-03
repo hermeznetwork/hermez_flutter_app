@@ -52,6 +52,7 @@ class _HomePageState extends State<HomePage> {
   List<TabNavigationItem> items;
 
   bool showHermezWallet = false;
+  GlobalKey _scaffoldKey;
 
   @override
   void initState() {
@@ -63,33 +64,38 @@ class _HomePageState extends State<HomePage> {
     children = [
       for (final tabItem in items)
         Navigator(onGenerateRoute: (settings) {
+          _scaffoldKey = GlobalKey<ScaffoldState>();
           _context = context;
           Widget page = tabItem.page;
           if (settings.name == 'wallet_details') {
             page = WalletDetailsPage(
+              key: _scaffoldKey,
               arguments: settings.arguments,
             );
           } else if (settings.name == 'settings_details') {
             var configurationService =
                 Provider.of<ConfigurationService>(context, listen: false);
             page = SettingsDetailsPage(
+                key: _scaffoldKey,
                 arguments: settings.arguments,
                 configurationService: configurationService);
           } else if (settings.name == 'account_selector') {
             final AccountSelectorArguments args = settings.arguments;
-            page = AccountSelectorPage(arguments: args);
+            page = AccountSelectorPage(key: _scaffoldKey, arguments: args);
           } else if (settings.name == 'currency_selector') {
             page = SettingsCurrencyPage(store: widget.arguments.store);
           } else if (settings.name == 'fee_selector') {
             page = FeeSelectorPage(
+                key: _scaffoldKey,
                 arguments: FeeSelectorArguments(widget.arguments.store));
           } else if (settings.name == 'account_details') {
             final AccountDetailsArguments args = settings.arguments;
-            page = AccountDetailsPage(arguments: args);
+            page = AccountDetailsPage(key: _scaffoldKey, arguments: args);
           } else if (settings.name == 'transaction_details') {
             page = WalletTransferProvider(
               builder: (context, store) {
-                return TransactionDetailsPage(arguments: settings.arguments);
+                return TransactionDetailsPage(
+                    key: _scaffoldKey, arguments: settings.arguments);
               },
             );
           }
@@ -113,27 +119,41 @@ class _HomePageState extends State<HomePage> {
             child: CircularProgressIndicator(color: HermezColors.orange),
           ));
     } else {
-      return Scaffold(
-        body: IndexedStack(
-          index: _currentIndex.value,
-          children: children,
-        ),
-        extendBody: true,
-        bottomNavigationBar: BottomNavigationBar(
-            elevation: 0,
-            selectedItemColor: HermezColors.blackTwo,
-            unselectedItemColor: HermezColors.blueyGreyTwo,
-            backgroundColor: Colors.transparent, // transparent
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
-            currentIndex: _currentIndex.value,
-            onTap: (int index) => onTabTapped(index, context),
-            items: [
-              for (final tabItem in items)
-                BottomNavigationBarItem(
-                    icon: tabItem.icon, label: tabItem.title)
-            ]),
-      );
+      return WillPopScope(
+          child: Scaffold(
+            body: IndexedStack(
+              index: _currentIndex.value,
+              children: children,
+            ),
+            extendBody: true,
+            bottomNavigationBar: BottomNavigationBar(
+                elevation: 0,
+                selectedItemColor: HermezColors.blackTwo,
+                unselectedItemColor: HermezColors.blueyGreyTwo,
+                backgroundColor: Colors.transparent, // transparent
+                showSelectedLabels: false,
+                showUnselectedLabels: false,
+                currentIndex: _currentIndex.value,
+                onTap: (int index) => onTabTapped(index, context),
+                items: [
+                  for (final tabItem in items)
+                    BottomNavigationBarItem(
+                        icon: tabItem.icon, label: tabItem.title)
+                ]),
+          ),
+          onWillPop: () async {
+            try {
+              if (Navigator.of(_scaffoldKey.currentContext).canPop()) {
+                Navigator.of(_scaffoldKey.currentContext).pop();
+                return false;
+              } else {
+                return true;
+              }
+            } catch (e) {
+              print(e.toString());
+              return true;
+            }
+          });
     }
     //});
   }
@@ -254,20 +274,23 @@ class _HomePageState extends State<HomePage> {
                 key: GlobalKey(),
                 onGenerateRoute: (settings) {
                   _context = context;
+                  _scaffoldKey = GlobalKey<ScaffoldState>();
                   Widget page;
                   if (index == 0) {
                     page = WalletSelectorPage(
+                        key: _scaffoldKey,
                         arguments: WalletSelectorArguments(
                             widget.arguments.store, context,
                             showHermezWallet: showHermezWallet,
                             hermezWalletShown: () {
-                      showHermezWallet = false;
-                    }));
+                          showHermezWallet = false;
+                        }));
                   } else if (index == 2) {
                     page = settingsPage(context);
                   }
                   if (settings.name == 'wallet_details') {
                     page = WalletDetailsPage(
+                      key: _scaffoldKey,
                       arguments: settings.arguments,
                     );
                   } else if (settings.name == 'settings_details') {
@@ -275,25 +298,30 @@ class _HomePageState extends State<HomePage> {
                         Provider.of<ConfigurationService>(context,
                             listen: false);
                     page = SettingsDetailsPage(
+                        key: _scaffoldKey,
                         arguments: settings.arguments,
                         configurationService: configurationService);
                   } else if (settings.name == 'account_selector') {
                     final AccountSelectorArguments args = settings.arguments;
-                    page = AccountSelectorPage(arguments: args);
+                    page =
+                        AccountSelectorPage(key: _scaffoldKey, arguments: args);
                   } else if (settings.name == 'currency_selector') {
-                    page = SettingsCurrencyPage(store: widget.arguments.store);
+                    page = SettingsCurrencyPage(
+                        key: _scaffoldKey, store: widget.arguments.store);
                   } else if (settings.name == 'fee_selector') {
                     page = FeeSelectorPage(
+                        key: _scaffoldKey,
                         arguments:
                             FeeSelectorArguments(widget.arguments.store));
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
-                    page = AccountDetailsPage(arguments: args);
+                    page =
+                        AccountDetailsPage(key: _scaffoldKey, arguments: args);
                   } else if (settings.name == 'transaction_details') {
                     page = WalletTransferProvider(
                       builder: (context, store) {
                         return TransactionDetailsPage(
-                            arguments: settings.arguments);
+                            key: _scaffoldKey, arguments: settings.arguments);
                       },
                     );
                   }
