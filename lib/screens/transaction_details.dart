@@ -204,85 +204,109 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                           "Enter passcode",
                                                           false,
                                                           false));
-                                          if (pinSuccess) {
-                                            var success =
-                                                await handleFormSubmit();
+                                          if (pinSuccess != null) {
+                                            if (pinSuccess == true) {
+                                              var success =
+                                                  await handleFormSubmit();
 
-                                            if (success) {
-                                              if (widget.arguments
-                                                      .transactionType ==
-                                                  TransactionType.EXIT) {
-                                                Navigator.of(context)
-                                                    .pushNamed("/info",
-                                                        arguments: InfoArguments(
-                                                            "success.png",
-                                                            true,
-                                                            "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
-                                                            iconSize: 300))
-                                                    .then((value) {
-                                                  Navigator.of(context).pop(
-                                                    PopWithResults(
-                                                      fromPage:
-                                                          "/transaction_details",
-                                                      toPage: "/home",
-                                                      results: {
-                                                        "pop_result": true
-                                                      },
-                                                    ),
-                                                  );
-                                                });
-                                              } else if (widget.arguments
-                                                      .transactionType ==
-                                                  TransactionType.WITHDRAW) {
-                                                Navigator.of(context)
-                                                    .pushNamed("/info",
-                                                        arguments: InfoArguments(
-                                                            "success.png",
-                                                            true,
-                                                            "Your withdrawal is awaiting verification.",
-                                                            iconSize: 300))
-                                                    .then((value) {
-                                                  Navigator.of(context).pop(
-                                                    PopWithResults(
-                                                      fromPage:
-                                                          "/transaction_details",
-                                                      toPage: "/home",
-                                                      results: {
-                                                        "pop_result": true
-                                                      },
-                                                    ),
-                                                  );
-                                                });
-                                              } else if (widget.arguments
-                                                      .transactionType ==
-                                                  TransactionType.FORCEEXIT) {
-                                                Navigator.of(context)
-                                                    .pushNamed("/info",
-                                                        arguments: InfoArguments(
-                                                            "success.png",
-                                                            true,
-                                                            "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
-                                                            iconSize: 300))
-                                                    .then((value) {
-                                                  Navigator.of(context).pop(
-                                                    PopWithResults(
-                                                      fromPage:
-                                                          "/transaction_details",
-                                                      toPage: "/home",
-                                                      results: {
-                                                        "pop_result": true
-                                                      },
-                                                    ),
-                                                  );
-                                                });
+                                              if (success) {
+                                                if (widget.arguments
+                                                        .transactionType ==
+                                                    TransactionType.EXIT) {
+                                                  Navigator.of(context)
+                                                      .pushNamed("/info",
+                                                          arguments: InfoArguments(
+                                                              "success.png",
+                                                              true,
+                                                              "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
+                                                              iconSize: 300))
+                                                      .then((value) {
+                                                    Navigator.of(context).pop(
+                                                      PopWithResults(
+                                                        fromPage:
+                                                            "/transaction_details",
+                                                        toPage: "/home",
+                                                        results: {
+                                                          "pop_result": true
+                                                        },
+                                                      ),
+                                                    );
+                                                  });
+                                                } else if (widget.arguments
+                                                        .transactionType ==
+                                                    TransactionType.WITHDRAW) {
+                                                  Navigator.of(context)
+                                                      .pushNamed("/info",
+                                                          arguments: InfoArguments(
+                                                              "success.png",
+                                                              true,
+                                                              "Your withdrawal is awaiting verification.",
+                                                              iconSize: 300))
+                                                      .then((value) {
+                                                    Navigator.of(context).pop(
+                                                      PopWithResults(
+                                                        fromPage:
+                                                            "/transaction_details",
+                                                        toPage: "/home",
+                                                        results: {
+                                                          "pop_result": true
+                                                        },
+                                                      ),
+                                                    );
+                                                  });
+                                                } else if (widget.arguments
+                                                        .transactionType ==
+                                                    TransactionType.FORCEEXIT) {
+                                                  Navigator.of(context)
+                                                      .pushNamed("/info",
+                                                          arguments: InfoArguments(
+                                                              "success.png",
+                                                              true,
+                                                              "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
+                                                              iconSize: 300))
+                                                      .then((value) {
+                                                    Navigator.of(context).pop(
+                                                      PopWithResults(
+                                                        fromPage:
+                                                            "/transaction_details",
+                                                        toPage: "/home",
+                                                        results: {
+                                                          "pop_result": true
+                                                        },
+                                                      ),
+                                                    );
+                                                  });
+                                                } else {
+                                                  Navigator.of(context)
+                                                      .pushNamed("/info",
+                                                          arguments: InfoArguments(
+                                                              "success.png",
+                                                              true,
+                                                              "Your transaction is awaiting verification.",
+                                                              iconSize: 300))
+                                                      .then((value) {
+                                                    Navigator.of(context).pop(
+                                                      PopWithResults(
+                                                        fromPage:
+                                                            "/transaction_details",
+                                                        toPage: "/home",
+                                                        results: {
+                                                          "pop_result": true
+                                                        },
+                                                      ),
+                                                    );
+                                                  });
+                                                }
                                               } else {
                                                 Navigator.of(context)
-                                                    .pushNamed("/info",
-                                                        arguments: InfoArguments(
-                                                            "success.png",
-                                                            true,
-                                                            "Your transaction is awaiting verification.",
-                                                            iconSize: 300))
+                                                    .pushNamed(
+                                                  "/info",
+                                                  arguments: InfoArguments(
+                                                      "info_tx_failure.png",
+                                                      true,
+                                                      "There has been an error with your transaction.",
+                                                      iconSize: 250),
+                                                )
                                                     .then((value) {
                                                   Navigator.of(context).pop(
                                                     PopWithResults(
@@ -297,31 +321,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                 });
                                               }
                                             } else {
-                                              Navigator.of(context)
-                                                  .pushNamed(
-                                                "/info",
-                                                arguments: InfoArguments(
-                                                    "info_tx_failure.png",
-                                                    true,
-                                                    "There has been an error with your transaction.",
-                                                    iconSize: 250),
-                                              )
-                                                  .then((value) {
-                                                Navigator.of(context).pop(
-                                                  PopWithResults(
-                                                    fromPage:
-                                                        "/transaction_details",
-                                                    toPage: "/home",
-                                                    results: {
-                                                      "pop_result": true
-                                                    },
-                                                  ),
-                                                );
-                                              });
+                                              Navigator.popUntil(context,
+                                                  ModalRoute.withName("/home"));
                                             }
                                           } else {
-                                            Navigator.popUntil(context,
-                                                ModalRoute.withName("/home"));
+                                            setState(() {
+                                              isLoading = false;
+                                            });
                                           }
                                         }
                                       : null,

@@ -498,11 +498,13 @@ class WalletHandler {
         final transactionHash = pendingTransfer['txHash'];
         web3.TransactionReceipt receipt =
             await _contractService.getTxReceipt(transactionHash);
-        web3.TransactionInformation transaction =
-            await _contractService.getTransactionByHash(transactionHash);
-        if (receipt != null &&
-            transaction != null &&
-            transaction.transactionIndex != null) {
+        List<dynamic> transactions = await getEthereumTransactionsByAddress(
+            ethereumAddress, pendingTransfer['token'], 0);
+        final transactionFound = transactions.firstWhere(
+            (transaction) => transaction['txHash'] == transactionHash,
+            orElse: () => null);
+        if (transactionFound != null ||
+            (receipt != null && receipt.status == false)) {
           transferIds.add(transactionHash);
           await _configurationService.removePendingTransfer(transactionHash);
         }

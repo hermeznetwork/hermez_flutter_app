@@ -184,24 +184,26 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                         child: Center(
                           child: new GestureDetector(
                             onTap: () {
-                              widget.arguments.store
-                                  .updateLevel(TransactionLevel.LEVEL2);
-                              Future.delayed(const Duration(milliseconds: 100),
-                                  () {
-                                Navigator.pushNamed(context, 'wallet_details',
-                                    arguments: WalletDetailsArguments(
-                                      widget.arguments.store,
-                                      TransactionLevel.LEVEL2,
-                                      widget.arguments.parentContext,
-                                    )).then((refresh) {
-                                  if (refresh != null && refresh == true) {
-                                    needRefresh = refresh;
-                                  } else {
-                                    needRefresh = false;
-                                  }
-                                  setState(() {});
+                              if (!isLoading) {
+                                widget.arguments.store
+                                    .updateLevel(TransactionLevel.LEVEL2);
+                                Future.delayed(
+                                    const Duration(milliseconds: 100), () {
+                                  Navigator.pushNamed(context, 'wallet_details',
+                                      arguments: WalletDetailsArguments(
+                                        widget.arguments.store,
+                                        TransactionLevel.LEVEL2,
+                                        widget.arguments.parentContext,
+                                      )).then((refresh) {
+                                    if (refresh != null && refresh == true) {
+                                      needRefresh = refresh;
+                                    } else {
+                                      needRefresh = false;
+                                    }
+                                    setState(() {});
+                                  });
                                 });
-                              });
+                              }
                             },
                             onDoubleTap: null,
                             child: Container(
@@ -521,19 +523,21 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                         child: Center(
                           child: new GestureDetector(
                             onTap: () {
-                              widget.arguments.store
-                                  .updateLevel(TransactionLevel.LEVEL1);
-                              Future.delayed(const Duration(milliseconds: 100),
-                                  () {
-                                Navigator.pushNamed(context, 'wallet_details',
-                                    arguments: WalletDetailsArguments(
-                                      widget.arguments.store,
-                                      TransactionLevel.LEVEL1,
-                                      widget.arguments.parentContext,
-                                    )).then((value) {
-                                  setState(() {});
+                              if (!isLoading) {
+                                widget.arguments.store
+                                    .updateLevel(TransactionLevel.LEVEL1);
+                                Future.delayed(
+                                    const Duration(milliseconds: 100), () {
+                                  Navigator.pushNamed(context, 'wallet_details',
+                                      arguments: WalletDetailsArguments(
+                                        widget.arguments.store,
+                                        TransactionLevel.LEVEL1,
+                                        widget.arguments.parentContext,
+                                      )).then((value) {
+                                    setState(() {});
+                                  });
                                 });
-                              });
+                              }
                             },
                             onDoubleTap: null,
                             child: Container(

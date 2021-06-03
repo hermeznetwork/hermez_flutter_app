@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -79,7 +78,7 @@ class _QRCodePageState extends State<QRCodePage> {
           elevation: 0.0,
           backgroundColor: HermezColors.lightOrange,
           actions:
-          //widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT
+          widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT ?
                <Widget>[
                   IconButton(
                     icon: Image.asset("assets/share.png",
@@ -90,7 +89,7 @@ class _QRCodePageState extends State<QRCodePage> {
                       shareScreenshot();
                     },
                   ),
-                ]
+                ] : null
               ),
       body: SafeArea(
         child: Column(
@@ -401,8 +400,7 @@ class _QRCodePageState extends State<QRCodePage> {
                         widget.arguments.qrCodeType !=
                             QRCodeType.REQUEST_PAYMENT) ||
                     (widget.arguments.qrCodeType ==
-                            QRCodeType.REQUEST_PAYMENT &&
-                        Platform.isAndroid)
+                            QRCodeType.REQUEST_PAYMENT)
                 ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 20.0, bottom: 20.0),
