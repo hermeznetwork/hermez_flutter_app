@@ -791,7 +791,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         timestamp = dateTimeFromStr.millisecondsSinceEpoch;
                       } else if (transaction.timestamp.isNotEmpty) {
                         final formatter = DateFormat(
-                            "yyyy-MM-ddThh:mm:ss"); // "2021-03-24T15:42:544802"
+                            "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-24T15:42:544802"
                         final DateTime dateTimeFromStr =
                             formatter.parse(transaction.timestamp, true);
                         timestamp = dateTimeFromStr.millisecondsSinceEpoch;
@@ -1157,8 +1157,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           await fetchPendingDeposits(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingDepositsTxs =
           pendingDeposits.map((pendingDeposit) {
-        DateTime date =
-            DateTime.fromMillisecondsSinceEpoch(pendingDeposit['timestamp']);
+        DateTime date = DateTime.fromMillisecondsSinceEpoch(
+            pendingDeposit['timestamp'],
+            isUtc: true);
         String timestamp = date.toString().replaceFirst(" ", "T") + "Z";
         return ForgedTransaction(
             id: pendingDeposit['id'],
@@ -1185,8 +1186,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         transactions.sort((a, b) {
           final formatter =
               DateFormat("yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
-          final DateTime dateTime1FromStr = formatter.parse(a.timestamp, true);
-          final DateTime dateTime2FromStr = formatter.parse(b.timestamp, true);
+          final DateTime dateTime1FromStr = formatter.parse(a.timestamp);
+          final DateTime dateTime2FromStr = formatter.parse(b.timestamp);
 
           return dateTime2FromStr.compareTo(dateTime1FromStr);
         });
@@ -1267,7 +1268,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     List<PoolTransaction> poolTxs =
         List.from(widget.arguments.store.state.pendingL2Txs);
     poolTxs.removeWhere((transaction) =>
-        transaction.type == 'Exit' &&
+        transaction.type == 'Exit' ||
         transaction.fromAccountIndex != accountIndex);
     return poolTxs;
   }
@@ -1276,7 +1277,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     List<PoolTransaction> poolTxs =
         List.from(widget.arguments.store.state.pendingL2Txs);
     poolTxs.removeWhere((transaction) =>
-        transaction.type != 'Exit' &&
+        transaction.type != 'Exit' ||
         transaction.fromAccountIndex != accountIndex);
     return poolTxs;
   }
