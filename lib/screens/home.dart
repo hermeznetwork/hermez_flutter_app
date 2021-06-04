@@ -278,7 +278,6 @@ class _HomePageState extends State<HomePage> {
                   Widget page;
                   if (index == 0) {
                     page = WalletSelectorPage(
-                        //key: _scaffoldKey,
                         arguments: WalletSelectorArguments(
                             widget.arguments.store, context,
                             showHermezWallet: showHermezWallet,
@@ -305,20 +304,16 @@ class _HomePageState extends State<HomePage> {
                         configurationService: configurationService);
                   } else if (settings.name == 'account_selector') {
                     final AccountSelectorArguments args = settings.arguments;
-                    page = AccountSelectorPage(
-                        /*key: _scaffoldKey,*/ arguments: args);
+                    page = AccountSelectorPage(arguments: args);
                   } else if (settings.name == 'currency_selector') {
-                    page = SettingsCurrencyPage(
-                        /*key: _scaffoldKey, */ store: widget.arguments.store);
+                    page = SettingsCurrencyPage(store: widget.arguments.store);
                   } else if (settings.name == 'fee_selector') {
                     page = FeeSelectorPage(
-                        /*key: _scaffoldKey,*/
                         arguments:
                             FeeSelectorArguments(widget.arguments.store));
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
-                    page = AccountDetailsPage(
-                        /*key: _scaffoldKey,*/ arguments: args);
+                    page = AccountDetailsPage(arguments: args);
                   } else if (settings.name == 'transaction_details') {
                     page = WalletTransferProvider(
                       builder: (context, store) {
@@ -338,7 +333,11 @@ class _HomePageState extends State<HomePage> {
   Widget settingsPage(dynamic context) {
     var configurationService =
         Provider.of<ConfigurationService>(context, listen: false);
-    return SettingsPage(widget.arguments.store, configurationService, context);
+    return SettingsPage(widget.arguments.store, configurationService, context,
+        () {
+      this.showHermezWallet = true;
+      onTabTapped(0, context);
+    });
   }
 
   updateItems() {

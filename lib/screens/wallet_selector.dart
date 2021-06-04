@@ -64,6 +64,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
             widget.arguments.store,
             TransactionLevel.LEVEL2,
             widget.arguments.parentContext,
+            true,
           ));
       widget.arguments.showHermezWallet = false;
       if (widget.arguments.hermezWalletShown != null) {
@@ -194,6 +195,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         widget.arguments.store,
                                         TransactionLevel.LEVEL2,
                                         widget.arguments.parentContext,
+                                        false,
                                       )).then((refresh) {
                                     if (refresh != null && refresh == true) {
                                       needRefresh = refresh;
@@ -533,6 +535,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         widget.arguments.store,
                                         TransactionLevel.LEVEL1,
                                         widget.arguments.parentContext,
+                                        false,
                                       )).then((value) {
                                     setState(() {});
                                   });

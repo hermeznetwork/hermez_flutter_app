@@ -10,6 +10,7 @@ import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/pop_result.dart';
 import 'package:hermez_plugin/addresses.dart';
 import 'package:hermez_plugin/environment.dart';
 import 'package:local_auth/local_auth.dart';
@@ -294,13 +295,24 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                         if (selectedAccount != null) {
                           // Force withdrawal
                           Navigator.pushNamed(widget.arguments.parentContext,
-                              "/transaction_amount",
-                              arguments: TransactionAmountArguments(
-                                  widget.arguments.store,
-                                  TransactionLevel.LEVEL2,
-                                  TransactionType.FORCEEXIT,
-                                  account: selectedAccount,
-                                  allowChangeLevel: false));
+                                  "/transaction_amount",
+                                  arguments: TransactionAmountArguments(
+                                      widget.arguments.store,
+                                      TransactionLevel.LEVEL2,
+                                      TransactionType.FORCEEXIT,
+                                      account: selectedAccount,
+                                      allowChangeLevel: false))
+                              .then((results) {
+                            if (results is PopWithResults) {
+                              PopWithResults popResult = results;
+                              if (popResult.toPage == "/home") {
+                                Navigator.pop(context, popResult);
+                                /*if (this.onForceExitSuccess != null) {
+                                  this.onForceExitSuccess();
+                                }*/
+                              }
+                            }
+                          });
                         }
                       });
 

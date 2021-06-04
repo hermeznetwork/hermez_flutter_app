@@ -6,6 +6,7 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/pop_result.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -14,11 +15,13 @@ import 'package:hermez/utils/hermez_colors.dart';
 // title and message.
 
 class SettingsPage extends HookWidget {
-  SettingsPage(this.store, this.configurationService, this.parentContext);
+  SettingsPage(this.store, this.configurationService, this.parentContext,
+      this.onForceExitSuccess);
 
   WalletHandler store;
   ConfigurationService configurationService;
   BuildContext parentContext;
+  Function() onForceExitSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -129,9 +132,20 @@ class SettingsPage extends HookWidget {
                             parentContext, SettingsDetailsType.SECURITY));
                     break;
                   case 3:
-                    Navigator.of(context).pushNamed("settings_details",
-                        arguments: SettingsDetailsArguments(store,
-                            parentContext, SettingsDetailsType.ADVANCED));
+                    Navigator.of(context)
+                        .pushNamed("settings_details",
+                            arguments: SettingsDetailsArguments(store,
+                                parentContext, SettingsDetailsType.ADVANCED))
+                        .then((results) {
+                      if (results is PopWithResults) {
+                        PopWithResults popResult = results;
+                        if (popResult.toPage == "/home") {
+                          if (this.onForceExitSuccess != null) {
+                            this.onForceExitSuccess();
+                          }
+                        }
+                      }
+                    });
                     break;
                 }
               },

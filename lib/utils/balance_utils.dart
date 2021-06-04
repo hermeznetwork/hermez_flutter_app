@@ -208,7 +208,7 @@ class BalanceUtils {
       });*/
       store.state.pendingForceExits
           .takeWhile((pendingForceExit) =>
-              account.accountIndex == pendingForceExit.accountIndex)
+              account.accountIndex == pendingForceExit['accountIndex'])
           .forEach((pendingForceExit) {
         var amount = pendingForceExit['amount'];
         withdrawsAmount += amount;

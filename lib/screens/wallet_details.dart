@@ -35,8 +35,10 @@ class WalletDetailsArguments {
   final WalletHandler store;
   final TransactionLevel transactionLevel;
   final BuildContext parentContext;
+  final bool needRefresh;
 
-  WalletDetailsArguments(this.store, this.transactionLevel, this.parentContext);
+  WalletDetailsArguments(
+      this.store, this.transactionLevel, this.parentContext, this.needRefresh);
 }
 
 class WalletDetailsPage extends StatefulWidget {
@@ -64,6 +66,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   void initState() {
     //fetchAccounts();
     super.initState();
+    if (widget.arguments.needRefresh) {
+      _onRefresh();
+    }
   }
 
   Future<void> _onRefresh() async {
