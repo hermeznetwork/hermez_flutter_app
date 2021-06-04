@@ -64,15 +64,16 @@ class _HomePageState extends State<HomePage> {
     children = [
       for (final tabItem in items)
         Navigator(onGenerateRoute: (settings) {
-          _scaffoldKey = GlobalKey<ScaffoldState>();
           _context = context;
           Widget page = tabItem.page;
           if (settings.name == 'wallet_details') {
+            _scaffoldKey = GlobalKey<ScaffoldState>();
             page = WalletDetailsPage(
               key: _scaffoldKey,
               arguments: settings.arguments,
             );
           } else if (settings.name == 'settings_details') {
+            _scaffoldKey = GlobalKey<ScaffoldState>();
             var configurationService =
                 Provider.of<ConfigurationService>(context, listen: false);
             page = SettingsDetailsPage(
@@ -81,21 +82,21 @@ class _HomePageState extends State<HomePage> {
                 configurationService: configurationService);
           } else if (settings.name == 'account_selector') {
             final AccountSelectorArguments args = settings.arguments;
-            page = AccountSelectorPage(key: _scaffoldKey, arguments: args);
+            page = AccountSelectorPage(/*key: _scaffoldKey,*/ arguments: args);
           } else if (settings.name == 'currency_selector') {
             page = SettingsCurrencyPage(store: widget.arguments.store);
           } else if (settings.name == 'fee_selector') {
             page = FeeSelectorPage(
-                key: _scaffoldKey,
+                /*key: _scaffoldKey,*/
                 arguments: FeeSelectorArguments(widget.arguments.store));
           } else if (settings.name == 'account_details') {
             final AccountDetailsArguments args = settings.arguments;
-            page = AccountDetailsPage(key: _scaffoldKey, arguments: args);
+            page = AccountDetailsPage(/*key: _scaffoldKey,*/ arguments: args);
           } else if (settings.name == 'transaction_details') {
             page = WalletTransferProvider(
               builder: (context, store) {
                 return TransactionDetailsPage(
-                    key: _scaffoldKey, arguments: settings.arguments);
+                    /*key: _scaffoldKey,*/ arguments: settings.arguments);
               },
             );
           }
@@ -274,21 +275,21 @@ class _HomePageState extends State<HomePage> {
                 key: GlobalKey(),
                 onGenerateRoute: (settings) {
                   _context = context;
-                  _scaffoldKey = GlobalKey<ScaffoldState>();
                   Widget page;
                   if (index == 0) {
                     page = WalletSelectorPage(
-                        key: _scaffoldKey,
+                        //key: _scaffoldKey,
                         arguments: WalletSelectorArguments(
                             widget.arguments.store, context,
                             showHermezWallet: showHermezWallet,
                             hermezWalletShown: () {
-                          showHermezWallet = false;
-                        }));
+                      showHermezWallet = false;
+                    }));
                   } else if (index == 2) {
                     page = settingsPage(context);
                   }
                   if (settings.name == 'wallet_details') {
+                    _scaffoldKey = GlobalKey<ScaffoldState>();
                     page = WalletDetailsPage(
                       key: _scaffoldKey,
                       arguments: settings.arguments,
@@ -297,31 +298,33 @@ class _HomePageState extends State<HomePage> {
                     var configurationService =
                         Provider.of<ConfigurationService>(context,
                             listen: false);
+                    _scaffoldKey = GlobalKey<ScaffoldState>();
                     page = SettingsDetailsPage(
                         key: _scaffoldKey,
                         arguments: settings.arguments,
                         configurationService: configurationService);
                   } else if (settings.name == 'account_selector') {
                     final AccountSelectorArguments args = settings.arguments;
-                    page =
-                        AccountSelectorPage(key: _scaffoldKey, arguments: args);
+                    page = AccountSelectorPage(
+                        /*key: _scaffoldKey,*/ arguments: args);
                   } else if (settings.name == 'currency_selector') {
                     page = SettingsCurrencyPage(
-                        key: _scaffoldKey, store: widget.arguments.store);
+                        /*key: _scaffoldKey, */ store: widget.arguments.store);
                   } else if (settings.name == 'fee_selector') {
                     page = FeeSelectorPage(
-                        key: _scaffoldKey,
+                        /*key: _scaffoldKey,*/
                         arguments:
                             FeeSelectorArguments(widget.arguments.store));
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
-                    page =
-                        AccountDetailsPage(key: _scaffoldKey, arguments: args);
+                    page = AccountDetailsPage(
+                        /*key: _scaffoldKey,*/ arguments: args);
                   } else if (settings.name == 'transaction_details') {
                     page = WalletTransferProvider(
                       builder: (context, store) {
                         return TransactionDetailsPage(
-                            key: _scaffoldKey, arguments: settings.arguments);
+                            /*key: _scaffoldKey,*/ arguments:
+                                settings.arguments);
                       },
                     );
                   }
