@@ -1,10 +1,10 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez_plugin/hermez_wallet.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
+import 'package:hermez_sdk/hermez_wallet.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/pool_transaction.dart';
 
 part 'wallet.g.dart';
 

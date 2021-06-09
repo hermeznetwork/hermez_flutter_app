@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_handler.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/environment.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/pin.dart';
@@ -14,13 +15,13 @@ import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
-import 'package:hermez_plugin/addresses.dart';
-import 'package:hermez_plugin/environment.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/recommended_fee.dart';
-import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/utils.dart';
+import 'package:hermez_sdk/addresses.dart';
+import 'package:hermez_sdk/environment.dart' as HermezSDK;
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/recommended_fee.dart';
+import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -622,7 +623,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                   widget.arguments.store.state.ethereumAddress)
                               .toLowerCase() ||
                       widget.arguments.addressFrom.toLowerCase() ==
-                          getCurrentEnvironment()
+                          HermezSDK.getCurrentEnvironment()
                               .contracts['Hermez']
                               .toLowerCase())
                   ? Align(
@@ -721,7 +722,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                           widget.arguments.store.state.ethereumAddress
                               .toLowerCase() ||
                       widget.arguments.addressFrom.toLowerCase() ==
-                          getCurrentEnvironment()
+                          HermezSDK.getCurrentEnvironment()
                               .contracts['Hermez']
                               .toLowerCase()
                   ? Align(
@@ -774,7 +775,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                   widget.arguments.store.state.ethereumAddress)
                               .toLowerCase() ||
                       widget.arguments.addressTo.toLowerCase() ==
-                          getCurrentEnvironment()
+                          HermezSDK.getCurrentEnvironment()
                               .contracts['Hermez']
                               .toLowerCase())
                   ? Align(
@@ -834,7 +835,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               widget.arguments.store.state.ethereumAddress)
                           .toLowerCase() ||
                   widget.arguments.addressTo.toLowerCase() ==
-                      getCurrentEnvironment().contracts['Hermez'].toLowerCase())
+                      HermezSDK.getCurrentEnvironment()
+                          .contracts['Hermez']
+                          .toLowerCase())
               ? Align(
                   alignment: Alignment.centerRight,
                   child: Text(
@@ -1312,7 +1315,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             onTap: () async {
               var url;
               if (widget.arguments.transactionId != null) {
-                url = getCurrentEnvironment().batchExplorerUrl +
+                url = HermezSDK.getCurrentEnvironment().batchExplorerUrl +
                     '/transaction/' +
                     widget.arguments.transactionId;
               } else {
@@ -1416,7 +1419,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
             return await widget.arguments.store.forceExit(
                 amountExit, widget.arguments.account,
-                gasLimit: widget.arguments.gasLimit,
+                gasLimit: BigInt.from(widget.arguments.gasLimit),
                 gasPrice: widget.arguments.gasPrice);
           }
           break;
@@ -1433,7 +1436,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 widget.arguments.exit,
                 widget.arguments.completeDelayedWithdrawal,
                 widget.arguments.instantWithdrawal,
-                gasLimit: widget.arguments.gasLimit,
+                gasLimit: BigInt.from(widget.arguments.gasLimit),
                 gasPrice: widget.arguments.gasPrice);
           }
           break;

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="211" height="211" fill="none" viewBox="0 0 211 211">
+    <mask id="8okb492d0a" width="211" height="211" x="0" y="0" maskUnits="userSpaceOnUse">
+        <path fill="#fff" d="M105.5 211c58.266 0 105.5-47.234 105.5-105.5S163.766 0 105.5 0 0 47.234 0 105.5 47.234 211 105.5 211z"/>
+    </mask>
+    <g mask="url(#8okb492d0a)">
+        <path fill="#fff" d="M105.5 211c58.266 0 105.5-47.234 105.5-105.5S163.766 0 105.5 0 0 47.234 0 105.5 47.234 211 105.5 211z"/>
+    </g>
+    <mask id="vupsikuakb" width="211" height="211" x="0" y="0" maskUnits="userSpaceOnUse">
+        <path fill="#fff" d="M105.5 211c58.266 0 105.5-47.234 105.5-105.5S163.766 0 105.5 0 0 47.234 0 105.5 47.234 211 105.5 211z"/>
+    </mask>
+    <g mask="url(#vupsikuakb)">
+        <path fill="url(#paint0_linear)" d="M105.5 211c58.266 0 105.5-47.234 105.5-105.5S163.766 0 105.5 0 0 47.234 0 105.5 47.234 211 105.5 211z" opacity=".523"/>
+        <path fill="#FFFCF8" d="M155.632 68.627H55.315c-7.428 0-13.45 6.022-13.45 13.45v179.056c0 7.428 6.022 13.45 13.45 13.45h100.317c7.428 0 13.45-6.022 13.45-13.45V82.077c0-7.428-6.022-13.45-13.45-13.45z" opacity=".777"/>
+        <path stroke="#C8C8C8" stroke-linecap="square" stroke-width=".28" d="M41.752 94.852h127.216M41.752 108.301h127.216M41.752 121.752h127.216M41.752 135.201h127.216M41.752 148.652h127.216M41.752 162.102h127.216M41.752 175.553h127.216M41.752 189.002h127.216M41.752 202.453h127.216"/>
+        <path fill="#2B2B2B" fill-rule="evenodd" d="M95.553 113.249l17.182 18.553c-1.596 2.216-2.934 3.635-4.012 4.258-1.079.622-2.977 1.071-5.694 1.346l-7.476-24.157z" clip-rule="evenodd"/>
+        <path fill="#E75A2B" fill-rule="evenodd" d="M95.552 113.248l3.924 4.206-2.244 1.296-1.68-5.502z" clip-rule="evenodd"/>
+        <mask id="zzdvbryjkc" width="65" height="101" x="103" y="131" maskUnits="userSpaceOnUse">
+            <path fill="#fff" d="M103.029 137.406c1.286-.095 3.044-.786 5.274-2.074 2.23-1.287 3.708-2.464 4.433-3.53l54.459 94.325c-.983 1.28-2.447 2.482-4.391 3.604-1.944 1.123-3.716 1.789-5.316 2l-54.459-94.325z"/>
+        </mask>
+        <g mask="url(#zzdvbryjkc)">
+            <path fill="#E75A2B" d="M103.029 137.406c1.286-.095 3.044-.786 5.274-2.074 2.23-1.287 3.708-2.464 4.433-3.53l54.459 94.325c-.983 1.28-2.447 2.482-4.391 3.604-1.944 1.123-3.716 1.789-5.316 2l-54.459-94.325z"/>
+            <path stroke="#FFAD2F" stroke-linecap="square" stroke-width=".28" d="M106.375 135.637l54.922 95.127M109.773 133.674l54.922 95.127"/>
+        </g>
+        <path stroke="#E75A2B" stroke-linecap="round" stroke-width=".841" d="M61.367 69.072v136.184"/>
+    </g>
+    <defs>
+        <linearGradient id="paint0_linear" x1="-99.358" x2="211" y1="-101.737" y2="211" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FAF4EA"/>
+            <stop offset="1" stop-color="#FFA600"/>
+        </linearGradient>
+    </defs>
+</svg>

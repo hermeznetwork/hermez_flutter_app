@@ -1,3 +1,3 @@
 #import "GeneratedPluginRegistrant.h"
-#import <hermez_plugin/HermezPlugin.h>
+#import <hermez_sdk/HermezPlugin.h>
 

@@ -20,13 +20,13 @@ import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
-import 'package:hermez_plugin/addresses.dart';
-import 'package:hermez_plugin/constants.dart';
-import 'package:hermez_plugin/environment.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
-import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_sdk/addresses.dart';
+import 'package:hermez_sdk/constants.dart';
+import 'package:hermez_sdk/environment.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 import 'account_details.dart';
 import 'transaction_details.dart';
@@ -54,6 +54,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<Account> _accounts;
 
   List<Exit> _filteredExits = [];
+  List<bool> _allowedInstantWithdraws = [];
 
   List<dynamic> _pendingExits = [];
   List<dynamic> _pendingForceExits = [];
@@ -104,7 +105,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     }
   }
 
-  void fetchPendingTransactions() async {
+  Future<void> fetchPendingTransactions() async {
     _pendingExits = fetchPendingExits();
     List<Exit> _exits = fetchExits();
     _filteredExits = _exits.toList();
@@ -119,6 +120,12 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       }
       return false;
     });
+    for (int i = 0; i < _filteredExits.length; i++) {
+      Exit exit = _filteredExits[i];
+      bool isAllowed = await widget.arguments.store
+          .isInstantWithdrawalAllowed(double.parse(exit.balance), exit.token);
+      _allowedInstantWithdraws.add(isAllowed);
+    }
     /*const accountPendingDelayedWithdraws = storage.getItemsByHermezAddress(
           pendingDelayedWithdraws,
           ethereumNetworkTask.data.chainId,
@@ -674,7 +681,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   1,
                   currency,
                   widget.arguments.store.state.exchangeRatio,
-                  () async {},
+                  (bool isInstantWithdraw) async {},
                   widget.arguments.store.state.txLevel);
             } else if (_filteredExits.length > 0 &&
                 i <
@@ -684,6 +691,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               final index =
                   i - _pendingExits.length - _pendingForceExits.length;
               final Exit exit = _filteredExits[index];
+              final bool isAllowed = _allowedInstantWithdraws[index];
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency
@@ -692,62 +700,71 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .last;
 
               return WithdrawalRow(
-                  exit, 2, currency, widget.arguments.store.state.exchangeRatio,
-                  () async {
-                BigInt gasPrice = BigInt.one;
-                GasPriceResponse gasPriceResponse =
-                    await widget.arguments.store.getGasPrice();
-                switch (widget.arguments.store.state.defaultFee) {
-                  case WalletDefaultFee.SLOW:
-                    int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
-                    gasPrice = BigInt.from(gasPriceFloor);
-                    break;
-                  case WalletDefaultFee.AVERAGE:
-                    int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
-                    gasPrice = BigInt.from(gasPriceFloor);
-                    break;
-                  case WalletDefaultFee.FAST:
-                    int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
-                    gasPrice = BigInt.from(gasPriceFloor);
-                    break;
-                }
-                String addressFrom = exit.hezEthereumAddress;
-                String addressTo = getCurrentEnvironment().contracts['Hermez'];
-                final amountWithdraw = double.parse(exit.balance);
-                /*getTokenAmountBigInt(
+                exit,
+                2,
+                currency,
+                widget.arguments.store.state.exchangeRatio,
+                (bool instantWithdrawAllowed) async {
+                  BigInt gasPrice = BigInt.one;
+                  GasPriceResponse gasPriceResponse =
+                      await widget.arguments.store.getGasPrice();
+                  switch (widget.arguments.store.state.defaultFee) {
+                    case WalletDefaultFee.SLOW:
+                      int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                    case WalletDefaultFee.AVERAGE:
+                      int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                    case WalletDefaultFee.FAST:
+                      int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
+                      gasPrice = BigInt.from(gasPriceFloor);
+                      break;
+                  }
+                  String addressFrom = exit.hezEthereumAddress;
+                  String addressTo =
+                      getCurrentEnvironment().contracts['Hermez'];
+                  final amountWithdraw = double.parse(exit.balance);
+                  /*getTokenAmountBigInt(
                     double.parse(exit.balance) / pow(10, exit.token.decimals),
                     exit.token.decimals);*/
-                BigInt gasLimit = await widget.arguments.store
-                    .withdrawGasLimit(amountWithdraw, null, exit, false, true);
+                  BigInt gasLimit = await widget.arguments.store
+                      .withdrawGasLimit(amountWithdraw, null, exit, false,
+                          instantWithdrawAllowed);
 
-                var results = await Navigator.of(widget.arguments.parentContext)
-                    .pushNamed("/transaction_details",
-                        arguments: TransactionDetailsArguments(
-                          store: widget.arguments.store,
-                          transactionType: TransactionType.WITHDRAW,
-                          transactionLevel: TransactionLevel.LEVEL1,
-                          status: TransactionStatus.DRAFT,
-                          token: exit.token,
-                          exit: exit,
-                          amount: amountWithdraw.toDouble() /
-                              pow(10, exit.token.decimals),
-                          addressFrom: addressFrom,
-                          addressTo: addressTo,
-                          /*selectedFeeSpeed:
+                  var results = await Navigator.of(
+                          widget.arguments.parentContext)
+                      .pushNamed("/transaction_details",
+                          arguments: TransactionDetailsArguments(
+                              store: widget.arguments.store,
+                              transactionType: TransactionType.WITHDRAW,
+                              transactionLevel: TransactionLevel.LEVEL1,
+                              status: TransactionStatus.DRAFT,
+                              token: exit.token,
+                              exit: exit,
+                              amount: amountWithdraw.toDouble() /
+                                  pow(10, exit.token.decimals),
+                              addressFrom: addressFrom,
+                              addressTo: addressTo,
+                              /*selectedFeeSpeed:
                               widget.arguments.store.state.defaultFee,*/
-                          gasLimit: gasLimit.toInt(),
-                          gasPrice: gasPrice.toInt(),
-                        ));
-                if (results is PopWithResults) {
-                  PopWithResults popResult = results;
-                  if (popResult.toPage == "/home") {
-                    // TODO do stuff
-                    _onRefresh();
-                  } else {
-                    Navigator.of(context).pop(results);
+                              gasLimit: gasLimit.toInt(),
+                              gasPrice: gasPrice.toInt(),
+                              instantWithdrawal: instantWithdrawAllowed));
+                  if (results is PopWithResults) {
+                    PopWithResults popResult = results;
+                    if (popResult.toPage == "/home") {
+                      // TODO do stuff
+                      _onRefresh();
+                    } else {
+                      Navigator.of(context).pop(results);
+                    }
                   }
-                }
-              }, widget.arguments.store.state.txLevel);
+                },
+                widget.arguments.store.state.txLevel,
+                instantWithdrawAllowed: isAllowed,
+              );
             } else if (_pendingWithdraws.length > 0 &&
                 i <
                     _pendingWithdraws.length +
@@ -772,6 +789,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           .toString()
                           .replaceAll('.0', '')));
 
+              final bool isAllowed =
+                  _allowedInstantWithdraws[index]; // TODO: ???
+
               final String currency = widget
                   .arguments.store.state.defaultCurrency
                   .toString()
@@ -791,7 +811,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 currency,
                 widget.arguments.store.state.exchangeRatio,
                 step == 2
-                    ? () async {
+                    ? (bool instantWithdrawAllowed) async {
                         BigInt gasPrice = BigInt.one;
                         GasPriceResponse gasPriceResponse =
                             await widget.arguments.store.getGasPrice();
@@ -825,8 +845,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   pow(10, exit.token.decimals),
                               exit.token.decimals);*/
                           gasLimit = await widget.arguments.store
-                              .withdrawGasLimit(
-                                  amountWithdraw, null, exit, false, true);
+                              .withdrawGasLimit(amountWithdraw, null, exit,
+                                  false, instantWithdrawAllowed);
                         } catch (e) {
                           // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
                           gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
@@ -839,23 +859,23 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           }
                         }
 
-                        var results =
-                            await Navigator.of(widget.arguments.parentContext)
-                                .pushNamed("/transaction_details",
-                                    arguments: TransactionDetailsArguments(
-                                      store: widget.arguments.store,
-                                      transactionType: TransactionType.WITHDRAW,
-                                      transactionLevel: TransactionLevel.LEVEL1,
-                                      status: TransactionStatus.DRAFT,
-                                      token: exit.token,
-                                      exit: exit,
-                                      amount: double.parse(exit.balance) /
-                                          pow(10, exit.token.decimals),
-                                      addressFrom: addressFrom,
-                                      addressTo: addressTo,
-                                      gasLimit: gasLimit.toInt(),
-                                      gasPrice: gasPrice.toInt(),
-                                    ));
+                        var results = await Navigator.of(
+                                widget.arguments.parentContext)
+                            .pushNamed("/transaction_details",
+                                arguments: TransactionDetailsArguments(
+                                    store: widget.arguments.store,
+                                    transactionType: TransactionType.WITHDRAW,
+                                    transactionLevel: TransactionLevel.LEVEL1,
+                                    status: TransactionStatus.DRAFT,
+                                    token: exit.token,
+                                    exit: exit,
+                                    amount: double.parse(exit.balance) /
+                                        pow(10, exit.token.decimals),
+                                    addressFrom: addressFrom,
+                                    addressTo: addressTo,
+                                    gasLimit: gasLimit.toInt(),
+                                    gasPrice: gasPrice.toInt(),
+                                    instantWithdrawal: instantWithdrawAllowed));
                         if (results is PopWithResults) {
                           PopWithResults popResult = results;
                           if (popResult.toPage == "/home") {

@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/tx_utils.dart';
-import 'package:hermez_plugin/utils.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/tx_utils.dart';
+import 'package:hermez_sdk/utils.dart';
 import 'package:intl/intl.dart';
 
 class BalanceUtils {

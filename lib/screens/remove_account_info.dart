@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -46,8 +47,8 @@ class RemoveAccountInfoPage extends HookWidget {
                         margin: EdgeInsets.only(left: 65, right: 65),
                         child: Align(
                           alignment: Alignment.center,
-                          child: Image.asset(
-                            'assets/remove_account_warning.png',
+                          child: SvgPicture.asset(
+                            'assets/remove_account_warning.svg',
                             width: 300,
                             height: 300,
                           ),

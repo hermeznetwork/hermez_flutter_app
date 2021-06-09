@@ -6,7 +6,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_secure_storage (3.3.1):
     - Flutter
-  - hermez_plugin (0.0.1):
+  - hermez_sdk (1.0.0):
     - Flutter
   - local_auth (0.0.1):
     - Flutter
@@ -26,7 +26,7 @@ DEPENDENCIES:
   - esys_flutter_share (from `.symlinks/plugins/esys_flutter_share/ios`)
   - Flutter (from `Flutter`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
-  - hermez_plugin (from `.symlinks/plugins/hermez_plugin/ios`)
+  - hermez_sdk (from `.symlinks/plugins/hermez_sdk/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
@@ -46,8 +46,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
-  hermez_plugin:
-    :path: ".symlinks/plugins/hermez_plugin/ios"
+  hermez_sdk:
+    :path: ".symlinks/plugins/hermez_sdk/ios"
   local_auth:
     :path: ".symlinks/plugins/local_auth/ios"
   path_provider:
@@ -64,7 +64,7 @@ SPEC CHECKSUMS:
   esys_flutter_share: 403498dab005b36ce1f8d7aff377e81f0621b0b4
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
-  hermez_plugin: 0966f2f0258a81bec9dff7258a56e238b0dc3089
+  hermez_sdk: 29bdcad435cb7695e2bcf1ef6d2b7acbcc4c73f3
   local_auth: 25938960984c3a7f6e3253e3f8d962fdd16852bd
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -54,10 +55,10 @@ class _BiometricsPageState extends State<BiometricsPage> {
                     child: new Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Image.asset(
+                        SvgPicture.asset(
                           widget.arguments.isFingerprint
-                              ? 'assets/biometrics_fingerprint.png'
-                              : 'assets/biometrics_face.png',
+                              ? 'assets/biometrics_fingerprint.svg'
+                              : 'assets/biometrics_face.svg',
                           width: 120,
                           height: 120,
                         ),

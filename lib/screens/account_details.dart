@@ -14,17 +14,17 @@ import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
-import 'package:hermez_plugin/addresses.dart';
-import 'package:hermez_plugin/constants.dart';
-import 'package:hermez_plugin/environment.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/forged_transaction.dart';
-import 'package:hermez_plugin/model/l1info.dart';
-import 'package:hermez_plugin/model/l2info.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
-import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/tx_utils.dart';
+import 'package:hermez_sdk/addresses.dart';
+import 'package:hermez_sdk/constants.dart';
+import 'package:hermez_sdk/environment.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/forged_transaction.dart';
+import 'package:hermez_sdk/model/l1info.dart';
+import 'package:hermez_sdk/model/l2info.dart';
+import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/tx_utils.dart';
 import 'package:intl/intl.dart';
 
 import '../context/wallet/wallet_handler.dart';
@@ -545,7 +545,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       1,
                       currency,
                       widget.arguments.store.state.exchangeRatio,
-                      () async {},
+                      (bool isInstantWithdraw) async {},
                       widget.arguments.store.state.txLevel);
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
                 else if (filteredExits.length > 0 &&
@@ -564,7 +564,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       .last;
 
                   return WithdrawalRow(exit, 2, currency,
-                      widget.arguments.store.state.exchangeRatio, () async {
+                      widget.arguments.store.state.exchangeRatio,
+                      (bool isInstantWithdraw) async {
                     BigInt gasPrice = BigInt.one;
                     GasPriceResponse gasPriceResponse =
                         await widget.arguments.store.getGasPrice();
@@ -596,7 +597,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             pow(10, exit.token.decimals),
                         exit.token.decimals);*/
                     gasLimit = await widget.arguments.store.withdrawGasLimit(
-                        amountWithdraw, null, exit, false, true);
+                        amountWithdraw, null, exit, false, isInstantWithdraw);
 
                     var results =
                         await Navigator.of(widget.arguments.parentContext)
@@ -667,7 +668,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     currency,
                     widget.arguments.store.state.exchangeRatio,
                     step == 2
-                        ? () async {
+                        ? (bool isInstantWithdraw) async {
                             BigInt gasPrice = BigInt.one;
                             GasPriceResponse gasPriceResponse =
                                 await widget.arguments.store.getGasPrice();
@@ -700,26 +701,28 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 exit.token.decimals);*/
 
                             BigInt gasLimit = await widget.arguments.store
-                                .withdrawGasLimit(
-                                    amountWithdraw, null, exit, false, true);
+                                .withdrawGasLimit(amountWithdraw, null, exit,
+                                    false, isInstantWithdraw);
 
                             var results = await Navigator.of(
                                     widget.arguments.parentContext)
                                 .pushNamed("/transaction_details",
                                     arguments: TransactionDetailsArguments(
-                                      store: widget.arguments.store,
-                                      transactionType: TransactionType.WITHDRAW,
-                                      transactionLevel: TransactionLevel.LEVEL1,
-                                      status: TransactionStatus.DRAFT,
-                                      token: exit.token,
-                                      exit: exit,
-                                      amount: amountWithdraw.toDouble() /
-                                          pow(10, exit.token.decimals),
-                                      addressFrom: addressFrom,
-                                      addressTo: addressTo,
-                                      gasLimit: gasLimit.toInt(),
-                                      gasPrice: gasPrice.toInt(),
-                                    ));
+                                        store: widget.arguments.store,
+                                        transactionType:
+                                            TransactionType.WITHDRAW,
+                                        transactionLevel:
+                                            TransactionLevel.LEVEL1,
+                                        status: TransactionStatus.DRAFT,
+                                        token: exit.token,
+                                        exit: exit,
+                                        amount: amountWithdraw.toDouble() /
+                                            pow(10, exit.token.decimals),
+                                        addressFrom: addressFrom,
+                                        addressTo: addressTo,
+                                        gasLimit: gasLimit.toInt(),
+                                        gasPrice: gasPrice.toInt(),
+                                        instantWithdrawal: isInstantWithdraw));
                             if (results is PopWithResults) {
                               PopWithResults popResult = results;
                               if (popResult.toPage == "/home") {

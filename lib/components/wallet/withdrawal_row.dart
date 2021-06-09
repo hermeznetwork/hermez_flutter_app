@@ -5,20 +5,21 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_plugin/model/exit.dart';
+import 'package:hermez_sdk/model/exit.dart';
 
 class WithdrawalRow extends StatelessWidget {
   WithdrawalRow(this.exit, this.step, this.currency, this.exchangeRatio,
       this.onPressed, this.transactionLevel,
-      {this.retry = false});
+      {this.retry = false, this.instantWithdrawAllowed = true});
 
   final Exit exit;
   final int step;
   final String currency;
   final double exchangeRatio;
   final bool retry;
+  final bool instantWithdrawAllowed;
   final TransactionLevel transactionLevel;
-  final void Function() onPressed;
+  final void Function(bool isInstantWithdraw) onPressed;
 
   Widget build(BuildContext context) {
     String status = "";
@@ -172,79 +173,204 @@ class WithdrawalRow extends StatelessWidget {
                       ))
                     : Container(),
               ]),
-              Row(children: [
-                step == 2
-                    ? Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
-                                child: RichText(
-                              text: TextSpan(
-                                style: Theme.of(context).textTheme.bodyText2,
-                                children: [
-                                  WidgetSpan(
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 5.0),
-                                      child: SvgPicture.asset("assets/info.svg",
-                                          width: 15,
-                                          height: 15,
-                                          color: HermezColors.steel),
+              instantWithdrawAllowed
+                  ? Row(children: [
+                      step == 2
+                          ? Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                      child: RichText(
+                                    text: TextSpan(
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
+                                      children: [
+                                        WidgetSpan(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 5.0),
+                                            child: SvgPicture.asset(
+                                                "assets/info.svg",
+                                                width: 15,
+                                                height: 15,
+                                                color: HermezColors.steel),
+                                          ),
+                                        ),
+                                        TextSpan(
+                                            text: retry
+                                                ? "There was an error\nprocessing the withdraw"
+                                                : "Sign required to\nfinalize withdraw",
+                                            style: TextStyle(
+                                              color: HermezColors.steel,
+                                              fontSize: 14,
+                                              height: 1.43,
+                                              fontFamily: 'ModernEra',
+                                              fontWeight: FontWeight.w500,
+                                            )),
+                                      ],
                                     ),
-                                  ),
-                                  TextSpan(
-                                      text: retry
-                                          ? "There was an error\nprocessing the withdraw"
-                                          : "Sign required to\nfinalize withdraw",
-                                      style: TextStyle(
-                                        color: HermezColors.steel,
-                                        fontSize: 14,
-                                        height: 1.43,
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: FontWeight.w500,
-                                      )),
+                                  )),
                                 ],
                               ),
-                            )),
+                            )
+                          : Container(),
+                      step == 2
+                          ? Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: <Widget>[
+                                  SizedBox(
+                                    height: 42,
+                                    child: FlatButton(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(100.0),
+                                        side: BorderSide(
+                                            color: instantWithdrawAllowed
+                                                ? Color(0xffe75a2b)
+                                                : HermezColors.steel
+                                                    .withOpacity(0.5)),
+                                      ),
+                                      onPressed: () {
+                                        this.onPressed(instantWithdrawAllowed);
+                                      },
+                                      padding: EdgeInsets.only(
+                                          top: 13.0,
+                                          bottom: 13.0,
+                                          right: 24.0,
+                                          left: 24.0),
+                                      color: instantWithdrawAllowed
+                                          ? Color(0xffe75a2b)
+                                          : HermezColors.steel.withOpacity(0.5),
+                                      textColor: Colors.white,
+                                      child: Text(
+                                          instantWithdrawAllowed
+                                              ? (retry
+                                                  ? "Try again"
+                                                  : "Finalize")
+                                              : "Withdraw in 1 hour",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontFamily: 'ModernEra',
+                                            fontWeight: FontWeight.w700,
+                                          )),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(),
+                    ])
+                  : Column(
+                      children: [
+                        Row(children: [
+                          Expanded(
+                              child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16.0),
+                                color: HermezColors.steel.withOpacity(0.5)),
+                            padding: EdgeInsets.only(
+                                left: 24.0,
+                                top: 20.0,
+                                right: 24.0,
+                                bottom: 24.0),
+                            //width: double.infinity,
+                            child: Text(
+                                "Withdrawal is on hold because of the current network capacity.\n\n"
+                                "You can try to withdraw your funds later or you can schedule this transaction.",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  height: 1.5,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                )),
+                          ))
+                        ]),
+                        Row(children: [
+                          Expanded(
+                              child: Container(
+                            margin: EdgeInsets.only(top: 15, bottom: 15),
+                            //width: double.infinity,
+                            child: Divider(
+                                color: Color(0x757a7c89),
+                                height: 0.5,
+                                thickness: 2),
+                          ))
+                        ]),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 42,
+                                child: FlatButton(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100.0),
+                                    side: BorderSide(color: Color(0xffe75a2b)),
+                                  ),
+                                  onPressed: () {
+                                    //this.onPressed();
+                                  },
+                                  padding: EdgeInsets.only(
+                                      top: 13.0,
+                                      bottom: 13.0,
+                                      right: 24.0,
+                                      left: 24.0),
+                                  color: Color(0xffe75a2b),
+                                  textColor: Colors.white,
+                                  child: Text("Check availability in 10m",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w700,
+                                      )),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                      )
-                    : Container(),
-                step == 2
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 42,
-                            child: FlatButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(100.0),
-                                side: BorderSide(color: Color(0xffe75a2b)),
+                        SizedBox(height: 15.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 42,
+                                child: FlatButton(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100.0),
+                                    side: BorderSide(
+                                        color: HermezColors.steel
+                                            .withOpacity(0.5)),
+                                  ),
+                                  onPressed: () {
+                                    this.onPressed(instantWithdrawAllowed);
+                                  },
+                                  padding: EdgeInsets.only(
+                                      top: 13.0,
+                                      bottom: 13.0,
+                                      right: 24.0,
+                                      left: 24.0),
+                                  color: HermezColors.steel.withOpacity(0.5),
+                                  textColor: Colors.white,
+                                  child: Text("Withdraw in 1 hour",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w700,
+                                      )),
+                                ),
                               ),
-                              onPressed: () {
-                                this.onPressed();
-                              },
-                              padding: EdgeInsets.only(
-                                  top: 13.0,
-                                  bottom: 13.0,
-                                  right: 24.0,
-                                  left: 24.0),
-                              color: Color(0xffe75a2b),
-                              textColor: Colors.white,
-                              child: Text(retry ? "Try again" : "Finalize",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  )),
                             ),
-                          ),
-                        ],
-                      )
-                    : Container(),
-              ]), //title to be name of the crypto
+                          ],
+                        ),
+                      ],
+                    ),
+              //title to be name of the crypto
             ])));
   }
 }

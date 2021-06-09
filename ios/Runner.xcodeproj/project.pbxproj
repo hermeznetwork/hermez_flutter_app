@@ -39,7 +39,7 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
-		95C5186E263060070041A3C1 /* libbabyjubjub.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libbabyjubjub.a; path = ../../hermez_plugin/rust/target/universal/release/libbabyjubjub.a; sourceTree = "<group>"; };
+		95C5186E263060070041A3C1 /* libbabyjubjub.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libbabyjubjub.a; path = ../../hermez_sdk/rust/target/universal/release/libbabyjubjub.a; sourceTree = "<group>"; };
 		95C518702630601D0041A3C1 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		95D8A7F526275DFD00C99AFA /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
@@ -376,7 +376,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"${PODS_ROOT}/../.symlinks/plugins/hermez_plugin/ios\"",
+					"\"${PODS_ROOT}/../.symlinks/plugins/hermez_sdk/ios\"",
 				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.iden3.hermezwallet;
@@ -517,7 +517,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"${PODS_ROOT}/../.symlinks/plugins/hermez_plugin/ios\"",
+					"\"${PODS_ROOT}/../.symlinks/plugins/hermez_sdk/ios\"",
 				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.iden3.hermezwallet;
@@ -550,7 +550,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"${PODS_ROOT}/../.symlinks/plugins/hermez_plugin/ios\"",
+					"\"${PODS_ROOT}/../.symlinks/plugins/hermez_sdk/ios\"",
 				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.iden3.hermezwallet;

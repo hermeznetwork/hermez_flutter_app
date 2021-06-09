@@ -14,8 +14,8 @@ import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/screens/wallet_selector.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_plugin/addresses.dart';
-import 'package:hermez_plugin/model/account.dart';
+import 'package:hermez_sdk/addresses.dart';
+import 'package:hermez_sdk/model/account.dart';
 import 'package:provider/provider.dart';
 
 import '../context/wallet/wallet_handler.dart';

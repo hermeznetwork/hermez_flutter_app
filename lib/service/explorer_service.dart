@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez_plugin/environment.dart';
+import 'package:hermez_sdk/environment.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';

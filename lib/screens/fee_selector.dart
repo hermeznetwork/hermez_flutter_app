@@ -6,7 +6,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 import '../context/wallet/wallet_handler.dart';
 

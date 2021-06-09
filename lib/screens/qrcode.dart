@@ -13,7 +13,7 @@ import 'package:hermez/components/dialog/alert.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_sdk/model/token.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../context/wallet/wallet_handler.dart';

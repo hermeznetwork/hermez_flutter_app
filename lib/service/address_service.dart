@@ -4,8 +4,8 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:hermez/constants.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hd_key.dart';
-import 'package:hermez_plugin/addresses.dart' as addresses;
-import 'package:hermez_plugin/hermez_wallet.dart';
+import 'package:hermez_sdk/addresses.dart' as addresses;
+import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/crypto.dart';
 

@@ -5,7 +5,7 @@ import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/storage_service.dart';
-import 'package:hermez_plugin/environment.dart';
+import 'package:hermez_sdk/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class IConfigurationService {

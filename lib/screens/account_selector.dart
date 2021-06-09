@@ -9,9 +9,9 @@ import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_plugin/addresses.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_sdk/addresses.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 class AccountSelectorArguments {
   final TransactionLevel txLevel;

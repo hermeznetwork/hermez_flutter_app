@@ -1,15 +1,16 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_plugin/addresses.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
+import 'package:hermez_sdk/addresses.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/pool_transaction.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'account_selector.dart';
@@ -512,9 +513,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                 SizedBox(
                                   width: 8,
                                 ),
-                                ImageIcon(
-                                  AssetImage('assets/move.png'),
-                                )
+                                SvgPicture.asset('assets/move.svg', color: Colors.white,),
                               ],
                             ),
                           ),

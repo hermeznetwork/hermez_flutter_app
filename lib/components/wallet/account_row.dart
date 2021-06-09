@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 class AccountRow extends StatelessWidget {
   AccountRow(

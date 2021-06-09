@@ -7,7 +7,7 @@ import 'package:hermez/model/wallet_transfer.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez_plugin/model/token.dart';
+import 'package:hermez_sdk/model/token.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/web3dart.dart';
 

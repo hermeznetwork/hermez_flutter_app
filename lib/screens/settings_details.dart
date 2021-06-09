@@ -11,8 +11,8 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
-import 'package:hermez_plugin/addresses.dart';
-import 'package:hermez_plugin/environment.dart';
+import 'package:hermez_sdk/addresses.dart';
+import 'package:hermez_sdk/environment.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 

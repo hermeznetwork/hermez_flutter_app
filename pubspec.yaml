@@ -30,8 +30,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  hermez_plugin:
-    path: ../hermez_plugin/
+  hermez_sdk:
+    path: ../hermez_sdk/
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -107,17 +107,16 @@ flutter:
     - info_success.png
     - info_failure.png
     - info_tx_failure.png
+    - info_backup.png
     - info_backup_success.png
     # Biometrics
-    - biometrics_fingerprint.png
-    - biometrics_face.png
+    - biometrics_fingerprint.svg
+    - biometrics_face.svg
     - face.png
     - fingerprint.png
     - backup_warning.png
-    # Backup
-    - info_backup.png
     # Remove account
-    - remove_account_warning.png
+    - remove_account_warning.svg
     # Home
     - bt_move.svg
     - bt_receive.svg
@@ -125,7 +124,7 @@ flutter:
     - tab_home.svg
     - tab_scan.svg
     - tab_settings.svg
-    - move.png
+    - move.svg
     - hermez_logo.png
     - ethereum_logo.png
     - change_move_enable.svg
@@ -164,29 +163,17 @@ flutter:
     - deposit.png
 
     # Smart Contracts
-    - ERC20ABI.json
     - HermezABI.json
+    - ERC20ABI.json
+    - WithdrawalDelayerABI.json
 
-    - account.png
-    - wallet.png
-    - search.png
-    - label.png
-    - list.png
-
-    - add.png
-    - warning.png
-    - pending.png
-    - upload.png
     - arrows_up_down.png
     - success.png
     - scan.svg
-    - withdraw.png
-    - withdraw2.png
     - show_explorer.png
     - paste.png
     - force_exit.png
     - qr_code.png
-    - explorer.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

@@ -16,22 +16,22 @@ import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
-import 'package:hermez_plugin/addresses.dart' as addresses;
-import 'package:hermez_plugin/api.dart';
-import 'package:hermez_plugin/environment.dart';
-import 'package:hermez_plugin/hermez_compressed_amount.dart';
-import 'package:hermez_plugin/hermez_wallet.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/forged_transactions_request.dart';
-import 'package:hermez_plugin/model/forged_transactions_response.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
-import 'package:hermez_plugin/model/recommended_fee.dart';
-import 'package:hermez_plugin/model/state_response.dart';
-import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/model/transaction.dart';
-import 'package:hermez_plugin/tx_pool.dart' as tx_pool;
-import 'package:hermez_plugin/tx_utils.dart';
+import 'package:hermez_sdk/addresses.dart' as addresses;
+import 'package:hermez_sdk/api.dart';
+import 'package:hermez_sdk/environment.dart';
+import 'package:hermez_sdk/hermez_compressed_amount.dart';
+import 'package:hermez_sdk/hermez_wallet.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/forged_transactions_request.dart';
+import 'package:hermez_sdk/model/forged_transactions_response.dart';
+import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/recommended_fee.dart';
+import 'package:hermez_sdk/model/state_response.dart';
+import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/transaction.dart';
+import 'package:hermez_sdk/tx_pool.dart' as tx_pool;
+import 'package:hermez_sdk/tx_utils.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -499,7 +499,7 @@ class WalletHandler {
         web3.TransactionReceipt receipt =
             await _contractService.getTxReceipt(transactionHash);
         List<dynamic> transactions = await getEthereumTransactionsByAddress(
-            ethereumAddress, pendingTransfer['token'], 0);
+            ethereumAddress, Token.fromJson(pendingTransfer['token']), 0);
         final transactionFound = transactions.firstWhere(
             (transaction) => transaction['txHash'] == transactionHash,
             orElse: () => null);
@@ -822,11 +822,10 @@ class WalletHandler {
       final hermezPrivateKey =
           await _configurationService.getHermezPrivateKey();
       final hermezAddress = await _configurationService.getHermezAddress();
-      final chainId = getCurrentEnvironment().chainId;
       final hermezWallet =
           HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-      final signature = await hermezWallet.signCreateAccountAuthorization(
-          BigInt.from(chainId).toRadixString(16), ethereumPrivateKey);
+      final signature =
+          await hermezWallet.signCreateAccountAuthorization(ethereumPrivateKey);
       return _hermezService.authorizeAccountCreation(
           web3.EthereumAddress.fromHex(ethereumAddress),
           hermezWallet.publicKeyBase64,
@@ -881,7 +880,7 @@ class WalletHandler {
 
   Future<bool> withdraw(double amount, Account account, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
-      {int gasLimit, int gasPrice}) async {
+      {BigInt gasLimit, int gasPrice = 0}) async {
     _store.dispatch(TransactionStarted());
 
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
@@ -903,6 +902,12 @@ class WalletHandler {
     return success;
   }
 
+  Future<bool> isInstantWithdrawalAllowed(double amount, Token token) async {
+    final success =
+        await _hermezService.isInstantWithdrawalAllowed(amount, token);
+    return success;
+  }
+
   void transactionFinished() {
     _store.dispatch(TransactionFinished());
   }
@@ -914,7 +919,7 @@ class WalletHandler {
   }
 
   Future<bool> forceExit(BigInt amount, Account account,
-      {int gasLimit, int gasPrice}) async {
+      {BigInt gasLimit, int gasPrice = 0}) async {
     _store.dispatch(TransactionStarted());
     final hermezAddress = await _configurationService.getHermezAddress();
 

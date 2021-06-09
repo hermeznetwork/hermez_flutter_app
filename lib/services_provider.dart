@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/constants.dart';
+import 'package:hermez/environment.dart';
 import 'package:hermez/secrets/keys.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
@@ -8,34 +9,26 @@ import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/storage_service.dart';
-import 'package:hermez_plugin/environment.dart';
-import 'package:http/http.dart';
+import 'package:hermez_sdk/hermez_sdk.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web3dart/web3dart.dart';
-import 'package:web_socket_channel/io.dart';
 
-Future<List<SingleChildWidget>> createProviders(EnvParams hermezParams) async {
-  final client = Web3Client(hermezParams.baseWeb3Url, Client(),
-      enableBackgroundIsolate: true, socketConnector: () {
-    return IOWebSocketChannel.connect(hermezParams.baseWeb3RdpUrl)
-        .cast<String>();
-  });
-
+Future<List<SingleChildWidget>> createProviders(EnvParams walletParams) async {
   final localStorage = await SharedPreferences.getInstance();
   final secureStorage = new FlutterSecureStorage();
   final storageService = StorageService(localStorage, secureStorage);
   final configurationService =
       ConfigurationService(localStorage, secureStorage, storageService);
   final addressService = AddressService(configurationService);
-  final hermezService = HermezService(client, configurationService);
+  final hermezService = HermezService(configurationService);
   final exchangeService =
       ExchangeService(FIAT_EXCHANGE_RATES_API_URL, EXCHANGE_RATES_API_KEY);
+  final client = HermezSDK.currentWeb3Client;
   final contractService = ContractService(
       client, configurationService, ETH_GAS_PRICE_URL, ETH_GAS_STATION_API_KEY);
-  final explorerService = ExplorerService(
-      hermezParams.etherscanApiUrl, hermezParams.etherscanApiKey);
+  final explorerService =
+      ExplorerService(walletParams.etherscanApiUrl, ETHERSCAN_API_KEY);
 
   return [
     Provider.value(value: addressService),
