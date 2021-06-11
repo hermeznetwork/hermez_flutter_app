@@ -250,6 +250,31 @@ class ExplorerService implements IExplorerService {
     }
   }
 
+  Future<void> getBlockAvgTime({String sort = 'desc'}) async {
+    String startdate = "2021-06-09";
+    String enddate = "2021-06-10";
+    try {
+      Map<String, dynamic> resp = await _get(
+          '?module=stats&action=dailyavgblocktime&startdate=$startdate&enddate=$enddate&sort=$sort');
+      if (resp['message'] == 'OK' && resp['status'] == '1') {
+        List tokens = [];
+        for (dynamic token in resp['result']) {
+          tokens.add({
+            "amount": token['balance'],
+            "originNetwork": 'mainnet',
+            "address": token['contractAddress'].toLowerCase(),
+            "decimals": int.parse(token['decimals']),
+            "name": token['name'],
+            "symbol": token['symbol']
+          });
+        }
+        return tokens;
+      } else {
+        return [];
+      }
+    } catch (e) {}
+  }
+
   Future<Map<String, dynamic>> _get(String endpoint) async {
     Response response;
     if ([null, ''].contains(_apiKey)) {

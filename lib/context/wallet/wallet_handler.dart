@@ -2,7 +2,6 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
@@ -297,7 +296,7 @@ class WalletHandler {
           pendingForceExits));
       print('Wallet Updated');
     } catch (e) {
-      debugPrint(e.toString());
+      print(e.toString());
     }
   }
 
@@ -460,6 +459,10 @@ class WalletHandler {
   Future<StateResponse> getState() async {
     final state = await _hermezService.getState();
     return state;
+  }
+
+  Future<void> getBlockAvgTime() async {
+    await _explorerService.getBlockAvgTime();
   }
 
   Future<List<Token>> getTokens() async {
@@ -678,13 +681,8 @@ class WalletHandler {
   }
 
   Future<List<dynamic>> getPendingWithdraws() async {
-    final storage =
-        await _storageService.getStorage(PENDING_WITHDRAWS_KEY, false);
-    final chainId = getCurrentEnvironment().chainId.toString();
-    final hermezEthereumAddress =
-        await _configurationService.getHermezAddress();
-    final List accountPendingWithdraws = _storageService
-        .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
+    final List accountPendingWithdraws =
+        await _configurationService.getPendingWithdraws();
 
     List removeWithdawalIds = [];
     List removeWithdawalHashes = [];
@@ -696,7 +694,7 @@ class WalletHandler {
       Exit exit;
       if (pendingWithdraw['accountIndex'] != null &&
           pendingWithdraw['batchNum'] != null &&
-          status == 'pending') {
+          (status == 'pending' || status == 'completed')) {
         exit = await getExit(
             pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
         if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
@@ -712,7 +710,8 @@ class WalletHandler {
           txInfo = await _contractService.getTransactionByHash(transactionHash);
         } catch (e) {
           // wait an hour and if not, it failed
-          if (pendingWithdraw['instant'] = true &&
+          if ((pendingWithdraw['instant'] == true ||
+                  pendingWithdraw['status'] == 'completed') &&
               (DateTime.now().subtract(Duration(hours: 1)).isAfter(
                   DateTime.fromMillisecondsSinceEpoch(
                       pendingWithdraw['date'])))) {
@@ -726,8 +725,8 @@ class WalletHandler {
               final withdrawalId = exit.accountIndex + exit.batchNum.toString();
               updateWithdawalIds.add(withdrawalId);
               updatePendingWithdraws.add(withdrawalId);
-              _configurationService.updatePendingWithdrawStatus(
-                  status, withdrawalId);
+              _configurationService.updatePendingWithdraw(
+                  'status', status, withdrawalId);
             }
           }
         }
@@ -748,8 +747,8 @@ class WalletHandler {
                     exit.accountIndex + exit.batchNum.toString();
                 updateWithdawalIds.add(withdrawalId);
                 updatePendingWithdraws.add(withdrawalId);
-                _configurationService.updatePendingWithdrawStatus(
-                    status, withdrawalId);
+                _configurationService.updatePendingWithdraw(
+                    'status', status, withdrawalId);
               }
             } else {
               if (status == 'initiated') {

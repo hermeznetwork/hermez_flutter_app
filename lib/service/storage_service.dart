@@ -147,8 +147,8 @@ class StorageService implements IStorageService {
       Map<String, dynamic> prop,
       Map<String, dynamic> partialItem,
       bool secure) async {
-    final Map storage = await getStorage(key, secure);
-    final Map chainIdStorage =
+    final Map<String, dynamic> storage = await getStorage(key, secure);
+    final Map<String, dynamic> chainIdStorage =
         storage.containsKey(chainId) ? storage[chainId] : {};
     final List accountStorage =
         chainIdStorage.containsKey(hermezEthereumAddress)

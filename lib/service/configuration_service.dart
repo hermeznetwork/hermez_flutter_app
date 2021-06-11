@@ -43,12 +43,16 @@ abstract class IConfigurationService {
   bool didBackupWallet();
   /*Future<bool> setLatestNonce(int value);
   int getLatestNonce();*/
+  Future<List<dynamic>> getPendingWithdraws();
   dynamic getPendingWithdraw(String pendingWithdrawId);
   void addPendingWithdraw(dynamic pendingWithdraw);
+  void updatePendingWithdraw(
+      String nameToUpdate, String valueToUpdate, String valueId,
+      {String nameId = 'id'});
   void removePendingWithdraw(String value, {String name = 'id'});
-  dynamic getPendingDelayedWithdraw(String pendingWithdrawId);
-  void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
-  void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
+  //dynamic getPendingDelayedWithdraw(String pendingWithdrawId);
+  //void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
+  //void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
   // L1 Deposits
   void addPendingDeposit(dynamic pendingDeposit);
   void removePendingDeposit(String pendingDepositId);
@@ -273,11 +277,8 @@ class ConfigurationService implements IConfigurationService {
     return await _preferences.setInt("latest_nonce", value);
   }*/
 
-  /// Gets a pendingWithdraw from the pendingWithdraw pool
-  /// @param {string} pendingWithdrawId - The pendingWithdraw id
-  /// @returns {object} pendingWithdraw - The pendingWithdraw to add to the pool
   @override
-  dynamic getPendingWithdraw(String pendingWithdrawId) async {
+  Future<List<dynamic>> getPendingWithdraws() async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
@@ -286,6 +287,15 @@ class ConfigurationService implements IConfigurationService {
 
     final List accountPendingWithdraws = _storageService
         .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
+    return accountPendingWithdraws;
+  }
+
+  /// Gets a pendingWithdraw from the pendingWithdraw pool
+  /// @param {string} pendingWithdrawId - The pendingWithdraw id
+  /// @returns {object} pendingWithdraw - The pendingWithdraw to add to the pool
+  @override
+  dynamic getPendingWithdraw(String pendingWithdrawId) async {
+    final List accountPendingWithdraws = await getPendingWithdraws();
     dynamic result;
     if (accountPendingWithdraws != null) {
       result = accountPendingWithdraws.firstWhere(
@@ -320,8 +330,10 @@ class ConfigurationService implements IConfigurationService {
         hermezEthereumAddress, name, value, false);
   }
 
-  void updatePendingWithdrawStatus(String transactionStatus, String value,
-      {String name = 'id'}) async {
+  @override
+  void updatePendingWithdraw(
+      String nameToUpdate, String valueToUpdate, String valueId,
+      {String nameId = 'id'}) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
@@ -329,12 +341,12 @@ class ConfigurationService implements IConfigurationService {
         PENDING_WITHDRAWS_KEY,
         chainId,
         hermezEthereumAddress,
-        {'name': name, 'value': value},
-        {'status': transactionStatus},
+        {'name': nameId, 'value': valueId},
+        {nameToUpdate: valueToUpdate},
         false);
   }
 
-  /// Gets a pendingWithdraw from the pendingWithdraw pool
+/*/// Gets a pendingWithdraw from the pendingWithdraw pool
   /// @param {string} pendingWithdrawId - The pendingWithdraw id
   /// @returns {object} pendingWithdraw - The pendingWithdraw to add to the pool
   @override
@@ -351,9 +363,9 @@ class ConfigurationService implements IConfigurationService {
         (pendingDelayedWithdraw) =>
             pendingDelayedWithdraw['id'] == pendingWithdrawId,
         orElse: () => null);
-  }
+  }*/
 
-  /// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
+  /*/// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
   /// @param {dynamic} pendingDelayedWithdraw - The pendingDelayedWithdraw to add to the store
   /// @returns {void}
   @override
@@ -393,7 +405,7 @@ class ConfigurationService implements IConfigurationService {
         {'name': 'hash', 'value': transactionHash},
         {'date': pendingDelayedWithdrawDate},
         false);
-  }
+  }*/
 
   /*@override
   function checkPendingDelayedWithdraw (exitId) {

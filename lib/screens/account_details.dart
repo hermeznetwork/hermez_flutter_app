@@ -23,6 +23,7 @@ import 'package:hermez_sdk/model/forged_transaction.dart';
 import 'package:hermez_sdk/model/l1info.dart';
 import 'package:hermez_sdk/model/l2info.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:hermez_sdk/tx_utils.dart';
 import 'package:intl/intl.dart';
@@ -51,14 +52,16 @@ class AccountDetailsPage extends StatefulWidget {
 }
 
 class _AccountDetailsPageState extends State<AccountDetailsPage> {
+  StateResponse _stateResponse;
   bool _isLoading = true;
   bool _needRefresh = false;
   int fromItem = 0;
   int pendingItems = 0;
   List<dynamic> historyTransactions = [];
   List<dynamic> transactions = [];
-  //List<Exit> exits = [];
+  List<Exit> exits = [];
   List<Exit> filteredExits = [];
+  List<bool> allowedInstantWithdraws = [];
 
   List<dynamic> pendingExits = [];
   List<dynamic> pendingForceExits = [];
@@ -72,7 +75,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   Future<void> _onRefresh() {
     fromItem = 0;
-    //exits = [];
+    exits = [];
     filteredExits = [];
     pendingWithdraws = [];
     transactions = [];
@@ -545,8 +548,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       1,
                       currency,
                       widget.arguments.store.state.exchangeRatio,
-                      (bool isInstantWithdraw) async {},
-                      widget.arguments.store.state.txLevel);
+                      (bool completeDelayedWithdraw,
+                          bool isInstantWithdraw) async {},
+                      widget.arguments.store.state.txLevel,
+                      _stateResponse);
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
                 else if (filteredExits.length > 0 &&
                     i <
@@ -556,6 +561,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   final index =
                       i - pendingExits.length - pendingForceExits.length;
                   final Exit exit = filteredExits[index];
+                  final bool isAllowed = allowedInstantWithdraws[index];
 
                   final String currency = widget
                       .arguments.store.state.defaultCurrency
@@ -565,7 +571,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
                   return WithdrawalRow(exit, 2, currency,
                       widget.arguments.store.state.exchangeRatio,
-                      (bool isInstantWithdraw) async {
+                      (bool completeDelayedWithdraw,
+                          bool isInstantWithdraw) async {
                     BigInt gasPrice = BigInt.one;
                     GasPriceResponse gasPriceResponse =
                         await widget.arguments.store.getGasPrice();
@@ -585,47 +592,48 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         gasPrice = BigInt.from(gasPriceFloor);
                         break;
                     }
-
                     String addressFrom = exit.hezEthereumAddress;
                     String addressTo =
-                        getCurrentEnvironment().contracts['Hermez'];
-
+                        getCurrentEnvironment().contracts[ContractName.hermez];
                     BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
                     final amountWithdraw = double.parse(exit.balance);
-                    /*getTokenAmountBigInt(
-                        double.parse(exit.balance) /
-                            pow(10, exit.token.decimals),
-                        exit.token.decimals);*/
                     gasLimit = await widget.arguments.store.withdrawGasLimit(
-                        amountWithdraw, null, exit, false, isInstantWithdraw);
+                        amountWithdraw,
+                        null,
+                        exit,
+                        completeDelayedWithdraw,
+                        isInstantWithdraw);
 
-                    var results =
-                        await Navigator.of(widget.arguments.parentContext)
-                            .pushNamed("/transaction_details",
-                                arguments: TransactionDetailsArguments(
-                                  store: widget.arguments.store,
-                                  transactionType: TransactionType.WITHDRAW,
-                                  transactionLevel: TransactionLevel.LEVEL1,
-                                  status: TransactionStatus.DRAFT,
-                                  token: exit.token,
-                                  exit: exit,
-                                  amount: double.parse(exit.balance) /
-                                      pow(10, exit.token.decimals),
-                                  addressFrom: addressFrom,
-                                  addressTo: addressTo,
-                                  gasLimit: gasLimit.toInt(),
-                                  gasPrice: gasPrice.toInt(),
-                                ));
+                    var results = await Navigator.of(
+                            widget.arguments.parentContext)
+                        .pushNamed("/transaction_details",
+                            arguments: TransactionDetailsArguments(
+                                store: widget.arguments.store,
+                                transactionType: TransactionType.WITHDRAW,
+                                transactionLevel: TransactionLevel.LEVEL1,
+                                status: TransactionStatus.DRAFT,
+                                token: exit.token,
+                                exit: exit,
+                                amount: amountWithdraw.toDouble() /
+                                    pow(10, exit.token.decimals),
+                                addressFrom: addressFrom,
+                                addressTo: addressTo,
+                                gasLimit: gasLimit.toInt(),
+                                gasPrice: gasPrice.toInt(),
+                                completeDelayedWithdrawal:
+                                    completeDelayedWithdraw,
+                                instantWithdrawal: isInstantWithdraw));
                     if (results is PopWithResults) {
                       PopWithResults popResult = results;
                       if (popResult.toPage == "/home") {
-                        // TODO do stuff
                         _onRefresh();
                       } else {
                         Navigator.of(context).pop(results);
                       }
                     }
-                  }, widget.arguments.store.state.txLevel);
+                  }, widget.arguments.store.state.txLevel, _stateResponse,
+                      instantWithdrawAllowed: isAllowed,
+                      completeDelayedWithdraw: false);
                 } else if (pendingWithdraws.length > 0 &&
                     i <
                         pendingWithdraws.length +
@@ -644,10 +652,25 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       orElse: () => Exit(
                           hezEthereumAddress:
                               pendingWithdraw['hermezEthereumAddress'],
+                          delayedWithdrawRequest:
+                              pendingWithdraw['instant'] == false
+                                  ? pendingWithdraw['blockNum']
+                                  : null,
                           token: token,
                           balance: pendingWithdraw['amount']
                               .toString()
                               .replaceAll('.0', '')));
+
+                  final bool isAllowed = pendingWithdraw['instant'];
+
+                  if (!isAllowed) {
+                    if (exit.delayedWithdrawRequest == null) {
+                      exit.delayedWithdrawRequest = pendingWithdraw['blockNum'];
+                    }
+                    exit.balance = pendingWithdraw['amount']
+                        .toString()
+                        .replaceAll('.0', '');
+                  }
 
                   final String currency = widget
                       .arguments.store.state.defaultCurrency
@@ -656,7 +679,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       .last;
 
                   int step = 2;
-                  if (pendingWithdraw['status'] == 'pending') {
+                  if ((isAllowed && pendingWithdraw['status'] == 'pending') ||
+                      (!isAllowed &&
+                          pendingWithdraw['status'] == 'completed')) {
                     step = 3;
                   } else if (pendingWithdraw['status'] == 'fail') {
                     step = 2;
@@ -668,7 +693,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     currency,
                     widget.arguments.store.state.exchangeRatio,
                     step == 2
-                        ? (bool isInstantWithdraw) async {
+                        ? (bool completeDelayedWithdraw,
+                            bool instantWithdrawAllowed) async {
                             BigInt gasPrice = BigInt.one;
                             GasPriceResponse gasPriceResponse =
                                 await widget.arguments.store.getGasPrice();
@@ -691,18 +717,31 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             }
 
                             String addressFrom = exit.hezEthereumAddress;
-                            String addressTo =
-                                getCurrentEnvironment().contracts['Hermez'];
-
+                            String addressTo = getCurrentEnvironment()
+                                .contracts[ContractName.hermez];
                             final amountWithdraw = double.parse(exit.balance);
-                            /*getTokenAmountBigInt(
-                                double.parse(exit.balance) /
-                                    pow(10, exit.token.decimals),
-                                exit.token.decimals);*/
-
-                            BigInt gasLimit = await widget.arguments.store
-                                .withdrawGasLimit(amountWithdraw, null, exit,
-                                    false, isInstantWithdraw);
+                            BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
+                            try {
+                              gasLimit = await widget.arguments.store
+                                  .withdrawGasLimit(
+                                      amountWithdraw,
+                                      null,
+                                      exit,
+                                      completeDelayedWithdraw,
+                                      instantWithdrawAllowed);
+                            } catch (e) {
+                              // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
+                              gasLimit =
+                                  BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
+                              exit.merkleProof.siblings.forEach((element) {
+                                gasLimit +=
+                                    BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
+                              });
+                              if (exit.token.id != 0) {
+                                gasLimit +=
+                                    BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
+                              }
+                            }
 
                             var results = await Navigator.of(
                                     widget.arguments.parentContext)
@@ -722,7 +761,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                         addressTo: addressTo,
                                         gasLimit: gasLimit.toInt(),
                                         gasPrice: gasPrice.toInt(),
-                                        instantWithdrawal: isInstantWithdraw));
+                                        instantWithdrawal:
+                                            instantWithdrawAllowed,
+                                        completeDelayedWithdrawal:
+                                            completeDelayedWithdraw));
                             if (results is PopWithResults) {
                               PopWithResults popResult = results;
                               if (popResult.toPage == "/home") {
@@ -735,7 +777,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           }
                         : () {},
                     widget.arguments.store.state.txLevel,
+                    _stateResponse,
                     retry: pendingWithdraw['status'] == 'fail',
+                    instantWithdrawAllowed: isAllowed,
+                    completeDelayedWithdraw: !isAllowed,
                   );
                 } else if (pendingExits.length +
                         pendingForceExits.length +
@@ -1116,6 +1161,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   }
 
   Future<void> fetchData() async {
+    _stateResponse = await getState();
     if (_needRefresh) {
       await widget.arguments.store.getAccounts();
     }
@@ -1141,7 +1187,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       }).toList();
       pendingExits =
           await fetchL2PendingExits(widget.arguments.account.accountIndex);
-      List<dynamic> exits = fetchExits(widget.arguments.account.token.id);
+      exits = fetchExits(widget.arguments.account.token.id);
       pendingForceExits = await fetchPendingForceExits(
           widget.arguments.account.token.id, exits, pendingExits);
       pendingWithdraws =
@@ -1150,12 +1196,22 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       filteredExits.removeWhere((Exit exit) {
         for (dynamic pendingWithdraw in pendingWithdraws) {
           if (pendingWithdraw["id"] ==
-              (exit.accountIndex + exit.batchNum.toString())) {
+                  (exit.accountIndex + exit.batchNum.toString()) ||
+              (pendingWithdraw['instant'] == false &&
+                  exit.delayedWithdrawRequest != null &&
+                  Token.fromJson(pendingWithdraw['token']).id ==
+                      exit.token.id)) {
             return true;
           }
         }
         return false;
       });
+      for (int i = 0; i < filteredExits.length; i++) {
+        Exit exit = filteredExits[i];
+        bool isAllowed = await widget.arguments.store
+            .isInstantWithdrawalAllowed(double.parse(exit.balance), exit.token);
+        allowedInstantWithdraws.add(isAllowed);
+      }
       pendingDeposits =
           await fetchPendingDeposits(widget.arguments.account.token.id);
       final List<ForgedTransaction> pendingDepositsTxs =
@@ -1201,7 +1257,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           await fetchPendingTransfers(widget.arguments.account.token.id);
       pendingExits =
           fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
-      List<Exit> exits = await fetchExits(widget.arguments.account.token.id);
+      exits = await fetchExits(widget.arguments.account.token.id);
       pendingForceExits = await fetchPendingForceExits(
           widget.arguments.account.token.id, exits, pendingExits);
       filteredExits = exits.toList();
@@ -1210,12 +1266,22 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       filteredExits.removeWhere((Exit exit) {
         for (dynamic pendingWithdraw in pendingWithdraws) {
           if (pendingWithdraw["id"] ==
-              (exit.accountIndex + exit.batchNum.toString())) {
+                  (exit.accountIndex + exit.batchNum.toString()) ||
+              (pendingWithdraw['instant'] == false &&
+                  exit.delayedWithdrawRequest != null &&
+                  Token.fromJson(pendingWithdraw['token']).id ==
+                      exit.token.id)) {
             return true;
           }
         }
         return false;
       });
+      for (int i = 0; i < filteredExits.length; i++) {
+        Exit exit = filteredExits[i];
+        bool isAllowed = await widget.arguments.store
+            .isInstantWithdrawalAllowed(double.parse(exit.balance), exit.token);
+        allowedInstantWithdraws.add(isAllowed);
+      }
       pendingDeposits =
           await fetchPendingDeposits(widget.arguments.account.token.id);
       historyTransactions = await fetchHistoryTransactions();
@@ -1392,6 +1458,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       return false;
     });
     return filteredTransactions;
+  }
+
+  Future<StateResponse> getState() async {
+    return await widget.arguments.store.getState();
   }
 
   /*Future<Account> getEthereumAccount() async {

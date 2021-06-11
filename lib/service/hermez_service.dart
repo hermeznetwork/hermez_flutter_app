@@ -6,6 +6,7 @@ import 'package:hermez_sdk/api.dart';
 import 'package:hermez_sdk/api.dart' as api;
 import 'package:hermez_sdk/constants.dart';
 import 'package:hermez_sdk/hermez_compressed_amount.dart';
+import 'package:hermez_sdk/hermez_sdk.dart';
 import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/coordinator.dart';
@@ -298,7 +299,7 @@ class HermezService implements IHermezService {
           exit.merkleProof.siblings != null ? exit.merkleProof.siblings : [],
           isInstant: isIntant);
     } else {
-      return tx.delayedWithdrawGasLimit(hezEthereumAddress, account.token);
+      return tx.delayedWithdrawGasLimit(hezEthereumAddress, exit.token);
     }
   }
 
@@ -325,37 +326,41 @@ class HermezService implements IHermezService {
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       try {
-        bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
+        bool isInstant = instantWithdrawal == null ? true : instantWithdrawal;
 
         final txHash = await tx
             .withdraw(amount, exit.accountIndex, exit.token, babyJubJub,
                 exit.batchNum, exit.merkleProof.siblings, privateKey,
-                isInstant: isIntant, gasLimit: gasLimit, gasPrice: gasPrice)
+                isInstant: isInstant, gasLimit: gasLimit, gasPrice: gasPrice)
             .then((txHash) async {
           if (txHash != null) {
-            if (isIntant) {
+            int block = await HermezSDK.currentWeb3Client.getBlockNumber();
+            dynamic pendingDelayedWithdraw;
+            if (isInstant == false) {
+              List<dynamic> pendingWithdraws =
+                  await _configService.getPendingWithdraws();
+              if (pendingWithdraws != null) {
+                pendingDelayedWithdraw = pendingWithdraws.firstWhere(
+                    (pendingWithdraw) =>
+                        pendingWithdraw['instant'] == false &&
+                        Token.fromJson(pendingWithdraw['token']).id ==
+                            exit.token.id,
+                    orElse: () => null);
+                if (pendingDelayedWithdraw != null) {
+                  amount += pendingDelayedWithdraw['amount'];
+                  _configService
+                      .removePendingWithdraw(pendingDelayedWithdraw['id']);
+                }
+              }
               _configService.addPendingWithdraw({
                 'id': withdrawalId,
                 'hash': txHash,
+                'blockNum': block,
                 'hermezEthereumAddress': hezEthereumAddress,
                 'itemId': exit.itemId,
                 'accountIndex': exit.accountIndex,
                 'batchNum': exit.batchNum,
-                'instant': true,
-                'date': DateTime.now().millisecondsSinceEpoch,
-                'amount': amount.toDouble(),
-                'token': exit.token.toJson(),
-                'status': 'pending'
-              });
-            } else {
-              _configService.addPendingDelayedWithdraw({
-                'id': withdrawalId,
-                'hash': txHash,
-                'hermezEthereumAddress': hezEthereumAddress,
-                'itemId': exit.itemId,
-                'accountIndex': exit.accountIndex,
-                'batchNum': exit.batchNum,
-                'instant': false,
+                'instant': isInstant,
                 'date': DateTime.now().millisecondsSinceEpoch,
                 'amount': amount.toDouble(),
                 'token': exit.token.toJson(),
@@ -371,14 +376,19 @@ class HermezService implements IHermezService {
       }
     } else {
       try {
-        final txHash = await tx.delayedWithdraw(account.token, privateKey).then(
-          (txHash) async {
-            if (txHash != null) {
-              _configService.removePendingDelayedWithdraw(txHash);
-            }
-          },
-        );
-        return txHash != null;
+        final txHash = await tx
+            .delayedWithdraw(exit.token, privateKey)
+            .then((txHash) async {
+          if (txHash != null) {
+            String status = 'completed';
+            final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+            _configService.updatePendingWithdraw(
+                'status', status, withdrawalId);
+            _configService.updatePendingWithdraw('hash', txHash, withdrawalId);
+          }
+          return txHash != null;
+        });
+        return txHash;
       } catch (error) {
         print(error);
       }
