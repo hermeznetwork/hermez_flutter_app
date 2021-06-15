@@ -12,7 +12,6 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/share_utils.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-//import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../context/wallet/wallet_handler.dart';

@@ -1394,8 +1394,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         case TransactionType.DEPOSIT:
           {
             // check getCreateAccountAuth
-            final amountDeposit =
-                getTokenAmountBigInt(widget.arguments.amount, 18);
+            final amountDeposit = getTokenAmountBigInt(
+                widget.arguments.amount, widget.arguments.token.decimals);
 
             final accounts = await widget.arguments.store.getL2Accounts();
 

@@ -1,6 +1,4 @@
 PODS:
-  - camera (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
   - flutter_secure_storage (3.3.1):
     - Flutter
@@ -24,7 +22,6 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - camera (from `.symlinks/plugins/camera/ios`)
   - Flutter (from `Flutter`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - hermez_sdk (from `.symlinks/plugins/hermez_sdk/ios`)
@@ -41,8 +38,6 @@ SPEC REPOS:
     - MTBBarcodeScanner
 
 EXTERNAL SOURCES:
-  camera:
-    :path: ".symlinks/plugins/camera/ios"
   Flutter:
     :path: Flutter
   flutter_secure_storage:
@@ -65,7 +60,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher/ios"
 
 SPEC CHECKSUMS:
-  camera: 3164201dc344383e62282964016528c4f5a9ad50
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   hermez_sdk: 29bdcad435cb7695e2bcf1ef6d2b7acbcc4c73f3

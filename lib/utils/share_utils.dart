@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-//import 'package:oktoast/oktoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -41,7 +40,6 @@ Future saveScreenShot2SDCard(RenderRepaintBoundary boundary,
           success: success, fail: fail);
     });
   } else {
-    //showToast('请打开SD卡存储权限！');
     if (fail != null) fail();
     return;
   }
