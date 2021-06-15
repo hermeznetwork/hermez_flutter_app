@@ -1257,7 +1257,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           await fetchPendingTransfers(widget.arguments.account.token.id);
       pendingExits =
           fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
-      exits = await fetchExits(widget.arguments.account.token.id);
+      exits = fetchExits(widget.arguments.account.token.id);
       pendingForceExits = await fetchPendingForceExits(
           widget.arguments.account.token.id, exits, pendingExits);
       filteredExits = exits.toList();
