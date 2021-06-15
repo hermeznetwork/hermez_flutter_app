@@ -278,9 +278,11 @@ class ExplorerService implements IExplorerService {
   Future<Map<String, dynamic>> _get(String endpoint) async {
     Response response;
     if ([null, ''].contains(_apiKey)) {
-      response = await _client.get('$_base$endpoint');
+      var url = Uri.parse('$_base$endpoint');
+      response = await _client.get(url);
     } else {
-      response = await _client.get('$_base$endpoint&apikey=$_apiKey');
+      var url = Uri.parse('$_base$endpoint&apikey=$_apiKey');
+      response = await _client.get(url);
     }
     return responseHandler(response);
   }

@@ -555,12 +555,12 @@ class WalletHandler {
               "Hermez");
           final contractEvent = hermezContract.event('L1UserTxEvent');
           for (var log in receipt.logs) {
-            if (log['address'] == hermezContract.address.hex) {
+            if (log.address.hex == hermezContract.address.hex) {
               try {
                 List<String> topics = List<String>.from(
-                    log['topics'].map((topic) => topic.toString()));
+                    log.topics.map((topic) => topic.toString()));
                 List l1UserTxEvent =
-                    contractEvent.decodeResults(topics, log['data']);
+                    contractEvent.decodeResults(topics, log.data);
                 final transactionId =
                     getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
 
@@ -632,12 +632,12 @@ class WalletHandler {
               "Hermez");
           final contractEvent = hermezContract.event('L1UserTxEvent');
           for (var log in receipt.logs) {
-            if (log['address'] == hermezContract.address.hex) {
+            if (log.address.hex == hermezContract.address.hex) {
               try {
                 List<String> topics = List<String>.from(
-                    log['topics'].map((topic) => topic.toString()));
+                    log.topics.map((topic) => topic.toString()));
                 List l1UserTxEvent =
-                    contractEvent.decodeResults(topics, log['data']);
+                    contractEvent.decodeResults(topics, log.data);
                 final transactionId =
                     getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
 

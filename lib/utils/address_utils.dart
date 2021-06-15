@@ -58,7 +58,7 @@ class AddressUtils {
 
     final addr = strip0x(address).toLowerCase();
     final hash = ascii.encode(hex.encode(
-      SHA3Digest(256, true).process(ascii.encode(addr)),
+      SHA3Digest(256 /*, true*/).process(ascii.encode(addr)),
     ));
 
     var newAddr = "0x";

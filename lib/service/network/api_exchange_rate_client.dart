@@ -54,8 +54,9 @@ class ApiExchangeRateClient {
   Future<http2.Response> _post(
       String endpoint, Map<String, dynamic> body) async {
     try {
+      var url = Uri.parse('$_baseAddress$endpoint');
       final response = await http2.post(
-        '$_baseAddress$endpoint',
+        url,
         body: json.encode(body),
         headers: {
           HttpHeaders.acceptHeader: '*/*',
@@ -71,8 +72,9 @@ class ApiExchangeRateClient {
 
   Future<http2.Response> _put(dynamic task) async {
     try {
+      var url = Uri.parse('$_baseAddress/todos/${task.id}');
       final response = await http2.put(
-        '$_baseAddress/todos/${task.id}',
+        url,
         body: json.encode(task.toJson()),
         headers: {
           HttpHeaders.acceptHeader: 'application/json',
@@ -88,8 +90,9 @@ class ApiExchangeRateClient {
 
   Future<http2.Response> _delete(String id) async {
     try {
+      var url = Uri.parse('$_baseAddress/todos/$id');
       final response = await http2.delete(
-        '$_baseAddress/todos/$id',
+        url,
         headers: {
           HttpHeaders.acceptHeader: 'application/json',
         },

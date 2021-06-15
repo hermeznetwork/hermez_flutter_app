@@ -1,9 +1,5 @@
-import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:another_flushbar/flushbar.dart';
-import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,8 +9,11 @@ import 'package:hermez/components/dialog/alert.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/share_utils.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+//import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'transaction_amount.dart';
@@ -462,20 +461,55 @@ class _QRCodePageState extends State<QRCodePage> {
     );
   }
 
-  Future<Null> shareScreenshot() async {
-    try {
+  void shareScreenshot() {
+    //try {
       RenderRepaintBoundary boundary =
       qrCodeKey.currentContext.findRenderObject();
-      ui.Image image = await boundary.toImage(pixelRatio: 2);
+
+      // ScreenShot and save
+      saveScreenShot(boundary, success: () async {
+        String imagePath = await getScreenShotFilePath();
+        if (imagePath != null) {
+          Share.shareFiles([imagePath],
+              text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ?
+              'Hello, scan this Hermez code to send me ' +
+                  EthAmountFormatter.removeDecimalZeroFormat(
+                      double.parse(
+                          widget.arguments.amount.toStringAsFixed(6))) + ' ' +
+                  widget.arguments.token.symbol
+                  : 'Hello, here is my Hermez code!',
+              subject: 'Hermez QR Code',
+              sharePositionOrigin: boundary.localToGlobal(
+                  Offset.zero) & boundary.size);
+        } else {
+          Alert(title: 'Error', text: "QR Code not saved").show(context);
+        }
+
+        /*saveScreenShot2SDCard(boundary, success: () {
+          //showToast('save ok');
+        }, fail: () {
+          //showToast('save ok');
+        });*/
+      }, fail: () {
+        Alert(title: 'Error', text: "QR Code not saved").show(context);
+        //Alert(title: 'Error', text: e.toString()).show(context);
+        //showToast('save fail!');
+      });
+    }
+      /*ui.Image image = await boundary.toImage(pixelRatio: 2);
+
+      final appDir = await syspaths.getApplicationDocumentsDirectory();
+      imageFile.copy('${appDir.path}/$fileName');
       ByteData byteData =
       await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData.buffer.asUint8List();
+
       await Share.file('Hermez QR Code', 'hermez_qrcode.png', pngBytes, 'image/png', text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ? 'Hello, scan this Hermez code to send me ' + EthAmountFormatter.removeDecimalZeroFormat(
           double.parse(
-              widget.arguments.amount.toStringAsFixed(6))) + ' ' + widget.arguments.token.symbol :'Hello, here is my Hermez code!');
-    } on PlatformException catch (e) {
+              widget.arguments.amount.toStringAsFixed(6))) + ' ' + widget.arguments.token.symbol :'Hello, here is my Hermez code!');*/
+    /*} on PlatformException catch (e) {
       print("Exception while taking screenshot:" + e.toString());
       Alert(title: 'Error', text: e.toString()).show(context);
-    }
-  }
+    }*/
+
 }
