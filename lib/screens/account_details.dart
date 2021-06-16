@@ -663,7 +663,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
                   final bool isAllowed = pendingWithdraw['instant'];
 
-                  if (!isAllowed) {
+                  if (isAllowed == false) {
                     if (exit.delayedWithdrawRequest == null) {
                       exit.delayedWithdrawRequest = pendingWithdraw['blockNum'];
                     }
@@ -679,8 +679,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       .last;
 
                   int step = 2;
-                  if ((isAllowed && pendingWithdraw['status'] == 'pending') ||
-                      (!isAllowed &&
+                  if ((isAllowed == true &&
+                          pendingWithdraw['status'] == 'pending') ||
+                      (isAllowed == false &&
                           pendingWithdraw['status'] == 'completed')) {
                     step = 3;
                   } else if (pendingWithdraw['status'] == 'fail') {
@@ -775,12 +776,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               }
                             }
                           }
-                        : () {},
+                        : (bool completeDelayedWithdraw,
+                            bool instantWithdrawAllowed) {},
                     widget.arguments.store.state.txLevel,
                     _stateResponse,
                     retry: pendingWithdraw['status'] == 'fail',
-                    instantWithdrawAllowed: isAllowed,
-                    completeDelayedWithdraw: !isAllowed,
+                    instantWithdrawAllowed: isAllowed == true,
+                    completeDelayedWithdraw: isAllowed == false,
                   );
                 } else if (pendingExits.length +
                         pendingForceExits.length +
@@ -1206,6 +1208,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         }
         return false;
       });
+      allowedInstantWithdraws = [];
       for (int i = 0; i < filteredExits.length; i++) {
         Exit exit = filteredExits[i];
         bool isAllowed = await widget.arguments.store
@@ -1276,6 +1279,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         }
         return false;
       });
+      allowedInstantWithdraws = [];
       for (int i = 0; i < filteredExits.length; i++) {
         Exit exit = filteredExits[i];
         bool isAllowed = await widget.arguments.store

@@ -352,21 +352,21 @@ class HermezService implements IHermezService {
                       .removePendingWithdraw(pendingDelayedWithdraw['id']);
                 }
               }
-              _configService.addPendingWithdraw({
-                'id': withdrawalId,
-                'hash': txHash,
-                'blockNum': block,
-                'hermezEthereumAddress': hezEthereumAddress,
-                'itemId': exit.itemId,
-                'accountIndex': exit.accountIndex,
-                'batchNum': exit.batchNum,
-                'instant': isInstant,
-                'date': DateTime.now().millisecondsSinceEpoch,
-                'amount': amount.toDouble(),
-                'token': exit.token.toJson(),
-                'status': 'pending'
-              });
             }
+            await _configService.addPendingWithdraw({
+              'id': withdrawalId,
+              'hash': txHash,
+              'blockNum': block,
+              'hermezEthereumAddress': hezEthereumAddress,
+              'itemId': exit.itemId,
+              'accountIndex': exit.accountIndex,
+              'batchNum': exit.batchNum,
+              'instant': isInstant,
+              'date': DateTime.now().millisecondsSinceEpoch,
+              'amount': amount.toDouble(),
+              'token': exit.token.toJson(),
+              'status': 'pending'
+            });
           }
           return txHash != null;
         });

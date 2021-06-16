@@ -45,7 +45,7 @@ abstract class IConfigurationService {
   int getLatestNonce();*/
   Future<List<dynamic>> getPendingWithdraws();
   dynamic getPendingWithdraw(String pendingWithdrawId);
-  void addPendingWithdraw(dynamic pendingWithdraw);
+  Future<void> addPendingWithdraw(dynamic pendingWithdraw);
   void updatePendingWithdraw(
       String nameToUpdate, String valueToUpdate, String valueId,
       {String nameId = 'id'});
@@ -310,7 +310,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} pendingWithdraw - The pendingWithdraw to add to the pool
   /// @returns {void}
   @override
-  void addPendingWithdraw(dynamic pendingWithdraw) async {
+  Future<void> addPendingWithdraw(dynamic pendingWithdraw) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 

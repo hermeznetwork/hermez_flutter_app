@@ -129,6 +129,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       }
       return false;
     });
+    _allowedInstantWithdraws = [];
     for (int i = 0; i < _filteredExits.length; i++) {
       Exit exit = _filteredExits[i];
       bool isAllowed = await widget.arguments.store
@@ -803,7 +804,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
               final bool isAllowed = pendingWithdraw['instant'];
 
-              if (!isAllowed) {
+              if (isAllowed == false) {
                 if (exit.delayedWithdrawRequest == null) {
                   exit.delayedWithdrawRequest = pendingWithdraw['blockNum'];
                 }
@@ -818,8 +819,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .last;
 
               int step = 2;
-              if ((isAllowed && pendingWithdraw['status'] == 'pending') ||
-                  (!isAllowed && pendingWithdraw['status'] == 'completed')) {
+              if ((isAllowed == true &&
+                      pendingWithdraw['status'] == 'pending') ||
+                  (isAllowed == false &&
+                      pendingWithdraw['status'] == 'completed')) {
                 step = 3;
               } else if (pendingWithdraw['status'] == 'fail') {
                 step = 2;
@@ -913,8 +916,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 widget.arguments.store.state.txLevel,
                 _stateResponse,
                 retry: pendingWithdraw['status'] == 'fail',
-                instantWithdrawAllowed: isAllowed,
-                completeDelayedWithdraw: !isAllowed,
+                instantWithdrawAllowed: isAllowed == true,
+                completeDelayedWithdraw: isAllowed == false,
               );
             } // final index = i ~/ 2; //get the actual index excluding dividers.
             else {
