@@ -373,6 +373,7 @@ class HermezService implements IHermezService {
         return txHash;
       } catch (error) {
         print(error);
+        return false;
       }
     } else {
       try {
@@ -391,6 +392,7 @@ class HermezService implements IHermezService {
         return txHash;
       } catch (error) {
         print(error);
+        return false;
       }
     }
   }
@@ -402,8 +404,8 @@ class HermezService implements IHermezService {
   Future<BigInt> forceExitGasLimit(
       BigInt amount, String hezEthereumAddress, Account account) async {
     return await tx.forceExitGasLimit(
-        hezEthereumAddress,
         HermezCompressedAmount.compressAmount(amount.toDouble()),
+        hezEthereumAddress,
         account.accountIndex,
         account.token);
   }
@@ -438,6 +440,7 @@ class HermezService implements IHermezService {
       return txHash != null;
     } catch (error) {
       print(error);
+      return false;
     }
   }
 }
