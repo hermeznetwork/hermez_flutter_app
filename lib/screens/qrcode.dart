@@ -100,52 +100,18 @@ class _QRCodePageState extends State<QRCodePage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Stack(
-                          children: [
-                            RepaintBoundary(
-                              key: qrCodeKey,
-                              child: QrImage(
-                                size: 250,
-                                padding: EdgeInsets.all(0),
-                                dataModuleStyle: QrDataModuleStyle(
-                                    dataModuleShape: QrDataModuleShape.square,
-                                    color: Colors.white),
-                                eyeStyle: QrEyeStyle(
-                                    eyeShape: QrEyeShape.square,
-                                    color: Colors.white),
-                                data: widget.arguments.code == null
-                                    ? (widget.arguments.store.state.txLevel ==
-                                                TransactionLevel.LEVEL2
-                                            ? "hez:"
-                                            : "") +
-                                        widget.arguments.store.state
-                                            .ethereumAddress
-                                    : widget.arguments.code +
-                                        (widget.arguments.token != null
-                                            ? ':' +
-                                                widget.arguments.token.symbol
-                                            : '') +
-                                        (widget.arguments.amount != null &&
-                                                widget.arguments.amount > 0
-                                            ? ':' +
-                                                EthAmountFormatter
-                                                    .removeDecimalZeroFormat(
-                                                        double.parse(widget
-                                                            .arguments.amount
-                                                            .toStringAsFixed(
-                                                                6)))
-                                            : ''),
-                              ),
-                            ),
-                            QrImage(
-                              size: 250,
-                              padding: EdgeInsets.all(0),
+                        RepaintBoundary(
+                          key: qrCodeKey,
+                          child: QrImage(
+                              size: 290,
+                              padding: EdgeInsets.all(20),
                               dataModuleStyle: QrDataModuleStyle(
                                   dataModuleShape: QrDataModuleShape.square,
                                   color: Colors.black),
                               eyeStyle: QrEyeStyle(
                                   eyeShape: QrEyeShape.square,
                                   color: Colors.black),
+                              backgroundColor: HermezColors.lightOrange,
                               data: widget.arguments.code == null
                                   ? (widget.arguments.store.state.txLevel ==
                                               TransactionLevel.LEVEL2
@@ -167,10 +133,9 @@ class _QRCodePageState extends State<QRCodePage> {
                                                           .toStringAsFixed(6)))
                                           : ''),
                             ),
-                          ],
                         ),
                         SizedBox(
-                          height: 33,
+                          height: 3,
                         ),
                         Container(
                           width: 250,
