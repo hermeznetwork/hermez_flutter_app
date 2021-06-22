@@ -706,7 +706,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                             .substring(
                                 widget.arguments.store.state.ethereumAddress
                                         .length -
-                                    5,
+                                    4,
                                 widget.arguments.store.state.ethereumAddress
                                     .length)
                             .toUpperCase(),
@@ -863,7 +863,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                             .substring(
                                 widget.arguments.store.state.ethereumAddress
                                         .length -
-                                    5,
+                                    4,
                                 widget.arguments.store.state.ethereumAddress
                                     .length)
                             .toUpperCase(),

@@ -23,8 +23,19 @@ class FirstDepositPage extends StatefulWidget {
 class _FirstDepositPageState extends State<FirstDepositPage> {
   @override
   void initState() {
-    widget.arguments.store.initialise();
+    initialize();
     super.initState();
+  }
+
+  Future<void> initialize() async {
+    if (widget.arguments.store.state.walletInitialized == false &&
+        widget.arguments.store.state.loading == false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Add Your Code here.
+        widget.arguments.store.initialise();
+      });
+    }
+    return;
   }
 
   @override

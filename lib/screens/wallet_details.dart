@@ -91,23 +91,25 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     //await widget.arguments.store.getBlockAvgTime();
     await fetchPendingTransactions();
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
-      /*const accountPendingDeposits = storage.getItemsByHermezAddress(
-          pendingDeposits,
-          ethereumNetworkTask.data.chainId,
-          wallet.hermezEthereumAddress
-      )*/
-
-      /*
-      const pendingOnTopDeposits = accountPendingDeposits
-          .filter(deposit => deposit.type === TxType.Deposit)
-      const pendingCreateAccountDeposits = accountPendingDeposits
-          .filter(deposit => deposit.type === TxType.CreateAccountDeposit)*/
+      List<Account> accounts =
+          List.from(widget.arguments.store.state.l2Accounts);
       _pendingDeposits = fetchPendingDeposits();
-      return widget.arguments.store.state
-          .l2Accounts; //widget.arguments.store.getAccounts();
+      _pendingDeposits.forEach((pendingDeposit) {
+        Account existingAccount = accounts.firstWhere(
+            (account) => (account.token.id == pendingDeposit['token']['id']),
+            orElse: () => null);
+        if (existingAccount == null) {
+          Account pendingAccount = Account(
+              balance: pendingDeposit['value'],
+              token: Token.fromJson(pendingDeposit['token']));
+          accounts.add(pendingAccount);
+        }
+      });
+      return accounts;
     } else {
-      return widget.arguments.store.state
-          .l1Accounts; //widget.arguments.store.getL1Accounts(true);
+      List<Account> accounts =
+          List.from(widget.arguments.store.state.l1Accounts);
+      return accounts;
     }
   }
 
@@ -168,15 +170,15 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   List<Exit> fetchExits() {
-    return widget.arguments.store.state.exits;
+    return List.from(widget.arguments.store.state.exits);
   }
 
   List<dynamic> fetchPendingWithdraws() {
-    return widget.arguments.store.state.pendingWithdraws;
+    return List.from(widget.arguments.store.state.pendingWithdraws);
   }
 
   List<dynamic> fetchPendingDeposits() {
-    return widget.arguments.store.state.pendingDeposits;
+    return List.from(widget.arguments.store.state.pendingDeposits);
   }
 
   Future<StateResponse> getState() async {
@@ -537,7 +539,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   Widget handleAccountsList(AsyncSnapshot snapshot) {
-    if (_isLoading) {
+    if (snapshot.connectionState != ConnectionState.done || _isLoading) {
       return Container(
         color: Colors.white,
         child: Center(
@@ -640,8 +642,6 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         }
       }
     }
-
-    return buildAccountsList();
   }
 
   //widget that builds the list
@@ -872,7 +872,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   completeDelayedWithdraw,
                                   instantWithdrawAllowed);
                         } catch (e) {
-                          // default withdraw gas: 230K + STANDARD ERC20 TRANFER + (siblings.lenght * 31K)
+                          // default withdraw gas: 230K + STANDARD ERC20 TRANSFER + (siblings.length * 31K)
                           gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
                           exit.merkleProof.siblings.forEach((element) {
                             gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
@@ -935,6 +935,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .last;
 
               var isPendingDeposit = false;
+              if (account.accountIndex == null) {
+                isPendingDeposit = true;
+              }
               _pendingDeposits.forEach((pendingDeposit) {
                 if (account.token.id == (pendingDeposit['token'])['id']) {
                   isPendingDeposit = true;
@@ -961,14 +964,42 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   true,
                   isPendingDeposit,
                   false, (Account account, Token token, tokenId, amount) async {
-                var needRefresh = await Navigator.of(context).pushNamed(
-                    "account_details",
-                    arguments: AccountDetailsArguments(widget.arguments.store,
-                        account, widget.arguments.parentContext));
-                if (needRefresh != null && needRefresh == true) {
-                  _onRefresh();
+                if (account.accountIndex == null) {
+                  Flushbar(
+                    messageText: Text(
+                      'This account is being created',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: HermezColors.blackTwo,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    boxShadows: [
+                      BoxShadow(
+                        color: HermezColors.blueyGreyTwo.withAlpha(64),
+                        offset: Offset(0, 4),
+                        blurRadius: 16,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                    borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    backgroundColor: Colors.white,
+                    margin: EdgeInsets.all(16.0),
+                    duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+                  ).show(context);
                 } else {
-                  setState(() {});
+                  var needRefresh = await Navigator.of(context).pushNamed(
+                      "account_details",
+                      arguments: AccountDetailsArguments(widget.arguments.store,
+                          account, widget.arguments.parentContext));
+                  if (needRefresh != null && needRefresh == true) {
+                    _onRefresh();
+                  } else {
+                    setState(() {});
+                  }
                 }
               }); //iterate through indexes and get the next colour
             }

@@ -513,7 +513,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                 SizedBox(
                                   width: 8,
                                 ),
-                                SvgPicture.asset('assets/move.svg', color: Colors.white,),
+                                SvgPicture.asset(
+                                  'assets/move.svg',
+                                  color: Colors.white,
+                                ),
                               ],
                             ),
                           ),

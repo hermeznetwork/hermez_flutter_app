@@ -129,7 +129,8 @@ class HermezService implements IHermezService {
   Future<List<Token>> getTokens() async {
     final TokensRequest tokensRequest = null;
     final tokensResponse = await api.getTokens(
-        tokenIds: tokensRequest != null ? tokensRequest.ids : List.empty());
+        tokenIds: tokensRequest != null ? tokensRequest.ids : List.empty(),
+        limit: 2049);
     return tokensResponse.tokens;
   }
 

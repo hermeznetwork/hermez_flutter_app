@@ -49,7 +49,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   }
 
   Future<void> _onRefresh() async {
-    //setState(() {});
+    setState(() {});
   }
 
   @override
