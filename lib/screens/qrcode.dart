@@ -15,6 +15,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../context/wallet/wallet_handler.dart';
+import 'account_selector.dart';
 import 'transaction_amount.dart';
 
 // You can pass any object to the arguments parameter.
@@ -269,12 +270,9 @@ class _QRCodePageState extends State<QRCodePage> {
                       ],
                     ),
                   ),
-            (widget.arguments.isReceive &&
-                widget.arguments.qrCodeType !=
-                    QRCodeType.REQUEST_PAYMENT) || !widget.arguments.isReceive
-                ? Container(
+                 widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT ? Container(
                     margin: const EdgeInsets.only(
-                        left: 30.0, right: 30.0, top: 30.0, bottom: 0.0),
+                        left: 30.0, right: 30.0, top: 20.0, bottom: 0.0),
                     child: Align(
                       alignment: FractionalOffset.bottomCenter,
                       child: SizedBox(
@@ -357,14 +355,8 @@ class _QRCodePageState extends State<QRCodePage> {
                                 ])),
                       ),
                     ),
-                  )
-                : Container(),
-            (widget.arguments.isReceive &&
-                        widget.arguments.qrCodeType !=
-                            QRCodeType.REQUEST_PAYMENT) ||
-                    (widget.arguments.qrCodeType ==
-                            QRCodeType.REQUEST_PAYMENT)
-                ? Container(
+                  ): Container(),
+                 Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 20.0, bottom: 20.0),
                     child: Align(
@@ -376,6 +368,7 @@ class _QRCodePageState extends State<QRCodePage> {
                             borderRadius: BorderRadius.circular(100.0),
                           ),
                           onPressed: () {
+                            widget.arguments.isReceive ?
                             widget.arguments.qrCodeType ==
                                     QRCodeType.REQUEST_PAYMENT
                                 ? shareScreenshot()
@@ -385,7 +378,13 @@ class _QRCodePageState extends State<QRCodePage> {
                                         widget.arguments.store,
                                         widget.arguments.store.state.txLevel,
                                         TransactionType.RECEIVE,
-                                        allowChangeLevel: false));
+                                        allowChangeLevel: false)) : Navigator.pushNamed(context,
+                                "/account_selector",
+                                arguments: AccountSelectorArguments(
+                                    widget.arguments.qrCodeType ==
+                                        QRCodeType.HERMEZ ? TransactionLevel.LEVEL2 : TransactionLevel.LEVEL1,
+                                    TransactionType.RECEIVE,
+                                    widget.arguments.store));
                           },
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
@@ -394,19 +393,20 @@ class _QRCodePageState extends State<QRCodePage> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset(
+                                widget.arguments.isReceive ? Image.asset(
                                     widget.arguments.qrCodeType ==
                                             QRCodeType.REQUEST_PAYMENT
                                         ? "assets/share.png"
                                         : "assets/deposit.png",
                                     color: HermezColors.steel,
-                                    height: 20),
-                                SizedBox(width: 8),
+                                    height: 20) : Container(),
+                                widget.arguments.isReceive ? SizedBox(width: 8) : Container(),
                                 Text(
+                                    widget.arguments.isReceive ?
                                     widget.arguments.qrCodeType ==
                                             QRCodeType.REQUEST_PAYMENT
                                         ? "Share payment link"
-                                        : "Request payment",
+                                        : "Request payment" : "See supported tokens",
                                     style: TextStyle(
                                       color: HermezColors.steel,
                                       fontSize: 16,
@@ -418,7 +418,6 @@ class _QRCodePageState extends State<QRCodePage> {
                       ),
                     ),
                   )
-                : Container()
           ],
         ),
       ),
@@ -435,14 +434,16 @@ class _QRCodePageState extends State<QRCodePage> {
         String imagePath = await getScreenShotFilePath();
         if (imagePath != null) {
           Share.shareFiles([imagePath],
+
               text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ?
-              'Hello, scan this Hermez code to send me ' +
+              'Hello, scan this ' + (widget.arguments.store.state.txLevel ==
+                  TransactionLevel.LEVEL2 ? 'Hermez' : 'Ethereum') + ' code to send me ' +
                   EthAmountFormatter.removeDecimalZeroFormat(
                       double.parse(
                           widget.arguments.amount.toStringAsFixed(6))) + ' ' +
                   widget.arguments.token.symbol
-                  : 'Hello, here is my Hermez code!',
-              subject: 'Hermez QR Code',
+                  : 'Hello, here is my ' + (widget.arguments.qrCodeType == QRCodeType.HERMEZ ? 'Hermez' : 'Ethereum') + ' code!',
+              subject: (widget.arguments.qrCodeType == QRCodeType.HERMEZ ? 'Hermez' : 'Ethereum') +' QR Code',
               sharePositionOrigin: boundary.localToGlobal(
                   Offset.zero) & boundary.size);
         } else {

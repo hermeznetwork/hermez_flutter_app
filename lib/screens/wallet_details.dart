@@ -30,6 +30,7 @@ import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
 
 import 'account_details.dart';
+import 'account_selector.dart';
 import 'transaction_details.dart';
 
 class WalletDetailsArguments {
@@ -627,18 +628,56 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
           return Container(
               width: double.infinity,
               padding: const EdgeInsets.all(34.0),
-              child: Text(
-                widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
-                    ? 'Transfer tokens to your \n\n Ethereum wallet.'
-                    : 'Transfer tokens to your \n\n Hermez wallet.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: HermezColors.blueyGrey,
-                  fontSize: 16,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w500,
+              child: Column(children: [
+                Text(
+                  widget.arguments.store.state.txLevel ==
+                          TransactionLevel.LEVEL1
+                      ? 'Transfer tokens to your \n\n Ethereum wallet.'
+                      : 'Transfer tokens to your \n\n Hermez wallet.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: HermezColors.blueyGrey,
+                    fontSize: 16,
+                    fontFamily: 'ModernEra',
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ));
+                SizedBox(height: 24),
+                Center(
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      primary: Colors.white,
+                      padding: EdgeInsets.only(
+                          left: 23, right: 23, bottom: 16, top: 16),
+                      backgroundColor: Color(0xfff3f3f8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                    ),
+                    onPressed: () async {
+                      Navigator.of(widget.arguments.parentContext).pushNamed(
+                          "/account_selector",
+                          arguments: AccountSelectorArguments(
+                              widget.arguments.store.state.txLevel,
+                              TransactionType.RECEIVE,
+                              widget.arguments.store));
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'See supported tokens',
+                          style: TextStyle(
+                            color: HermezColors.blueyGreyTwo,
+                            fontSize: 16,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ]));
         }
       }
     }
