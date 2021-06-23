@@ -28,9 +28,9 @@ import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'account_details.dart';
-import 'account_selector.dart';
 import 'transaction_details.dart';
 
 class WalletDetailsArguments {
@@ -54,16 +54,14 @@ class WalletDetailsPage extends StatefulWidget {
 
 class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<Account> _accounts;
-
+  List<Token> _tokens;
   List<Exit> _exits = [];
   List<Exit> _filteredExits = [];
   List<bool> _allowedInstantWithdraws = [];
-
   List<dynamic> _pendingExits = [];
   List<dynamic> _pendingForceExits = [];
   List<dynamic> _pendingWithdraws = [];
   List<dynamic> _pendingDeposits = [];
-
   bool _isLoading = false;
   StateResponse _stateResponse;
 
@@ -653,13 +651,18 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30)),
                     ),
-                    onPressed: () async {
-                      Navigator.of(widget.arguments.parentContext).pushNamed(
-                          "/account_selector",
-                          arguments: AccountSelectorArguments(
-                              widget.arguments.store.state.txLevel,
-                              TransactionType.RECEIVE,
-                              widget.arguments.store));
+                    onPressed: () {
+                      showBarModalBottomSheet(
+                        context: widget.arguments.parentContext,
+                        builder: (context) => Scaffold(
+                          body: FutureBuilder(
+                              future: fetchTokens(),
+                              builder: (buildContext, snapshot) {
+                                return handleTokensList(
+                                    snapshot, widget.arguments.parentContext);
+                              }),
+                        ),
+                      );
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -681,6 +684,107 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         }
       }
     }
+  }
+
+  Future<List<Token>> fetchTokens() async {
+    return widget.arguments.store.getTokens();
+  }
+
+  Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(
+        child: CircularProgressIndicator(color: HermezColors.orange),
+      );
+    } else {
+      if (snapshot.hasError) {
+        // while data is loading:
+        return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(34.0),
+            child: Column(children: [
+              Text(
+                'There was an error loading \n\n this page.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: HermezColors.blueyGrey,
+                  fontSize: 16,
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ]));
+      } else {
+        if (snapshot.hasData && (snapshot.data as List).length > 0) {
+          _tokens = snapshot.data;
+          return buildTokensList(context);
+        }
+      }
+    }
+  }
+
+  //widget that builds the list
+  Widget buildTokensList(BuildContext parentContext) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 30,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Supported tokens in Hermez',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: HermezColors.blackTwo,
+                fontSize: 18,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 16,
+        ),
+        Expanded(
+          flex: 1,
+          child: Container(
+            color: Colors.white,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _tokens.length,
+              padding: const EdgeInsets.all(16.0),
+              itemBuilder: (context, i) {
+                final index = i;
+                final String currency = widget
+                    .arguments.store.state.defaultCurrency
+                    .toString()
+                    .split('.')
+                    .last;
+                final Token token = _tokens[index];
+                return AccountRow(
+                    null,
+                    token,
+                    token.name,
+                    token.symbol,
+                    currency != "USD"
+                        ? token.USD * widget.arguments.store.state.exchangeRatio
+                        : token.USD,
+                    currency,
+                    0,
+                    false,
+                    true,
+                    false,
+                    true,
+                    null);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   //widget that builds the list

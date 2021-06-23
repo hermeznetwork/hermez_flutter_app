@@ -6,16 +6,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/dialog/alert.dart';
+import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/share_utils.dart';
 import 'package:hermez_sdk/model/token.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../context/wallet/wallet_handler.dart';
-import 'account_selector.dart';
 import 'transaction_amount.dart';
 
 // You can pass any object to the arguments parameter.
@@ -53,6 +54,8 @@ class QRCodePage extends StatefulWidget {
 
 class _QRCodePageState extends State<QRCodePage> {
   static GlobalKey qrCodeKey = GlobalKey();
+
+  List<Token> _tokens;
   @override
   Widget build(BuildContext context) {
     String title;
@@ -101,6 +104,25 @@ class _QRCodePageState extends State<QRCodePage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
+                        !widget.arguments.isReceive ?
+                        Container(
+                          margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                                widget.arguments.qrCodeType == QRCodeType.HERMEZ ?
+                                'Use this code to transfer tokens from another Hermez account.' :
+                                'Transfer tokens to your Ethereum wallet first and'
+                                    ' then move them to your Hermez wallet.',
+                                style: TextStyle(
+                                  color: HermezColors.steel,
+                                  fontSize: 18,
+                                  height: 1.5,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                )),
+                          ),
+                        ): Container(),
                         RepaintBoundary(
                           key: qrCodeKey,
                           child: QrImage(
@@ -207,69 +229,6 @@ class _QRCodePageState extends State<QRCodePage> {
                     ),
                   ),
                 )),
-            widget.arguments.isReceive
-                ? Container()
-                : Container(
-                    margin: EdgeInsets.only(left: 30, right: 30),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15.0),
-                        color: HermezColors.mediumOrange),
-                    padding: EdgeInsets.all(20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SvgPicture.asset("assets/info.svg",
-                            color: HermezColors.blackTwo,
-                            alignment: Alignment.topLeft,
-                            height: 20),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Expanded(
-                            child: Column(
-                          children: [
-                            Align(
-                              alignment: Alignment.topLeft,
-                              child: Container(
-                                child: Text(
-                                  widget.arguments.qrCodeType ==
-                                          QRCodeType.HERMEZ
-                                      ? "From Hermez to Hermez"
-                                      : "From Ethereum to Hermez",
-                                  style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16),
-                                  textAlign: TextAlign.left,
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.topLeft,
-                              child: Container(
-                                padding: EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  widget.arguments.qrCodeType ==
-                                          QRCodeType.HERMEZ
-                                      ? "Use this code to transfer tokens from another Hermez account."
-                                      : "Transfer tokens to your Ethereum wallet first and then move them to your Hermez wallet.",
-                                  style: TextStyle(
-                                      color: HermezColors.blackTwo,
-                                      fontFamily: 'ModernEra',
-                                      height: 1.5,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16),
-                                  textAlign: TextAlign.left,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ))
-                      ],
-                    ),
-                  ),
                  widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 20.0, bottom: 0.0),
@@ -356,6 +315,7 @@ class _QRCodePageState extends State<QRCodePage> {
                       ),
                     ),
                   ): Container(),
+            widget.arguments.isReceive ?
                  Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 20.0, bottom: 20.0),
@@ -368,7 +328,6 @@ class _QRCodePageState extends State<QRCodePage> {
                             borderRadius: BorderRadius.circular(100.0),
                           ),
                           onPressed: () {
-                            widget.arguments.isReceive ?
                             widget.arguments.qrCodeType ==
                                     QRCodeType.REQUEST_PAYMENT
                                 ? shareScreenshot()
@@ -378,13 +337,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                         widget.arguments.store,
                                         widget.arguments.store.state.txLevel,
                                         TransactionType.RECEIVE,
-                                        allowChangeLevel: false)) : Navigator.pushNamed(context,
-                                "/account_selector",
-                                arguments: AccountSelectorArguments(
-                                    widget.arguments.qrCodeType ==
-                                        QRCodeType.HERMEZ ? TransactionLevel.LEVEL2 : TransactionLevel.LEVEL1,
-                                    TransactionType.RECEIVE,
-                                    widget.arguments.store));
+                                        allowChangeLevel: false));
                           },
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
@@ -393,20 +346,19 @@ class _QRCodePageState extends State<QRCodePage> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                widget.arguments.isReceive ? Image.asset(
+                                Image.asset(
                                     widget.arguments.qrCodeType ==
                                             QRCodeType.REQUEST_PAYMENT
                                         ? "assets/share.png"
                                         : "assets/deposit.png",
                                     color: HermezColors.steel,
-                                    height: 20) : Container(),
-                                widget.arguments.isReceive ? SizedBox(width: 8) : Container(),
+                                    height: 20),
+                                SizedBox(width: 8),
                                 Text(
-                                    widget.arguments.isReceive ?
                                     widget.arguments.qrCodeType ==
                                             QRCodeType.REQUEST_PAYMENT
                                         ? "Share payment link"
-                                        : "Request payment" : "See supported tokens",
+                                        : "Request payment",
                                     style: TextStyle(
                                       color: HermezColors.steel,
                                       fontSize: 16,
@@ -417,10 +369,190 @@ class _QRCodePageState extends State<QRCodePage> {
                         ),
                       ),
                     ),
-                  )
+                  ) : Container(),
+            widget.arguments.isReceive
+                ? Container()
+                : Container(
+              margin: EdgeInsets.only(left: 30, right: 30,top: 20.0),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15.0),
+                  color: HermezColors.blackTwo),
+              padding: EdgeInsets.all(20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SvgPicture.asset("assets/info.svg",
+                      color: Colors.white,
+                      alignment: Alignment.topLeft,
+                      height: 20,
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Container(
+                              child: Text(
+                                 "Make sure to receive only tokens that are supported in Hermez",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'ModernEra',
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: HermezColors.steel.withOpacity(0.5),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
+                            ),
+                            onPressed: () {
+                              showBarModalBottomSheet(
+                                context: context,
+                                builder: (context) => Scaffold(body: FutureBuilder(
+                                  future: fetchTokens(),
+                                    builder: (buildContext, snapshot) {
+                                      return handleTokensList(snapshot, context);
+                                    }
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.only(right: 6, left: 6),
+                              child: Text(
+                                'More info',
+                                style: TextStyle(
+                                  color: HermezColors.lightGrey,
+                                  fontSize: 15,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ))
+                ],
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Future<List<Token>> fetchTokens() async {
+    return widget.arguments.store.getTokens();
+  }
+
+  Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(
+        child: CircularProgressIndicator(color: HermezColors.orange),
+      );
+    } else {
+      if (snapshot.hasError) {
+        // while data is loading:
+        return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(34.0),
+            child: Column(children: [
+              Text(
+                'There was an error loading \n\n this page.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: HermezColors.blueyGrey,
+                  fontSize: 16,
+                  fontFamily: 'ModernEra',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ]));
+      } else {
+        if (snapshot.hasData && (snapshot.data as List).length > 0) {
+            _tokens = snapshot.data;
+            return buildTokensList(context);
+        }
+      }
+    }
+  }
+
+  //widget that builds the list
+  Widget buildTokensList(BuildContext parentContext) {
+    return  Column(
+      children: [
+        SizedBox(
+          height: 30,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+
+          children: [
+            Text(
+              'Supported tokens in Hermez',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: HermezColors.blackTwo,
+                fontSize: 18,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 16,
+        ),
+        Expanded(
+          flex: 1,
+          child:Container(
+            color: Colors.white,
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _tokens.length,
+                padding: const EdgeInsets.all(16.0),
+                itemBuilder: (context, i) {
+                  final index = i;
+                  final String currency = widget
+                      .arguments.store.state.defaultCurrency
+                      .toString()
+                      .split('.')
+                      .last;
+                    final Token token = _tokens[index];
+                    return AccountRow(
+                        null,
+                        token,
+                        token.name,
+                        token.symbol,
+                        currency != "USD"
+                            ? token.USD *
+                            widget.arguments.store.state.exchangeRatio
+                            : token.USD,
+                        currency,
+                        0,
+                        false,
+                        true,
+                        false,
+                        true, null);
+                  },
+            ),
+          ),),
+      ],
     );
   }
 
@@ -428,13 +560,11 @@ class _QRCodePageState extends State<QRCodePage> {
     //try {
       RenderRepaintBoundary boundary =
       qrCodeKey.currentContext.findRenderObject();
-
       // ScreenShot and save
       saveScreenShot(boundary, success: () async {
         String imagePath = await getScreenShotFilePath();
         if (imagePath != null) {
           Share.shareFiles([imagePath],
-
               text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ?
               'Hello, scan this ' + (widget.arguments.store.state.txLevel ==
                   TransactionLevel.LEVEL2 ? 'Hermez' : 'Ethereum') + ' code to send me ' +
@@ -461,20 +591,4 @@ class _QRCodePageState extends State<QRCodePage> {
         //showToast('save fail!');
       });
     }
-      /*ui.Image image = await boundary.toImage(pixelRatio: 2);
-
-      final appDir = await syspaths.getApplicationDocumentsDirectory();
-      imageFile.copy('${appDir.path}/$fileName');
-      ByteData byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData.buffer.asUint8List();
-
-      await Share.file('Hermez QR Code', 'hermez_qrcode.png', pngBytes, 'image/png', text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ? 'Hello, scan this Hermez code to send me ' + EthAmountFormatter.removeDecimalZeroFormat(
-          double.parse(
-              widget.arguments.amount.toStringAsFixed(6))) + ' ' + widget.arguments.token.symbol :'Hello, here is my Hermez code!');*/
-    /*} on PlatformException catch (e) {
-      print("Exception while taking screenshot:" + e.toString());
-      Alert(title: 'Error', text: e.toString()).show(context);
-    }*/
-
 }

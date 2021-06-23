@@ -3,6 +3,7 @@ import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 abstract class WalletAction {}
 
@@ -15,16 +16,16 @@ class WalletInitialized extends WalletAction {
 class InitializingWallet extends WalletAction {}
 
 class BalanceUpdated extends WalletAction {
-  BalanceUpdated(this.ethBalance, this.tokensBalance, this.cryptoList);
+  BalanceUpdated(this.ethBalance, this.tokensBalance);
   final BigInt ethBalance;
   final Map<String, BigInt> tokensBalance;
-  final List cryptoList;
 }
 
 class UpdatingBalance extends WalletAction {}
 
 class WalletUpdated extends WalletAction {
   WalletUpdated(
+    this.tokens,
     this.l1Accounts,
     this.l2Accounts,
     this.exits,
@@ -36,6 +37,7 @@ class WalletUpdated extends WalletAction {
     /*
       this.pendingL1Txs, this.pendingForceExits*/
   );
+  final List<Token> tokens;
   final List<Account> l1Accounts;
   final List<Account> l2Accounts;
   final List<Exit> exits;
@@ -99,8 +101,7 @@ Wallet reducer(Wallet state, WalletAction action) {
     return state.rebuild((b) => b
       ..loading = false
       ..ethBalance = action.ethBalance
-      ..tokensBalance = action.tokensBalance
-      ..cryptoList = action.cryptoList);
+      ..tokensBalance = action.tokensBalance);
   }
 
   if (action is UpdatingWallet) {
@@ -110,6 +111,7 @@ Wallet reducer(Wallet state, WalletAction action) {
   if (action is WalletUpdated) {
     return state.rebuild((b) => b
       ..loading = false
+      ..tokens = action.tokens
       ..l1Accounts = action.l1Accounts
       ..l2Accounts = action.l2Accounts
       ..exits = action.exits

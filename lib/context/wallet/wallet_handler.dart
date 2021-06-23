@@ -143,6 +143,18 @@ class WalletHandler {
               .last]));
     } catch (e) {
       print("Error on Exchange Rate API: " + e.toString());
+      LinkedHashMap<String, dynamic> exchangeRatio = {
+        "EUR": 0.837775,
+        "CNY": 6.446304,
+        "JPY": 110.253954,
+        "GBP": 0.716945
+      } as LinkedHashMap<String, dynamic>;
+      await _configurationService.setExchangeRatio(exchangeRatio);
+      _store.dispatch(ExchangeRatioUpdated(exchangeRatio[
+          (await _configurationService.getDefaultCurrency())
+              .toString()
+              .split(".")
+              .last]));
     }
 
     //final state = await getState();
@@ -281,6 +293,7 @@ class WalletHandler {
     try {
       //_store.dispatch(UpdatingWallet());
       print('Updating Wallet');
+      List<Token> tokens = await getTokens();
       List<Account> l1Accounts = await getL1Accounts(true);
       List<Account> l2Accounts = await getL2Accounts();
       List<Exit> exits = await getExits();
@@ -290,6 +303,7 @@ class WalletHandler {
       List<dynamic> pendingWithdraws = await getPendingWithdraws();
       List<dynamic> pendingForceExits = await getPendingForceExits();
       _store.dispatch(WalletUpdated(
+          tokens,
           l1Accounts,
           l2Accounts,
           exits,

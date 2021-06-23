@@ -34,7 +34,7 @@ class _$Wallet extends Wallet {
   @override
   final TransactionLevel txLevel;
   @override
-  final List<Account> cryptoList;
+  final List<Token> tokens;
   @override
   final List<Account> l1Accounts;
   @override
@@ -75,7 +75,7 @@ class _$Wallet extends Wallet {
       this.defaultFee,
       this.exchangeRatio,
       this.txLevel,
-      this.cryptoList,
+      this.tokens,
       this.l1Accounts,
       this.l2Accounts,
       this.pendingL2Txs,
@@ -123,7 +123,7 @@ class _$Wallet extends Wallet {
         defaultFee == other.defaultFee &&
         exchangeRatio == other.exchangeRatio &&
         txLevel == other.txLevel &&
-        cryptoList == other.cryptoList &&
+        tokens == other.tokens &&
         l1Accounts == other.l1Accounts &&
         l2Accounts == other.l2Accounts &&
         pendingL2Txs == other.pendingL2Txs &&
@@ -165,7 +165,7 @@ class _$Wallet extends Wallet {
                                                                 defaultFee.hashCode),
                                                             exchangeRatio.hashCode),
                                                         txLevel.hashCode),
-                                                    cryptoList.hashCode),
+                                                    tokens.hashCode),
                                                 l1Accounts.hashCode),
                                             l2Accounts.hashCode),
                                         pendingL2Txs.hashCode),
@@ -195,7 +195,7 @@ class _$Wallet extends Wallet {
           ..add('defaultFee', defaultFee)
           ..add('exchangeRatio', exchangeRatio)
           ..add('txLevel', txLevel)
-          ..add('cryptoList', cryptoList)
+          ..add('tokens', tokens)
           ..add('l1Accounts', l1Accounts)
           ..add('l2Accounts', l2Accounts)
           ..add('pendingL2Txs', pendingL2Txs)
@@ -268,9 +268,9 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   TransactionLevel get txLevel => _$this._txLevel;
   set txLevel(TransactionLevel txLevel) => _$this._txLevel = txLevel;
 
-  List<Account> _cryptoList;
-  List<Account> get cryptoList => _$this._cryptoList;
-  set cryptoList(List<Account> cryptoList) => _$this._cryptoList = cryptoList;
+  List<Token> _tokens;
+  List<Token> get tokens => _$this._tokens;
+  set tokens(List<Token> tokens) => _$this._tokens = tokens;
 
   List<Account> _l1Accounts;
   List<Account> get l1Accounts => _$this._l1Accounts;
@@ -348,7 +348,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _defaultFee = _$v.defaultFee;
       _exchangeRatio = _$v.exchangeRatio;
       _txLevel = _$v.txLevel;
-      _cryptoList = _$v.cryptoList;
+      _tokens = _$v.tokens;
       _l1Accounts = _$v.l1Accounts;
       _l2Accounts = _$v.l2Accounts;
       _pendingL2Txs = _$v.pendingL2Txs;
@@ -397,7 +397,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               defaultFee: defaultFee,
               exchangeRatio: exchangeRatio,
               txLevel: txLevel,
-              cryptoList: cryptoList,
+              tokens: tokens,
               l1Accounts: l1Accounts,
               l2Accounts: l2Accounts,
               pendingL2Txs: pendingL2Txs,

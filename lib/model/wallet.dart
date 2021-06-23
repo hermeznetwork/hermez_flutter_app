@@ -5,6 +5,7 @@ import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 part 'wallet.g.dart';
 
@@ -45,7 +46,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   TransactionLevel get txLevel;
 
-  List<Account> get cryptoList;
+  List<Token> get tokens;
 
   List<Account> get l1Accounts;
 
@@ -79,7 +80,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..defaultFee = WalletDefaultFee.AVERAGE
     ..exchangeRatio = 0.0
     ..txLevel = TransactionLevel.LEVEL1
-    ..cryptoList = []
+    ..tokens = []
     ..l1Accounts = []
     ..l2Accounts = []
     ..pendingL2Txs = []

@@ -47,19 +47,22 @@ class AccountRow extends StatelessWidget {
                   color: pendingDeposit
                       ? HermezColors.blackTwo
                       : HermezColors.lightGrey)),
-          onPressed: () {
-            this.onPressed(
-              account,
-              token,
-              symbol,
-              amount.toString(),
-            );
-          },
+          onPressed: onPressed != null
+              ? () {
+                  this.onPressed(
+                    account,
+                    token,
+                    symbol,
+                    amount.toString(),
+                  );
+                }
+              : null,
           padding: EdgeInsets.all(20.0),
           color:
               pendingDeposit ? HermezColors.blackTwo : HermezColors.lightGrey,
           textColor: pendingDeposit ? Colors.white : Colors.black,
-
+          disabledColor:
+              pendingDeposit ? HermezColors.blackTwo : HermezColors.lightGrey,
           child: Row(
             children: <Widget>[
               Expanded(
