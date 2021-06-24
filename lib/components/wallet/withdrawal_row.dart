@@ -40,18 +40,22 @@ class WithdrawalRow extends StatelessWidget {
     Color statusColor = HermezColors.statusOrange;
     Color statusBackgroundColor = HermezColors.statusOrangeBackground;
     calculateRemainingTime();
+    String stepTitle = "1";
     switch (step) {
       case 1:
+        stepTitle = "1";
         status = "Initiated";
         statusColor = HermezColors.statusOrange;
         statusBackgroundColor = HermezColors.statusOrangeBackground;
         break;
       case 2:
+        stepTitle = "2";
         status = "On hold";
         statusColor = HermezColors.statusRed;
         statusBackgroundColor = HermezColors.statusRedBackground;
         break;
       case 3:
+        stepTitle = "2";
         status = "Pending";
         statusColor = HermezColors.statusOrange;
         statusBackgroundColor = HermezColors.statusOrangeBackground;
@@ -86,7 +90,7 @@ class WithdrawalRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                      child: Text("STEP $step/3",
+                      child: Text("STEP $stepTitle/2",
                           style: TextStyle(
                             color: HermezColors.steel,
                             fontSize: 13,
@@ -498,27 +502,28 @@ class WithdrawalRow extends StatelessWidget {
     //this.state.network.lastBatch.timestamp
     double batchFrequencyTime = this.state.metrics.batchFrequency;
 
-    int lastBatchNum = this.state.network.lastBatch.batchNum;
-    String lastBatchDate = this.state.network.lastBatch.timestamp;
+    int lastBatchNum = this.state.network.lastBatch.batchNum ?? 0;
+    String lastBatchDate = this.state.network.lastBatch.timestamp ?? 0;
 
     int maxWaitingTime;
     int passedTime;
     Bucket bucket = this.state.rollup.buckets.firstWhere(
         (bucket) => double.parse(bucket.ceilUSD) > exitAmount,
         orElse: () => null);
+    maxWaitingTime = 0;
     if (bucket != null) {
       bucketBlockLastUpdate = int.parse(bucket.blockStamp);
       bucketBlocksEachCheck = int.parse(bucket.rateBlocks);
       maxWaitingTime = (bucketBlocksEachCheck * batchFrequencyTime).toInt();
+      print('LAST BATCH NUM: ' + lastBatchNum.toString());
+      print('BLOCK LAST UPDATE NUM: ' + bucketBlockLastUpdate.toString());
+      if (lastBatchNum >= bucketBlockLastUpdate) {
+        int passedBlocks = lastBatchNum - bucketBlockLastUpdate;
+        passedTime = (passedBlocks * batchFrequencyTime) ~/ 60;
+        print('PASSED TIME: ' + (passedTime).toString());
+      }
+      print('REMAINING TIME: ' + (maxWaitingTime).toString());
     }
-    print('LAST BATCH NUM: ' + lastBatchNum.toString());
-    print('BLOCK LAST UPDATE NUM: ' + bucketBlockLastUpdate.toString());
-    if (lastBatchNum >= bucketBlockLastUpdate) {
-      int passedBlocks = lastBatchNum - bucketBlockLastUpdate;
-      passedTime = (passedBlocks * batchFrequencyTime) ~/ 60;
-      print('PASSED TIME: ' + (passedTime).toString());
-    }
-    print('REMAINING TIME: ' + (maxWaitingTime).toString());
     return maxWaitingTime;
   }
 

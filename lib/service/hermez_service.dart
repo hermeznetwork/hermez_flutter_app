@@ -50,7 +50,7 @@ abstract class IHermezService {
   Future<PoolTransaction> getPoolTransactionById(String transactionId);
   Future<List<Token>> getTokens();
   Future<Token> getTokenById(int tokenId);
-  Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
+  Future<bool> deposit(double amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice = 0});
   Future<bool> withdraw(
@@ -64,7 +64,7 @@ abstract class IHermezService {
       String privateKey,
       {BigInt gasLimit,
       int gasPrice = 0});
-  Future<bool> forceExit(BigInt amount, String hezEthereumAddress,
+  Future<bool> forceExit(double amount, String hezEthereumAddress,
       Account account, String privateKey,
       {BigInt gasLimit, int gasPrice = 0});
   Future<bool> generateAndSendL2Tx(
@@ -215,7 +215,7 @@ class HermezService implements IHermezService {
   /// Makes a deposit.
   /// It detects if it's a 'createAccountDeposit' or a 'deposit' and prepares the parameters accordingly.
   /// Detects if it's an Ether, ERC 20 or ERC 777 token and sends the transaction accordingly.
-  /// @param {BigInt} amount - The amount to be deposited
+  /// @param {double} amount - The amount to be deposited
   /// @param {String} hezEthereumAddress - The Hermez address of the transaction sender
   /// @param {Object} token - The token information object as returned from the API
   /// @param {String} babyJubJub - The compressed BabyJubJub in hexadecimal format of the transaction sender.
@@ -225,15 +225,14 @@ class HermezService implements IHermezService {
   /// @param {Number} gasMultiplier - Optional gas multiplier
   /// @returns {Promise} transaction parameters
   @override
-  Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
+  Future<bool> deposit(double amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
       {BigInt approveGasLimit,
       BigInt depositGasLimit,
       int gasPrice = 0}) async {
     HermezCompressedAmount compressedAmount;
     try {
-      compressedAmount =
-          HermezCompressedAmount.compressAmount(amount.toDouble());
+      compressedAmount = HermezCompressedAmount.compressAmount(amount);
     } catch (e) {
       return false;
     }
@@ -251,7 +250,7 @@ class HermezService implements IHermezService {
             'from': hezEthereumAddress,
             'to': hezEthereumAddress,
             'token': token.toJson(),
-            'value': amount.toDouble().toString(),
+            'value': amount.toString(),
             'fee': '0',
             'status': 'PENDING',
             'timestamp': DateTime.now().millisecondsSinceEpoch,
@@ -267,7 +266,7 @@ class HermezService implements IHermezService {
     return txHash;
   }
 
-  Future<LinkedHashMap<String, BigInt>> depositGasLimit(BigInt amount,
+  Future<LinkedHashMap<String, BigInt>> depositGasLimit(double amount,
       String hezEthereumAddress, Token token, String babyJubJub) async {
     final LinkedHashMap<String, BigInt> gasLimit = await tx.depositGasLimit(
         HermezCompressedAmount.compressAmount(amount.toDouble()),
@@ -364,7 +363,7 @@ class HermezService implements IHermezService {
               'batchNum': exit.batchNum,
               'instant': isInstant,
               'date': DateTime.now().millisecondsSinceEpoch,
-              'amount': amount.toDouble(),
+              'amount': amount,
               'token': exit.token.toJson(),
               'status': 'pending'
             });
@@ -403,16 +402,16 @@ class HermezService implements IHermezService {
   }
 
   Future<BigInt> forceExitGasLimit(
-      BigInt amount, String hezEthereumAddress, Account account) async {
+      double amount, String hezEthereumAddress, Account account) async {
     return await tx.forceExitGasLimit(
-        HermezCompressedAmount.compressAmount(amount.toDouble()),
+        HermezCompressedAmount.compressAmount(amount),
         hezEthereumAddress,
         account.accountIndex,
         account.token);
   }
 
   @override
-  Future<bool> forceExit(BigInt amount, String hezEthereumAddress,
+  Future<bool> forceExit(double amount, String hezEthereumAddress,
       Account account, String privateKey,
       {BigInt gasLimit, int gasPrice = 0}) async {
     try {
@@ -428,7 +427,7 @@ class HermezService implements IHermezService {
             'fromHezEthereumAddress': hezEthereumAddress,
             'toHezEthereumAddress': hezEthereumAddress,
             'token': account.token.toJson(),
-            'amount': amount.toDouble(),
+            'amount': amount,
             'state': 'pend',
             'timestamp': DateTime.now().millisecondsSinceEpoch,
             'type': TxType.Exit.toString().split('.').last

@@ -21,7 +21,6 @@ import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/token.dart';
-import 'package:hermez_sdk/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1101,6 +1100,18 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                           ],
                         )
                       : Container(),
+                  !enoughFee && !isLoading
+                      ? Text(
+                          'Insufficient ETH to cover gas fee.',
+                          style: TextStyle(
+                            color: HermezColors.redError,
+                            height: 1.73,
+                            fontSize: 15,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                      : Container(),
                 ],
               ),
             ],
@@ -1251,6 +1262,18 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       ),
                     ],
                   ),
+                  !enoughFee && !isLoading
+                      ? Text(
+                          'Insufficient ETH to cover gas fee.',
+                          style: TextStyle(
+                            color: HermezColors.redError,
+                            height: 1.73,
+                            fontSize: 15,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                      : Container(),
                 ],
               ),
             ],
@@ -1394,8 +1417,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         case TransactionType.DEPOSIT:
           {
             // check getCreateAccountAuth
-            final amountDeposit = getTokenAmountBigInt(
-                widget.arguments.amount, widget.arguments.token.decimals);
+            final double amountDeposit = widget.arguments.amount *
+                pow(10, widget.arguments.token.decimals);
 
             final accounts = await widget.arguments.store.getL2Accounts();
 
@@ -1414,8 +1437,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           break;
         case TransactionType.FORCEEXIT:
           {
-            final amountExit = getTokenAmountBigInt(
-                widget.arguments.amount, widget.arguments.token.decimals);
+            final double amountExit = widget.arguments.amount *
+                pow(10, widget.arguments.token.decimals);
 
             return await widget.arguments.store.forceExit(
                 amountExit, widget.arguments.account,
@@ -1427,8 +1450,6 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           {
             final amountWithdraw = widget.arguments.amount *
                 pow(10, widget.arguments.token.decimals);
-            /*getTokenAmountBigInt(
-                widget.arguments.amount, widget.arguments.token.decimals);*/
 
             return await widget.arguments.store.withdraw(
                 amountWithdraw,
@@ -1445,14 +1466,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             final fees = await widget.arguments.store.fetchFees();
             final transactionFee = getFee(fees, true);
 
-            final amountExit = getTokenAmountBigInt(
-                widget.arguments.amount, widget.arguments.token.decimals);
+            final double amountExit = widget.arguments.amount *
+                pow(10, widget.arguments.token.decimals);
 
-            return await widget.arguments.store.exit(
-                widget.arguments.amount *
-                    pow(10, widget.arguments.token.decimals),
-                widget.arguments.account,
-                transactionFee);
+            return await widget.arguments.store
+                .exit(amountExit, widget.arguments.account, transactionFee);
           }
           break;
         default:
@@ -1476,12 +1494,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               transactionFee = getFee(fees, false);
             }
 
-            return await widget.arguments.store.transfer(
-                widget.arguments.amount *
-                    pow(10, widget.arguments.token.decimals),
-                widget.arguments.account,
-                receiverAccount,
-                transactionFee);
+            final double amountTransfer = widget.arguments.amount *
+                pow(10, widget.arguments.token.decimals);
+
+            return await widget.arguments.store.transfer(amountTransfer,
+                widget.arguments.account, receiverAccount, transactionFee);
           }
       }
     }
@@ -1493,8 +1510,22 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       return true;
     }
     if (widget.arguments.status == TransactionStatus.DRAFT) {
-      double fee =
-          widget.arguments.gasLimit * widget.arguments.gasPrice.toDouble();
+      BigInt gasPrice = BigInt.one;
+      switch (widget.arguments.selectedFeeSpeed) {
+        case WalletDefaultFee.SLOW:
+          int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
+          gasPrice = BigInt.from(gasPriceFloor);
+          break;
+        case WalletDefaultFee.AVERAGE:
+          int gasPriceFloor = gasPriceResponse.average * pow(10, 8);
+          gasPrice = BigInt.from(gasPriceFloor);
+          break;
+        case WalletDefaultFee.FAST:
+          int gasPriceFloor = gasPriceResponse.fast * pow(10, 8);
+          gasPrice = BigInt.from(gasPriceFloor);
+          break;
+      }
+      double fee = widget.arguments.gasLimit * gasPrice.toDouble();
       if (widget.arguments.transactionType == TransactionType.EXIT) {
         fee = widget.arguments.withdrawEstimatedFee;
       } else if (widget.arguments.transactionType ==

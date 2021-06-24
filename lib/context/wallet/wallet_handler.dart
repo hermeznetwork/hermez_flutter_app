@@ -853,7 +853,7 @@ class WalletHandler {
   }
 
   Future<LinkedHashMap<String, BigInt>> depositGasLimit(
-      BigInt amount, Token token) async {
+      double amount, Token token) async {
     //_store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
@@ -863,7 +863,7 @@ class WalletHandler {
         amount, hermezAddress, token, hermezWallet.publicKeyCompressedHex);
   }
 
-  Future<bool> deposit(BigInt amount, Token token,
+  Future<bool> deposit(double amount, Token token,
       {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice}) async {
     _store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
@@ -929,13 +929,13 @@ class WalletHandler {
     _store.dispatch(TransactionFinished());
   }
 
-  Future<BigInt> forceExitGasLimit(BigInt amount, Account account) async {
+  Future<BigInt> forceExitGasLimit(double amount, Account account) async {
     //_store.dispatch(TransactionStarted());
     final hermezAddress = await _configurationService.getHermezAddress();
     return _hermezService.forceExitGasLimit(amount, hermezAddress, account);
   }
 
-  Future<bool> forceExit(BigInt amount, Account account,
+  Future<bool> forceExit(double amount, Account account,
       {BigInt gasLimit, int gasPrice = 0}) async {
     _store.dispatch(TransactionStarted());
     final hermezAddress = await _configurationService.getHermezAddress();

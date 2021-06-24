@@ -1303,6 +1303,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               } else {
                                 selectedWithdrawFeeSpeed = selectedFee;
                               }
+                              needRefresh = true;
                             });
                           }));
                     }
@@ -1394,7 +1395,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       ethereumToken = await getEthereumToken();
       ethereumAccount = await getEthereumAccount();
       if (selectedAccount != null) {
-        BigInt amountToEstimate = BigInt.one;
+        double amountToEstimate = BigInt.one.toDouble();
         gasLimit = await widget.arguments.store
             .forceExitGasLimit(amountToEstimate, selectedAccount);
       }
@@ -1534,7 +1535,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         String addressTo = getCurrentEnvironment().contracts['Hermez'];
         gasLimit = BigInt.zero;
         if (selectedAccount != null) {
-          BigInt amountToEstimate = BigInt.one;
+          double amountToEstimate = BigInt.one.toDouble();
           depositGasLimit = await widget.arguments.store
               .depositGasLimit(amountToEstimate, selectedAccount.token);
           depositGasLimit.forEach((String key, BigInt value) {

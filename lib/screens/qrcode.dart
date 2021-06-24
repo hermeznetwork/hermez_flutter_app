@@ -373,7 +373,7 @@ class _QRCodePageState extends State<QRCodePage> {
             widget.arguments.isReceive
                 ? Container()
                 : Container(
-              margin: EdgeInsets.only(left: 30, right: 30,top: 20.0),
+              margin: EdgeInsets.only(left: 30, right: 30,top: 20.0, bottom: 20.0),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
                   color: HermezColors.blackTwo),
