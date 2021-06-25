@@ -28,8 +28,15 @@ class AddressUtils {
   }
 
   static String strip0x(String address) {
-    if (address.startsWith("0x") || address.startsWith("0X")) {
+    if (address.toLowerCase().startsWith("0x")) {
       return address.substring(2);
+    }
+    return address;
+  }
+
+  static String stripHez0x(String address) {
+    if (address.toLowerCase().startsWith("hez:0x")) {
+      return address.substring(6);
     }
     return address;
   }
@@ -51,7 +58,7 @@ class AddressUtils {
 
     final addr = strip0x(address).toLowerCase();
     final hash = ascii.encode(hex.encode(
-      SHA3Digest(256, true).process(ascii.encode(addr)),
+      SHA3Digest(256 /*, true*/).process(ascii.encode(addr)),
     ));
 
     var newAddr = "0x";

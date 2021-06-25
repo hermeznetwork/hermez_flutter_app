@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:intl/intl.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 class AccountRow extends StatelessWidget {
   AccountRow(
+      this.account,
+      this.token,
       this.name,
       this.symbol,
       this.price,
@@ -12,8 +16,11 @@ class AccountRow extends StatelessWidget {
       this.simplified,
       this.currencyFirst,
       this.pendingDeposit,
+      this.isToken,
       this.onPressed);
 
+  final Account account;
+  final Token token;
   final String name;
   final String symbol;
   final double price;
@@ -22,7 +29,9 @@ class AccountRow extends StatelessWidget {
   final bool simplified;
   final bool currencyFirst;
   final bool pendingDeposit;
-  final void Function(String token, String amount) onPressed;
+  final bool isToken;
+  final void Function(
+      Account account, Token token, String tokenId, String amount) onPressed;
 
   Widget build(BuildContext context) {
     String status = "Pending";
@@ -37,18 +46,23 @@ class AccountRow extends StatelessWidget {
               side: BorderSide(
                   color: pendingDeposit
                       ? HermezColors.blackTwo
-                      : HermezColors.lightOrange)),
-          onPressed: () {
-            this.onPressed(
-              symbol,
-              amount.toString(),
-            );
-          },
+                      : HermezColors.lightGrey)),
+          onPressed: onPressed != null
+              ? () {
+                  this.onPressed(
+                    account,
+                    token,
+                    symbol,
+                    amount.toString(),
+                  );
+                }
+              : null,
           padding: EdgeInsets.all(20.0),
           color:
               pendingDeposit ? HermezColors.blackTwo : HermezColors.lightGrey,
           textColor: pendingDeposit ? Colors.white : Colors.black,
-
+          disabledColor:
+              pendingDeposit ? HermezColors.blackTwo : HermezColors.lightGrey,
           child: Row(
             children: <Widget>[
               Expanded(
@@ -101,73 +115,57 @@ class AccountRow extends StatelessWidget {
                   ],
                 ),
               ),
-              Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Container(
-                      child: Text(
-                        simplified
-                            ? formatAmount(
-                                currencyFirst
-                                    ? (this.price * this.amount)
-                                    : this.amount,
-                                currencyFirst ? defaultCurrency : this.symbol)
-                            : formatAmount(
-                                currencyFirst ? this.amount : this.price,
-                                this.symbol),
-                        style: TextStyle(
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w600,
-                            color: pendingDeposit
-                                ? Colors.white
-                                : HermezColors.blackTwo,
-                            fontSize: 16),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                    simplified
-                        ? Container()
-                        : Container(
-                            padding: EdgeInsets.only(top: 15.0),
+              isToken == false
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                          Container(
                             child: Text(
-                              formatAmount(
-                                  currencyFirst
-                                      ? (this.price * this.amount)
-                                      : this.amount,
-                                  currencyFirst
-                                      ? defaultCurrency
-                                      : this.symbol),
+                              simplified
+                                  ? EthAmountFormatter.formatAmount(
+                                      currencyFirst
+                                          ? (this.price * this.amount)
+                                          : this.amount,
+                                      currencyFirst
+                                          ? defaultCurrency
+                                          : this.symbol)
+                                  : EthAmountFormatter.formatAmount(
+                                      currencyFirst ? this.amount : this.price,
+                                      this.symbol),
                               style: TextStyle(
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w500,
-                                color: HermezColors.blueyGreyTwo,
-                              ),
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w600,
+                                  color: pendingDeposit
+                                      ? Colors.white
+                                      : HermezColors.blackTwo,
+                                  fontSize: 16),
                               textAlign: TextAlign.right,
                             ),
                           ),
-                  ]),
+                          simplified
+                              ? Container()
+                              : Container(
+                                  padding: EdgeInsets.only(top: 15.0),
+                                  child: Text(
+                                    EthAmountFormatter.formatAmount(
+                                        currencyFirst
+                                            ? (this.price * this.amount)
+                                            : this.amount,
+                                        currencyFirst
+                                            ? defaultCurrency
+                                            : this.symbol),
+                                    style: TextStyle(
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                      color: HermezColors.blueyGreyTwo,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                        ])
+                  : Container(),
             ],
           ), //title to be name of the crypto
         ));
-  }
-
-  String formatAmount(double amount, String symbol) {
-    double resultValue = 0;
-    String result = "";
-    String locale = "eu";
-    if (symbol == "EUR") {
-      locale = 'eu';
-      symbol = '€';
-    } else if (symbol == "USD") {
-      locale = 'en';
-      symbol = '\$';
-    }
-    if (amount != null) {
-      double value = amount;
-      resultValue = resultValue + value;
-    }
-    result =
-        NumberFormat.currency(locale: locale, symbol: symbol).format(amount);
-    return result;
   }
 }

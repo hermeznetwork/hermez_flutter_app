@@ -1,13 +1,10 @@
-/*const MY_ACCOUNT = {
-  'PREFERRED_CURRENCY_KEY' : 'preferredCurrency',
-  'DEFAULT_PREFERRED_CURRENCY' : CurrencySymbol.USD.code;
-};*/
+const FIAT_EXCHANGE_RATES_API_URL = 'api.exchangeratesapi.io';
 
-//const FIAT_EXCHANGE_RATES_API_URL = 'https://api.exchangeratesapi.io';
+const ETH_GAS_PRICE_URL = "ethgasstation.info";
 
 //const ACCOUNT_INDEX_SEPARATOR = ':';
 
-//const SNACKBAR_AUTO_HIDE_DURATION = 5000;
+const FLUSHBAR_AUTO_HIDE_DURATION = 2;
 
 const AUTH_MESSAGE =
     "Hermez Network account access.\n\nSign this message if you are in a trusted application only.";
@@ -17,6 +14,10 @@ const AUTH_MESSAGE =
 //const MAX_TOKEN_DECIMALS = 6;
 
 const PENDING_DEPOSITS_KEY = 'pendingDeposits';
+
+const PENDING_TRANSFERS_KEY = 'pendingTransfers';
+
+const PENDING_FORCE_EXITS_KEY = 'pendingForceExits';
 
 const PENDING_WITHDRAWS_KEY = 'pendingWithdraws';
 

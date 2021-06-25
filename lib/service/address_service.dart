@@ -4,16 +4,15 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:hermez/constants.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hd_key.dart';
-import 'package:hermez_plugin/addresses.dart' as addresses;
-import 'package:hermez_plugin/hermez_wallet.dart';
-import "package:hex/hex.dart";
+import 'package:hermez_sdk/addresses.dart' as addresses;
+import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:web3dart/credentials.dart';
 import 'package:web3dart/crypto.dart';
 
 abstract class IAddressService {
   String generateMnemonic();
   String entropyToMnemonic(String entropyMnemonic);
-  Future<bool> setupFromMnemonic(String mnemonic);
+  Future<String> setupFromMnemonic(String mnemonic);
   Future<bool> setupFromPrivateKey(String privateKey);
   String getPrivateKey(String mnemonic);
   Future<String> getHermezPrivateKey(String privateKey);
@@ -36,27 +35,45 @@ class AddressService implements IAddressService {
     return bip39.entropyToMnemonic(entropyMnemonic);
   }
 
+  bool isValidMnemonic(String mnemonic) {
+    try {
+      final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
+      final privateKey = getPrivateKey(mnemonic);
+      return cryptMnemonic != null &&
+          privateKey != null &&
+          cryptMnemonic.isNotEmpty &&
+          privateKey.isNotEmpty;
+    } catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
   @override
-  Future<bool> setupFromMnemonic(String mnemonic) async {
-    final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
-    final privateKey = getPrivateKey(cryptMnemonic);
-    final hermezPrivateKey = await getHermezPrivateKey(privateKey);
-    final ethereumAddress = await getEthereumAddress(privateKey);
-    final hermezAddress = await getHermezAddress(privateKey);
-    final babyJubJubHex = await getBabyJubJubHex(privateKey);
-    final babyJubJubBase64 = await getBabyJubJubBase64(privateKey);
+  Future<String> setupFromMnemonic(String mnemonic) async {
+    try {
+      final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);
+      final privateKey = getPrivateKey(mnemonic);
+      final hermezPrivateKey = await getHermezPrivateKey(privateKey);
+      final ethereumAddress = await getEthereumAddress(privateKey);
+      final hermezAddress = await getHermezAddress(privateKey);
+      final babyJubJubHex = await getBabyJubJubHex(privateKey);
+      final babyJubJubBase64 = await getBabyJubJubBase64(privateKey);
+      await _configService.setMnemonic(cryptMnemonic);
+      await _configService.setPrivateKey(privateKey);
+      await _configService.setHermezPrivateKey(hermezPrivateKey);
+      await _configService.setEthereumAddress(ethereumAddress);
+      await _configService.setHermezAddress(hermezAddress);
+      await _configService.setBabyJubJubHex(babyJubJubHex);
+      await _configService.setBabyJubJubBase64(babyJubJubBase64);
+      await _configService.setupDone(true);
 
-    await _configService.setMnemonic(cryptMnemonic);
-    await _configService.setPrivateKey(privateKey);
-    await _configService.setHermezPrivateKey(hermezPrivateKey);
-    await _configService.setBabyJubJubHex(babyJubJubHex);
-    await _configService.setBabyJubJubBase64(babyJubJubBase64);
-    await _configService.setEthereumAddress(ethereumAddress);
-    await _configService.setHermezAddress(hermezAddress);
-    await _configService.setupDone(true);
-
-    print("Config: $_configService.getEthereumAddress()");
-    return true;
+      print("Config: ${_configService.getEthereumAddress()}");
+      return _configService.getEthereumAddress();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   @override
@@ -80,9 +97,8 @@ class AddressService implements IAddressService {
 
   @override
   String getPrivateKey(String mnemonic) {
-    String seed = bip39.mnemonicToSeedHex(mnemonic);
-    KeyData master = HDKey.getMasterKeyFromSeed(seed);
-    final privateKey = HEX.encode(master.key);
+    String privateKey =
+        HDKey.mnemonicToPrivateKey(mnemonic, derivePath: "m/44'/60'/0'/0/0");
     print("ethereum private key: $privateKey");
     return privateKey;
   }

@@ -1,15 +1,15 @@
+import 'dart:collection';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/storage_service.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
-import 'package:hermez_plugin/environment.dart';
+import 'package:hermez_sdk/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web3dart/web3dart.dart';
 
 abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
-  Future<void> setupDone(bool value);
   Future<void> setPrivateKey(String value);
   Future<void> setHermezPrivateKey(String value);
   Future<void> setBabyJubJubHex(String value);
@@ -17,6 +17,14 @@ abstract class IConfigurationService {
   Future<void> setEthereumAddress(String value);
   Future<void> setHermezAddress(String value);
   Future<void> setDefaultCurrency(WalletDefaultCurrency defaultCurrency);
+  Future<void> setDefaultFee(WalletDefaultFee defaultFee);
+  Future<void> setPasscode(String value);
+  Future<void> setBiometricsFingerprint(bool value);
+  Future<void> setBiometricsFace(bool value);
+  Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value);
+  Future<void> setLevelSelected(TransactionLevel value);
+  Future<void> setupDone(bool value);
+  Future<void> backupDone(bool value);
   Future<String> getMnemonic();
   Future<String> getPrivateKey();
   Future<String> getHermezPrivateKey();
@@ -25,13 +33,35 @@ abstract class IConfigurationService {
   Future<String> getEthereumAddress();
   Future<String> getHermezAddress();
   Future<WalletDefaultCurrency> getDefaultCurrency();
+  Future<WalletDefaultFee> getDefaultFee();
+  Future<String> getPasscode();
+  bool getBiometricsFingerprint();
+  bool getBiometricsFace();
+  double getExchangeRatio(String currency);
+  Future<TransactionLevel> getLevelSelected();
   bool didSetupWallet();
-  void addPendingWithdraw(dynamic pendingWithdraw);
-  void removePendingWithdraw(String pendingWithdrawId);
-  void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
-  void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
+  bool didBackupWallet();
+  /*Future<bool> setLatestNonce(int value);
+  int getLatestNonce();*/
+  Future<List<dynamic>> getPendingWithdraws();
+  dynamic getPendingWithdraw(String pendingWithdrawId);
+  Future<void> addPendingWithdraw(dynamic pendingWithdraw);
+  void updatePendingWithdraw(
+      String nameToUpdate, String valueToUpdate, String valueId,
+      {String nameId = 'id'});
+  void removePendingWithdraw(String value, {String name = 'id'});
+  //dynamic getPendingDelayedWithdraw(String pendingWithdrawId);
+  //void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
+  //void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
+  // L1 Deposits
   void addPendingDeposit(dynamic pendingDeposit);
   void removePendingDeposit(String pendingDepositId);
+  // L1 Transfers
+  void addPendingTransfer(dynamic pendingTransfer);
+  void removePendingTransfer(String pendingTransferId);
+  // L1 Force Exit
+  void addPendingForceExit(dynamic pendingForceExit);
+  void removePendingForceExit(String value, {String name = 'id'});
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -82,8 +112,33 @@ class ConfigurationService implements IConfigurationService {
         key: "defaultCurrency", value: value.toString().split(".").last);
   }
 
-  Future<void> setExchangeRatio(double value) async {
-    await _preferences.setDouble("exchangeRatio", value);
+  @override
+  Future<void> setDefaultFee(WalletDefaultFee value) async {
+    await _secureStorage.write(
+        key: "defaultFee", value: value.toString().split(".").last);
+  }
+
+  @override
+  Future<void> setPasscode(String value) async {
+    await _secureStorage.write(key: 'passcode', value: value);
+  }
+
+  @override
+  Future<void> setBiometricsFingerprint(bool value) async {
+    await _preferences.setBool('biometrics_fingerprint', value);
+  }
+
+  @override
+  Future<void> setBiometricsFace(bool value) async {
+    await _preferences.setBool('biometrics_face', value);
+  }
+
+  @override
+  Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value) async {
+    List<String> exchangeRatios = List.empty(growable: true);
+    value.forEach(
+        (key, value) => exchangeRatios.add(key + "," + value.toString()));
+    await _preferences.setStringList("exchangeRatio", exchangeRatios);
   }
 
   @override
@@ -95,6 +150,11 @@ class ConfigurationService implements IConfigurationService {
   @override
   Future<void> setupDone(bool value) async {
     await _preferences.setBool("didSetupWallet", value);
+  }
+
+  @override
+  Future<void> backupDone(bool value) async {
+    await _preferences.setBool("didBackupWallet", value);
   }
 
   // gets
@@ -139,14 +199,53 @@ class ConfigurationService implements IConfigurationService {
         await _secureStorage.read(key: "defaultCurrency");
     if (defaultCurrencyString == "EUR") {
       return WalletDefaultCurrency.EUR;
+    } else if (defaultCurrencyString == "CNY") {
+      return WalletDefaultCurrency.CNY;
+    } else if (defaultCurrencyString == "JPY") {
+      return WalletDefaultCurrency.JPY;
+    } else if (defaultCurrencyString == "GBP") {
+      return WalletDefaultCurrency.GBP;
     } else {
       return WalletDefaultCurrency.USD;
     }
   }
 
   @override
-  double getExchangeRatio() {
-    return _preferences.getDouble("exchangeRatio") ?? 0.0;
+  Future<WalletDefaultFee> getDefaultFee() async {
+    String defaultFeeString = await _secureStorage.read(key: "defaultFee");
+    if (defaultFeeString == "SLOW") {
+      return WalletDefaultFee.SLOW;
+    } else if (defaultFeeString == "FAST") {
+      return WalletDefaultFee.FAST;
+    } else {
+      return WalletDefaultFee.AVERAGE;
+    }
+  }
+
+  @override
+  Future<String> getPasscode() async {
+    return _secureStorage.read(key: 'passcode');
+  }
+
+  @override
+  bool getBiometricsFingerprint() {
+    return _preferences.getBool("biometrics_fingerprint") ?? false;
+  }
+
+  @override
+  bool getBiometricsFace() {
+    return _preferences.getBool("biometrics_face") ?? false;
+  }
+
+  @override
+  double getExchangeRatio(String currency) {
+    List<String> currencyRatios = _preferences.getStringList("exchangeRatio");
+    for (int i = 0; i < currencyRatios.length; i++) {
+      if (currencyRatios[i].split(",")[0] == currency) {
+        return double.parse(currencyRatios[i].split(",")[1]);
+      }
+    }
+    return 0.0;
   }
 
   @override
@@ -164,33 +263,109 @@ class ConfigurationService implements IConfigurationService {
     return _preferences.getBool("didSetupWallet") ?? false;
   }
 
+  @override
+  bool didBackupWallet() {
+    return _preferences.getBool("didBackupWallet") ?? false;
+  }
+
+  /*@override
+  int getLatestNonce() {
+    return _preferences.getInt("latest_nonce") ?? 1;
+  }
+
+  Future<bool> setLatestNonce(int value) async {
+    return await _preferences.setInt("latest_nonce", value);
+  }*/
+
+  @override
+  Future<List<dynamic>> getPendingWithdraws() async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    final storage =
+        await _storageService.getStorage(PENDING_WITHDRAWS_KEY, false);
+
+    final List accountPendingWithdraws = _storageService
+        .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
+    return accountPendingWithdraws;
+  }
+
+  /// Gets a pendingWithdraw from the pendingWithdraw pool
+  /// @param {string} pendingWithdrawId - The pendingWithdraw id
+  /// @returns {object} pendingWithdraw - The pendingWithdraw to add to the pool
+  @override
+  dynamic getPendingWithdraw(String pendingWithdrawId) async {
+    final List accountPendingWithdraws = await getPendingWithdraws();
+    dynamic result;
+    if (accountPendingWithdraws != null) {
+      result = accountPendingWithdraws.firstWhere(
+          (pendingWithdraw) => pendingWithdraw['id'] == pendingWithdrawId,
+          orElse: () => null);
+    }
+    return result;
+  }
+
   /// Adds a pendingWithdraw to the pendingWithdraw pool
   /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was made
   /// @param {string} pendingWithdraw - The pendingWithdraw to add to the pool
   /// @returns {void}
   @override
-  void addPendingWithdraw(dynamic pendingWithdraw) async {
+  Future<void> addPendingWithdraw(dynamic pendingWithdraw) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.addItem(PENDING_WITHDRAWS_KEY, chainId,
+    await _storageService.addItem(PENDING_WITHDRAWS_KEY, chainId,
         hermezEthereumAddress, pendingWithdraw, false);
   }
 
   /// Removes a pendingWithdraw from the pendingWithdraw pool
-  /// @param {string} hermezEthereumAddress - The account with which the pendingWithdraw was originally made
   /// @param {string} pendingWithdrawId - The pendingWithdraw identifier to remove from the pool
   /// @returns {void}
   @override
-  void removePendingWithdraw(String pendingWithdrawId) async {
+  void removePendingWithdraw(String value, {String name = 'id'}) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.removeItem(PENDING_WITHDRAWS_KEY, chainId,
-        hermezEthereumAddress, pendingWithdrawId, false);
+    await _storageService.removeItem(PENDING_WITHDRAWS_KEY, chainId,
+        hermezEthereumAddress, name, value, false);
   }
 
-  /// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
+  @override
+  void updatePendingWithdraw(
+      String nameToUpdate, String valueToUpdate, String valueId,
+      {String nameId = 'id'}) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    await _storageService.updatePartialItemByCustomProp(
+        PENDING_WITHDRAWS_KEY,
+        chainId,
+        hermezEthereumAddress,
+        {'name': nameId, 'value': valueId},
+        {nameToUpdate: valueToUpdate},
+        false);
+  }
+
+/*/// Gets a pendingWithdraw from the pendingWithdraw pool
+  /// @param {string} pendingWithdrawId - The pendingWithdraw id
+  /// @returns {object} pendingWithdraw - The pendingWithdraw to add to the pool
+  @override
+  dynamic getPendingDelayedWithdraw(String pendingWithdrawId) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    final storage =
+        await _storageService.getStorage(PENDING_DELAYED_WITHDRAWS_KEY, false);
+
+    final List accountPendingDelayedWithdraws = _storageService
+        .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
+    return accountPendingDelayedWithdraws.firstWhere(
+        (pendingDelayedWithdraw) =>
+            pendingDelayedWithdraw['id'] == pendingWithdrawId,
+        orElse: () => null);
+  }*/
+
+  /*/// Adds a pendingDelayedWithdraw to the pendingDelayedWithdraw store
   /// @param {dynamic} pendingDelayedWithdraw - The pendingDelayedWithdraw to add to the store
   /// @returns {void}
   @override
@@ -198,7 +373,7 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.addItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId,
+    await _storageService.addItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId,
         hermezEthereumAddress, pendingDelayedWithdraw, false);
   }
 
@@ -210,8 +385,8 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.removeItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId,
-        hermezEthereumAddress, pendingDelayedWithdrawId, false);
+    await _storageService.removeItem(PENDING_DELAYED_WITHDRAWS_KEY, chainId,
+        hermezEthereumAddress, 'id', pendingDelayedWithdrawId, false);
   }
 
   /// Updates the date in a delayed withdraw transaction
@@ -223,14 +398,14 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.updatePartialItemByCustomProp(
+    await _storageService.updatePartialItemByCustomProp(
         PENDING_DELAYED_WITHDRAWS_KEY,
         chainId,
         hermezEthereumAddress,
         {'name': 'hash', 'value': transactionHash},
         {'date': pendingDelayedWithdrawDate},
         false);
-  }
+  }*/
 
   /*@override
   function checkPendingDelayedWithdraw (exitId) {
@@ -271,7 +446,7 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.addItem(PENDING_DEPOSITS_KEY, chainId,
+    await _storageService.addItem(PENDING_DEPOSITS_KEY, chainId,
         hermezEthereumAddress, pendingDeposit, false);
   }
 
@@ -279,12 +454,12 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} transactionId - The transaction identifier used to remove a pendingDeposit from the store
   /// @returns {void}
   @override
-  void removePendingDeposit(String transactionId) async {
+  void removePendingDeposit(String transactionHash) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.removeItem(PENDING_DEPOSITS_KEY, chainId,
-        hermezEthereumAddress, transactionId, false);
+    await _storageService.removeItem(PENDING_DEPOSITS_KEY, chainId,
+        hermezEthereumAddress, 'hash', transactionHash, false);
   }
 
   void updatePendingDepositId(
@@ -292,7 +467,7 @@ class ConfigurationService implements IConfigurationService {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
-    _storageService.updatePartialItemByCustomProp(
+    await _storageService.updatePartialItemByCustomProp(
         PENDING_DEPOSITS_KEY,
         chainId,
         hermezEthereumAddress,
@@ -301,7 +476,7 @@ class ConfigurationService implements IConfigurationService {
         false);
   }
 
-  void checkPendingDeposits(Web3Client web3Client) async {
+  /*void checkPendingDeposits(Web3Client web3Client) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
     final storage =
@@ -323,6 +498,68 @@ class ConfigurationService implements IConfigurationService {
     /*pendingDepositsTxReceipts.forEach((List txReceipts) {
       txReceipts.removeWhere((txReceipt) => txReceipt != null && txReceipt.logs && txReceipt.logs.length > 0)
     });*/
+  }*/
+
+  /// Adds a pendingTransfer to the pendingTransfers store
+  /// @param {string} pendingTransfer - The pendingTransfer to add to the store
+  /// @returns {void}
+  @override
+  void addPendingTransfer(dynamic pendingTransfer) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    await _storageService.addItem(PENDING_TRANSFERS_KEY, chainId,
+        ethereumAddress, pendingTransfer, false);
+  }
+
+  /// Removes a pendingTransfer from the pendingTransfer store
+  /// @param {string} transactionId - The transaction identifier used to remove a pendingTransfer from the store
+  /// @returns {void}
+  @override
+  void removePendingTransfer(String transactionHash) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    await _storageService.removeItem(PENDING_TRANSFERS_KEY, chainId,
+        ethereumAddress, 'hash', transactionHash, false);
+  }
+
+  /// Adds a pendingTransfer to the pendingTransfers store
+  /// @param {string} pendingTransfer - The pendingTransfer to add to the store
+  /// @returns {void}
+  @override
+  void addPendingForceExit(dynamic pendingForceExit) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    await _storageService.addItem(PENDING_FORCE_EXITS_KEY, chainId,
+        ethereumAddress, pendingForceExit, false);
+  }
+
+  /// Removes a pendingTransfer from the pendingTransfer store
+  /// @param {string} transactionId - The transaction identifier used to remove a pendingTransfer from the store
+  /// @returns {void}
+  @override
+  void removePendingForceExit(String value, {String name = 'id'}) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    await _storageService.removeItem(
+        PENDING_FORCE_EXITS_KEY, chainId, ethereumAddress, name, value, false);
+  }
+
+  void updatePendingForceExitId(
+      String transactionHash, String transactionId) async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    await _storageService.updatePartialItemByCustomProp(
+        PENDING_FORCE_EXITS_KEY,
+        chainId,
+        hermezEthereumAddress,
+        {'name': 'hash', 'value': transactionHash},
+        {'id': transactionId},
+        false);
   }
 
   /*function checkPendingDeposits () {

@@ -1,5 +1,6 @@
 library api_testing_flutter_kata;
 
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,18 +12,20 @@ import 'model/rates_response.dart';
 
 class ApiExchangeRateClient {
   final String _baseAddress;
+  final String _apiKey;
 
-  final String LATEST_URL = "/latest";
+  final String LATEST_URL = "/v1/latest";
 
-  ApiExchangeRateClient(this._baseAddress);
+  ApiExchangeRateClient(this._baseAddress, this._apiKey);
 
   // EXCHANGE RATE
 
-  Future<double> getExchangeRates(RatesRequest request) async {
+  Future<LinkedHashMap<String, dynamic>> getExchangeRates(
+      RatesRequest request) async {
     final response = await _get(LATEST_URL, request.toQueryParams());
     final RatesResponse ratesResponse =
         RatesResponse.fromJson(json.decode(response.body));
-    return ratesResponse.rates["EUR"];
+    return ratesResponse.rates;
   }
 
   Future<http2.Response> _get(
@@ -51,8 +54,9 @@ class ApiExchangeRateClient {
   Future<http2.Response> _post(
       String endpoint, Map<String, dynamic> body) async {
     try {
+      var url = Uri.parse('$_baseAddress$endpoint');
       final response = await http2.post(
-        '$_baseAddress$endpoint',
+        url,
         body: json.encode(body),
         headers: {
           HttpHeaders.acceptHeader: '*/*',
@@ -68,8 +72,9 @@ class ApiExchangeRateClient {
 
   Future<http2.Response> _put(dynamic task) async {
     try {
+      var url = Uri.parse('$_baseAddress/todos/${task.id}');
       final response = await http2.put(
-        '$_baseAddress/todos/${task.id}',
+        url,
         body: json.encode(task.toJson()),
         headers: {
           HttpHeaders.acceptHeader: 'application/json',
@@ -85,8 +90,9 @@ class ApiExchangeRateClient {
 
   Future<http2.Response> _delete(String id) async {
     try {
+      var url = Uri.parse('$_baseAddress/todos/$id');
       final response = await http2.delete(
-        '$_baseAddress/todos/$id',
+        url,
         headers: {
           HttpHeaders.acceptHeader: 'application/json',
         },

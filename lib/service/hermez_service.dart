@@ -1,29 +1,29 @@
 import 'dart:async';
+import 'dart:collection';
 
-import 'package:hermez/service/network/api_exchange_rate_client.dart';
-import 'package:hermez/service/network/model/rates_request.dart';
-import 'package:hermez_plugin/addresses.dart' as addresses;
-import 'package:hermez_plugin/api.dart' as api;
-import 'package:hermez_plugin/api.dart';
-import 'package:hermez_plugin/constants.dart';
-import 'package:hermez_plugin/hermez_compressed_amount.dart';
-import 'package:hermez_plugin/hermez_wallet.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/coordinator.dart';
-import 'package:hermez_plugin/model/create_account_authorization.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/exits_request.dart';
-import 'package:hermez_plugin/model/forged_transaction.dart';
-import 'package:hermez_plugin/model/forged_transactions_request.dart';
-import 'package:hermez_plugin/model/forged_transactions_response.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
-import 'package:hermez_plugin/model/recommended_fee.dart';
-import 'package:hermez_plugin/model/state_response.dart';
-import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/model/tokens_request.dart';
-import 'package:hermez_plugin/model/transaction.dart';
-import 'package:hermez_plugin/tx.dart' as tx;
-import 'package:hermez_plugin/tx_utils.dart';
+import 'package:hermez_sdk/addresses.dart' as addresses;
+import 'package:hermez_sdk/api.dart';
+import 'package:hermez_sdk/api.dart' as api;
+import 'package:hermez_sdk/constants.dart';
+import 'package:hermez_sdk/hermez_compressed_amount.dart';
+import 'package:hermez_sdk/hermez_sdk.dart';
+import 'package:hermez_sdk/hermez_wallet.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/coordinator.dart';
+import 'package:hermez_sdk/model/create_account_authorization.dart';
+import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/exits_request.dart';
+import 'package:hermez_sdk/model/forged_transaction.dart';
+import 'package:hermez_sdk/model/forged_transactions_request.dart';
+import 'package:hermez_sdk/model/forged_transactions_response.dart';
+import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/recommended_fee.dart';
+import 'package:hermez_sdk/model/state_response.dart';
+import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/tokens_request.dart';
+import 'package:hermez_sdk/model/transaction.dart';
+import 'package:hermez_sdk/tx.dart' as tx;
+import 'package:hermez_sdk/tx_utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 import 'configuration_service.dart';
@@ -41,6 +41,7 @@ abstract class IHermezService {
       int limit = DEFAULT_PAGE_SIZE});
   Future<Account> getAccount(String accountIndex);
   Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress);
+  Future<Exit> getExit(int batchNum, String accountIndex);
   Future<List<Coordinator>> getCoordinators(
       String forgerAddr, String bidderAddr);
   Future<ForgedTransactionsResponse> getForgedTransactions(
@@ -49,11 +50,11 @@ abstract class IHermezService {
   Future<PoolTransaction> getPoolTransactionById(String transactionId);
   Future<List<Token>> getTokens();
   Future<Token> getTokenById(int tokenId);
-  Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
+  Future<bool> deposit(double amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER});
-  Future<void> withdraw(
-      BigInt amount,
+      {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice = 0});
+  Future<bool> withdraw(
+      double amount,
       Account account,
       Exit exit,
       bool completeDelayedWithdrawal,
@@ -61,8 +62,11 @@ abstract class IHermezService {
       String hezEthereumAddress,
       String babyJubJub,
       String privateKey,
-      {int gasLimit = GAS_LIMIT,
-      int gasMultiplier = GAS_MULTIPLIER});
+      {BigInt gasLimit,
+      int gasPrice = 0});
+  Future<bool> forceExit(double amount, String hezEthereumAddress,
+      Account account, String privateKey,
+      {BigInt gasLimit, int gasPrice = 0});
   Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
@@ -70,13 +74,8 @@ abstract class IHermezService {
 }
 
 class HermezService implements IHermezService {
-  final web3.Web3Client client;
-  String _exchangeUrl;
   IConfigurationService _configService;
-  HermezService(this.client, this._exchangeUrl, this._configService);
-
-  ApiExchangeRateClient _apiExchangeRateClient() =>
-      ApiExchangeRateClient(_exchangeUrl);
+  HermezService(this._configService);
 
   @override
   Future<StateResponse> getState() async {
@@ -130,7 +129,8 @@ class HermezService implements IHermezService {
   Future<List<Token>> getTokens() async {
     final TokensRequest tokensRequest = null;
     final tokensResponse = await api.getTokens(
-        tokenIds: tokensRequest != null ? tokensRequest.ids : List());
+        tokenIds: tokensRequest != null ? tokensRequest.ids : List.empty(),
+        limit: 2049);
     return tokensResponse.tokens;
   }
 
@@ -165,14 +165,23 @@ class HermezService implements IHermezService {
   @override
   Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token) async {
-    final l2TxResult = tx.generateAndSendL2Tx(transaction, wallet, token);
-    return l2TxResult != null;
+    try {
+      final l2TxResult =
+          await tx.generateAndSendL2Tx(transaction, wallet, token);
+      return l2TxResult != null;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
   Future<bool> sendL2Transaction(Transaction transaction, String bjj) async {
-    final response = await tx.sendL2Transaction(transaction.toJson(), bjj);
-    return response.isNotEmpty;
+    try {
+      final response = await tx.sendL2Transaction(transaction.toJson(), bjj);
+      return response.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
@@ -206,7 +215,7 @@ class HermezService implements IHermezService {
   /// Makes a deposit.
   /// It detects if it's a 'createAccountDeposit' or a 'deposit' and prepares the parameters accordingly.
   /// Detects if it's an Ether, ERC 20 or ERC 777 token and sends the transaction accordingly.
-  /// @param {BigInt} amount - The amount to be deposited
+  /// @param {double} amount - The amount to be deposited
   /// @param {String} hezEthereumAddress - The Hermez address of the transaction sender
   /// @param {Object} token - The token information object as returned from the API
   /// @param {String} babyJubJub - The compressed BabyJubJub in hexadecimal format of the transaction sender.
@@ -216,39 +225,87 @@ class HermezService implements IHermezService {
   /// @param {Number} gasMultiplier - Optional gas multiplier
   /// @returns {Promise} transaction parameters
   @override
-  Future<bool> deposit(BigInt amount, String hezEthereumAddress, Token token,
+  Future<bool> deposit(double amount, String hezEthereumAddress, Token token,
       String babyJubJub, String privateKey,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
+      {BigInt approveGasLimit,
+      BigInt depositGasLimit,
+      int gasPrice = 0}) async {
+    HermezCompressedAmount compressedAmount;
+    try {
+      compressedAmount = HermezCompressedAmount.compressAmount(amount);
+    } catch (e) {
+      return false;
+    }
     final txHash = await tx
-        .deposit(HermezCompressedAmount.compressAmount(amount.toDouble()),
-            hezEthereumAddress, token, babyJubJub, client, privateKey,
-            gasLimit: gasLimit, gasMultiplier: gasMultiplier)
+        .deposit(
+            compressedAmount, hezEthereumAddress, token, babyJubJub, privateKey,
+            approveMaxGas: approveGasLimit,
+            depositMaxGas: depositGasLimit,
+            gasPrice: gasPrice)
         .then((txHash) async {
       if (txHash != null) {
         await api.getAccounts(hezEthereumAddress, [token.id]).then((res) {
           _configService.addPendingDeposit({
-            'hash': txHash,
-            'fromHezEthereumAddress': hezEthereumAddress,
-            'toHezEthereumAddress': hezEthereumAddress,
-            'token': token,
-            'amount': amount.toDouble(),
-            'state': 'pend',
-            'timestamp': DateTime.now().toIso8601String(),
-            'type':
-                res != null && res.accounts != null && res.accounts.length > 0
+            'txHash': txHash,
+            'from': hezEthereumAddress,
+            'to': hezEthereumAddress,
+            'token': token.toJson(),
+            'value': amount.toString(),
+            'fee': '0',
+            'status': 'PENDING',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'type': 'DEPOSIT'
+            /*res != null && res.accounts != null && res.accounts.length > 0
                     ? TxType.Deposit.toString().split('.').last
-                    : TxType.CreateAccountDeposit.toString().split('.').last
+                    : TxType.CreateAccountDeposit.toString().split('.').last*/
           });
         });
       }
       return txHash != null;
     });
-    return txHash != null;
+    return txHash;
+  }
+
+  Future<LinkedHashMap<String, BigInt>> depositGasLimit(double amount,
+      String hezEthereumAddress, Token token, String babyJubJub) async {
+    final LinkedHashMap<String, BigInt> gasLimit = await tx.depositGasLimit(
+        HermezCompressedAmount.compressAmount(amount.toDouble()),
+        hezEthereumAddress,
+        token,
+        babyJubJub);
+    return gasLimit;
+  }
+
+  Future<BigInt> withdrawGasLimit(
+      double amount,
+      Account account,
+      Exit exit,
+      bool completeDelayedWithdrawal,
+      bool instantWithdrawal,
+      String hezEthereumAddress,
+      String babyJubJub) async {
+    if (completeDelayedWithdrawal == null ||
+        completeDelayedWithdrawal == false) {
+      bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
+      return tx.withdrawGasLimit(
+          amount,
+          hezEthereumAddress,
+          exit != null
+              ? exit.accountIndex
+              : "hez:" + account.token.symbol + ":0",
+          exit != null ? exit.token : account.token,
+          babyJubJub,
+          exit != null ? exit.batchNum : 0,
+          exit.merkleProof.siblings != null ? exit.merkleProof.siblings : [],
+          isInstant: isIntant);
+    } else {
+      return tx.delayedWithdrawGasLimit(hezEthereumAddress, exit.token);
+    }
   }
 
   @override
   Future<bool> withdraw(
-      BigInt amount,
+      double amount,
       Account account,
       Exit exit,
       bool completeDelayedWithdrawal,
@@ -256,77 +313,134 @@ class HermezService implements IHermezService {
       String hezEthereumAddress,
       String babyJubJub,
       String privateKey,
-      {int gasLimit = GAS_LIMIT,
-      int gasMultiplier = GAS_MULTIPLIER}) async {
+      {BigInt gasLimit,
+      int gasPrice = 0}) async {
     final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-
+    /*HermezCompressedAmount compressedAmount;
+    try {
+      compressedAmount =
+          HermezCompressedAmount.compressAmount(amount.toDouble());
+    } catch (e) {
+      return false;
+    }*/
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       try {
-        bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
-        await tx
-            .withdraw(
-                amount,
-                exit.accountIndex,
-                exit.token,
-                babyJubJub,
-                BigInt.from(exit.batchNum),
-                exit.merkleProof.siblings,
-                client,
-                privateKey,
-                isInstant: isIntant)
-            .then((value) async => {
-                  if (isIntant)
-                    {
-                      _configService.addPendingWithdraw({
-                        'hermezEthereumAddress': hezEthereumAddress,
-                        'id': withdrawalId,
-                        'accountIndex': exit.accountIndex,
-                        'batchNum': exit.batchNum,
-                        'amount': amount.toDouble(),
-                        'token': exit.token.toJson()
-                      })
-                    }
-                  else
-                    {
-                      _configService.addPendingDelayedWithdraw({
-                        'id': withdrawalId,
-                        'accountIndex': exit.accountIndex,
-                        'batchNum': exit.batchNum,
-                        'instant': false,
-                        'date': DateTime.now(),
-                        'amount': amount,
-                        'token': exit.token
-                      })
-                    }
-                });
-        return true;
+        bool isInstant = instantWithdrawal == null ? true : instantWithdrawal;
+
+        final txHash = await tx
+            .withdraw(amount, exit.accountIndex, exit.token, babyJubJub,
+                exit.batchNum, exit.merkleProof.siblings, privateKey,
+                isInstant: isInstant, gasLimit: gasLimit, gasPrice: gasPrice)
+            .then((txHash) async {
+          if (txHash != null) {
+            int block = await HermezSDK.currentWeb3Client.getBlockNumber();
+            dynamic pendingDelayedWithdraw;
+            if (isInstant == false) {
+              List<dynamic> pendingWithdraws =
+                  await _configService.getPendingWithdraws();
+              if (pendingWithdraws != null) {
+                pendingDelayedWithdraw = pendingWithdraws.firstWhere(
+                    (pendingWithdraw) =>
+                        pendingWithdraw['instant'] == false &&
+                        Token.fromJson(pendingWithdraw['token']).id ==
+                            exit.token.id,
+                    orElse: () => null);
+                if (pendingDelayedWithdraw != null) {
+                  amount += pendingDelayedWithdraw['amount'];
+                  _configService
+                      .removePendingWithdraw(pendingDelayedWithdraw['id']);
+                }
+              }
+            }
+            await _configService.addPendingWithdraw({
+              'id': withdrawalId,
+              'hash': txHash,
+              'blockNum': block,
+              'hermezEthereumAddress': hezEthereumAddress,
+              'itemId': exit.itemId,
+              'accountIndex': exit.accountIndex,
+              'batchNum': exit.batchNum,
+              'instant': isInstant,
+              'date': DateTime.now().millisecondsSinceEpoch,
+              'amount': amount,
+              'token': exit.token.toJson(),
+              'status': 'pending'
+            });
+          }
+          return txHash != null;
+        });
+        return txHash;
       } catch (error) {
         print(error);
+        return false;
       }
     } else {
       try {
-        tx.delayedWithdraw(hezEthereumAddress, account.token, client).then(
-            (value) async =>
-                {_configService.removePendingDelayedWithdraw(withdrawalId)});
+        final txHash = await tx
+            .delayedWithdraw(exit.token, privateKey)
+            .then((txHash) async {
+          if (txHash != null) {
+            String status = 'completed';
+            final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+            _configService.updatePendingWithdraw(
+                'status', status, withdrawalId);
+            _configService.updatePendingWithdraw('hash', txHash, withdrawalId);
+          }
+          return txHash != null;
+        });
+        return txHash;
       } catch (error) {
         print(error);
+        return false;
       }
     }
   }
 
-  Future<void> forceExit(BigInt amount, Account account,
-      {int gasLimit = GAS_LIMIT, int gasMultiplier = GAS_MULTIPLIER}) async {
-    tx.forceExit(amount, account.accountIndex, account.token, client);
+  Future<bool> isInstantWithdrawalAllowed(double amount, Token token) async {
+    return await tx.isInstantWithdrawalAllowed(amount, token);
+  }
+
+  Future<BigInt> forceExitGasLimit(
+      double amount, String hezEthereumAddress, Account account) async {
+    return await tx.forceExitGasLimit(
+        HermezCompressedAmount.compressAmount(amount),
+        hezEthereumAddress,
+        account.accountIndex,
+        account.token);
   }
 
   @override
-  Future<double> getEURUSDExchangeRatio() async {
-    final request = RatesRequest.fromJson({
-      "base": "USD",
-      "symbols": {"EUR"},
-    });
-    double response = await _apiExchangeRateClient().getExchangeRates(request);
-    return response;
+  Future<bool> forceExit(double amount, String hezEthereumAddress,
+      Account account, String privateKey,
+      {BigInt gasLimit, int gasPrice = 0}) async {
+    try {
+      final txHash = await tx
+          .forceExit(HermezCompressedAmount.compressAmount(amount.toDouble()),
+              account.accountIndex, account.token, privateKey,
+              gasLimit: gasLimit, gasPrice: gasPrice)
+          .then((txHash) async {
+        if (txHash != null) {
+          _configService.addPendingForceExit({
+            'hash': txHash,
+            'accountIndex': account.accountIndex,
+            'fromHezEthereumAddress': hezEthereumAddress,
+            'toHezEthereumAddress': hezEthereumAddress,
+            'token': account.token.toJson(),
+            'amount': amount,
+            'state': 'pend',
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'type': TxType.Exit.toString().split('.').last
+            /*'hermezEthereumAddress': hezEthereumAddress,
+            ,*/
+          });
+        }
+        return txHash;
+      });
+      return txHash != null;
+    } catch (error) {
+      print(error);
+      return false;
+    }
   }
 }

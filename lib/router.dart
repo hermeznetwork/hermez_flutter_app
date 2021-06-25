@@ -1,50 +1,114 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hermez/qrcode_reader_page.dart';
+import 'package:hermez/screens/account_selector.dart';
+import 'package:hermez/screens/backup_info.dart';
+import 'package:hermez/screens/biometrics.dart';
+import 'package:hermez/screens/fee_selector.dart';
+import 'package:hermez/screens/first_deposit.dart';
+import 'package:hermez/screens/home.dart';
+import 'package:hermez/screens/import.dart';
+import 'package:hermez/screens/info.dart';
+import 'package:hermez/screens/intro.dart';
+import 'package:hermez/screens/move_info.dart';
+import 'package:hermez/screens/pin.dart';
+import 'package:hermez/screens/qrcode.dart';
+import 'package:hermez/screens/qrcode_scanner.dart';
+import 'package:hermez/screens/recovery_phrase.dart';
+import 'package:hermez/screens/recovery_phrase_confirm.dart';
+import 'package:hermez/screens/remove_account_info.dart';
+import 'package:hermez/screens/settings_details.dart';
+import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/service/configuration_service.dart';
-import 'package:hermez/wallet_account_details_page.dart';
-import 'package:hermez/wallet_account_selector_page.dart';
-import 'package:hermez/wallet_activity_page.dart';
-import 'package:hermez/wallet_amount_page.dart';
-import 'package:hermez/wallet_create_page.dart';
-import 'package:hermez/wallet_home_page.dart';
-import 'package:hermez/wallet_import_page.dart';
-import 'package:hermez/wallet_settings_currency_page.dart';
-import 'package:hermez/wallet_settings_page.dart';
-import 'package:hermez/wallet_settings_qrcode_page.dart';
-import 'package:hermez/wallet_transaction_details_page.dart';
-import 'package:hermez/wallet_transaction_info_page.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
-import 'package:hermez/wallet_transfer_page.dart';
 import 'package:provider/provider.dart';
 
 import 'context/setup/wallet_setup_provider.dart';
 import 'context/transfer/wallet_transfer_provider.dart';
 import 'context/wallet/wallet_provider.dart';
-import 'intro_page.dart';
-import 'wallet_receiver_page.dart';
 
 Map<String, WidgetBuilder> getRoutes(context) {
   return {
     '/': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet())
-        return WalletProvider(builder: (context, store) {
-          return WalletHomePage("Hermez");
+      if (configurationService.didSetupWallet()) {
+        return PinPage(
+            arguments:
+                PinArguments("Enter passcode", false, false, onSuccess: () {
+              Navigator.pushReplacementNamed(context, '/home');
+            }),
+            configurationService: configurationService);
+      } else {
+        return WalletSetupProvider(builder: (context, store) {
+          return IntroPage();
         });
-
-      return IntroPage();
+      }
     },
-    '/activity': (BuildContext context) {
+    '/home': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet())
+      if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
-          return WalletActivityPage("Hermez");
+          final bool showHermezWallet =
+              ModalRoute.of(context).settings.arguments;
+          HomeArguments args;
+          if (showHermezWallet != null) {
+            args = HomeArguments(store, configurationService,
+                showHermezWallet: showHermezWallet);
+          } else {
+            args = HomeArguments(store, configurationService);
+          }
+          return HomePage(arguments: args);
         });
-
-      return IntroPage();
+      } else {
+        return WalletSetupProvider(builder: (context, store) {
+          return IntroPage();
+        });
+      }
     },
-    '/account_details': (BuildContext context) {
+    '/pin': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return PinPage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
+    },
+    '/info': (BuildContext context) {
+      return InfoPage(arguments: ModalRoute.of(context).settings.arguments);
+    },
+    '/biometrics': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return BiometricsPage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
+    },
+    '/backup_info': (BuildContext context) {
+      return BackupInfoPage();
+    },
+    '/recovery_phrase': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return RecoveryPhrasePage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
+    },
+    '/recovery_phrase_confirm': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return RecoveryPhraseConfirmPage(
+          configurationService: configurationService);
+    },
+    '/settings_details': (BuildContext context) {
+      var configurationService = Provider.of<ConfigurationService>(context);
+      return SettingsDetailsPage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
+    },
+    '/fee_selector': (BuildContext context) {
+      return FeeSelectorPage(
+          arguments: ModalRoute.of(context).settings.arguments);
+    },
+    '/remove_account_info': (BuildContext context) {
+      return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);
+    },
+    '/move_info': (BuildContext context) {
+      return MoveInfoPage(arguments: ModalRoute.of(context).settings.arguments);
+    },
+    /*'/account_details': (BuildContext context) {
       // Cast the arguments to the correct type: ScreenArguments.
       final WalletAccountDetailsArguments args =
           ModalRoute.of(context).settings.arguments;
@@ -53,28 +117,33 @@ Map<String, WidgetBuilder> getRoutes(context) {
         return WalletProvider(builder: (context, store) {
           return WalletAccountDetailsPage(args);
         });
-      return IntroPage();
-    },
-    '/settings': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet())
-        return WalletProvider(builder: (context, store) {
-          return SettingsPage(store);
-        });
-      return IntroPage();
+      return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+      });
+    },*/
+    '/scanner': (BuildContext context) {
+      return QRCodeScannerPage(
+          arguments: ModalRoute.of(context).settings.arguments);
     },
     '/qrcode': (BuildContext context) =>
-        SettingsQRCodePage(ModalRoute.of(context).settings.arguments),
-    /*(BuildContext context) {
+        QRCodePage(arguments: ModalRoute.of(context).settings.arguments),
+    //'/currency_selector': (BuildContext context) =>
+    //    SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
+    '/first_deposit': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet())
+      if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
-          return SettingsQRCodePage(store);
+          bool showHermezWallet = ModalRoute.of(context).settings.arguments;
+          return FirstDepositPage(
+              arguments: FirstDepositArguments(store,
+                  showHermezWallet: showHermezWallet));
         });
-      return IntroPage();
-    },*/
-    '/currency_selector': (BuildContext context) =>
-        SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
+      }
+      return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+      });
+    },
+
     //(BuildContext context) {
     /*var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())
@@ -83,7 +152,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
         });
       return IntroPage();*/
     //},
-    '/create': (BuildContext context) =>
+    /*'/create': (BuildContext context) =>
         WalletSetupProvider(builder: (context, store) {
           useEffect(() {
             store.generateMnemonic();
@@ -91,41 +160,39 @@ Map<String, WidgetBuilder> getRoutes(context) {
           }, []);
 
           return WalletCreatePage("Create wallet");
-        }),
+        }),*/
     '/import': (BuildContext context) => WalletSetupProvider(
           builder: (context, store) {
-            return WalletImportPage("Import wallet");
+            return ImportWalletPage(store: store);
           },
         ),
-    '/amount': (BuildContext context) => AmountPage(),
-    '/receiver': (BuildContext context) =>
-        ReceiverPage(arguments: ModalRoute.of(context).settings.arguments),
-    '/account_selector': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
+    //'/amount': (BuildContext context) => AmountPage(),
+    /*'/receiver': (BuildContext context) =>
+        ReceiverPage(arguments: ModalRoute.of(context).settings.arguments),*/
+    '/transaction_amount': (BuildContext context) => TransactionAmountPage(
+        arguments: ModalRoute.of(context).settings.arguments),
+    '/account_selector': (BuildContext context) =>
+        /*var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet())
-        return WalletProvider(builder: (context, store) {
-          return WalletAccountSelectorPage(
-              ModalRoute.of(context).settings.arguments);
-        });
-      return IntroPage();
-    },
-    '/transfer': (BuildContext context) => WalletTransferProvider(
+        return WalletProvider(builder: (context, store) {*/
+        AccountSelectorPage(
+            arguments: ModalRoute.of(context).settings.arguments),
+    /*});
+      return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+      });
+    },*/
+    /*'/transfer': (BuildContext context) => WalletTransferProvider(
           builder: (context, store) {
             return WalletTransferPage(title: "Send Tokens");
           },
-        ),
-    '/transfer_amount': (BuildContext context) =>
-        WalletAmountPage(arguments: ModalRoute.of(context).settings.arguments),
+        ),*/
+
     '/transaction_details': (BuildContext context) => WalletTransferProvider(
           builder: (context, store) {
             return TransactionDetailsPage(
                 arguments: ModalRoute.of(context).settings.arguments);
           },
         ),
-    '/transaction_info': (BuildContext context) => TransactionInfoPage(),
-    '/qrcode_reader': (BuildContext context) => QRCodeReaderPage(
-          title: "Scan QRCode",
-          onScanned: ModalRoute.of(context).settings.arguments,
-        )
   };
 }

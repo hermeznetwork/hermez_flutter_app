@@ -2,20 +2,22 @@
 //import 'package:firebase_analytics/observer.dart';
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hermez/app_config.dart';
+import 'package:flutter/services.dart';
+import 'package:hermez/environment.dart';
 import 'package:hermez/router.dart';
 import 'package:hermez/services_provider.dart';
-import 'package:hermez_plugin/environment.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   // bootstrapping;
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  setEnvironment('rinkeby');
+  //setEnvironment('goerli');
+  //setEnvironment('rinkeby');
+  setEnvironment('mainnet');
 
-  final stores =
-      await createProviders(AppConfig().params["dev"], getCurrentEnvironment());
+  final stores = await createProviders(getCurrentEnvironment());
 
   runApp(MultiProvider(
     providers: stores,
@@ -45,7 +47,7 @@ class MainApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done) {*/
     return new MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter App',
+      title: 'Hermez Wallet',
       initialRoute: '/',
       routes: getRoutes(context),
       /*navigatorObservers: [

@@ -9,7 +9,7 @@ abstract class IStorageService {
   Future<Map> addItem(String key, String chainId, String hermezEthereumAddress,
       dynamic item, bool secure);
   void removeItem(String key, String chainId, String hermezEthereumAddress,
-      String id, bool secure);
+      String name, String value, bool secure);
   dynamic getItemsByHermezAddress(
       Map storage, String chainId, String hermezEthereumAddress);
 }
@@ -79,7 +79,7 @@ class StorageService implements IStorageService {
             ? chainIdStorage[hermezEthereumAddress]
             : [];
 
-    final List newAccountStorage = List()..addAll(accountStorage);
+    List newAccountStorage = List.of(accountStorage, growable: true);
     newAccountStorage.add(item);
 
     final Map<String, dynamic> newChainIdStorage = Map<String, dynamic>()
@@ -103,8 +103,13 @@ class StorageService implements IStorageService {
   }
 
   @override
-  Future<Map> removeItem(String key, String chainId,
-      String hermezEthereumAddress, String id, bool secure) async {
+  Future<Map> removeItem(
+      String key,
+      String chainId,
+      String hermezEthereumAddress,
+      String name,
+      String value,
+      bool secure) async {
     final Map storage = await getStorage(key, secure);
     final Map chainIdStorage =
         storage.containsKey(chainId) ? storage[chainId] : {};
@@ -113,7 +118,7 @@ class StorageService implements IStorageService {
             ? chainIdStorage[hermezEthereumAddress]
             : [];
 
-    accountStorage.removeWhere((item) => item['id'] == id);
+    accountStorage.removeWhere((item) => item[name] == value);
 
     final Map<String, dynamic> newChainIdStorage = Map<String, dynamic>()
       ..addAll(chainIdStorage);
@@ -142,8 +147,8 @@ class StorageService implements IStorageService {
       Map<String, dynamic> prop,
       Map<String, dynamic> partialItem,
       bool secure) async {
-    final Map storage = await getStorage(key, secure);
-    final Map chainIdStorage =
+    final Map<String, dynamic> storage = await getStorage(key, secure);
+    final Map<String, dynamic> chainIdStorage =
         storage.containsKey(chainId) ? storage[chainId] : {};
     final List accountStorage =
         chainIdStorage.containsKey(hermezEthereumAddress)

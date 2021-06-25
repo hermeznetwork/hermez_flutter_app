@@ -1,33 +1,36 @@
+import 'dart:collection';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
-import 'package:hermez/wallet_transfer_amount_page.dart';
-import 'package:hermez_plugin/addresses.dart' as addresses;
-import 'package:hermez_plugin/api.dart';
-import 'package:hermez_plugin/constants.dart';
-import 'package:hermez_plugin/environment.dart';
-import 'package:hermez_plugin/hermez_compressed_amount.dart';
-import 'package:hermez_plugin/hermez_wallet.dart';
-import 'package:hermez_plugin/model/account.dart';
-import 'package:hermez_plugin/model/exit.dart';
-import 'package:hermez_plugin/model/forged_transactions_request.dart';
-import 'package:hermez_plugin/model/forged_transactions_response.dart';
-import 'package:hermez_plugin/model/pool_transaction.dart';
-import 'package:hermez_plugin/model/recommended_fee.dart';
-import 'package:hermez_plugin/model/state_response.dart';
-import 'package:hermez_plugin/model/token.dart';
-import 'package:hermez_plugin/model/transaction.dart';
-import 'package:hermez_plugin/tx_pool.dart' as tx_pool;
-import 'package:hermez_plugin/tx_utils.dart';
+import 'package:hermez_sdk/addresses.dart' as addresses;
+import 'package:hermez_sdk/api.dart';
+import 'package:hermez_sdk/environment.dart';
+import 'package:hermez_sdk/hermez_compressed_amount.dart';
+import 'package:hermez_sdk/hermez_wallet.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/forged_transactions_request.dart';
+import 'package:hermez_sdk/model/forged_transactions_response.dart';
+import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/recommended_fee.dart';
+import 'package:hermez_sdk/model/state_response.dart';
+import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/transaction.dart';
+import 'package:hermez_sdk/tx_pool.dart' as tx_pool;
+import 'package:hermez_sdk/tx_utils.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -41,7 +44,8 @@ class WalletHandler {
       this._explorerService,
       this._configurationService,
       this._storageService,
-      this._hermezService);
+      this._hermezService,
+      this._exchangeService);
 
   final Store<Wallet, WalletAction> _store;
   final AddressService _addressService;
@@ -50,22 +54,31 @@ class WalletHandler {
   final StorageService _storageService;
   final ConfigurationService _configurationService;
   final HermezService _hermezService;
+  final ExchangeService _exchangeService;
 
   Wallet get state => _store.state;
 
   Future<void> initialise() async {
-    final entropyMnemonic = await _configurationService.getMnemonic();
+    try {
+      _store.dispatch(InitializingWallet());
+      print("Initializing Wallet");
+      final entropyMnemonic = await _configurationService.getMnemonic();
 
-    if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
-      _initialiseFromMnemonic(entropyMnemonic);
-      return;
+      if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
+        await _initialiseFromMnemonic(entropyMnemonic);
+        return;
+      }
+
+      final privateKey = await _configurationService.getPrivateKey();
+      await _initialiseFromPrivateKey(privateKey);
+    } catch (e) {
+      print(e.toString());
     }
-
-    final privateKey = await _configurationService.getPrivateKey();
-    _initialiseFromPrivateKey(privateKey);
   }
 
   Future<void> initialiseReadOnly() async {
+    _store.dispatch(InitializingWallet());
+    print("Initializing Wallet");
     final entropyMnemonic = await _configurationService.getMnemonic();
     final privateKey = await _configurationService.getPrivateKey();
     final ethereumAddress = await _configurationService.getEthereumAddress();
@@ -74,12 +87,12 @@ class WalletHandler {
         privateKey.isNotEmpty &&
         ethereumAddress != null &&
         ethereumAddress.isNotEmpty) {
-      _initialiseFromStoredData(privateKey, ethereumAddress);
+      await _initialiseFromStoredData(privateKey, ethereumAddress);
       return;
     }
 
     if (entropyMnemonic != null && entropyMnemonic.isNotEmpty) {
-      _initialiseFromMnemonic(entropyMnemonic);
+      await _initialiseFromMnemonic(entropyMnemonic);
       return;
     }
 
@@ -90,25 +103,23 @@ class WalletHandler {
     final mnemonic = _addressService.entropyToMnemonic(entropyMnemonic);
     final privateKey = _addressService.getPrivateKey(mnemonic);
     final address = await _addressService.getEthereumAddress(privateKey);
-
-    _store.dispatch(InitialiseWallet(address.toString(), privateKey));
-
     await _initialise();
+    _store.dispatch(WalletInitialized(address.toString(), privateKey));
+    print("Wallet Initialized");
   }
 
   Future<void> _initialiseFromPrivateKey(String privateKey) async {
     final address = await _addressService.getEthereumAddress(privateKey);
-
-    _store.dispatch(InitialiseWallet(address.toString(), privateKey));
-
     await _initialise();
+    _store.dispatch(WalletInitialized(address.toString(), privateKey));
+    print("Wallet Initialized");
   }
 
   Future<void> _initialiseFromStoredData(
       String privateKey, String ethereumAddress) async {
-    _store.dispatch(InitialiseWallet(ethereumAddress, privateKey));
-
     await _initialise();
+    _store.dispatch(WalletInitialized(ethereumAddress, privateKey));
+    print("Wallet Initialized");
   }
 
   Future<void> _initialise() async {
@@ -118,11 +129,39 @@ class WalletHandler {
     final defaultCurrency = await _configurationService.getDefaultCurrency();
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
 
+    final defaultFee = await _configurationService.getDefaultFee();
+    _store.dispatch(DefaultFeeUpdated(defaultFee));
+
+    try {
+      final exchangeRatio = await _exchangeService
+          .getFiatExchangeRates(["EUR", "CNY", "JPY", "GBP"]);
+      await _configurationService.setExchangeRatio(exchangeRatio);
+      _store.dispatch(ExchangeRatioUpdated(exchangeRatio[
+          (await _configurationService.getDefaultCurrency())
+              .toString()
+              .split(".")
+              .last]));
+    } catch (e) {
+      print("Error on Exchange Rate API: " + e.toString());
+      LinkedHashMap<String, dynamic> exchangeRatio = {
+        "EUR": 0.837775,
+        "CNY": 6.446304,
+        "JPY": 110.253954,
+        "GBP": 0.716945
+      } as LinkedHashMap<String, dynamic>;
+      await _configurationService.setExchangeRatio(exchangeRatio);
+      _store.dispatch(ExchangeRatioUpdated(exchangeRatio[
+          (await _configurationService.getDefaultCurrency())
+              .toString()
+              .split(".")
+              .last]));
+    }
+
     //final state = await getState();
 
-    final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();
+    /*final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();
     _configurationService.setExchangeRatio(exchangeRatio);
-    _store.dispatch(ExchangeRatioUpdated(exchangeRatio));
+    _store.dispatch(ExchangeRatioUpdated(exchangeRatio));*/
 
     /*final address = await _configurationService.getEthereumAddress();
     final createAccountAuth = await _hermezService
@@ -149,7 +188,7 @@ class WalletHandler {
     });*/
   }
 
-  Future<void> fetchOwnL1Balance() async {
+  /*Future<void> fetchOwnL1Balance() async {
     if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
       _store.dispatch(UpdatingBalance());
@@ -248,10 +287,39 @@ class WalletHandler {
 
     _store.dispatch(
         BalanceUpdated(ethBalance.getInWei, tokensBalance, L2accounts));
+  }*/
+
+  Future<bool> getAccounts() async {
+    try {
+      //_store.dispatch(UpdatingWallet());
+      print('Updating Wallet');
+      List<Token> tokens = await getTokens();
+      List<Account> l1Accounts = await getL1Accounts(true);
+      List<Account> l2Accounts = await getL2Accounts();
+      List<Exit> exits = await getExits();
+      List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
+      List<dynamic> pendingL1Transfers = await getPendingTransfers();
+      List<dynamic> pendingDeposits = await getPendingDeposits();
+      List<dynamic> pendingWithdraws = await getPendingWithdraws();
+      List<dynamic> pendingForceExits = await getPendingForceExits();
+      _store.dispatch(WalletUpdated(
+          tokens,
+          l1Accounts,
+          l2Accounts,
+          exits,
+          pendingL2Txs,
+          pendingL1Transfers,
+          pendingDeposits,
+          pendingWithdraws,
+          pendingForceExits));
+      print('Wallet Updated');
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
-  Future<List<Account>> getL1Accounts() async {
-    List<Account> accounts = List();
+  Future<List<Account>> getL1Accounts(bool showZeroBalanceAccounts) async {
+    List<Account> accounts = [];
     if (state != null && state.ethereumAddress != null) {
       final supportedTokens = await _hermezService.getTokens();
 
@@ -262,10 +330,9 @@ class WalletHandler {
           // GET L1 ETH Balance
           web3.EtherAmount ethBalance = await _contractService.getEthBalance(
               web3.EthereumAddress.fromHex(state.ethereumAddress));
-
           if (ethBalance.getInWei > BigInt.zero) {
             final account = Account(
-                accountIndex: "0",
+                accountIndex: token.id.toString(),
                 balance: ethBalance.getInWei.toString(),
                 bjj: "",
                 hezEthereumAddress: state.ethereumAddress,
@@ -273,6 +340,20 @@ class WalletHandler {
                 nonce: 0,
                 token: token);
             accounts.add(account);
+          } else {
+            List<dynamic> transactions = await getEthereumTransactionsByAddress(
+                state.ethereumAddress, token, null);
+            if (transactions != null && transactions.isNotEmpty) {
+              final account = Account(
+                  accountIndex: token.id.toString(),
+                  balance: ethBalance.getInWei.toString(),
+                  bjj: "",
+                  hezEthereumAddress: state.ethereumAddress,
+                  itemId: 0,
+                  nonce: 0,
+                  token: token);
+              accounts.add(account);
+            }
           }
         } else {
           //Map<String, BigInt> tokensBalance = Map();
@@ -285,11 +366,11 @@ class WalletHandler {
           } catch (error) {
             throw error;
           }
+          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+              web3.EtherUnit.wei, tokenBalance);
           if (tokenBalance > BigInt.zero) {
-            var tokenAmount = web3.EtherAmount.fromUnitAndValue(
-                web3.EtherUnit.wei, tokenBalance);
             final account = Account(
-                accountIndex: "0",
+                accountIndex: token.id.toString(),
                 balance: tokenAmount.getInWei.toString(),
                 bjj: "",
                 hezEthereumAddress: state.ethereumAddress,
@@ -297,7 +378,24 @@ class WalletHandler {
                 nonce: 0,
                 token: token);
             accounts.add(account);
-            //tokensBalance[token.symbol] = tokenBalance;
+          } else {
+            if (showZeroBalanceAccounts) {
+              List<dynamic> transactions =
+                  await getEthereumTransactionsByAddress(
+                      state.ethereumAddress, token, null);
+              if (transactions != null && transactions.isNotEmpty) {
+                final account = Account(
+                    accountIndex: token.id.toString(),
+                    balance: tokenAmount.getInWei.toString(),
+                    bjj: "",
+                    hezEthereumAddress: state.ethereumAddress,
+                    itemId: 0,
+                    nonce: 0,
+                    token: token);
+                accounts.add(account);
+                //tokensBalance[token.symbol] = tokenBalance;
+              }
+            }
           }
         }
       }
@@ -308,7 +406,7 @@ class WalletHandler {
     return accounts;
   }
 
-  Future<List<Account>> getAccounts(
+  Future<List<Account>> getL2Accounts(
       {String ethereumAddress, List<int> tokenIds}) async {
     if (ethereumAddress == null) {
       ethereumAddress = state.ethereumAddress;
@@ -318,12 +416,71 @@ class WalletHandler {
     }
     final accounts = await _hermezService.getAccounts(
         web3.EthereumAddress.fromHex(ethereumAddress), tokenIds);
+
     return accounts;
+  }
+
+  Future<Account> getAccount(String accountIndex) async {
+    Account account = await _hermezService.getAccount(accountIndex);
+    return account;
+  }
+
+  Future<Account> getL1Account(int tokenId) async {
+    if (state != null && state.ethereumAddress != null) {
+      final supportedTokens = await _hermezService.getTokens();
+      Token token = supportedTokens.firstWhere(
+          (supportedToken) => supportedToken.id == tokenId,
+          orElse: () => null);
+      if (token != null) {
+        if (tokenId == 0) {
+          // GET L1 ETH Balance
+          web3.EtherAmount ethBalance = await _contractService.getEthBalance(
+              web3.EthereumAddress.fromHex(state.ethereumAddress));
+          final account = Account(
+              accountIndex: tokenId.toString(),
+              balance: ethBalance.getInWei.toString(),
+              bjj: "",
+              hezEthereumAddress: state.ethereumAddress,
+              itemId: 0,
+              nonce: 0,
+              token: token);
+          return account;
+        } else {
+          var tokenBalance = BigInt.zero;
+          try {
+            tokenBalance = await _contractService.getTokenBalance(
+                web3.EthereumAddress.fromHex(state.ethereumAddress),
+                web3.EthereumAddress.fromHex(token.ethereumAddress),
+                token.name);
+          } catch (error) {
+            throw error;
+          }
+          var tokenAmount = web3.EtherAmount.fromUnitAndValue(
+              web3.EtherUnit.wei, tokenBalance);
+
+          final account = Account(
+              accountIndex: token.id.toString(),
+              balance: tokenAmount.getInWei.toString(),
+              bjj: "",
+              hezEthereumAddress: state.ethereumAddress,
+              itemId: 0,
+              nonce: 0,
+              token: token);
+          return account;
+        }
+      } else {
+        return null;
+      }
+    }
   }
 
   Future<StateResponse> getState() async {
     final state = await _hermezService.getState();
     return state;
+  }
+
+  Future<void> getBlockAvgTime() async {
+    await _explorerService.getBlockAvgTime();
   }
 
   Future<List<Token>> getTokens() async {
@@ -342,7 +499,120 @@ class WalletHandler {
         web3.EthereumAddress.fromHex(state.ethereumAddress),
         onlyPendingWithdraws: onlyPendingWithdraws,
         tokenId: tokenId);
+    exits.sort((exit1, exit2) {
+      return exit2.itemId.compareTo(exit1.itemId);
+    });
     return exits;
+  }
+
+  Future<List<dynamic>> getPendingTransfers() async {
+    final storage =
+        await _storageService.getStorage(PENDING_TRANSFERS_KEY, false);
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await _configurationService.getEthereumAddress();
+    final List accountPendingTransfers = _storageService
+        .getItemsByHermezAddress(storage, chainId, ethereumAddress);
+
+    List transferIds = [];
+    for (final pendingTransfer in accountPendingTransfers) {
+      try {
+        final transactionHash = pendingTransfer['txHash'];
+        web3.TransactionReceipt receipt =
+            await _contractService.getTxReceipt(transactionHash);
+        List<dynamic> transactions = await getEthereumTransactionsByAddress(
+            ethereumAddress, Token.fromJson(pendingTransfer['token']), 0);
+        final transactionFound = transactions.firstWhere(
+            (transaction) => transaction['txHash'] == transactionHash,
+            orElse: () => null);
+        if (transactionFound != null ||
+            (receipt != null && receipt.status == false)) {
+          transferIds.add(transactionHash);
+          await _configurationService.removePendingTransfer(transactionHash);
+        }
+      } catch (e) {
+        print(e.toString());
+      }
+    }
+
+    accountPendingTransfers.removeWhere(
+        (pendingTransfer) => transferIds.contains(pendingTransfer['txHash']));
+
+    return accountPendingTransfers.reversed.toList();
+  }
+
+  Future<List<dynamic>> getPendingForceExits() async {
+    final storage =
+        await _storageService.getStorage(PENDING_FORCE_EXITS_KEY, false);
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await _configurationService.getEthereumAddress();
+    final List accountPendingForceExits = _storageService
+        .getItemsByHermezAddress(storage, chainId, ethereumAddress);
+
+    List forceExitIds = [];
+    for (final pendingForceExit in accountPendingForceExits) {
+      final transactionHash = pendingForceExit['hash'];
+      web3.TransactionReceipt receipt =
+          await _contractService.getTxReceipt(transactionHash);
+      if (receipt != null) {
+        if (receipt.status == false) {
+          // Tx didn't pass
+          if (pendingForceExit['id'] == null) {
+            pendingForceExit['id'] = transactionHash;
+            accountPendingForceExits[accountPendingForceExits.indexWhere(
+                    (element) => element['hash'] == pendingForceExit['hash'])] =
+                pendingForceExit;
+            await _configurationService.updatePendingForceExitId(
+                transactionHash, transactionHash);
+          }
+          forceExitIds.add(transactionHash);
+          await _configurationService.removePendingForceExit(transactionHash);
+        } else {
+          final hermezContract = await ContractParser.fromAssets(
+              'HermezABI.json',
+              getCurrentEnvironment().contracts['Hermez'],
+              "Hermez");
+          final contractEvent = hermezContract.event('L1UserTxEvent');
+          for (var log in receipt.logs) {
+            if (log.address.hex == hermezContract.address.hex) {
+              try {
+                List<String> topics = List<String>.from(
+                    log.topics.map((topic) => topic.toString()));
+                List l1UserTxEvent =
+                    contractEvent.decodeResults(topics, log.data);
+                final transactionId =
+                    getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
+
+                if (pendingForceExit['id'] == null) {
+                  pendingForceExit['id'] = transactionId;
+                  accountPendingForceExits[accountPendingForceExits.indexWhere(
+                          (element) =>
+                              element['hash'] == pendingForceExit['hash'])] =
+                      pendingForceExit;
+                  _configurationService.updatePendingForceExitId(
+                      transactionHash, transactionId);
+                }
+
+                final forgedTransaction =
+                    await getHistoryTransaction(transactionId);
+                if (forgedTransaction != null &&
+                    forgedTransaction.batchNum != null) {
+                  forceExitIds.add(transactionHash);
+                  _configurationService.removePendingForceExit(transactionHash,
+                      name: 'hash');
+                }
+              } catch (e) {
+                print(e.toString());
+              }
+            }
+          }
+        }
+      }
+    }
+
+    accountPendingForceExits.removeWhere(
+        (pendingForceExit) => forceExitIds.contains(pendingForceExit['hash']));
+
+    return accountPendingForceExits.reversed.toList();
   }
 
   Future<List<dynamic>> getPendingDeposits() async {
@@ -356,39 +626,61 @@ class WalletHandler {
 
     List depositIds = [];
     for (final pendingDeposit in accountPendingDeposits) {
-      final transactionHash = pendingDeposit['hash'];
+      final transactionHash = pendingDeposit['txHash'];
       web3.TransactionReceipt receipt =
           await _contractService.getTxReceipt(transactionHash);
       if (receipt != null) {
-        final hermezContract = await ContractParser.fromAssets(
-            'HermezABI.json', contractAddresses['Hermez'], "Hermez");
-        final contractEvent = hermezContract.event('L1UserTxEvent');
-        for (var log in receipt.logs) {
-          List<String> topics =
-              List<String>.from(log['topics'].map((topic) => topic.toString()));
-          try {
-            List l1UserTxEvent =
-                contractEvent.decodeResults(topics, log['data']);
-            final transactionId =
-                getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
+        if (receipt.status == false) {
+          // Tx didn't pass
+          if (pendingDeposit['id'] == null) {
+            pendingDeposit['id'] = transactionHash;
+            accountPendingDeposits[accountPendingDeposits.indexWhere(
+                    (element) =>
+                        element['txHash'] == pendingDeposit['txHash'])] =
+                pendingDeposit;
+            _configurationService.updatePendingDepositId(
+                transactionHash, transactionHash);
+          }
+          depositIds.add(transactionHash);
+          _configurationService.removePendingDeposit(transactionHash);
+        } else {
+          final hermezContract = await ContractParser.fromAssets(
+              'HermezABI.json',
+              getCurrentEnvironment().contracts['Hermez'],
+              "Hermez");
+          final contractEvent = hermezContract.event('L1UserTxEvent');
+          for (var log in receipt.logs) {
+            if (log.address.hex == hermezContract.address.hex) {
+              try {
+                List<String> topics = List<String>.from(
+                    log.topics.map((topic) => topic.toString()));
+                List l1UserTxEvent =
+                    contractEvent.decodeResults(topics, log.data);
+                final transactionId =
+                    getL1UserTxId(l1UserTxEvent[0], l1UserTxEvent[1]);
 
-            if (pendingDeposit['id'] == null) {
-              pendingDeposit['id'] = transactionId;
-              accountPendingDeposits[accountPendingDeposits.indexWhere(
-                      (element) => element['hash'] == pendingDeposit['hash'])] =
-                  pendingDeposit;
-              _configurationService.updatePendingDepositId(
-                  transactionHash, transactionId);
-            }
+                if (pendingDeposit['id'] == null) {
+                  pendingDeposit['id'] = transactionId;
+                  accountPendingDeposits[accountPendingDeposits.indexWhere(
+                          (element) =>
+                              element['txHash'] == pendingDeposit['txHash'])] =
+                      pendingDeposit;
+                  _configurationService.updatePendingDepositId(
+                      transactionHash, transactionId);
+                }
 
-            final forgedTransaction =
-                await getHistoryTransaction(transactionId);
-            if (forgedTransaction != null &&
-                forgedTransaction.batchNum != null) {
-              depositIds.add(transactionHash);
-              _configurationService.removePendingDeposit(transactionId);
+                final forgedTransaction =
+                    await getHistoryTransaction(transactionId);
+                if (forgedTransaction != null &&
+                    forgedTransaction.batchNum != null) {
+                  depositIds.add(transactionHash);
+                  _configurationService.removePendingDeposit(transactionHash);
+                }
+              } catch (e) {
+                print(e.toString());
+              }
             }
-          } catch (e) {}
+          }
         }
       }
       /*
@@ -401,33 +693,119 @@ class WalletHandler {
     }
 
     accountPendingDeposits.removeWhere(
-        (pendingDeposit) => depositIds.contains(pendingDeposit['hash']));
+        (pendingDeposit) => depositIds.contains(pendingDeposit['txHash']));
 
-    return accountPendingDeposits;
+    return accountPendingDeposits.reversed.toList();
   }
 
   Future<List<dynamic>> getPendingWithdraws() async {
-    final storage =
-        await _storageService.getStorage(PENDING_WITHDRAWS_KEY, false);
-    final chainId = getCurrentEnvironment().chainId.toString();
-    final hermezEthereumAddress =
-        await _configurationService.getHermezAddress();
-    final List accountPendingWithdraws = _storageService
-        .getItemsByHermezAddress(storage, chainId, hermezEthereumAddress);
+    final List accountPendingWithdraws =
+        await _configurationService.getPendingWithdraws();
 
-    List withdawalIds = [];
+    List removeWithdawalIds = [];
+    List removeWithdawalHashes = [];
+    List updateWithdawalIds = [];
+    List<dynamic> updatePendingWithdraws = [];
     accountPendingWithdraws.forEach((pendingWithdraw) async {
-      final exit = await getExit(
-          pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
-      if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
-        final withdrawalId = exit.accountIndex + exit.batchNum.toString();
-        withdawalIds.add(withdrawalId);
-        _configurationService.removePendingWithdraw(withdrawalId);
+      final String transactionHash = pendingWithdraw['hash'];
+      final String status = pendingWithdraw['status'];
+      Exit exit;
+      if (pendingWithdraw['accountIndex'] != null &&
+          pendingWithdraw['batchNum'] != null &&
+          (status == 'pending' || status == 'completed')) {
+        exit = await getExit(
+            pendingWithdraw['accountIndex'], pendingWithdraw['batchNum']);
+        if (exit.instantWithdraw != null || exit.delayedWithdraw != null) {
+          final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+          removeWithdawalIds.add(withdrawalId);
+          _configurationService.removePendingWithdraw(withdrawalId);
+        }
+      }
+
+      if (transactionHash != null) {
+        web3.TransactionInformation txInfo;
+        try {
+          txInfo = await _contractService.getTransactionByHash(transactionHash);
+        } catch (e) {
+          // wait an hour and if not, it failed
+          if ((pendingWithdraw['instant'] == true ||
+                  pendingWithdraw['status'] == 'completed') &&
+              (DateTime.now().subtract(Duration(hours: 1)).isAfter(
+                  DateTime.fromMillisecondsSinceEpoch(
+                      pendingWithdraw['date'])))) {
+            if (exit == null) {
+              removeWithdawalHashes.add(transactionHash);
+              _configurationService.removePendingWithdraw(transactionHash,
+                  name: 'hash');
+            } else {
+              String status = 'fail';
+              pendingWithdraw['status'] = status;
+              final withdrawalId = exit.accountIndex + exit.batchNum.toString();
+              updateWithdawalIds.add(withdrawalId);
+              updatePendingWithdraws.add(withdrawalId);
+              _configurationService.updatePendingWithdraw(
+                  'status', status, withdrawalId);
+            }
+          }
+        }
+        if (txInfo != null) {
+          web3.TransactionReceipt receipt =
+              await _contractService.getTxReceipt(transactionHash);
+          if (receipt != null) {
+            if (receipt.status == false) {
+              // Tx didn't pass
+              if (exit == null) {
+                removeWithdawalHashes.add(transactionHash);
+                _configurationService.removePendingWithdraw(transactionHash,
+                    name: 'hash');
+              } else {
+                String status = 'fail';
+                pendingWithdraw['status'] = status;
+                final withdrawalId =
+                    exit.accountIndex + exit.batchNum.toString();
+                updateWithdawalIds.add(withdrawalId);
+                updatePendingWithdraws.add(withdrawalId);
+                _configurationService.updatePendingWithdraw(
+                    'status', status, withdrawalId);
+              }
+            } else {
+              if (status == 'initiated') {
+                List<Exit> exits = await getExits(
+                    tokenId: Token.fromJson(pendingWithdraw['token']).id);
+                exit = exits.firstWhere(
+                    (Exit exit) =>
+                        pendingWithdraw['accountIndex'] == exit.accountIndex &&
+                        (pendingWithdraw['amount'] as double)
+                                .toInt()
+                                .toString() ==
+                            exit.balance &&
+                        Token.fromJson(pendingWithdraw['token']).id ==
+                            exit.token.id &&
+                        (exit.instantWithdraw == null &&
+                            exit.delayedWithdraw == null),
+                    orElse: () => null);
+                if (exit != null) {
+                  removeWithdawalHashes.add(transactionHash);
+                  _configurationService.removePendingWithdraw(transactionHash,
+                      name: 'hash');
+                }
+              }
+            }
+          }
+        }
       }
     });
 
-    accountPendingWithdraws.removeWhere(
-        (pendingWithdraw) => withdawalIds.contains(pendingWithdraw['id']));
+    /*accountPendingWithdraws[accountPendingWithdraws.indexWhere(
+            (pendingWithdraw) =>
+                updateWithdawalIds.contains(pendingWithdraw['id']))] =
+        updatePendingWithdraws[0];*/
+
+    accountPendingWithdraws.removeWhere((pendingWithdraw) =>
+        removeWithdawalIds.contains(pendingWithdraw['id']));
+
+    accountPendingWithdraws.removeWhere((pendingWithdraw) =>
+        removeWithdawalHashes.contains(pendingWithdraw['hash']));
 
     return accountPendingWithdraws;
   }
@@ -461,11 +839,10 @@ class WalletHandler {
       final hermezPrivateKey =
           await _configurationService.getHermezPrivateKey();
       final hermezAddress = await _configurationService.getHermezAddress();
-      final chainId = getCurrentEnvironment().chainId;
       final hermezWallet =
           HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-      final signature = await hermezWallet.signCreateAccountAuthorization(
-          BigInt.from(chainId).toRadixString(16), ethereumPrivateKey);
+      final signature =
+          await hermezWallet.signCreateAccountAuthorization(ethereumPrivateKey);
       return _hermezService.authorizeAccountCreation(
           web3.EthereumAddress.fromHex(ethereumAddress),
           hermezWallet.publicKeyBase64,
@@ -475,18 +852,52 @@ class WalletHandler {
     }
   }
 
-  Future<bool> deposit(BigInt amount, Token token) async {
+  Future<LinkedHashMap<String, BigInt>> depositGasLimit(
+      double amount, Token token) async {
+    //_store.dispatch(TransactionStarted());
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+    return _hermezService.depositGasLimit(
+        amount, hermezAddress, token, hermezWallet.publicKeyCompressedHex);
+  }
+
+  Future<bool> deposit(double amount, Token token,
+      {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice}) async {
     _store.dispatch(TransactionStarted());
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.deposit(amount, hermezAddress, token,
-        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey);
+        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey,
+        approveGasLimit: approveGasLimit,
+        depositGasLimit: depositGasLimit,
+        gasPrice: gasPrice);
+  }
+
+  Future<BigInt> withdrawGasLimit(double amount, Account account, Exit exit,
+      bool completeDelayedWithdrawal, bool instantWithdrawal) async {
+    //_store.dispatch(TransactionStarted());
+
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+    return _hermezService.withdrawGasLimit(
+        amount,
+        account,
+        exit,
+        completeDelayedWithdrawal,
+        instantWithdrawal,
+        hermezAddress,
+        hermezWallet.publicKeyCompressedHex);
   }
 
   Future<bool> withdraw(double amount, Account account, Exit exit,
-      bool completeDelayedWithdrawal, bool instantWithdrawal) async {
+      bool completeDelayedWithdrawal, bool instantWithdrawal,
+      {BigInt gasLimit, int gasPrice = 0}) async {
     _store.dispatch(TransactionStarted());
 
     final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
@@ -494,18 +905,23 @@ class WalletHandler {
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final success = await _hermezService.withdraw(
-        BigInt.from(amount),
+        amount,
         account,
         exit,
         completeDelayedWithdrawal,
         instantWithdrawal,
         hermezAddress,
         hermezWallet.publicKeyCompressedHex,
-        state.ethereumPrivateKey);
+        state.ethereumPrivateKey,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice);
 
-    //if (success) {
+    return success;
+  }
 
-    //}
+  Future<bool> isInstantWithdrawalAllowed(double amount, Token token) async {
+    final success =
+        await _hermezService.isInstantWithdrawalAllowed(amount, token);
     return success;
   }
 
@@ -513,8 +929,20 @@ class WalletHandler {
     _store.dispatch(TransactionFinished());
   }
 
-  Future<void> forceExit(BigInt amount, Account account) {
-    _hermezService.forceExit(amount, account);
+  Future<BigInt> forceExitGasLimit(double amount, Account account) async {
+    //_store.dispatch(TransactionStarted());
+    final hermezAddress = await _configurationService.getHermezAddress();
+    return _hermezService.forceExitGasLimit(amount, hermezAddress, account);
+  }
+
+  Future<bool> forceExit(double amount, Account account,
+      {BigInt gasLimit, int gasPrice = 0}) async {
+    _store.dispatch(TransactionStarted());
+    final hermezAddress = await _configurationService.getHermezAddress();
+
+    return _hermezService.forceExit(
+        amount, hermezAddress, account, state.ethereumPrivateKey,
+        gasLimit: gasLimit, gasPrice: gasPrice);
   }
 
   Future<bool> exit(double amount, Account account, double fee) async {
@@ -527,6 +955,7 @@ class WalletHandler {
 
     final exitTx = {
       'from': account.accountIndex,
+      'type': 'Exit',
       'amount': HermezCompressedAmount.compressAmount(amount),
       'fee': fee,
     };
@@ -551,10 +980,10 @@ class WalletHandler {
     final transferTx = {
       'from': from.accountIndex,
       'to': to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
-      'toBjj': null,
+      //'toBjj': null,
       'amount': HermezCompressedAmount.compressAmount(amount),
       'fee': fee,
-      'nonce': from.nonce
+      //'nonce': from.nonce
     };
 
     final success = await _hermezService.generateAndSendL2Tx(
@@ -582,48 +1011,108 @@ class WalletHandler {
     return result;
   }
 
-  Future<BigInt> getEstimatedFee(String from, String to, BigInt amount) async {
+  /// Calculates the fee for the transaction.
+  /// It takes the appropriate recomended fee in USD from the coordinator
+  /// and converts it to token value.
+  /// @param {Object} fees - The recommended Fee object returned by the Coordinator
+  /// @param {Boolean} iExistingAccount - Whether it's a existingAccount transfer
+  /// @returns {number} - Transaction fee
+  double getFee(RecommendedFee fees, bool isExistingAccount, Token token,
+      TransactionType transactionType) {
+    if (token.USD == 0) {
+      return 0;
+    }
+
+    final fee = (isExistingAccount ||
+            transactionType == TransactionType.EXIT ||
+            transactionType == TransactionType.FORCEEXIT)
+        ? fees.existingAccount
+        : fees.createAccount;
+
+    return double.parse((fee / token.USD).toStringAsFixed(6));
+  }
+
+  Future<GasPriceResponse> getGasPrice() async {
+    GasPriceResponse gasPrice = await _contractService.getGasPrice();
+    return gasPrice;
+  }
+
+  Future<BigInt> getGasLimit(String from, String to, BigInt amount, Token token,
+      {Uint8List data}) async {
     web3.EthereumAddress fromAddress;
     web3.EthereumAddress toAddress;
-    web3.EtherAmount gasPrice = await _contractService.getGasPrice();
     if (from != null && from.isNotEmpty) {
       fromAddress = web3.EthereumAddress.fromHex(from);
     }
     if (to != null && to.isNotEmpty) {
       toAddress = web3.EthereumAddress.fromHex(to);
     }
-    BigInt estimatedGas = await _contractService.getEstimatedGas(
-      fromAddress,
-      toAddress,
-      web3.EtherAmount.fromUnitAndValue(
-        web3.EtherUnit.wei,
-        BigInt.from(
-          amount.toDouble() * pow(10, 18),
-        ),
-      ),
-    );
 
-    BigInt estimatedFee = gasPrice.getInWei * estimatedGas;
+    BigInt maxGas = await _contractService.getEstimatedGas(
+        fromAddress, toAddress, amount, data, token);
+    return maxGas;
+  }
+
+  Future<BigInt> getEstimatedGas(String from, String to, BigInt amount,
+      Token token, WalletDefaultFee feeSpeed,
+      {Uint8List data}) async {
+    web3.EthereumAddress fromAddress;
+    web3.EthereumAddress toAddress;
+    if (from != null && from.isNotEmpty) {
+      fromAddress = web3.EthereumAddress.fromHex(from);
+    }
+    if (to != null && to.isNotEmpty) {
+      toAddress = web3.EthereumAddress.fromHex(to);
+    }
+    GasPriceResponse gasPriceResponse = await getGasPrice();
+    BigInt maxGas = await _contractService.getEstimatedGas(
+        fromAddress, toAddress, amount, data, token);
+
+    BigInt gasPrice = BigInt.zero;
+    switch (feeSpeed) {
+      case WalletDefaultFee.SLOW:
+        gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
+        break;
+      case WalletDefaultFee.AVERAGE:
+        gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
+        break;
+      case WalletDefaultFee.FAST:
+        gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
+        break;
+    }
+
+    BigInt estimatedFee = gasPrice * maxGas;
 
     return estimatedFee;
   }
 
-  void updateDefaultCurrency(WalletDefaultCurrency defaultCurrency) {
+  Future<void> updateDefaultCurrency(
+      WalletDefaultCurrency defaultCurrency) async {
     _configurationService.setDefaultCurrency(defaultCurrency);
+    _store.dispatch(ExchangeRatioUpdated(_configurationService
+        .getExchangeRatio(defaultCurrency.toString().split(".").last)));
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
   }
 
-  void updateLevel(TransactionLevel txLevel) {
-    _configurationService.setLevelSelected(txLevel);
+  Future<void> updateDefaultFee(WalletDefaultFee defaultFee) async {
+    _configurationService.setDefaultFee(defaultFee);
+    _store.dispatch(DefaultFeeUpdated(defaultFee));
+  }
+
+  void updateLevel(TransactionLevel txLevel) async {
+    await _configurationService.setLevelSelected(txLevel);
     _store.dispatch(LevelUpdated(txLevel));
   }
 
   Future<List<dynamic>> getEthereumTransactionsByAddress(
-      String address, Account account, int fromItem) async {
-    if (account.token.symbol == "ETH") {
+      String address, Token token, int fromItem) async {
+    if (token.symbol == "ETH") {
       return _explorerService.getTransactionsByAccountAddress(address);
     } else {
-      return _explorerService.getTransferEventsByAccountAddress(address);
+      List<dynamic> transactions =
+          await _explorerService.getTokenTransferEventsByAccountAddress(
+              address, token.ethereumAddress);
+      return transactions;
     }
   }
 
@@ -646,8 +1135,13 @@ class WalletHandler {
     await _configurationService.setBabyJubJubBase64("");
     await _configurationService.setEthereumAddress("");
     await _configurationService.setHermezAddress("");
-    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.EUR);
+    await _configurationService.setPasscode("");
+    await _configurationService.setBiometricsFingerprint(false);
+    await _configurationService.setBiometricsFace(false);
+    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.USD);
+    await _configurationService.setDefaultFee(WalletDefaultFee.AVERAGE);
     await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
     await _configurationService.setupDone(false);
+    await _configurationService.backupDone(false);
   }
 }

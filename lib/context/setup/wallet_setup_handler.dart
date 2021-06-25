@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet_setup.dart';
 import 'package:hermez/service/address_service.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'wallet_setup_state.dart';
 
@@ -14,9 +14,14 @@ class WalletSetupHandler {
 
   WalletSetup get state => _store.state;
 
-  void generateMnemonic() {
-    var mnemonic = _addressService.generateMnemonic();
+  Future<String> generateMnemonic() async {
+    String mnemonic = _addressService.generateMnemonic();
     _store.dispatch(WalletSetupConfirmMnemonic(mnemonic));
+    try {
+      return await _addressService.setupFromMnemonic(mnemonic);
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   Future<bool> confirmMnemonic(String mnemonic) async {
@@ -36,14 +41,25 @@ class WalletSetupHandler {
     _store.dispatch(WalletSetupChangeStep(step));
   }
 
+  bool isValidMnemonic(String mnemonic) {
+    if (_validateMnemonic(mnemonic)) {
+      final normalisedMnemonic = _mnemonicNormalise(mnemonic);
+      return _addressService.isValidMnemonic(normalisedMnemonic);
+    } else {
+      return false;
+    }
+  }
+
   Future<bool> importFromMnemonic(String mnemonic) async {
     try {
       _store.dispatch(WalletSetupStarted());
 
       if (_validateMnemonic(mnemonic)) {
         final normalisedMnemonic = _mnemonicNormalise(mnemonic);
-        await _addressService.setupFromMnemonic(normalisedMnemonic);
-        return true;
+        return await _addressService.setupFromMnemonic(normalisedMnemonic) !=
+            null;
+      } else {
+        return false;
       }
     } catch (e) {
       _store.dispatch(WalletSetupAddError(e.toString()));
