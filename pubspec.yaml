@@ -135,6 +135,10 @@ flutter:
     - arrow_up.svg
     - deposit.png
 
+    # Rewards
+    # - rewards.svg
+    - rewards.png
+
     # Smart Contracts
     - HermezABI.json
     - ERC20ABI.json

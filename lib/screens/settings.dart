@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/components/wallet/backup_row.dart';
+import 'package:hermez/components/wallet/rewards_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/service/configuration_service.dart';
@@ -80,9 +80,14 @@ class SettingsPage extends HookWidget {
           // final index = i ~/ 2; //get the actual index excluding dividers.
 
           if (!configurationService.didBackupWallet() && i == 0) {
-            return BackupRow(() {
+            /*return BackupRow( () {
               Navigator.of(parentContext).pushNamed("/backup_info");
-            });
+            });*/
+            return RewardsRow(
+              parentContext, /* () {
+              Navigator.of(parentContext).pushNamed("/backup_info");
+            }*/
+            );
           } else {
             String title = "";
 
