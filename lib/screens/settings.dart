@@ -84,10 +84,12 @@ class SettingsPage extends HookWidget {
               Navigator.of(parentContext).pushNamed("/backup_info");
             });*/
             return RewardsRow(
-              parentContext, /* () {
+                parentContext,
+                RewardsType
+                    .ONGOING /* () {
               Navigator.of(parentContext).pushNamed("/backup_info");
             }*/
-            );
+                );
           } else {
             String title = "";
 

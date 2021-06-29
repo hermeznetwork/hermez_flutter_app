@@ -138,6 +138,8 @@ flutter:
     # Rewards
     # - rewards.svg
     - rewards.png
+    - green_tick.svg
+    - red_alert.svg
 
     # Smart Contracts
     - HermezABI.json

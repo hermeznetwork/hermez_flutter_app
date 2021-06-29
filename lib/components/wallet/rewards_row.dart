@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
+enum RewardsType { ONGOING, FINISHED, ERROR }
+
 class RewardsRow extends StatelessWidget {
-  RewardsRow(this.parentContext /*this.onPressed*/);
+  RewardsRow(this.parentContext, this.rewardsType,
+      {this.eligible = false} /*this.onPressed*/);
 
   final BuildContext parentContext;
+  final RewardsType rewardsType;
+  final bool eligible;
   //final void Function() onPressed;
 
   Widget build(BuildContext context) {
@@ -76,8 +82,15 @@ class RewardsRow extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.only(top: 5.0, bottom: 10.0),
               child: Text(
-                "Thank you for participating in the Hermez reward program."
-                " Your total reward is 12.3 HEZ (\$43.12)",
+                this.rewardsType == RewardsType.ERROR
+                    ? "There was a problem "
+                        "loading the information on this page. "
+                        "Please, try to access it again later."
+                    : this.rewardsType == RewardsType.FINISHED
+                        ? "Thank you for participating in the Hermez reward program."
+                            " Your total reward is 12.3 HEZ (\$43.12)"
+                        : "Reward over your funds is 0.65%. You earned so far"
+                            " 37.82 HEZ (\$107.33)",
                 style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'ModernEra',
@@ -94,96 +107,320 @@ class RewardsRow extends StatelessWidget {
   }
 
   Widget _buildRewardsPage() {
-    return Container(
-      padding: EdgeInsets.all(30.0),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            //alignment: Alignment(-1.6, 0),
-            child: Container(
-              child: Text(
-                "Deposit funds to Hermez to earn rewards.",
-                style: TextStyle(
-                    color: HermezColors.blackTwo,
-                    fontFamily: 'ModernEra',
-                    fontWeight: FontWeight.w700,
-                    height: 1.5,
-                    fontSize: 18),
-                textAlign: TextAlign.left,
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(30.0),
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                child: Text(
+                  this.rewardsType == RewardsType.FINISHED
+                      ? "Community Rewards Round is over"
+                      : "Deposit funds to Hermez to earn rewards.",
+                  style: TextStyle(
+                      color: HermezColors.blackTwo,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w700,
+                      height: 1.5,
+                      fontSize: 18),
+                  textAlign: TextAlign.left,
+                ),
               ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 20.0),
-            child: Image.asset("assets/rewards.png"),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            //alignment: Alignment(-1.6, 0),
-            child: Container(
-              padding: EdgeInsets.only(top: 20.0, bottom: 10.0),
-              child: Text(
-                "Thank you for participating in the Hermez reward program."
-                " You will receive your HEZ in next few days.",
-                style: TextStyle(
-                    color: HermezColors.blackTwo,
-                    fontFamily: 'ModernEra',
-                    fontWeight: FontWeight.w500,
-                    height: 1.6,
-                    fontSize: 16),
-                textAlign: TextAlign.justify,
-              ),
+            Container(
+              padding: EdgeInsets.only(top: 20.0),
+              child: Image.asset("assets/rewards.png"),
             ),
-          ),
-          Container(
-              child: FlatButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-                side: BorderSide(color: HermezColors.lightGrey)),
-            onPressed: null,
-            padding: EdgeInsets.all(24.0),
-            color: HermezColors.lightGrey,
-            textColor: Colors.black,
-            disabledColor: HermezColors.lightGrey,
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Column(
+            this.rewardsType == RewardsType.ONGOING
+                ? Container(
+                    margin: EdgeInsets.only(top: 20),
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          side: BorderSide(color: HermezColors.lightGrey)),
+                      onPressed: null,
+                      padding: EdgeInsets.all(24.0),
+                      color: HermezColors.lightGrey,
+                      textColor: Colors.black,
+                      disabledColor: HermezColors.lightGrey,
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                  '3d 24h 20m left',
+                                  style: TextStyle(
+                                    color: HermezColors.blackTwo,
+                                    fontSize: 18,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Container(),
+            this.rewardsType == RewardsType.ONGOING && this.eligible == false
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    //alignment: Alignment(-1.6, 0),
+                    child: Container(
+                      margin: EdgeInsets.only(top: 20),
+                      child: Text(
+                        "Action required for eligibility",
+                        style: TextStyle(
+                            color: HermezColors.blueyGreyTwo,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                            fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  )
+                : Container(),
+            this.rewardsType == RewardsType.FINISHED
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    //alignment: Alignment(-1.6, 0),
+                    child: Container(
+                      padding: EdgeInsets.only(top: 20.0, bottom: 10.0),
+                      child: Text(
+                        "Thank you for participating in the Hermez reward program."
+                        " You will receive your HEZ in next few days.",
+                        style: TextStyle(
+                            color: HermezColors.blackTwo,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                            height: 1.6,
+                            fontSize: 16),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        //alignment: Alignment(-1.6, 0),
-                        child: Container(
-                          padding: EdgeInsets.only(bottom: 10.0),
-                          child: Text(
-                            'Your total reward',
-                            style: TextStyle(
-                              color: HermezColors.blueyGreyTwo,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                    children: [
+                      this.rewardsType == RewardsType.ONGOING
+                          ? Container(
+                              margin: EdgeInsets.only(
+                                  top: this.rewardsType != RewardsType.ERROR &&
+                                          this.eligible == false
+                                      ? 17
+                                      : 27,
+                                  right: 10),
+                              alignment: Alignment.topLeft,
+                              child: SvgPicture.asset(
+                                this.eligible == true
+                                    ? "assets/green_tick.svg"
+                                    : "assets/red_alert.svg",
+                                width: 16,
+                                height: 16,
+                              ),
+                            )
+                          : Container(),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          //alignment: Alignment(-1.6, 0),
+                          child: Container(
+                            margin: EdgeInsets.only(
+                                top: this.rewardsType != RewardsType.ERROR &&
+                                        this.eligible == false
+                                    ? 10
+                                    : 20,
+                                bottom: 20),
+                            child: Text(
+                              this.rewardsType == RewardsType.ERROR
+                                  ? "There was a problem "
+                                      "loading the information on this page. "
+                                      "Please, try to access it again later."
+                                  : this.eligible == true
+                                      ? "You are eligible to earn rewards"
+                                      : "Make at least 2 transactions to other Hermez accounts.",
+                              style: TextStyle(
+                                  color: HermezColors.blackTwo,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.5,
+                                  fontSize: 18),
+                              textAlign: TextAlign.left,
                             ),
                           ),
                         ),
+                      )
+                    ],
+                  ),
+            this.rewardsType != RewardsType.ERROR
+                ? Container(
+                    child: FlatButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        side: BorderSide(color: HermezColors.lightGrey)),
+                    onPressed: null,
+                    padding: EdgeInsets.all(24.0),
+                    color: HermezColors.lightGrey,
+                    textColor: Colors.black,
+                    disabledColor: HermezColors.lightGrey,
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                //alignment: Alignment(-1.6, 0),
+                                child: Container(
+                                  padding: EdgeInsets.only(bottom: 10.0),
+                                  child: Text(
+                                    this.rewardsType == RewardsType.FINISHED
+                                        ? 'Your total reward'
+                                        : 'Reward over your funds',
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGreyTwo,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                this.rewardsType == RewardsType.FINISHED
+                                    ? '12.3 HEZ (\$43.12)'
+                                    : '0.65%',
+                                style: TextStyle(
+                                  color: HermezColors.blackTwo,
+                                  fontSize: 18,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              this.rewardsType == RewardsType.ONGOING
+                                  ? Align(
+                                      alignment: Alignment.centerLeft,
+                                      //alignment: Alignment(-1.6, 0),
+                                      child: Container(
+                                        padding: EdgeInsets.only(
+                                            top: 20, bottom: 10.0),
+                                        child: Text(
+                                          'You earned so far',
+                                          style: TextStyle(
+                                            color: HermezColors.blueyGreyTwo,
+                                            fontFamily: 'ModernEra',
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
+                              this.rewardsType == RewardsType.ONGOING
+                                  ? Text(
+                                      '12.3 HEZ (\$43.12)',
+                                      style: TextStyle(
+                                        color: HermezColors.blackTwo,
+                                        fontSize: 18,
+                                        fontFamily: 'ModernEra',
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                  : Container(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))
+                : Container(),
+            this.rewardsType != RewardsType.ERROR
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 25),
+                        alignment: Alignment.topLeft,
+                        child: SvgPicture.asset(
+                          "assets/info.svg",
+                          width: 16,
+                          height: 16,
+                          color: HermezColors.steel,
+                        ),
                       ),
-                      Text(
-                        '12.3 HEZ (\$43.12)',
-                        style: TextStyle(
-                          color: HermezColors.blackTwo,
-                          fontSize: 18,
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
+                      Expanded(
+                        child: Container(
+                          margin:
+                              EdgeInsets.only(top: 20, left: 15, bottom: 20),
+                          child: Text(
+                            this.rewardsType == RewardsType.ONGOING
+                                ? "Values are estimated and updated once per day."
+                                    " You will receive your reward at the"
+                                    " end of the program."
+                                : "The value of the reward is estimated, "
+                                    "it may vary slightly from the reward finally "
+                                    "received.",
+                            style: TextStyle(
+                                color: HermezColors.blueyGreyTwo,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w600,
+                                height: 1.5,
+                                fontSize: 16),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
                       ),
                     ],
-                  ),
+                  )
+                : Container(),
+            Container(
+              margin: EdgeInsets.only(bottom: 20),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding:
+                      EdgeInsets.only(left: 23, right: 23, bottom: 16, top: 16),
+                  backgroundColor: HermezColors.lightGrey,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
                 ),
-              ],
+                onPressed: () {},
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'More info',
+                      style: TextStyle(
+                        color: HermezColors.blueyGreyTwo,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Image.asset(
+                      'assets/show_explorer.png',
+                      height: 16,
+                      width: 16,
+                      color: HermezColors.blueyGreyTwo,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ))
-        ],
+          ],
+        ),
       ),
     );
   }
