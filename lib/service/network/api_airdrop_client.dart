@@ -3,13 +3,13 @@ library api_testing_flutter_kata;
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:hermez/service/network/api_client_exceptions.dart';
 import 'package:hermez/service/network/model/active_airdrops_response.dart';
 import 'package:hermez/service/network/model/airdrop.dart';
 import 'package:hermez/service/network/model/env_settings_response.dart';
 import 'package:hermez/service/network/model/user_eligibility_response.dart';
 import 'package:http/http.dart' as http2;
 
+import 'api_airdrop_exceptions.dart';
 import 'model/accumulated_earned_reward_request.dart';
 import 'model/airdrop_response.dart';
 import 'model/earned_reward_request.dart';
@@ -188,11 +188,44 @@ class ApiAirdropClient {
 
   http2.Response returnResponseOrThrowException(http2.Response response) {
     if (response.statusCode == 301) {
-      // airdrop with id 2 already ended, so estimated reward is zer
-      throw UnknownApiException(response.statusCode);
+      // airdrop with id 2 already ended, so estimated reward is zero
+      throw AirdropAlreadyEndedException();
     } else if (response.statusCode == 401) {
       // Not found
-      throw ItemNotFoundException();
+      throw AirdropNotFoundException();
+    } else if (response.statusCode == 402) {
+      // Not found
+      throw LatestEthBlockNotFoundException();
+    } else if (response.statusCode == 403) {
+      // Not found
+      throw HezTokenNotFoundException();
+    } else if (response.statusCode == 404) {
+      // Not found
+      throw AccountNotFoundByAccountIndexException();
+    } else if (response.statusCode == 405) {
+      // Not found
+      throw AccountNotFoundByEthAddrOrBjjException();
+    } else if (response.statusCode == 406) {
+      // Not found
+      throw AccountBalanceNotFoundException();
+    } else if (response.statusCode == 407) {
+      // Not found
+      throw CurrentPriceNotFoundException();
+    } else if (response.statusCode == 408) {
+      // Not found
+      throw WeightNotFoundException();
+    } else if (response.statusCode == 409) {
+      // Not found
+      throw TokenNotFoundException();
+    } else if (response.statusCode == 410) {
+      // Not found
+      throw AirdropStateNotFoundException();
+    } else if (response.statusCode == 411) {
+      // Not found
+      throw TokenStateNotFoundException();
+    } else if (response.statusCode == 510) {
+      // Not found
+      throw FailedToCreateDecimalFromStringException();
     } else if (response.statusCode == 500) {
       throw InternalServerErrorException();
     } else if (response.statusCode > 400) {
