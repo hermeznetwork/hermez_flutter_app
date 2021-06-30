@@ -5,25 +5,32 @@ EnvParams params = Env().params['local'];
 
 class Env {
   Env() {
-    params['mainnet'] = EnvParams("https://etherscan.io",
-        "http://api.etherscan.io/api", ETHERSCAN_API_KEY);
+    params['mainnet'] = EnvParams(
+      "https://etherscan.io",
+      "http://api.etherscan.io/api",
+      ETHERSCAN_API_KEY,
+      "airdrop.hermez.io",
+    );
 
     params['rinkeby'] = EnvParams(
       "https://rinkeby.etherscan.io",
       "http://api-rinkeby.etherscan.io/api",
       ETHERSCAN_API_KEY,
+      "airdrop.testnet.hermez.io",
     );
 
     params['goerli'] = EnvParams(
       "https://goerli.etherscan.io",
       "http://api-goerli.etherscan.io/api",
       ETHERSCAN_API_KEY,
+      "airdrop.internaltestnet.hermez.io",
     );
 
     params['local'] = EnvParams(
       "https://etherscan.io",
       "http://api-goerli.etherscan.io/api",
       ETHERSCAN_API_KEY,
+      "airdrop.internaltestnet.hermez.io",
     );
   }
 
@@ -39,10 +46,12 @@ class Env {
 }
 
 class EnvParams {
-  EnvParams(this.etherscanUrl, this.etherscanApiUrl, this.etherscanApiKey);
+  EnvParams(this.etherscanUrl, this.etherscanApiUrl, this.etherscanApiKey,
+      this.airdropUrl);
   final String etherscanUrl;
   final String etherscanApiUrl;
   final String etherscanApiKey;
+  final String airdropUrl;
 }
 
 /// Gets the current supported environments

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
+import 'package:hermez/service/airdrop_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/exchange_service.dart';
@@ -30,6 +31,7 @@ class WalletProvider extends ContextProviderWidget<WalletHandler> {
     final storageService = Provider.of<StorageService>(context);
     final hermezService = Provider.of<HermezService>(context);
     final exchangeService = Provider.of<ExchangeService>(context);
+    final airdropService = Provider.of<AirdropService>(context);
     final handler = useMemoized(
       () => WalletHandler(
           store,
@@ -39,7 +41,8 @@ class WalletProvider extends ContextProviderWidget<WalletHandler> {
           configurationService,
           storageService,
           hermezService,
-          exchangeService),
+          exchangeService,
+          airdropService),
       [addressService, store],
     );
 

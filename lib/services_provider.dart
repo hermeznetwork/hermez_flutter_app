@@ -3,6 +3,7 @@ import 'package:hermez/constants.dart';
 import 'package:hermez/environment.dart';
 import 'package:hermez/secrets/keys.dart';
 import 'package:hermez/service/address_service.dart';
+import 'package:hermez/service/airdrop_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/exchange_service.dart';
@@ -24,6 +25,7 @@ Future<List<SingleChildWidget>> createProviders(EnvParams walletParams) async {
   final hermezService = HermezService(configurationService);
   final exchangeService =
       ExchangeService(FIAT_EXCHANGE_RATES_API_URL, EXCHANGE_RATES_API_KEY);
+  final airdropService = AirdropService(walletParams.airdropUrl);
   final client = HermezSDK.currentWeb3Client;
   final contractService = ContractService(
       client, configurationService, ETH_GAS_PRICE_URL, ETH_GAS_STATION_API_KEY);
@@ -37,6 +39,7 @@ Future<List<SingleChildWidget>> createProviders(EnvParams walletParams) async {
     Provider.value(value: storageService),
     Provider.value(value: configurationService),
     Provider.value(value: hermezService),
-    Provider.value(value: exchangeService)
+    Provider.value(value: exchangeService),
+    Provider.value(value: airdropService),
   ];
 }

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/constants.dart';
@@ -7,6 +8,8 @@ import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez_sdk/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'network/model/airdrop.dart';
 
 abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
@@ -22,6 +25,7 @@ abstract class IConfigurationService {
   Future<void> setBiometricsFingerprint(bool value);
   Future<void> setBiometricsFace(bool value);
   Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value);
+  Future<void> setActiveAirdrops(List<Airdrop> value);
   Future<void> setLevelSelected(TransactionLevel value);
   Future<void> setupDone(bool value);
   Future<void> backupDone(bool value);
@@ -38,6 +42,7 @@ abstract class IConfigurationService {
   bool getBiometricsFingerprint();
   bool getBiometricsFace();
   double getExchangeRatio(String currency);
+  List<Airdrop> getActiveAirdrops();
   Future<TransactionLevel> getLevelSelected();
   bool didSetupWallet();
   bool didBackupWallet();
@@ -139,6 +144,14 @@ class ConfigurationService implements IConfigurationService {
     value.forEach(
         (key, value) => exchangeRatios.add(key + "," + value.toString()));
     await _preferences.setStringList("exchangeRatio", exchangeRatios);
+  }
+
+  @override
+  Future<void> setActiveAirdrops(List<Airdrop> value) async {
+    List<String> activeAirdrops = List.empty(growable: true);
+    value
+        .forEach((airdrop) => activeAirdrops.add(jsonEncode(airdrop.toJson())));
+    await _preferences.setStringList("activeAirdrops", activeAirdrops);
   }
 
   @override
@@ -246,6 +259,16 @@ class ConfigurationService implements IConfigurationService {
       }
     }
     return 0.0;
+  }
+
+  @override
+  List<Airdrop> getActiveAirdrops() {
+    List<Airdrop> activeAirdrops = List.empty(growable: true);
+    List<String> storedValue = _preferences.getStringList("activeAirdrops");
+    storedValue.forEach((airdrop) {
+      activeAirdrops.add(Airdrop.fromJson(json.decode(airdrop)));
+    });
+    return activeAirdrops;
   }
 
   @override

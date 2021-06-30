@@ -7,6 +7,7 @@ import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/address_service.dart';
+import 'package:hermez/service/airdrop_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/exchange_service.dart';
@@ -45,7 +46,8 @@ class WalletHandler {
       this._configurationService,
       this._storageService,
       this._hermezService,
-      this._exchangeService);
+      this._exchangeService,
+      this._airdropService);
 
   final Store<Wallet, WalletAction> _store;
   final AddressService _addressService;
@@ -55,6 +57,7 @@ class WalletHandler {
   final ConfigurationService _configurationService;
   final HermezService _hermezService;
   final ExchangeService _exchangeService;
+  final AirdropService _airdropService;
 
   Wallet get state => _store.state;
 
@@ -156,6 +159,11 @@ class WalletHandler {
               .split(".")
               .last]));
     }
+
+    final activeAirdrops = await _airdropService.getActiveAirdrops();
+    print("Active Airdrops: " + activeAirdrops.toString());
+    await _configurationService.setActiveAirdrops(activeAirdrops);
+    _store.dispatch(ActiveAirdropsUpdated(activeAirdrops));
 
     //final state = await getState();
 

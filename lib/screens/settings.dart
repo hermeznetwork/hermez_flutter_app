@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/components/wallet/backup_row.dart';
 import 'package:hermez/components/wallet/rewards_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/settings_details.dart';
@@ -56,14 +57,36 @@ class SettingsPage extends HookWidget {
   }
 
   buildSettingsList() {
+    int itemCount = 3;
+    if (!configurationService.didBackupWallet()) {
+      itemCount++;
+    }
+    if (configurationService.getActiveAirdrops() != null &&
+        configurationService.getActiveAirdrops().length > 0) {
+      itemCount++;
+    }
     return Container(
       color: Colors.white,
       child: ListView.separated(
         shrinkWrap: true,
-        itemCount: configurationService.didBackupWallet() ? 3 : 4,
+        itemCount: itemCount,
         separatorBuilder: (BuildContext context, int index) {
-          if (index == 0 && !configurationService.didBackupWallet()) {
-            return Container();
+          if (configurationService.getActiveAirdrops() != null &&
+              configurationService.getActiveAirdrops().length > 0 &&
+              index == 0) {
+            return Container(
+              padding: const EdgeInsets.only(bottom: 10.0),
+            );
+          } else if (!configurationService.didBackupWallet() &&
+              ((configurationService.getActiveAirdrops() != null &&
+                      configurationService.getActiveAirdrops().length > 0 &&
+                      index == 1) ||
+                  (configurationService.getActiveAirdrops() == null ||
+                      configurationService.getActiveAirdrops().length == 0 &&
+                          index == 0))) {
+            return Container(
+              padding: const EdgeInsets.only(bottom: 10.0),
+            );
           } else {
             return Container(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
@@ -78,11 +101,9 @@ class SettingsPage extends HookWidget {
           // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
 
           // final index = i ~/ 2; //get the actual index excluding dividers.
-
-          if (!configurationService.didBackupWallet() && i == 0) {
-            /*return BackupRow( () {
-              Navigator.of(parentContext).pushNamed("/backup_info");
-            });*/
+          if (configurationService.getActiveAirdrops() != null &&
+              configurationService.getActiveAirdrops().length > 0 &&
+              i == 0) {
             return RewardsRow(
                 parentContext,
                 RewardsType
@@ -90,18 +111,35 @@ class SettingsPage extends HookWidget {
               Navigator.of(parentContext).pushNamed("/backup_info");
             }*/
                 );
+          } else if (!configurationService.didBackupWallet() &&
+              ((configurationService.getActiveAirdrops() != null &&
+                      configurationService.getActiveAirdrops().length > 0 &&
+                      i == 1) ||
+                  (configurationService.getActiveAirdrops() == null ||
+                      configurationService.getActiveAirdrops().length == 0 &&
+                          i == 0))) {
+            return BackupRow(() {
+              Navigator.of(parentContext).pushNamed("/backup_info");
+            });
           } else {
             String title = "";
 
-            final index = i + (configurationService.didBackupWallet() ? 1 : 0);
+            int index = i;
+            if (!configurationService.didBackupWallet()) {
+              index--;
+            }
+            if (configurationService.getActiveAirdrops() != null &&
+                configurationService.getActiveAirdrops().length > 0) {
+              index--;
+            }
             switch (index) {
-              case 1:
+              case 0:
                 title = "General";
                 break;
-              case 2:
+              case 1:
                 title = "Security";
                 break;
-              case 3:
+              case 2:
                 title = "Advanced";
                 break;
             }
@@ -128,17 +166,17 @@ class SettingsPage extends HookWidget {
               ),
               onTap: () {
                 switch (index) {
-                  case 1:
+                  case 0:
                     Navigator.of(context).pushNamed("settings_details",
                         arguments: SettingsDetailsArguments(
                             store, parentContext, SettingsDetailsType.GENERAL));
                     break;
-                  case 2:
+                  case 1:
                     Navigator.of(context).pushNamed("settings_details",
                         arguments: SettingsDetailsArguments(store,
                             parentContext, SettingsDetailsType.SECURITY));
                     break;
-                  case 3:
+                  case 2:
                     Navigator.of(context)
                         .pushNamed("settings_details",
                             arguments: SettingsDetailsArguments(store,

@@ -14,8 +14,8 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   //setEnvironment('goerli');
-  //setEnvironment('rinkeby');
-  setEnvironment('mainnet');
+  setEnvironment('rinkeby');
+  //setEnvironment('mainnet');
 
   final stores = await createProviders(getCurrentEnvironment());
 
