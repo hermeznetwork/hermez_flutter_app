@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:hermez/service/network/model/active_airdrops_response.dart';
 import 'package:hermez/service/network/model/airdrop.dart';
 import 'package:hermez/service/network/model/env_settings_response.dart';
+import 'package:hermez/service/network/model/reward_percentage_response.dart';
 import 'package:hermez/service/network/model/user_eligibility_response.dart';
 import 'package:http/http.dart' as http2;
 
@@ -63,18 +64,28 @@ class ApiAirdropClient {
 
   // Is used to get percentage of the reward that will be distributed
   // today by the airdropID
-  Future<String> getRewardPercentage(String airdropID) async {
+  Future<String> getRewardPercentage(int airdropID) async {
     final response =
-        await _get(REWARD_PERCENTAGE_URL, {"airdropID": airdropID});
+        await _get(REWARD_PERCENTAGE_URL, {"airdropID": airdropID.toString()});
+    final RewardPercentageResponse rewardPercentageResponse =
+        RewardPercentageResponse.fromJson(json.decode(response.body));
+    return rewardPercentageResponse.percentage;
   }
 
   // Is used to get info if user is eligible to get a reward
   // for the airdrop or not by the accountIndex and airdropID
-  Future<bool> checkUserEligibility(int airdropID, int accountIndex) async {
-    final response = await _get(CHECK_USER_ELIGIBILITY_URL, {
+  Future<bool> checkUserEligibility(int airdropID,
+      {String ethereumAddress, int accountIndex = -1}) async {
+    var params = {
       "airdropID": airdropID.toString(),
-      "accountIndex": accountIndex.toString()
-    });
+    };
+    if (accountIndex != null && accountIndex != -1) {
+      params.putIfAbsent('accountIndex', () => accountIndex.toString());
+    }
+    if (ethereumAddress != null && ethereumAddress.isNotEmpty) {
+      params.putIfAbsent('ethAddr', () => ethereumAddress);
+    }
+    final response = await _get(CHECK_USER_ELIGIBILITY_URL, params);
     final UserEligibilityResponse userEligibilityResponse =
         UserEligibilityResponse.fromJson(json.decode(response.body));
     return userEligibilityResponse.isUserEligible;
@@ -113,7 +124,7 @@ class ApiAirdropClient {
   Future<http2.Response> _get(
       String endpoint, Map<String, String> queryParameters) async {
     try {
-      var uri;
+      Uri uri;
       if (queryParameters != null) {
         uri = Uri.https(_baseAddress, endpoint, queryParameters);
       } else {

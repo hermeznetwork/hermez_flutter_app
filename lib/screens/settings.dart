@@ -106,6 +106,7 @@ class SettingsPage extends HookWidget {
               i == 0) {
             return RewardsRow(
                 parentContext,
+                configurationService.getActiveAirdrops()[0],
                 RewardsType
                     .ONGOING /* () {
               Navigator.of(parentContext).pushNamed("/backup_info");

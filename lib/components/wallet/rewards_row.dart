@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/service/network/model/airdrop.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 enum RewardsType { ONGOING, FINISHED, ERROR }
 
 class RewardsRow extends StatelessWidget {
-  RewardsRow(this.parentContext, this.rewardsType,
+  RewardsRow(this.parentContext, this.airdrop, this.rewardsType,
       {this.eligible = false} /*this.onPressed*/);
 
   final BuildContext parentContext;
+  final Airdrop airdrop;
   final RewardsType rewardsType;
   final bool eligible;
   //final void Function() onPressed;
@@ -152,7 +154,7 @@ class RewardsRow extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 Text(
-                                  '3d 24h 20m left',
+                                  calculateTimeLeft(),
                                   style: TextStyle(
                                     color: HermezColors.blackTwo,
                                     fontSize: 18,
@@ -246,7 +248,9 @@ class RewardsRow extends StatelessWidget {
                                       "Please, try to access it again later."
                                   : this.eligible == true
                                       ? "You are eligible to earn rewards"
-                                      : "Make at least 2 transactions to other Hermez accounts.",
+                                      : "Make at least " +
+                                          this.airdrop.minTx.toString() +
+                                          " transactions to other Hermez accounts.",
                               style: TextStyle(
                                   color: HermezColors.blackTwo,
                                   fontFamily: 'ModernEra',
@@ -423,5 +427,27 @@ class RewardsRow extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String calculateTimeLeft() {
+    final currentTime = DateTime.now();
+    final initTime =
+        DateTime.fromMillisecondsSinceEpoch(this.airdrop.initTimestamp * 1000);
+    if (currentTime.millisecondsSinceEpoch >= initTime.millisecondsSinceEpoch) {
+      final passedTime =
+          currentTime.millisecondsSinceEpoch - initTime.millisecondsSinceEpoch;
+      final timeLeft = (this.airdrop.duration * 1000) - passedTime;
+      final duration = Duration(milliseconds: timeLeft);
+      final days = duration.inDays;
+      final hours = duration.inHours - (days * 24);
+      final minutes = duration.inMinutes - (hours * 60) - (days * 24 * 60);
+      return days.toString() +
+          "d " +
+          hours.toString() +
+          "h " +
+          minutes.toString() +
+          "m left";
+    }
+    return "";
   }
 }
