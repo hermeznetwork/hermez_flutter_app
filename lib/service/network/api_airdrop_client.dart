@@ -37,8 +37,12 @@ class ApiAirdropClient {
 
   // estimated-reward is used to get the estimated reward while an AirDrop
   // is happening (actual timestamp less than init_timestamp+duration)
-  getEstimatedReward() async {
-    final response = await _get(ESTIMATED_REWARD_URL, null);
+  Future<EarnedRewardResponse> getEstimatedReward(
+      EarnedRewardRequest request) async {
+    final response = await _get(ESTIMATED_REWARD_URL, request.toQueryParams());
+    final EarnedRewardResponse earnedRewardResponse =
+        EarnedRewardResponse.fromJson(json.decode(response.body));
+    return earnedRewardResponse;
   }
 
   // Earned-reward is used to get final reward calculated after

@@ -38,10 +38,10 @@ class MoveRow extends StatelessWidget {
                     color: HermezColors.lightGrey,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Image.asset(
+                  child: SvgPicture.asset(
                     (transactionLevel == TransactionLevel.LEVEL1
-                        ? 'assets/ethereum_logo.png'
-                        : 'assets/hermez_logo.png'),
+                        ? 'assets/ethereum_logo.svg'
+                        : 'assets/hermez_logo.svg'),
                     width: 30,
                     height: 30,
                   ),
@@ -84,10 +84,10 @@ class MoveRow extends StatelessWidget {
                     color: HermezColors.lightGrey,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Image.asset(
+                  child: SvgPicture.asset(
                     (transactionLevel == TransactionLevel.LEVEL1
-                        ? 'assets/hermez_logo.png'
-                        : 'assets/ethereum_logo.png'),
+                        ? 'assets/hermez_logo.svg'
+                        : 'assets/ethereum_logo.svg'),
                     width: 30,
                     height: 30,
                   ),
