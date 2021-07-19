@@ -1646,7 +1646,6 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   Future<bool> isCreatedHermezAccount(String value) async {
-    // TODO: check if hez internal address is working too
     accountIsCreated = isHermezEthereumAddress(value)
         ? await widget.arguments.store
             .getCreateAccountAuthorization(getEthereumAddress(value))
