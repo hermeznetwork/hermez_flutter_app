@@ -1638,7 +1638,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                     .toLowerCase()) !=
                 strip0x(address.toLowerCase())) ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL2 &&
-            isHermezEthereumAddress(address) &&
+            (isHermezEthereumAddress(address) || isHermezBjjAddress(address)) &&
             getHermezAddress(widget.arguments.store.state.ethereumAddress)
                     .toLowerCase() !=
                 address.toLowerCase() &&
@@ -1646,6 +1646,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   Future<bool> isCreatedHermezAccount(String value) async {
+    // TODO: check if hez internal address is working too
     accountIsCreated = isHermezEthereumAddress(value)
         ? await widget.arguments.store
             .getCreateAccountAuthorization(getEthereumAddress(value))
