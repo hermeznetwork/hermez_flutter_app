@@ -34,8 +34,7 @@ abstract class IHermezService {
       web3.EthereumAddress ethereumAddress, String bjj, String signature);
   Future<CreateAccountAuthorization> getCreateAccountAuthorization(
       web3.EthereumAddress ethereumAddress);
-  Future<List<Account>> getAccounts(
-      web3.EthereumAddress ethereumAddress, List<int> tokenIds,
+  Future<List<Account>> getAccounts(String hezAddress, List<int> tokenIds,
       {int fromItem = 0,
       PaginationOrder order = PaginationOrder.ASC,
       int limit = DEFAULT_PAGE_SIZE});
@@ -108,13 +107,11 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<List<Account>> getAccounts(
-      web3.EthereumAddress ethereumAddress, List<int> tokenIds,
+  Future<List<Account>> getAccounts(String hezAddress, List<int> tokenIds,
       {int fromItem = 0,
       PaginationOrder order = PaginationOrder.ASC,
       int limit = DEFAULT_PAGE_SIZE}) async {
-    final accountsResponse = await api.getAccounts(
-        addresses.getHermezAddress(ethereumAddress.hex), tokenIds,
+    final accountsResponse = await api.getAccounts(hezAddress, tokenIds,
         fromItem: fromItem, order: order, limit: limit);
     return accountsResponse.accounts;
   }
@@ -168,7 +165,11 @@ class HermezService implements IHermezService {
     try {
       final l2TxResult =
           await tx.generateAndSendL2Tx(transaction, wallet, token);
-      return l2TxResult != null;
+      if (l2TxResult != null && l2TxResult['status'] == 200) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return false;
     }
@@ -177,8 +178,12 @@ class HermezService implements IHermezService {
   @override
   Future<bool> sendL2Transaction(Transaction transaction, String bjj) async {
     try {
-      final response = await tx.sendL2Transaction(transaction.toJson(), bjj);
-      return response.isNotEmpty;
+      final l2TxResult = await tx.sendL2Transaction(transaction.toJson(), bjj);
+      if (l2TxResult != null && l2TxResult['status'] == 200) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return false;
     }

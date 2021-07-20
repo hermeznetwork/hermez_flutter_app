@@ -29,16 +29,16 @@ class AddressUtils {
 
   static String strip0x(String address) {
     if (address.toLowerCase().startsWith("0x")) {
-      return address.substring(2);
+      address = address.substring(2);
     }
     return address;
   }
 
   static String stripHez0x(String address) {
-    if (address.toLowerCase().startsWith("hez:0x")) {
-      return address.substring(6);
+    if (address.toLowerCase().startsWith("hez:")) {
+      address = address.substring(4);
     }
-    return address;
+    return strip0x(address);
   }
 
   /// Derives an Ethereum address from a given public key.

@@ -188,107 +188,6 @@ class WalletHandler {
     });*/
   }
 
-  /*Future<void> fetchOwnL1Balance() async {
-    if (state != null && state.ethereumAddress != null) {
-      final supportedTokens = await _hermezService.getTokens();
-      _store.dispatch(UpdatingBalance());
-
-      web3.EtherAmount ethBalance = web3.EtherAmount.zero();
-      Map<String, BigInt> tokensBalance = Map();
-      List<Account> accounts = List();
-
-      for (Token token in supportedTokens) {
-        if (token.id == 0) {
-          // GET L1 ETH Balance
-          ethBalance = await _contractService.getEthBalance(
-              web3.EthereumAddress.fromHex(state.ethereumAddress));
-
-          if (ethBalance.getInWei > BigInt.zero) {
-            final account = Account(
-                accountIndex: "0",
-                balance: ethBalance.getInWei.toString(),
-                bjj: "",
-                hezEthereumAddress: state.ethereumAddress,
-                itemId: 0,
-                nonce: 0,
-                token: token);
-            accounts.add(account);
-          }
-        } else {
-          var tokenBalance = BigInt.zero;
-          try {
-            tokenBalance = await _contractService.getTokenBalance(
-                web3.EthereumAddress.fromHex(state.ethereumAddress),
-                web3.EthereumAddress.fromHex(token.ethereumAddress),
-                token.name);
-          } catch (error) {}
-          if (tokenBalance > BigInt.zero) {
-            var tokenAmount = web3.EtherAmount.fromUnitAndValue(
-                web3.EtherUnit.wei, tokenBalance);
-            final account = Account(
-                accountIndex: "0",
-                balance: tokenAmount.getInWei.toString(),
-                bjj: "",
-                hezEthereumAddress: state.ethereumAddress,
-                itemId: 0,
-                nonce: 0,
-                token: token);
-            accounts.add(account);
-            tokensBalance[token.symbol] = tokenBalance;
-          }
-        }
-      }
-
-      _store.dispatch(
-          BalanceUpdated(ethBalance.getInWei, tokensBalance, accounts));
-    }
-  }
-
-  Future<void> fetchOwnL2Balance() async {
-    final accounts = await _hermezService.getAccounts(
-        web3.EthereumAddress.fromHex(state.ethereumAddress), [3, 87, 91]);
-    _store.dispatch(UpdatingBalance());
-
-    List<Account> L2accounts = List();
-    var ethBalance = web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei, 0);
-
-    Map<String, BigInt> tokensBalance = Map();
-
-    for (Account account in accounts) {
-      var balance = BigInt.parse(account.balance);
-      // if tokenId == 0 -> ETH
-      if (account.token.symbol == "ETH") {
-        ethBalance =
-            web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei, balance);
-      } else {
-        tokensBalance[account.token.symbol] = balance;
-      }
-    }
-
-    //var accounts = await _hermezService
-    //    .getAccounts(web3.EthereumAddress.fromHex(state.address));
-
-    // TEST ENVIRONMENT
-    /*Map<String, String> headers = {
-      'X-CMC_PRO_API_KEY': '87529169-9e17-4393-939e-39c4737dbd80',
-      'Content-Type': 'application/json; charset=UTF-8',
-      "Accept": "application/json",
-    };
-    String _apiURL =
-        "https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=100&convert=USD";
-    String symbols = "ETH,USDT,BNB,LINK,LEO,USDC,HT,VEST,COMP,MKR,HEDG,BAT,INO,CRO,ZRX,OKB,KNC,SNX,LEND";//,HT,VEST,COMP,MKR,HEDG,cUSDC,BAT,INO,CRO,ZRX,OKB,KNC,SNX,LEND";
-    String _apiURL2 =
-        "https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=$symbols&convert=USD";
-    var response = await http.get(_apiURL2, headers: headers); //waits for response
-    String body = response.body;
-    Map result = jsonDecode(body);
-    var cryptoList = result["data"].values.toList();*/
-    //final cryptoList = List();
-
-    _store.dispatch(
-        BalanceUpdated(ethBalance.getInWei, tokensBalance, L2accounts));
-  }*/
-
   Future<bool> getAccounts() async {
     try {
       //_store.dispatch(UpdatingWallet());
@@ -407,15 +306,14 @@ class WalletHandler {
   }
 
   Future<List<Account>> getL2Accounts(
-      {String ethereumAddress, List<int> tokenIds}) async {
-    if (ethereumAddress == null) {
-      ethereumAddress = state.ethereumAddress;
+      {String hezAddress, List<int> tokenIds}) async {
+    if (hezAddress == null) {
+      hezAddress = addresses.getHermezAddress(state.ethereumAddress);
     }
     if (tokenIds == null) {
       tokenIds = [];
     }
-    final accounts = await _hermezService.getAccounts(
-        web3.EthereumAddress.fromHex(ethereumAddress), tokenIds);
+    final accounts = await _hermezService.getAccounts(hezAddress, tokenIds);
 
     return accounts;
   }
@@ -979,11 +877,13 @@ class WalletHandler {
 
     final transferTx = {
       'from': from.accountIndex,
-      'to': to.accountIndex != null ? to.accountIndex : to.hezEthereumAddress,
-      //'toBjj': null,
+      'to': to.accountIndex != null
+          ? to.accountIndex
+          : to.hezEthereumAddress != null
+              ? to.hezEthereumAddress
+              : to.bjj,
       'amount': HermezCompressedAmount.compressAmount(amount),
       'fee': fee,
-      //'nonce': from.nonce
     };
 
     final success = await _hermezService.generateAndSendL2Tx(
@@ -1125,6 +1025,11 @@ class WalletHandler {
         tokenId: account.token.id,
         fromItem: fromItem);
     return _hermezService.getForgedTransactions(request);
+  }
+
+  Future<String> getBabyJubJubBase64() async {
+    final ethereumPrivateKey = await _configurationService.getPrivateKey();
+    return await _addressService.getBabyJubJubBase64(ethereumPrivateKey);
   }
 
   Future<void> resetWallet() async {
