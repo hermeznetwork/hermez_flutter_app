@@ -1638,10 +1638,15 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                     .toLowerCase()) !=
                 strip0x(address.toLowerCase())) ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL2 &&
-            isHermezEthereumAddress(address) &&
-            getHermezAddress(widget.arguments.store.state.ethereumAddress)
-                    .toLowerCase() !=
-                address.toLowerCase() &&
+            (isHermezEthereumAddress(address) &&
+                    getHermezAddress(
+                                widget.arguments.store.state.ethereumAddress)
+                            .toLowerCase() !=
+                        address.toLowerCase() ||
+                isHermezBjjAddress(address) &&
+                    (await widget.arguments.store.getBabyJubJubBase64())
+                            .toLowerCase() !=
+                        address.toLowerCase()) &&
             await isCreatedHermezAccount(address));
   }
 

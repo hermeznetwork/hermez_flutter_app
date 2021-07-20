@@ -649,15 +649,21 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         (widget.arguments.store.state.txLevel ==
                                     TransactionLevel.LEVEL1
                                 ? "0x" +
-                                    AddressUtils.strip0x(widget
-                                            .arguments.addressFrom
+                                    AddressUtils.strip0x(widget.arguments.addressFrom
                                             .substring(0, 6))
                                         .toUpperCase()
-                                : "hez:0x" +
-                                    AddressUtils.stripHez0x(widget
-                                            .arguments.addressFrom
-                                            .substring(0, 10))
-                                        .toUpperCase()) +
+                                : isHermezEthereumAddress(
+                                        widget.arguments.addressFrom)
+                                    ? "hez:0x" +
+                                        AddressUtils.stripHez0x(widget
+                                                .arguments.addressFrom
+                                                .substring(0, 10))
+                                            .toUpperCase()
+                                    : "hez:" +
+                                        AddressUtils.stripHez0x(widget
+                                                .arguments.addressFrom
+                                                .substring(0, 8))
+                                            .toUpperCase()) +
                             " ･･･ " +
                             widget.arguments.addressFrom
                                 .substring(
@@ -801,15 +807,21 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         (widget.arguments.store.state.txLevel ==
                                     TransactionLevel.LEVEL1
                                 ? "0x" +
-                                    AddressUtils.strip0x(widget
-                                            .arguments.addressTo
+                                    AddressUtils.strip0x(widget.arguments.addressTo
                                             .substring(0, 6))
                                         .toUpperCase()
-                                : "hez:0x" +
-                                    AddressUtils.stripHez0x(widget
-                                            .arguments.addressTo
-                                            .substring(0, 10))
-                                        .toUpperCase()) +
+                                : isHermezEthereumAddress(
+                                        widget.arguments.addressTo)
+                                    ? "hez:0x" +
+                                        AddressUtils.stripHez0x(widget
+                                                .arguments.addressTo
+                                                .substring(0, 10))
+                                            .toUpperCase()
+                                    : "hez:" +
+                                        AddressUtils.stripHez0x(widget
+                                                .arguments.addressTo
+                                                .substring(0, 8))
+                                            .toUpperCase()) +
                             " ･･･ " +
                             widget.arguments.addressTo
                                 .substring(
@@ -1475,13 +1487,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           break;
         default:
           {
-            final ethereumAddress =
-                getEthereumAddress(widget.arguments.addressTo);
             final accounts = await widget.arguments.store.getL2Accounts(
-                ethereumAddress: ethereumAddress,
+                hezAddress: widget.arguments.addressTo,
                 tokenIds: [widget.arguments.token.id]);
-            final accountCreated = await widget.arguments.store
-                .getCreateAccountAuthorization(ethereumAddress);
+            bool accountCreated = true;
+            if (isHermezEthereumAddress(widget.arguments.addressTo)) {
+              final ethereumAddress =
+                  getEthereumAddress(widget.arguments.addressTo);
+              accountCreated = await widget.arguments.store
+                  .getCreateAccountAuthorization(ethereumAddress);
+            }
             var receiverAccount;
             final fees = await widget.arguments.store.fetchFees();
             var transactionFee;
