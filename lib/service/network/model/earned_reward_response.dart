@@ -1,15 +1,15 @@
 class EarnedRewardResponse {
-  final String earnedReward;
+  final String earnedRewards;
 
-  EarnedRewardResponse({this.earnedReward});
+  EarnedRewardResponse({this.earnedRewards});
 
   factory EarnedRewardResponse.fromJson(Map<String, dynamic> json) {
     return EarnedRewardResponse(
-      earnedReward: json['earnedReward'],
+      earnedRewards: json['earnedRewards'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'earnedReward': earnedReward,
+        'earnedRewards': earnedRewards,
       };
 }

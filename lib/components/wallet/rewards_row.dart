@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/service/network/model/airdrop.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/service/network/model/airdrop_info.dart';
+import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez_sdk/model/token.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-enum RewardsType { ONGOING, FINISHED, ERROR }
-
 class RewardsRow extends StatelessWidget {
-  RewardsRow(this.parentContext, this.airdrop, this.rewardsType,
-      {this.eligible = false} /*this.onPressed*/);
+  RewardsRow(
+      this.parentContext, this.airdropInfo, this.store /*this.onPressed*/);
 
   final BuildContext parentContext;
-  final Airdrop airdrop;
-  final RewardsType rewardsType;
-  final bool eligible;
+  final AirdropInfo airdropInfo;
+  final WalletHandler store;
   //final void Function() onPressed;
 
   Widget build(BuildContext context) {
+    Token token = store.state.tokens.firstWhere((token) => token.id == 1);
     return Container(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
@@ -84,15 +85,42 @@ class RewardsRow extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.only(top: 5.0, bottom: 10.0),
               child: Text(
-                this.rewardsType == RewardsType.ERROR
+                /*this.rewardsType == RewardsType.ERROR
                     ? "There was a problem "
                         "loading the information on this page. "
                         "Please, try to access it again later."
-                    : this.rewardsType == RewardsType.FINISHED
-                        ? "Thank you for participating in the Hermez reward program."
-                            " Your total reward is 12.3 HEZ (\$43.12)"
-                        : "Reward over your funds is 0.65%. You earned so far"
-                            " 37.82 HEZ (\$107.33)",
+                    :*/
+                this.airdropInfo.airdrop.status != "IN_PROGRESS"
+                    ? "Thank you for participating in the Hermez reward program."
+                            " Your total reward is " +
+                        EthAmountFormatter.formatAmount(
+                            this.airdropInfo.earnedReward, "HEZ") +
+                        ' (' +
+                        EthAmountFormatter.formatAmount(
+                            (this.airdropInfo.earnedReward *
+                                token.USD *
+                                (this
+                                            .store
+                                            .state
+                                            .defaultCurrency
+                                            .toString()
+                                            .split(".")
+                                            .last !=
+                                        'USD'
+                                    ? this.store.state.exchangeRatio
+                                    : 1)),
+                            this
+                                .store
+                                .state
+                                .defaultCurrency
+                                .toString()
+                                .split(".")
+                                .last) +
+                        ')'
+                    : "Reward over your funds is 0.65%. You earned so far " +
+                        EthAmountFormatter.formatAmount(
+                            this.airdropInfo.earnedReward, "HEZ") +
+                        " (\$107.33)",
                 style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'ModernEra',
@@ -109,6 +137,7 @@ class RewardsRow extends StatelessWidget {
   }
 
   Widget _buildRewardsPage() {
+    Token token = store.state.tokens.firstWhere((token) => token.id == 1);
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.all(30.0),
@@ -118,7 +147,7 @@ class RewardsRow extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Container(
                 child: Text(
-                  this.rewardsType == RewardsType.FINISHED
+                  this.airdropInfo.airdrop.status != "IN_PROGRESS"
                       ? "Community Rewards Round is over"
                       : "Deposit funds to Hermez to earn rewards.",
                   style: TextStyle(
@@ -135,7 +164,7 @@ class RewardsRow extends StatelessWidget {
               padding: EdgeInsets.only(top: 20.0),
               child: Image.asset("assets/rewards.png"),
             ),
-            this.rewardsType == RewardsType.ONGOING
+            this.airdropInfo.airdrop.status == "IN_PROGRESS"
                 ? Container(
                     margin: EdgeInsets.only(top: 20),
                     child: FlatButton(
@@ -170,7 +199,8 @@ class RewardsRow extends StatelessWidget {
                     ),
                   )
                 : Container(),
-            this.rewardsType == RewardsType.ONGOING && this.eligible == false
+            this.airdropInfo.airdrop.status == "IN_PROGRESS" &&
+                    this.airdropInfo.eligible == false
                 ? Align(
                     alignment: Alignment.centerLeft,
                     //alignment: Alignment(-1.6, 0),
@@ -189,7 +219,7 @@ class RewardsRow extends StatelessWidget {
                     ),
                   )
                 : Container(),
-            this.rewardsType == RewardsType.FINISHED
+            this.airdropInfo.airdrop.status != "IN_PROGRESS"
                 ? Align(
                     alignment: Alignment.centerLeft,
                     //alignment: Alignment(-1.6, 0),
@@ -212,17 +242,17 @@ class RewardsRow extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      this.rewardsType == RewardsType.ONGOING
+                      this.airdropInfo.airdrop.status == "IN_PROGRESS"
                           ? Container(
                               margin: EdgeInsets.only(
-                                  top: this.rewardsType != RewardsType.ERROR &&
-                                          this.eligible == false
-                                      ? 17
-                                      : 27,
+                                  top: /*this.rewardsType != RewardsType.ERROR &&*/
+                                      this.airdropInfo.eligible == false
+                                          ? 17
+                                          : 27,
                                   right: 10),
                               alignment: Alignment.topLeft,
                               child: SvgPicture.asset(
-                                this.eligible == true
+                                this.airdropInfo.eligible == true
                                     ? "assets/green_tick.svg"
                                     : "assets/red_alert.svg",
                                 width: 16,
@@ -236,21 +266,22 @@ class RewardsRow extends StatelessWidget {
                           //alignment: Alignment(-1.6, 0),
                           child: Container(
                             margin: EdgeInsets.only(
-                                top: this.rewardsType != RewardsType.ERROR &&
-                                        this.eligible == false
-                                    ? 10
-                                    : 20,
+                                top: /*this.rewardsType != RewardsType.ERROR &&*/
+                                    this.airdropInfo.eligible == false
+                                        ? 10
+                                        : 20,
                                 bottom: 20),
                             child: Text(
-                              this.rewardsType == RewardsType.ERROR
+                              /*this.rewardsType == RewardsType.ERROR
                                   ? "There was a problem "
                                       "loading the information on this page. "
                                       "Please, try to access it again later."
-                                  : this.eligible == true
-                                      ? "You are eligible to earn rewards"
-                                      : "Make at least " +
-                                          this.airdrop.minTx.toString() +
-                                          " transactions to other Hermez accounts.",
+                                  :*/
+                              this.airdropInfo.eligible == true
+                                  ? "You are eligible to earn rewards"
+                                  : "Make at least 2" +
+                                      //this.airdrop.minTx.toString() +
+                                      " transactions to other Hermez accounts.",
                               style: TextStyle(
                                   color: HermezColors.blackTwo,
                                   fontFamily: 'ModernEra',
@@ -264,32 +295,86 @@ class RewardsRow extends StatelessWidget {
                       )
                     ],
                   ),
-            this.rewardsType != RewardsType.ERROR
-                ? Container(
-                    child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        side: BorderSide(color: HermezColors.lightGrey)),
-                    onPressed: null,
-                    padding: EdgeInsets.all(24.0),
-                    color: HermezColors.lightGrey,
-                    textColor: Colors.black,
-                    disabledColor: HermezColors.lightGrey,
-                    child: Row(
+            /*this.rewardsType != RewardsType.ERROR
+                ?*/
+            Container(
+                child: FlatButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  side: BorderSide(color: HermezColors.lightGrey)),
+              onPressed: null,
+              padding: EdgeInsets.all(24.0),
+              color: HermezColors.lightGrey,
+              textColor: Colors.black,
+              disabledColor: HermezColors.lightGrey,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Align(
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          //alignment: Alignment(-1.6, 0),
+                          child: Container(
+                            padding: EdgeInsets.only(bottom: 10.0),
+                            child: Text(
+                              this.airdropInfo.airdrop.status != "IN_PROGRESS"
+                                  ? 'Your total reward'
+                                  : 'Reward over your funds',
+                              style: TextStyle(
+                                color: HermezColors.blueyGreyTwo,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          this.airdropInfo.airdrop.status != "IN_PROGRESS"
+                              ? EthAmountFormatter.formatAmount(
+                                      this.airdropInfo.earnedReward, "HEZ") +
+                                  ' (' +
+                                  EthAmountFormatter.formatAmount(
+                                      (this.airdropInfo.earnedReward *
+                                          token.USD *
+                                          (this
+                                                      .store
+                                                      .state
+                                                      .defaultCurrency
+                                                      .toString()
+                                                      .split(".")
+                                                      .last !=
+                                                  'USD'
+                                              ? this.store.state.exchangeRatio
+                                              : 1)),
+                                      this
+                                          .store
+                                          .state
+                                          .defaultCurrency
+                                          .toString()
+                                          .split(".")
+                                          .last) +
+                                  ')'
+                              : this.airdropInfo.rewardPercentage.toString() +
+                                  "%",
+                          style: TextStyle(
+                            color: HermezColors.blackTwo,
+                            fontSize: 18,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        this.airdropInfo.airdrop.status == "IN_PROGRESS"
+                            ? Align(
                                 alignment: Alignment.centerLeft,
                                 //alignment: Alignment(-1.6, 0),
                                 child: Container(
-                                  padding: EdgeInsets.only(bottom: 10.0),
+                                  padding:
+                                      EdgeInsets.only(top: 20, bottom: 10.0),
                                   child: Text(
-                                    this.rewardsType == RewardsType.FINISHED
-                                        ? 'Your total reward'
-                                        : 'Reward over your funds',
+                                    'You earned so far',
                                     style: TextStyle(
                                       color: HermezColors.blueyGreyTwo,
                                       fontFamily: 'ModernEra',
@@ -298,95 +383,89 @@ class RewardsRow extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              ),
-                              Text(
-                                this.rewardsType == RewardsType.FINISHED
-                                    ? '12.3 HEZ (\$43.12)'
-                                    : '0.65%',
+                              )
+                            : Container(),
+                        this.airdropInfo.airdrop.status == "IN_PROGRESS"
+                            ? Text(
+                                EthAmountFormatter.formatAmount(
+                                        this.airdropInfo.earnedReward, "HEZ") +
+                                    ' (' +
+                                    EthAmountFormatter.formatAmount(
+                                        (this.airdropInfo.earnedReward *
+                                            token.USD *
+                                            (this
+                                                        .store
+                                                        .state
+                                                        .defaultCurrency
+                                                        .toString()
+                                                        .split(".")
+                                                        .last !=
+                                                    'USD'
+                                                ? this.store.state.exchangeRatio
+                                                : 1)),
+                                        this
+                                            .store
+                                            .state
+                                            .defaultCurrency
+                                            .toString()
+                                            .split(".")
+                                            .last) +
+                                    ')',
                                 style: TextStyle(
                                   color: HermezColors.blackTwo,
                                   fontSize: 18,
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w700,
                                 ),
-                              ),
-                              this.rewardsType == RewardsType.ONGOING
-                                  ? Align(
-                                      alignment: Alignment.centerLeft,
-                                      //alignment: Alignment(-1.6, 0),
-                                      child: Container(
-                                        padding: EdgeInsets.only(
-                                            top: 20, bottom: 10.0),
-                                        child: Text(
-                                          'You earned so far',
-                                          style: TextStyle(
-                                            color: HermezColors.blueyGreyTwo,
-                                            fontFamily: 'ModernEra',
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : Container(),
-                              this.rewardsType == RewardsType.ONGOING
-                                  ? Text(
-                                      '12.3 HEZ (\$43.12)',
-                                      style: TextStyle(
-                                        color: HermezColors.blackTwo,
-                                        fontSize: 18,
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    )
-                                  : Container(),
-                            ],
-                          ),
-                        ),
+                              )
+                            : Container(),
                       ],
                     ),
-                  ))
-                : Container(),
-            this.rewardsType != RewardsType.ERROR
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(top: 25),
-                        alignment: Alignment.topLeft,
-                        child: SvgPicture.asset(
-                          "assets/info.svg",
-                          width: 16,
-                          height: 16,
-                          color: HermezColors.steel,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          margin:
-                              EdgeInsets.only(top: 20, left: 15, bottom: 20),
-                          child: Text(
-                            this.rewardsType == RewardsType.ONGOING
-                                ? "Values are estimated and updated once per day."
-                                    " You will receive your reward at the"
-                                    " end of the program."
-                                : "The value of the reward is estimated, "
-                                    "it may vary slightly from the reward finally "
-                                    "received.",
-                            style: TextStyle(
-                                color: HermezColors.blueyGreyTwo,
-                                fontFamily: 'ModernEra',
-                                fontWeight: FontWeight.w600,
-                                height: 1.5,
-                                fontSize: 16),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : Container(),
+                  ),
+                ],
+              ),
+            ))
+            /*: Container()*/,
+            /*this.rewardsType != RewardsType.ERROR
+                ?*/
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 25),
+                  alignment: Alignment.topLeft,
+                  child: SvgPicture.asset(
+                    "assets/info.svg",
+                    width: 16,
+                    height: 16,
+                    color: HermezColors.steel,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(top: 20, left: 15, bottom: 20),
+                    child: Text(
+                      this.airdropInfo.airdrop.status == "IN_PROGRESS"
+                          ? "Values are estimated and updated once per day."
+                              " You will receive your reward at the"
+                              " end of the program."
+                          : "The value of the reward is estimated, "
+                              "it may vary slightly from the reward finally "
+                              "received.",
+                      style: TextStyle(
+                          color: HermezColors.blueyGreyTwo,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w600,
+                          height: 1.5,
+                          fontSize: 16),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            //: Container(),
             Container(
               margin: EdgeInsets.only(bottom: 20),
               child: TextButton(
@@ -430,24 +509,31 @@ class RewardsRow extends StatelessWidget {
   }
 
   String calculateTimeLeft() {
-    final currentTime = DateTime.now();
-    final initTime =
-        DateTime.fromMillisecondsSinceEpoch(this.airdrop.initTimestamp * 1000);
-    if (currentTime.millisecondsSinceEpoch >= initTime.millisecondsSinceEpoch) {
-      final passedTime =
-          currentTime.millisecondsSinceEpoch - initTime.millisecondsSinceEpoch;
-      final timeLeft = (this.airdrop.duration * 1000) - passedTime;
-      final duration = Duration(milliseconds: timeLeft);
-      final days = duration.inDays;
-      final hours = duration.inHours - (days * 24);
-      final minutes = duration.inMinutes - (hours * 60) - (days * 24 * 60);
-      return days.toString() +
-          "d " +
-          hours.toString() +
-          "h " +
-          minutes.toString() +
-          "m left";
+    int lastBlockNum = 30000000; //this.state.network.lastEthereumBlock;
+    double blockFrequencyTime = 13.0;
+    // average block time ethereum
+    int passedTime = 0;
+    if (lastBlockNum >= this.airdropInfo.airdrop.initialEthereumBlock) {
+      int passedBlocks =
+          lastBlockNum - this.airdropInfo.airdrop.initialEthereumBlock;
+      passedTime = (passedBlocks * blockFrequencyTime).toInt();
+      print('PASSED TIME: ' + (passedTime).toString());
     }
-    return "";
+    final airdropDuration = ((this.airdropInfo.airdrop.finalEthereumBlock -
+                this.airdropInfo.airdrop.initialEthereumBlock) *
+            blockFrequencyTime)
+        .toInt();
+
+    final timeLeft = airdropDuration - passedTime;
+    final duration = Duration(milliseconds: timeLeft);
+    final days = duration.inDays;
+    final hours = duration.inHours - (days * 24);
+    final minutes = duration.inMinutes - (hours * 60) - (days * 24 * 60);
+    return days.toString() +
+        "d " +
+        hours.toString() +
+        "h " +
+        minutes.toString() +
+        "m left";
   }
 }

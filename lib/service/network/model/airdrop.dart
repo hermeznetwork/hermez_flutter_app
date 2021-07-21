@@ -1,41 +1,35 @@
+enum AirdropStatus { IN_PROGRESS, CLOSED, PAID }
+
 class Airdrop {
-  final int airdropId;
-  final int initTimestamp;
-  final int duration;
-  final String reward;
-  final int minTx;
-  final String name;
-  final bool isClosed;
+  final int id;
+  final String budget;
+  final int initialEthereumBlock;
+  final int finalEthereumBlock;
+  final String status;
 
   Airdrop({
-    this.airdropId,
-    this.initTimestamp,
-    this.duration,
-    this.reward,
-    this.minTx,
-    this.name,
-    this.isClosed,
+    this.id,
+    this.budget,
+    this.initialEthereumBlock,
+    this.finalEthereumBlock,
+    this.status,
   });
 
   factory Airdrop.fromJson(Map<String, dynamic> json) {
     return Airdrop(
-      airdropId: json['airdropId'],
-      initTimestamp: json['initTimestamp'],
-      duration: json['duration'],
-      reward: json['reward'],
-      minTx: json['minTx'],
-      name: json['name'],
-      isClosed: json['isClosed'],
+      id: json['id'],
+      budget: json['budget'],
+      initialEthereumBlock: json['initialEthereumBlock'],
+      finalEthereumBlock: json['finalEthereumBlock'],
+      status: json['status'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'airdropId': airdropId,
-        'initTimestamp': initTimestamp,
-        'duration': duration,
-        'reward': reward,
-        'minTx': minTx,
-        'name': name,
-        'isClosed': isClosed,
+        'id': id,
+        'budget': budget,
+        'initialEthereumBlock': initialEthereumBlock,
+        'finalEthereumBlock': finalEthereumBlock,
+        'status': status,
       };
 }

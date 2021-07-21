@@ -1,5 +1,5 @@
 class RewardPercentageResponse {
-  final String percentage;
+  final double percentage;
 
   RewardPercentageResponse({this.percentage});
 

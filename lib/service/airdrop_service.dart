@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:hermez/service/network/api_airdrop_client.dart';
-import 'package:hermez/service/network/model/active_airdrops_response.dart';
 
 import 'network/model/accumulated_earned_reward_request.dart';
 import 'network/model/airdrop.dart';
 
 abstract class IAirdropService {
   Future<List<Airdrop>> getActiveAirdrops();
+  Future<Airdrop> getAirdrop(int airdropID);
   Future<double> getRewardPercentage(int airdropID);
   Future<bool> checkUserEligibility(int airdropID,
       {String ethereumAddress = "", int accountIndex = -1});
@@ -23,18 +23,33 @@ class AirdropService implements IAirdropService {
   Future<List<Airdrop>> getActiveAirdrops() async {
     bool isRunning = await _apiAirdropClient().getEnvIsRunning();
     if (isRunning) {
-      ActiveAirdropsResponse response =
-          await _apiAirdropClient().getActiveAirdrops();
-      return response.airdrops;
+      List<Airdrop> response = await _apiAirdropClient().getAllAirdrops();
+      if (response != null && response.length > 0) {
+        response.removeWhere((airdrop) => airdrop.status == "PAID");
+        return response;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<Airdrop> getAirdrop(int airdropID) async {
+    bool isRunning = await _apiAirdropClient().getEnvIsRunning();
+    if (isRunning) {
+      Airdrop response = await _apiAirdropClient().getAirdrop(airdropID);
+      return response;
     } else {
       return null;
     }
   }
 
   Future<double> getRewardPercentage(int airdropID) async {
-    String percentage =
+    double percentage =
         await _apiAirdropClient().getRewardPercentage(airdropID);
-    return double.tryParse(percentage) ?? 0.0;
+    return percentage;
   }
 
   Future<bool> checkUserEligibility(int airdropID,
@@ -51,7 +66,7 @@ class AirdropService implements IAirdropService {
         accountIndex: accountIndex.toString());
     final earnedRewardResponse = await _apiAirdropClient()
         .getAccumulatedEarnedReward(accumulatedEarnedRequest);
-    return double.tryParse(earnedRewardResponse.earnedReward) ?? 0;
+    return double.tryParse(earnedRewardResponse.earnedRewards) ?? 0;
     /*EarnedRewardRequest(
         ethAddr: ethereumAddress, accountIndex: accountIndex.toString());*/
     /*return await _apiAirdropClient().getEarnedReward(airdropID,

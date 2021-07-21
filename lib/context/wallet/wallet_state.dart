@@ -1,6 +1,6 @@
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez/service/network/model/airdrop.dart';
+import 'package:hermez/service/network/model/airdrop_info.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
@@ -72,7 +72,7 @@ class ExchangeRatioUpdated extends WalletAction {
 
 class ActiveAirdropsUpdated extends WalletAction {
   ActiveAirdropsUpdated(this.activeAirdrops);
-  final List<Airdrop> activeAirdrops;
+  final List<AirdropInfo> activeAirdrops;
 }
 
 class LevelUpdated extends WalletAction {

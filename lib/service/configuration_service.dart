@@ -9,7 +9,7 @@ import 'package:hermez/service/storage_service.dart';
 import 'package:hermez_sdk/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'network/model/airdrop.dart';
+import 'network/model/airdrop_info.dart';
 
 abstract class IConfigurationService {
   Future<void> setMnemonic(String value);
@@ -25,7 +25,7 @@ abstract class IConfigurationService {
   Future<void> setBiometricsFingerprint(bool value);
   Future<void> setBiometricsFace(bool value);
   Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value);
-  Future<void> setActiveAirdrops(List<Airdrop> value);
+  Future<void> setActiveAirdrops(List<AirdropInfo> value);
   Future<void> setLevelSelected(TransactionLevel value);
   Future<void> setupDone(bool value);
   Future<void> backupDone(bool value);
@@ -42,7 +42,7 @@ abstract class IConfigurationService {
   bool getBiometricsFingerprint();
   bool getBiometricsFace();
   double getExchangeRatio(String currency);
-  List<Airdrop> getActiveAirdrops();
+  List<AirdropInfo> getActiveAirdrops();
   Future<TransactionLevel> getLevelSelected();
   bool didSetupWallet();
   bool didBackupWallet();
@@ -147,7 +147,7 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  Future<void> setActiveAirdrops(List<Airdrop> value) async {
+  Future<void> setActiveAirdrops(List<AirdropInfo> value) async {
     List<String> activeAirdrops = List.empty(growable: true);
     value
         .forEach((airdrop) => activeAirdrops.add(jsonEncode(airdrop.toJson())));
@@ -262,11 +262,11 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  List<Airdrop> getActiveAirdrops() {
-    List<Airdrop> activeAirdrops = List.empty(growable: true);
+  List<AirdropInfo> getActiveAirdrops() {
+    List<AirdropInfo> activeAirdrops = List.empty(growable: true);
     List<String> storedValue = _preferences.getStringList("activeAirdrops");
     storedValue.forEach((airdrop) {
-      activeAirdrops.add(Airdrop.fromJson(json.decode(airdrop)));
+      activeAirdrops.add(AirdropInfo.fromJson(json.decode(airdrop)));
     });
     return activeAirdrops;
   }

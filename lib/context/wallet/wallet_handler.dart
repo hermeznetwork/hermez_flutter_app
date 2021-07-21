@@ -13,6 +13,8 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/network/model/airdrop.dart';
+import 'package:hermez/service/network/model/airdrop_info.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
@@ -160,28 +162,39 @@ class WalletHandler {
               .last]));
     }
 
-    final activeAirdrops = await _airdropService.getActiveAirdrops();
-    print("Active Airdrops: " + activeAirdrops.toString());
+    /*final List<Airdrop> activeAirdrops =
+        await _airdropService.getActiveAirdrops();*/
+    final List<Airdrop> activeAirdrops = [await _airdropService.getAirdrop(1)];
+    //print("Active Airdrops: " + activeAirdrops.toString());
+    List<AirdropInfo> airdropInfos = List.empty(growable: true);
     if (activeAirdrops != null && activeAirdrops.length > 0) {
       final ethereumAddress = await _configurationService.getEthereumAddress();
 
-      final rewardPercentage = await _airdropService
-          .getRewardPercentage(activeAirdrops[0].airdropId);
-      print("Reward Percentage: " + rewardPercentage.toString());
+      for (int i = 0; i < activeAirdrops.length; i++) {
+        final rewardPercentage =
+            await _airdropService.getRewardPercentage(activeAirdrops[0].id);
+        print("Reward Percentage: " + rewardPercentage.toString());
 
-      final eligible = await _airdropService.checkUserEligibility(
-          activeAirdrops[0].airdropId,
-          ethereumAddress: ethereumAddress);
-      print("Eligible: " + eligible.toString());
+        final eligible = await _airdropService.checkUserEligibility(
+            activeAirdrops[0].id,
+            ethereumAddress: ethereumAddress);
+        print("Eligible: " + eligible.toString());
 
-      final earnedReward = await _airdropService.getEarnedReward(
-          [activeAirdrops[0].airdropId, 15],
-          ethereumAddress: ethereumAddress);
+        final earnedReward = await _airdropService.getEarnedReward(
+            [activeAirdrops[0].id],
+            ethereumAddress: ethereumAddress);
+        print("Earned Reward: " + earnedReward.toString());
 
-      print("Earned Reward: " + earnedReward.toString());
+        AirdropInfo airdropInfo = AirdropInfo(
+            airdrop: activeAirdrops[i],
+            rewardPercentage: rewardPercentage,
+            eligible: eligible,
+            earnedReward: earnedReward);
+        airdropInfos.add(airdropInfo);
+      }
     }
-    await _configurationService.setActiveAirdrops(activeAirdrops);
-    _store.dispatch(ActiveAirdropsUpdated(activeAirdrops));
+    await _configurationService.setActiveAirdrops(airdropInfos);
+    _store.dispatch(ActiveAirdropsUpdated(airdropInfos));
 
     await authorizeAccountCreation();
   }

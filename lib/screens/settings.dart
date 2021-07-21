@@ -105,13 +105,12 @@ class SettingsPage extends HookWidget {
               configurationService.getActiveAirdrops().length > 0 &&
               i == 0) {
             return RewardsRow(
-                parentContext,
-                configurationService.getActiveAirdrops()[0],
-                RewardsType
-                    .ONGOING /* () {
+              parentContext,
+              configurationService.getActiveAirdrops()[0],
+              this.store, /* () {
               Navigator.of(parentContext).pushNamed("/backup_info");
             }*/
-                );
+            );
           } else if (!configurationService.didBackupWallet() &&
               ((configurationService.getActiveAirdrops() != null &&
                       configurationService.getActiveAirdrops().length > 0 &&
