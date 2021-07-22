@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:hermez_sdk/addresses.dart' as addresses;
-import 'package:hermez_sdk/api.dart';
 import 'package:hermez_sdk/api.dart' as api;
 import 'package:hermez_sdk/constants.dart';
 import 'package:hermez_sdk/hermez_compressed_amount.dart';
@@ -36,7 +35,7 @@ abstract class IHermezService {
       web3.EthereumAddress ethereumAddress);
   Future<List<Account>> getAccounts(String hezAddress, List<int> tokenIds,
       {int fromItem = 0,
-      PaginationOrder order = PaginationOrder.ASC,
+      api.PaginationOrder order = api.PaginationOrder.ASC,
       int limit = DEFAULT_PAGE_SIZE});
   Future<Account> getAccount(String accountIndex);
   Future<List<Exit>> getExits(web3.EthereumAddress ethereumAddress);
@@ -109,7 +108,7 @@ class HermezService implements IHermezService {
   @override
   Future<List<Account>> getAccounts(String hezAddress, List<int> tokenIds,
       {int fromItem = 0,
-      PaginationOrder order = PaginationOrder.ASC,
+      api.PaginationOrder order = api.PaginationOrder.ASC,
       int limit = DEFAULT_PAGE_SIZE}) async {
     final accountsResponse = await api.getAccounts(hezAddress, tokenIds,
         fromItem: fromItem, order: order, limit: limit);

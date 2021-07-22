@@ -1,31 +1,27 @@
 library api_testing_flutter_kata;
 
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:hermez/service/network/api_client_exceptions.dart';
-import 'package:hermez/service/network/model/rates_request.dart';
+import 'package:hermez/service/network/model/currencies_response.dart';
 import 'package:http/http.dart' as http2;
 
-import 'model/rates_response.dart';
+import 'model/currency.dart';
 
 class ApiExchangeRateClient {
   final String _baseAddress;
-  final String _apiKey;
 
-  final String LATEST_URL = "/v1/latest";
+  final String CURRENCIES_URL = "/v1/currencies";
 
-  ApiExchangeRateClient(this._baseAddress, this._apiKey);
+  ApiExchangeRateClient(this._baseAddress);
 
   // EXCHANGE RATE
-
-  Future<LinkedHashMap<String, dynamic>> getExchangeRates(
-      RatesRequest request) async {
-    final response = await _get(LATEST_URL, request.toQueryParams());
-    final RatesResponse ratesResponse =
-        RatesResponse.fromJson(json.decode(response.body));
-    return ratesResponse.rates;
+  Future<List<Currency>> getExchangeRates() async {
+    final response = await _get(CURRENCIES_URL, null);
+    final CurrenciesResponse currenciesResponse =
+        CurrenciesResponse.fromJson(json.decode(response.body));
+    return currenciesResponse.currencies;
   }
 
   Future<http2.Response> _get(

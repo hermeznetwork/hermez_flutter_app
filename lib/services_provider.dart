@@ -22,8 +22,7 @@ Future<List<SingleChildWidget>> createProviders(EnvParams walletParams) async {
       ConfigurationService(localStorage, secureStorage, storageService);
   final addressService = AddressService(configurationService);
   final hermezService = HermezService(configurationService);
-  final exchangeService =
-      ExchangeService(FIAT_EXCHANGE_RATES_API_URL, EXCHANGE_RATES_API_KEY);
+  final exchangeService = ExchangeService();
   final client = HermezSDK.currentWeb3Client;
   final contractService = ContractService(
       client, configurationService, ETH_GAS_PRICE_URL, ETH_GAS_STATION_API_KEY);

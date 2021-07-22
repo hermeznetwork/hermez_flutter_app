@@ -2,28 +2,29 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:hermez/service/network/api_exchange_rate_client.dart';
-import 'package:hermez/service/network/model/rates_request.dart';
+import 'package:hermez_sdk/api.dart' as api;
+
+import 'network/model/currency.dart';
 
 abstract class IExchangeService {
-  Future<LinkedHashMap<String, dynamic>> getFiatExchangeRates(
-      List<String> symbols);
+  Future<LinkedHashMap<String, dynamic>> getFiatExchangeRates();
 }
 
 class ExchangeService implements IExchangeService {
-  String _exchangeUrl;
-  String _exchangeApiKey;
-  ExchangeService(this._exchangeUrl, this._exchangeApiKey);
+  ExchangeService();
 
-  ApiExchangeRateClient _apiExchangeRateClient() =>
-      ApiExchangeRateClient(_exchangeUrl, _exchangeApiKey);
+  ApiExchangeRateClient _apiExchangeRateClient() {
+    String baseUrl = api.getBaseApiUrl();
+    return ApiExchangeRateClient(baseUrl);
+  }
 
   @override
-  Future<LinkedHashMap<String, dynamic>> getFiatExchangeRates(
-      List<String> symbols) async {
-    final request = RatesRequest.fromJson(
-        {"base": "USD", "symbols": symbols, "access_key": _exchangeApiKey});
-    LinkedHashMap<String, dynamic> response =
-        await _apiExchangeRateClient().getExchangeRates(request);
-    return response;
+  Future<LinkedHashMap<String, dynamic>> getFiatExchangeRates() async {
+    LinkedHashMap<String, dynamic> result = LinkedHashMap<String, dynamic>();
+    List<Currency> response = await _apiExchangeRateClient().getExchangeRates();
+    response.forEach((currency) {
+      result[currency.currency] = currency.price;
+    });
+    return result;
   }
 }

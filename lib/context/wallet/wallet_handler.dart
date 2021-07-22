@@ -133,8 +133,7 @@ class WalletHandler {
     _store.dispatch(DefaultFeeUpdated(defaultFee));
 
     try {
-      final exchangeRatio = await _exchangeService
-          .getFiatExchangeRates(["EUR", "CNY", "JPY", "GBP"]);
+      final exchangeRatio = await _exchangeService.getFiatExchangeRates();
       await _configurationService.setExchangeRatio(exchangeRatio);
       _store.dispatch(ExchangeRatioUpdated(exchangeRatio[
           (await _configurationService.getDefaultCurrency())
