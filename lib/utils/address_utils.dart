@@ -24,7 +24,7 @@ class AddressUtils {
       return false;
     }
 
-    return addr == checksumAddress.substring(2);
+    return addr.toLowerCase() == checksumAddress.substring(2).toLowerCase();
   }
 
   static String strip0x(String address) {

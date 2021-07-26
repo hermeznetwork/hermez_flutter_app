@@ -36,6 +36,8 @@ dependencies:
   flutter_secure_storage: ^4.2.0
   qr_flutter: ^4.0.0
   qr_code_scanner: ^0.5.1
+  qr_code_tools: ^0.0.7
+  image_picker: ^0.8.2
   path_provider: ^2.0.2
   share_plus: ^2.1.4
   permission_handler: ^8.1.0
