@@ -196,22 +196,14 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                         }
                       },
                     ),
-                    Container(
-                      height: 56,
-                      width: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: HermezColors.mediumOrange,
-                      ),
-                      child: IconButton(
-                        iconSize: 12,
-                        padding: EdgeInsets.all(0),
-                        icon: Image.asset("assets/share.png",
-                            width: 20, height: 20),
-                        onPressed: () async {
-                          _getQrByGallery();
-                        },
-                      ),
+                    IconButton(
+                      iconSize: 56,
+                      padding: EdgeInsets.all(0),
+                      icon: SvgPicture.asset("assets/qr_gallery.svg",
+                          width: 56, height: 56),
+                      onPressed: () async {
+                        _getQrByGallery();
+                      },
                     ),
                   ],
                 ),

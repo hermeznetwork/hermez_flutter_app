@@ -102,6 +102,8 @@ flutter:
     - move.svg
     - hermez_logo.png
     - ethereum_logo.png
+    - qr_hermez_logo.svg
+    - qr_hermez_logo.png
     - change_move_enable.svg
     - change_move_disable.svg
     - deposit3.png
@@ -130,6 +132,7 @@ flutter:
     - flash_on.png
     # - flash_on.svg
     - flash_off.svg
+    - qr_gallery.svg
 
     # Amount
     - arrow_right.svg
@@ -149,6 +152,7 @@ flutter:
     - paste.png
     - force_exit.png
     - qr_code.png
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

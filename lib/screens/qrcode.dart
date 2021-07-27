@@ -94,38 +94,41 @@ class _QRCodePageState extends State<QRCodePage> {
                 ] : null
               ),
       body: SafeArea(
+        child:
+        SingleChildScrollView(
         child: Column(
           children: [
-            Expanded(
-                flex: 1,
-                child: new Center(
-                  child: SingleChildScrollView(
-                    child: new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+            !widget.arguments.isReceive ?
+            Container(
+              margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                    widget.arguments.qrCodeType == QRCodeType.HERMEZ ?
+                    'Use this code to transfer tokens from another Hermez account.' :
+                    'Transfer tokens to your Ethereum wallet first and'
+                        ' then move them to your Hermez wallet.',
+                    style: TextStyle(
+                      color: HermezColors.steel,
+                      fontSize: 18,
+                      height: 1.5,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w500,
+                    )),
+              ),
+            ): Container( margin: EdgeInsets.only(bottom: 50),
+            ), Center(
+                    child:RepaintBoundary(
+                      key: qrCodeKey,
+                      child:Container( color: HermezColors.lightOrange,child:
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        !widget.arguments.isReceive ?
-                        Container(
-                          margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                                widget.arguments.qrCodeType == QRCodeType.HERMEZ ?
-                                'Use this code to transfer tokens from another Hermez account.' :
-                                'Transfer tokens to your Ethereum wallet first and'
-                                    ' then move them to your Hermez wallet.',
-                                style: TextStyle(
-                                  color: HermezColors.steel,
-                                  fontSize: 18,
-                                  height: 1.5,
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w500,
-                                )),
-                          ),
-                        ): Container(),
-                        RepaintBoundary(
-                          key: qrCodeKey,
-                          child: QrImage(
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            QrImage(
                               size: 290,
                               padding: EdgeInsets.all(20),
                               dataModuleStyle: QrDataModuleStyle(
@@ -135,6 +138,10 @@ class _QRCodePageState extends State<QRCodePage> {
                                   eyeShape: QrEyeShape.square,
                                   color: Colors.black),
                               backgroundColor: HermezColors.lightOrange,
+                              embeddedImage: AssetImage('assets/qr_hermez_logo.png'),
+                              embeddedImageStyle: QrEmbeddedImageStyle(
+                                size: Size(36, 36),
+                              ),
                               data: widget.arguments.code == null
                                   ? (widget.arguments.store.state.txLevel ==
                                               TransactionLevel.LEVEL2
@@ -156,12 +163,12 @@ class _QRCodePageState extends State<QRCodePage> {
                                                           .toStringAsFixed(6)))
                                           : ''),
                             ),
-                        ),
-                        SizedBox(
-                          height: 3,
+                        ],
                         ),
                         Container(
-                          width: 250,
+                          width: 290,
+                          padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                          color: HermezColors.lightOrange,
                           child: FittedBox(
                             fit: BoxFit.contain,
                             child: Text(
@@ -222,13 +229,13 @@ class _QRCodePageState extends State<QRCodePage> {
                             ),
                           ),
                         ),
-                        SizedBox(
-                          height: 44,
-                        ),
                       ],
                     ),
                   ),
-                )),
+                ),
+            ),
+          Column(
+            children: <Widget>[
                  widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT ? Container(
                     margin: const EdgeInsets.only(
                         left: 30.0, right: 30.0, top: 20.0, bottom: 0.0),
@@ -446,13 +453,14 @@ class _QRCodePageState extends State<QRCodePage> {
                           ),
                         ],
                       ))
+
                 ],
+
               ),
             ),
           ],
-        ),
-      ),
-    );
+        ),]),
+    )));
   }
 
   Future<List<Token>> fetchTokens() async {
