@@ -36,6 +36,8 @@ dependencies:
   flutter_secure_storage: ^4.2.0
   qr_flutter: ^4.0.0
   qr_code_scanner: ^0.5.1
+  qr_code_tools: ^0.0.7
+  image_picker: ^0.8.2
   path_provider: ^2.0.2
   share_plus: ^2.1.4
   permission_handler: ^8.1.0
@@ -100,6 +102,8 @@ flutter:
     - move.svg
     - hermez_logo.png
     - ethereum_logo.png
+    - qr_hermez_logo.svg
+    - qr_hermez_logo.png
     - change_move_enable.svg
     - change_move_disable.svg
     - deposit3.png
@@ -128,6 +132,7 @@ flutter:
     - flash_on.png
     # - flash_on.svg
     - flash_off.svg
+    - qr_gallery.svg
 
     # Amount
     - arrow_right.svg
@@ -147,6 +152,7 @@ flutter:
     - paste.png
     - force_exit.png
     - qr_code.png
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

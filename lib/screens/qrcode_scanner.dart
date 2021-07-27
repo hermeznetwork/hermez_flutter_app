@@ -5,7 +5,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:qr_code_tools/qr_code_tools.dart';
 
 typedef OnScanned = void Function(String address);
 
@@ -41,9 +43,13 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   bool _isDetecting = false;
   CameraLensDirection _direction = CameraLensDirection.back;*/
 
-  Barcode result;
+  String result;
   QRViewController controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  final picker = ImagePicker();
+  var showFlashBtn = false;
+  var showSwitchBtn = false;
+  var flashStatus = false;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -103,44 +109,102 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
+                    showFlashBtn == false
+                        ? FutureBuilder(
+                            future: Future.wait(
+                                [showFlashButton(), getFlashStatus()]),
+                            builder: (context,
+                                AsyncSnapshot<List<dynamic>> snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.done) {
+                                if (snapshot.data != null &&
+                                    showFlashBtn == true) {
+                                  return Row(
+                                    children: [
+                                      IconButton(
+                                          iconSize: 56,
+                                          padding: EdgeInsets.all(0),
+                                          icon: snapshot.data[1] == true
+                                              ? Image.asset(
+                                                  "assets/flash_on.png",
+                                                  width: 56,
+                                                  height: 56)
+                                              : SvgPicture.asset(
+                                                  "assets/flash_off.svg",
+                                                  width: 56,
+                                                  height: 56),
+                                          onPressed: () async {
+                                            await controller?.toggleFlash();
+                                            setState(() {});
+                                          }),
+                                      SizedBox(width: 28),
+                                    ],
+                                  );
+                                } else {
+                                  return Container();
+                                }
+                              } else {
+                                return Container();
+                              }
+                            })
+                        : FutureBuilder(
+                            future: getFlashStatus(),
+                            builder: (context, AsyncSnapshot<bool> snapshot) {
+                              return Row(
+                                children: [
+                                  IconButton(
+                                      iconSize: 56,
+                                      padding: EdgeInsets.all(0),
+                                      icon: flashStatus == true
+                                          ? Image.asset("assets/flash_on.png",
+                                              width: 56, height: 56)
+                                          : SvgPicture.asset(
+                                              "assets/flash_off.svg",
+                                              width: 56,
+                                              height: 56),
+                                      onPressed: () async {
+                                        await controller?.toggleFlash();
+                                        setState(() {});
+                                      }),
+                                  SizedBox(width: 28),
+                                ],
+                              );
+                            },
+                          ),
                     FutureBuilder(
-                        future: controller?.getFlashStatus(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError == false &&
-                              (snapshot.data == false ||
-                                  snapshot.data == true)) {
-                            return Row(
-                              children: [
-                                IconButton(
-                                    iconSize: 56,
-                                    padding: EdgeInsets.all(0),
-                                    icon: snapshot.data == true
-                                        ? Image.asset("assets/flash_on.png",
-                                            width: 56, height: 56)
-                                        : SvgPicture.asset(
-                                            "assets/flash_off.svg",
-                                            width: 56,
-                                            height: 56),
-                                    onPressed: () async {
-                                      await controller?.toggleFlash();
-                                      setState(() {});
-                                    }),
-                                SizedBox(width: 56),
-                              ],
-                            );
-                          } else {
-                            return Container();
-                          }
-                        }),
+                      future: showSwitchCamera(),
+                      builder: (context, AsyncSnapshot<bool> snapshot) {
+                        if (showSwitchBtn == true) {
+                          return Row(
+                            children: [
+                              IconButton(
+                                  iconSize: 56,
+                                  padding: EdgeInsets.all(0),
+                                  icon: SvgPicture.asset(
+                                      "assets/switch_camera.svg",
+                                      width: 56,
+                                      height: 56),
+                                  onPressed: () async {
+                                    await controller?.flipCamera();
+                                    setState(() {});
+                                  }),
+                              SizedBox(width: 28),
+                            ],
+                          );
+                        } else {
+                          return Container();
+                        }
+                      },
+                    ),
                     IconButton(
-                        iconSize: 56,
-                        padding: EdgeInsets.all(0),
-                        icon: SvgPicture.asset("assets/switch_camera.svg",
-                            width: 56, height: 56),
-                        onPressed: () async {
-                          await controller?.flipCamera();
-                          setState(() {});
-                        })
+                      iconSize: 56,
+                      padding: EdgeInsets.all(0),
+                      icon: SvgPicture.asset("assets/qr_gallery.svg",
+                          width: 56, height: 56),
+                      onPressed: () async {
+                        _getQrByGallery();
+                      },
+                    ),
                   ],
                 ),
                 SizedBox(height: 50)
@@ -150,6 +214,32 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
         ],
       ),
     );
+  }
+
+  void _getQrByGallery() async {
+    XFile file = await picker.pickImage(source: ImageSource.gallery);
+    print(file.path);
+    String data = await QrCodeToolsPlugin.decodeFrom(file.path)
+        .onError((error, stackTrace) {
+      return error.toString();
+    });
+    print(data);
+    if (data != null && data.length > 0) {
+      if (result == null) {
+        List<String> scannedStrings = data.split(":");
+        if (scannedStrings.length > 0 &&
+            (widget.arguments.type == QRCodeScannerType.ALL ||
+                widget.arguments.type == QRCodeScannerType.HERMEZ_ADDRESS) &&
+            AddressUtils.isValidEthereumAddress(scannedStrings[1])) {
+          finish(data);
+        } else if (scannedStrings.length > 0 &&
+            (widget.arguments.type == QRCodeScannerType.ALL ||
+                widget.arguments.type == QRCodeScannerType.ETHEREUM_ADDRESS) &&
+            AddressUtils.isValidEthereumAddress(scannedStrings[0])) {
+          finish(data);
+        }
+      }
+    }
   }
 
   Widget _buildQrView(BuildContext context) {
@@ -183,18 +273,18 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                     widget.arguments.type == QRCodeScannerType.ALL ||
                 widget.arguments.type == QRCodeScannerType.HERMEZ_ADDRESS) &&
             AddressUtils.isValidEthereumAddress(scannedStrings[1])) {
-          finish(scanData);
+          finish(scanData.code);
         } else if ((scannedStrings.length > 0 &&
                     widget.arguments.type == QRCodeScannerType.ALL ||
                 widget.arguments.type == QRCodeScannerType.ETHEREUM_ADDRESS) &&
             AddressUtils.isValidEthereumAddress(scannedStrings[0])) {
-          finish(scanData);
+          finish(scanData.code);
         }
       }
     }, onError: null, onDone: null, cancelOnError: false);
   }
 
-  void finish(Barcode scanData) {
+  void finish(String scanData) {
     result = scanData;
     if (widget.arguments.closeWhenScanned) {
       if (Navigator.canPop(context)) {
@@ -202,7 +292,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       }
     }
     if (widget.arguments.onScanned != null) {
-      widget.arguments.onScanned(result.code);
+      widget.arguments.onScanned(result);
     }
   }
 
@@ -210,5 +300,33 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+
+  Future<bool> showFlashButton() async {
+    SystemFeatures systemFeatures = await controller?.getSystemFeatures();
+    if (systemFeatures != null) {
+      showFlashBtn = systemFeatures.hasFlash ?? false;
+    } else {
+      showFlashBtn = false;
+    }
+    return showFlashBtn;
+  }
+
+  Future<bool> showSwitchCamera() async {
+    SystemFeatures systemFeatures = await controller?.getSystemFeatures();
+    if (systemFeatures != null) {
+      showSwitchBtn =
+          systemFeatures.hasFrontCamera && systemFeatures.hasBackCamera ??
+              false;
+    } else {
+      showSwitchBtn = false;
+    }
+    return showSwitchBtn;
+  }
+
+  Future<bool> getFlashStatus() async {
+    bool status = await controller?.getFlashStatus();
+    flashStatus = status;
+    return flashStatus;
   }
 }
