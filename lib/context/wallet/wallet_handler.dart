@@ -382,7 +382,9 @@ class WalletHandler {
 
   Future<List<Token>> getTokens({bool needRefresh = false}) async {
     var supportedTokens;
-    if (state.tokens != null && needRefresh == false) {
+    if (state.tokens != null &&
+        state.tokens.length > 0 &&
+        needRefresh == false) {
       supportedTokens = state.tokens;
     } else {
       supportedTokens = await _hermezService.getTokens();
