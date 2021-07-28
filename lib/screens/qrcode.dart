@@ -173,16 +173,25 @@ class _QRCodePageState extends State<QRCodePage> {
                             fit: BoxFit.contain,
                             child: Text(
                               widget.arguments.code == null
-                                  ? (widget.arguments.store.state.txLevel ==
+                                  ? ((widget.arguments.store.state.txLevel ==
                                               TransactionLevel.LEVEL2
                                           ? "hez:"
                                           : "") +
+                                  widget.arguments.store.state
+                                      .ethereumAddress.substring(
+                                                                0,
+                                      (widget.arguments.store.state
+                                        .ethereumAddress.length / 2)
+                                        .floor()) +
+                                        "\n" +
+                                  widget.arguments.store.state
+                                      .ethereumAddress.substring(
+                                      (widget.arguments.store.state
+                                          .ethereumAddress.length / 2)
+                                        .floor(),
                                       widget.arguments.store.state
-                                          .ethereumAddress +
-                                      "\n" +
-                                      widget
-                                          .arguments.store.state.ethereumAddress
-                                  : widget.arguments.code.substring(
+                                          .ethereumAddress.length))
+                                  : (widget.arguments.code.substring(
                                           0,
                                           (widget.arguments.code.length / 2)
                                               .floor()) +
@@ -190,34 +199,31 @@ class _QRCodePageState extends State<QRCodePage> {
                                       widget.arguments.code.substring(
                                           (widget.arguments.code.length / 2)
                                               .floor(),
-                                          widget.arguments.code.length) +
-                                      "\n" +
-                                      (widget.arguments.token != null
-                                          ? ':' + widget.arguments.token.symbol
-                                          : widget.arguments.amount != null &&
-                                                  widget.arguments.amount > 0
-                                              ? ':' +
-                                                  widget.arguments.store.state
-                                                      .defaultCurrency
-                                                      .toString()
-                                                      .split('.')
-                                                      .last
-                                              : '') +
-                                      (widget.arguments.amount != null &&
+                                          widget.arguments.code.length)
+                                  +
+                                      (widget.arguments.token != null || (widget.arguments.amount != null && widget.arguments.amount > 0)
+                                          ? ("\n" + ':')
+                                          + (widget.arguments.token != null ? widget.arguments.token.symbol : widget.arguments.store.state
+                                              .defaultCurrency
+                                              .toString()
+                                              .split('.')
+                                              .last)
+                                          + (widget.arguments.amount != null &&
                                               widget.arguments.amount > 0
-                                          ? ':' +
+                                              ? ':' +
                                               EthAmountFormatter
                                                   .removeDecimalZeroFormat(
-                                                double.parse(widget
-                                                    .arguments.amount
-                                                    .toStringAsFixed(widget
-                                                                .arguments
-                                                                .token !=
-                                                            null
-                                                        ? 6
-                                                        : 2))
+                                                  double.parse(widget
+                                                      .arguments.amount
+                                                      .toStringAsFixed(widget
+                                                      .arguments
+                                                      .token !=
+                                                      null
+                                                      ? 6
+                                                      : 2))
                                               )
-                                          : ''),
+                                              : '') : ''
+                                      )),
                               style: TextStyle(
                                 color: HermezColors.blackTwo,
                                 fontSize: 16,

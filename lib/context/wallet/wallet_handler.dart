@@ -187,11 +187,11 @@ class WalletHandler {
     });*/
   }
 
-  Future<bool> getAccounts() async {
+  Future<void> getAccounts() async {
     try {
       //_store.dispatch(UpdatingWallet());
       print('Updating Wallet');
-      List<Token> tokens = await getTokens();
+      List<Token> tokens = await getTokens(needRefresh: true);
       List<Account> l1Accounts = await getL1Accounts(true);
       List<Account> l2Accounts = await getL2Accounts();
       List<Exit> exits = await getExits();
@@ -219,7 +219,7 @@ class WalletHandler {
   Future<List<Account>> getL1Accounts(bool showZeroBalanceAccounts) async {
     List<Account> accounts = [];
     if (state != null && state.ethereumAddress != null) {
-      final supportedTokens = await _hermezService.getTokens();
+      final supportedTokens = await getTokens();
 
       //_store.dispatch(UpdatingBalance());
 
@@ -380,8 +380,13 @@ class WalletHandler {
     await _explorerService.getBlockAvgTime();
   }
 
-  Future<List<Token>> getTokens() async {
-    final supportedTokens = await _hermezService.getTokens();
+  Future<List<Token>> getTokens({bool needRefresh = false}) async {
+    var supportedTokens;
+    if (state.tokens != null && needRefresh == false) {
+      supportedTokens = state.tokens;
+    } else {
+      supportedTokens = await _hermezService.getTokens();
+    }
     return supportedTokens;
   }
 
