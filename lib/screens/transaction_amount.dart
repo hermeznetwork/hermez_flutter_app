@@ -19,6 +19,7 @@ import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
+import 'package:hermez/utils/transaction_utils.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/constants.dart';
 import 'package:hermez_sdk/environment.dart';
@@ -730,6 +731,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                       bool valid = false;
                       if (value.isNotEmpty) {
                         double amount = double.parse(value);
+                        if (defaultCurrencySelected == true) {}
+                        final fixedAmountInTokens =
+                            fixTransactionAmount(amount);
                         valid = isAmountValid(amount.toString());
                       } else {
                         valid = isAmountValid('0');
@@ -1309,6 +1313,41 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                     }
                   : null);
         });
+  }
+
+  /// Handles the "Max" button click. It will calculate the max possible amount that a
+  /// user can send in a transaction based on the account balance. It also takes the fee
+  /// into account (if applicable).
+  void handleSendAll() {
+    final maxPossibleAmount =
+        selectedAccount != null ? selectedAccount.balance : 0;
+    final maxAmountWithoutFee = getMaxTxAmount(widget.arguments.transactionType,
+        maxPossibleAmount, selectedAccount.token, l2Fee, gasPrice);
+    final maxAmountWithoutFeeInFiat = convertAmountToFiat(maxAmountWithoutFee)
+  }
+
+  /// Converts an amount in tokens to fiat. It takes into account the prefered currency
+  /// of the user.
+  /// @param {BigNumber} tokensAmount - Amount to be converted to fiat
+  /// @returns fiatAmount
+  function convertAmountToFiat (tokensAmount) {
+    const fixedTokenAmount = getFixedTokenAmount(tokensAmount.toString(), account.token.decimals)
+
+    return getTokenAmountInPreferredCurrency(
+        fixedTokenAmount,
+        account.token.USD,
+        preferredCurrency,
+        fiatExchangeRates
+    ).toFixed(2)
+  }
+
+  /// Converts an amount in fiat to tokens.
+  /// @param {Number} fiatAmount - Amount to be converted to tokens
+  /// @returns
+  double convertAmountToTokens (double fiatAmount) {
+    final tokensAmount = fiatAmount / selectedAccount.token.USD;
+
+    return double.tryParse(selectedAccount.token.decimals);
   }
 
   void onSubmit(
