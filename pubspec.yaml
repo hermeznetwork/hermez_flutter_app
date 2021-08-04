@@ -97,6 +97,7 @@ flutter:
     - bt_send.svg
     - tab_home.svg
     - tab_scan.svg
+    - tab_store.png
     - tab_settings.svg
     - move.svg
     - hermez_logo.png
@@ -113,6 +114,8 @@ flutter:
     # - tx_receive.svg
     - tx_move.png
     # - tx_move.svg
+    # Marketplace
+    - vendor_bitrefill.svg
     # Settings
     - settings_currency_conversion.svg
     - settings_view_explorer.svg

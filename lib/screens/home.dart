@@ -9,6 +9,7 @@ import 'package:hermez/screens/qrcode_scanner.dart';
 import 'package:hermez/screens/settings.dart';
 import 'package:hermez/screens/settings_currency.dart';
 import 'package:hermez/screens/settings_details.dart';
+import 'package:hermez/screens/store_selector.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/screens/wallet_selector.dart';
@@ -129,6 +130,7 @@ class _HomePageState extends State<HomePage> {
             extendBody: true,
             bottomNavigationBar: BottomNavigationBar(
                 elevation: 0,
+                type: BottomNavigationBarType.fixed,
                 selectedItemColor: HermezColors.blackTwo,
                 unselectedItemColor: HermezColors.blueyGreyTwo,
                 backgroundColor: Colors.transparent, // transparent
@@ -139,7 +141,9 @@ class _HomePageState extends State<HomePage> {
                 items: [
                   for (final tabItem in items)
                     BottomNavigationBarItem(
-                        icon: tabItem.icon, label: tabItem.title)
+                        backgroundColor: HermezColors.transparent,
+                        icon: tabItem.icon,
+                        label: tabItem.title)
                 ]),
           ),
           onWillPop: () async {
@@ -285,6 +289,9 @@ class _HomePageState extends State<HomePage> {
                       showHermezWallet = false;
                     }));
                   } else if (index == 2) {
+                    page = StoreSelectorPage(
+                        arguments: StoreSelectorArguments(context));
+                  } else if (index == 3) {
                     page = settingsPage(context);
                   }
                   if (settings.name == 'wallet_details') {
@@ -363,10 +370,19 @@ class _HomePageState extends State<HomePage> {
         title: "QR Scan",
       ),
       TabNavigationItem(
+        page: StoreSelectorPage(arguments: StoreSelectorArguments(context)),
+        icon: Image.asset('assets/tab_store.png',
+            height: 26,
+            color: _currentIndex.value == 2
+                ? HermezColors.blackTwo
+                : HermezColors.blueyGreyTwo),
+        title: "Store",
+      ),
+      TabNavigationItem(
         page: settingsPage(context),
         icon: Stack(children: [
           SvgPicture.asset('assets/tab_settings.svg',
-              color: _currentIndex.value == 2
+              color: _currentIndex.value == 3
                   ? HermezColors.blackTwo
                   : HermezColors.blueyGreyTwo),
           Positioned(

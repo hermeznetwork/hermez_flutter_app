@@ -38,4 +38,6 @@ class HermezColors {
   static const Color statusRed = Color(0xffff4b40);
 
   static const Color statusRedBackground = Color(0xffff4b40);
+
+  static const Color vendorBitrefill = Color.fromRGBO(68, 155, 247, 1.0);
 }

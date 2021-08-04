@@ -18,6 +18,7 @@ import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/transaction_details.dart';
+import 'package:hermez/screens/web_explorer.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:provider/provider.dart';
 
@@ -108,6 +109,11 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/move_info': (BuildContext context) {
       return MoveInfoPage(arguments: ModalRoute.of(context).settings.arguments);
     },
+    '/web_explorer': (BuildContext context) {
+      return WebExplorerPage(
+          arguments: ModalRoute.of(context).settings.arguments);
+    },
+
     /*'/account_details': (BuildContext context) {
       // Cast the arguments to the correct type: ScreenArguments.
       final WalletAccountDetailsArguments args =

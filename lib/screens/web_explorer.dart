@@ -3,6 +3,7 @@ import 'dart:convert' as JSON;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -24,6 +25,10 @@ class WebExplorerPage extends StatefulWidget {
 Timer timer;
 
 class _WebExplorerPageState extends State<WebExplorerPage> {
+  // WeblnHandlers _weblnHandlers;
+  // InvoiceBloc _invoiceBloc;
+  bool _isInit = false;
+
   WebViewController _webViewController;
 
   @override
@@ -31,6 +36,17 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
     super.initState();
     // Enable hybrid composition.
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (!_isInit) {
+      //_invoiceBloc = AppBlocsProvider.of<InvoiceBloc>(context);
+      //_weblnHandlers = WeblnHandlers(context, widget.accountBloc, _invoiceBloc);
+
+      _isInit = true;
+    }
+    super.didChangeDependencies();
   }
 
   @override
@@ -48,24 +64,33 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
         backgroundColor: Colors.white,
       ),
       backgroundColor: HermezColors.lightOrange,
-      body: WebView(
-        initialUrl: 'https://embed.bitrefill.com/?apiKey=GAj4sWRVqK3Uau1L',
-        onWebViewCreated: (WebViewController webViewController) {
-          setState(() {
-            _webViewController = webViewController;
-          });
+      body: Listener(
+        onPointerDown: (_) {
+          // hide keyboard on click
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
         },
-        // enable Javascript on WebView
-        javascriptMode: JavascriptMode.unrestricted,
-        javascriptChannels: <JavascriptChannel>[
-          _hermezJavascriptChannel(context),
-        ].toSet(),
-        onPageFinished: (String url) async {
-          // redirect post messages to javascript channel
-          _webViewController.evaluateJavascript(
-              "window.onmessage = (message) => window.HermezWebView.postMessage(message.data);");
-          print('Page finished loading: $url');
-        },
+        child: WebView(
+          initialUrl: 'https://embed.bitrefill.com/?apiKey=GAj4sWRVqK3Uau1L',
+          onWebViewCreated: (WebViewController webViewController) {
+            setState(() {
+              _webViewController = webViewController;
+            });
+          },
+          // enable Javascript on WebView
+          javascriptMode: JavascriptMode.unrestricted,
+          javascriptChannels: <JavascriptChannel>[
+            _hermezJavascriptChannel(context),
+          ].toSet(),
+          onPageStarted: (String url) async {
+            print('Page started loading: $url');
+          },
+          onPageFinished: (String url) async {
+            // redirect post messages to javascript channel
+            //_webViewController.evaluateJavascript(
+            //    "window.onmessage = (message) => window.HermezWebView.postMessage(message.data);");
+            print('Page finished loading: $url');
+          },
+        ),
       ),
     );
   }
