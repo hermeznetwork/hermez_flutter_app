@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:hermez/service/network/model/bitrefill_gift.dart';
+import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 //import 'package:webview_flutter/webview_flutter.dart';
 
@@ -32,6 +34,7 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
   IOSCookieManager _cookieManager = IOSCookieManager.instance();
   WebStorageManager _webStorageManager = WebStorageManager.instance();
   Map<String, String> _headers;
+  List<BitrefillItem> _items = [];
   //WebViewController _webViewController;
 
   @override
@@ -88,6 +91,7 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
               useShouldInterceptFetchRequest: true,
               useOnLoadResource: true,
               supportZoom: false,
+              clearCache: true,
               /*debuggingEnabled: true,
     )*/
             ),
@@ -150,6 +154,12 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
               print("CART: " + controller.toString());
             }*/
           },
+          iosOnNavigationResponse: (InAppWebViewController controller,
+              IOSWKNavigationResponse navigationResponse) async {
+            return IOSNavigationResponseAction.ALLOW;
+          },
+          /*onJsConfirm: (InAppWebViewController controller,
+              JsConfirmRequest jsConfirmRequest) {},*/
           shouldInterceptFetchRequest: (InAppWebViewController controller,
               FetchRequest fetchRequest) async {
             print("shouldInterceptFetchRequest URL: ${fetchRequest.url}");
@@ -180,13 +190,63 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
                     }
                   }
                   print(map);
+                  BitrefillGift bitrefillGift;
+                  if (map['gift'] != null && map['gift'] == "true") {
+                    bitrefillGift = BitrefillGift(
+                      recipientName: map['gift_recipient_name'],
+                      recipientEmail: map['gift_recipient_email'],
+                      delivery: map['gift_delivery'],
+                      timezoneOffset: map['gift_delivery'] == "scheduled"
+                          ? map['gift_delivery_timezone_offset']
+                          : null,
+                      senderName: map['gift_sender_name'],
+                      message: map['gift_message'],
+                      theme: map['gift_theme'],
+                    );
+                  }
+                  BitrefillItem item = BitrefillItem(
+                      slug: map['slug'],
+                      recipient: map['recipient'],
+                      amount: int.parse(map['amount']),
+                      value: map['value'] == 'custom'
+                          ? num.parse(map['ranged_value'])
+                          : num.parse(map['value']),
+                      giftInfo: bitrefillGift);
+                  _items.add(item);
                 } catch (e) {
                   print(e.toString());
                 }
               } else if (fetchRequest.method == "PUT" &&
                   fetchRequest.body != null) {
-                dynamic jsonObject = json.decode(fetchRequest.body);
+                List<Map<String, dynamic>> jsonObject =
+                    json.decode(fetchRequest.body);
+                _items = [];
+                for (Map<String, dynamic> map in jsonObject) {
+                  BitrefillGift bitrefillGift;
+                  if (map['giftInfo'] != null) {
+                    Map<String, dynamic> giftMap = map['giftInfo'];
+                    bitrefillGift = BitrefillGift(
+                      recipientName: giftMap['recipientName'],
+                      recipientEmail: giftMap['recipientEmail'],
+                      senderName: giftMap['senderName'],
+                      message: giftMap['message'],
+                      theme: giftMap['theme'],
+                    );
+                  }
+                  BitrefillItem item = BitrefillItem(
+                      id: map['id'],
+                      slug: map['slug'],
+                      recipient: map['recipient'],
+                      amount: map['amount'],
+                      value: map['value'] == 'custom'
+                          ? num.parse(map['ranged_value'])
+                          : num.parse(map['value']),
+                      giftInfo: bitrefillGift);
+                  _items.add(item);
+                }
                 print(jsonObject);
+              } else if (fetchRequest.method == "DELETE") {
+                // TODO remove by ID
               }
             }
             return fetchRequest;
