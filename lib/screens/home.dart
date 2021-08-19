@@ -290,7 +290,8 @@ class _HomePageState extends State<HomePage> {
                     }));
                   } else if (index == 2) {
                     page = StoreSelectorPage(
-                        arguments: StoreSelectorArguments(context));
+                        arguments: StoreSelectorArguments(
+                            widget.arguments.store, context));
                   } else if (index == 3) {
                     page = settingsPage(context);
                   }
@@ -370,7 +371,8 @@ class _HomePageState extends State<HomePage> {
         title: "QR Scan",
       ),
       TabNavigationItem(
-        page: StoreSelectorPage(arguments: StoreSelectorArguments(context)),
+        page: StoreSelectorPage(
+            arguments: StoreSelectorArguments(widget.arguments.store, context)),
         icon: Image.asset('assets/tab_store.png',
             height: 26,
             color: _currentIndex.value == 2

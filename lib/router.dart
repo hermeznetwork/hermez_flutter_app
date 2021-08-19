@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/backup_info.dart';
 import 'package:hermez/screens/biometrics.dart';
+import 'package:hermez/screens/bitrefill_form.dart';
 import 'package:hermez/screens/fee_selector.dart';
 import 'package:hermez/screens/first_deposit.dart';
 import 'package:hermez/screens/home.dart';
@@ -200,5 +201,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
                 arguments: ModalRoute.of(context).settings.arguments);
           },
         ),
+    '/bitrefill_form': (BuildContext context) =>
+        BitrefillFormPage(arguments: ModalRoute.of(context).settings.arguments),
   };
 }
