@@ -14,6 +14,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/email_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -80,6 +81,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
   WalletDefaultFee selectedFeeSpeed;
   WalletDefaultFee selectedWithdrawFeeSpeed;
   GasPriceResponse gasPriceResponse;
+  double amountInDefaultCurrency;
   final TextEditingController amountController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
@@ -88,27 +90,27 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
     super.initState();
     defaultCurrencySelected = true;
     enoughGas = true;
-    // TODO: calculate Total amount
     if (widget.arguments.items != null && widget.arguments.items.length > 0) {
       final String currency = widget.arguments.store.state.defaultCurrency
           .toString()
           .split('.')
           .last;
-      double amount = 0;
+      amountInDefaultCurrency = 0;
       widget.arguments.items.forEach((bitrefillItem) {
-        amount += (bitrefillItem.value * bitrefillItem.amount) /
-            (bitrefillItem.currency != "USD"
-                ? widget.arguments.store
-                    .getUSDExchangeRatio(bitrefillItem.currency)
-                : 1) *
-            (currency != "USD"
-                ? widget.arguments.store.state.exchangeRatio
-                : 1);
+        amountInDefaultCurrency +=
+            (bitrefillItem.value * bitrefillItem.amount) /
+                (bitrefillItem.currency != "USD"
+                    ? widget.arguments.store
+                        .getUSDExchangeRatio(bitrefillItem.currency)
+                    : 1) *
+                (currency != "USD"
+                    ? widget.arguments.store.state.exchangeRatio
+                    : 1);
       });
       amountController.text = EthAmountFormatter.removeDecimalZeroFormat(
-          double.parse(
-              double.parse(EthAmountFormatter.removeDecimalZeroFormat(amount))
-                  .toStringAsFixed(defaultCurrencySelected ? 2 : 6)));
+          double.parse(double.parse(EthAmountFormatter.removeDecimalZeroFormat(
+                  amountInDefaultCurrency))
+              .toStringAsFixed(2)));
     }
     needRefresh = true;
     showEstimatedFees = false;
@@ -161,10 +163,6 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
         if (snapshot.hasData) {
           String feeText = getFeeText(snapshot.connectionState);
           BigInt estimatedFee = getEstimatedFee(); //snapshot.data;
-          final String currency = widget.arguments.store.state.defaultCurrency
-              .toString()
-              .split('.')
-              .last;
 
           return Container(
             padding: EdgeInsets.all(10),
@@ -382,185 +380,12 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                   ),
                 ],
                 children: <Widget>[
-                  /*widget.arguments.transactionType == TransactionType.EXIT ||
-                          widget.arguments.transactionType ==
-                              TransactionType.FORCEEXIT ||
-                          widget.arguments.transactionType ==
-                              TransactionType.DEPOSIT
-                      ? MoveRow(
-                          widget.arguments.txLevel,
-                          widget.arguments.allowChangeLevel &&
-                                  needRefresh == false
-                              ? () async {
-                                  setState(() {
-                                    gasPriceResponse = null;
-                                    if ((widget.arguments.txLevel ==
-                                        TransactionLevel.LEVEL1)) {
-                                      widget.arguments.txLevel =
-                                          TransactionLevel.LEVEL2;
-                                      if (selectedAccount != null) {
-                                        selectedAccount = widget
-                                            .arguments.store.state.l2Accounts
-                                            .firstWhere(
-                                                (account) =>
-                                                    account.token.symbol ==
-                                                    selectedAccount
-                                                        .token.symbol,
-                                                orElse: () => null);
-                                      }
-                                      widget.arguments.transactionType =
-                                          TransactionType.EXIT;
-                                    } else {
-                                      widget.arguments.txLevel =
-                                          TransactionLevel.LEVEL1;
-                                      if (selectedAccount != null) {
-                                        selectedAccount = widget
-                                            .arguments.store.state.l1Accounts
-                                            .firstWhere(
-                                                (account) =>
-                                                    account.token.symbol ==
-                                                    selectedAccount
-                                                        .token.symbol,
-                                                orElse: () => null);
-                                      }
-                                      widget.arguments.transactionType =
-                                          TransactionType.DEPOSIT;
-                                    }
-                                    if (selectedAccount == null) {
-                                      defaultCurrencySelected = true;
-                                    }
-                                    needRefresh = true;
-                                    amountController.clear();
-                                  });
-                                }
-                              : null,
-                        )
-                      :*/
                   Container(),
-                  selectedAccount != null || widget.arguments.token != null
-                      ? AccountRow(
-                          selectedAccount,
-                          widget.arguments.token,
-                          selectedAccount != null
-                              ? selectedAccount.token.name
-                              : widget.arguments.token.name,
-                          selectedAccount != null
-                              ? selectedAccount.token.symbol
-                              : widget.arguments.token.symbol,
-                          currency != "USD"
-                              ? (selectedAccount != null
-                                      ? selectedAccount.token.USD
-                                      : widget.arguments.token.USD) *
-                                  widget.arguments.store.state.exchangeRatio
-                              : selectedAccount != null
-                                  ? selectedAccount.token.USD
-                                  : widget.arguments.token.USD,
-                          currency,
-                          /*selectedAccount != null
-                              ? BalanceUtils.calculatePendingBalance(
-                                      widget.arguments.txLevel,
-                                      selectedAccount,
-                                      selectedAccount.token.symbol,
-                                      widget.arguments.store) /
-                                  pow(10, selectedAccount.token.decimals)
-                              :*/
-                          0,
-                          true,
-                          defaultCurrencySelected,
-                          false,
-                          widget.arguments.token != null,
-                          (account, token, _, amount) async {
-                            final account = await Navigator.of(parentContext)
-                                .pushNamed("/account_selector",
-                                    arguments: AccountSelectorArguments(
-                                      TransactionLevel.LEVEL2,
-                                      TransactionType.SEND,
-                                      //widget.arguments.transactionType,
-                                      widget.arguments.store,
-                                    ));
-                            if (account != null) {
-                              setState(() {
-                                //amountController.clear();
-                                needRefresh = true;
-                                if (account is Account) {
-                                  selectedAccount = account;
-                                } else if (account is Token) {
-                                  widget.arguments.token = account;
-                                }
-                              });
-                            }
-                          },
-                        )
-                      : Container(
-                          padding: EdgeInsets.only(bottom: 15.0),
-                          child: FlatButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                                side:
-                                    BorderSide(color: HermezColors.lightGrey)),
-                            onPressed: () async {
-                              final account = await Navigator.of(parentContext)
-                                  .pushNamed("/account_selector",
-                                      arguments: AccountSelectorArguments(
-                                          TransactionLevel.LEVEL2,
-                                          TransactionType.SEND,
-                                          widget.arguments.store));
-                              if (account != null) {
-                                setState(() {
-                                  amountController.clear();
-                                  needRefresh = true;
-                                  if (account is Account) {
-                                    selectedAccount = account;
-                                  } else if (account is Token) {
-                                    widget.arguments.token = account;
-                                  }
-                                });
-                              }
-                            },
-                            padding: EdgeInsets.all(20.0),
-                            color: HermezColors.lightGrey,
-                            textColor: HermezColors.blackTwo,
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Container(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          'Select token',
-                                          style: TextStyle(
-                                            color: HermezColors.blackTwo,
-                                            fontSize: 16,
-                                            fontFamily: 'ModernEra',
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ), //title to be name of the crypto
-                          )),
-                  /*(widget.arguments.transactionType ==
-                                  TransactionType.FORCEEXIT ||
-                              widget.arguments.transactionType ==
-                                  TransactionType.EXIT) &&
-                          enoughGas == false &&
-                          !needRefresh &&
-                          selectedAccount != null
-                      ? _buildNoGasRow()
-                      :*/
-                  Container(),
+                  _buildAccountSelectorRow(parentContext),
+                  _buildNoBalanceRow(),
                   _buildAmountRow(
                       context, null, amountController, estimatedFee),
-                  /*widget.arguments.transactionType == TransactionType.SEND
-                      ?*/
                   _buildEmailRow()
-                  //: Container()
                 ],
               ),
             ),
@@ -576,74 +401,208 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
     );
   }
 
-  Widget _buildNoGasRow() {
-    /*final String currency =
+  Widget _buildAccountSelectorRow(BuildContext parentContext) {
+    final String currency =
         widget.arguments.store.state.defaultCurrency.toString().split('.').last;
-    double currencyExchange = (ethereumToken.USD *
-        (currency != "USD" ? widget.arguments.store.state.exchangeRatio : 1));
-    double exitFee = 0;
-    double withdrawFee = 0;
-    if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
-        widget.arguments.transactionType == TransactionType.DEPOSIT ||
-        widget.arguments.transactionType == TransactionType.WITHDRAW ||
-        (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            widget.arguments.transactionType == TransactionType.SEND)) {
-      // fee l1
-      BigInt gasPrice = getGasPrice(selectedFeeSpeed);
-      BigInt estimatedFee = gasLimit * gasPrice;
-      exitFee = estimatedFee.toDouble() / pow(10, ethereumToken.decimals);
-    }
-    if (widget.arguments.transactionType == TransactionType.EXIT ||
-        widget.arguments.transactionType == TransactionType.FORCEEXIT) {
-      BigInt withdrawGasPrice = getGasPrice(selectedWithdrawFeeSpeed);
-      BigInt withdrawEstimatedFee = withdrawGasLimit * withdrawGasPrice;
-      withdrawFee =
-          withdrawEstimatedFee.toDouble() / pow(10, ethereumToken.decimals);
-    }
+    return selectedAccount != null || widget.arguments.token != null
+        ? AccountRow(
+            selectedAccount,
+            widget.arguments.token,
+            selectedAccount != null
+                ? selectedAccount.token.name
+                : widget.arguments.token.name,
+            selectedAccount != null
+                ? selectedAccount.token.symbol
+                : widget.arguments.token.symbol,
+            currency != "USD"
+                ? (selectedAccount != null
+                        ? selectedAccount.token.USD
+                        : widget.arguments.token.USD) *
+                    widget.arguments.store.state.exchangeRatio
+                : selectedAccount != null
+                    ? selectedAccount.token.USD
+                    : widget.arguments.token.USD,
+            currency,
+            selectedAccount != null
+                ? BalanceUtils.calculatePendingBalance(
+                        TransactionLevel.LEVEL2,
+                        selectedAccount,
+                        selectedAccount.token.symbol,
+                        widget.arguments.store) /
+                    pow(10, selectedAccount.token.decimals)
+                : 0,
+            true,
+            defaultCurrencySelected,
+            false,
+            widget.arguments.token != null,
+            (account, token, _, amount) async {
+              final account = await Navigator.of(parentContext)
+                  .pushNamed("/account_selector",
+                      arguments: AccountSelectorArguments(
+                        TransactionLevel.LEVEL2,
+                        TransactionType.SEND,
+                        //widget.arguments.transactionType,
+                        widget.arguments.store,
+                      ));
+              if (account != null) {
+                setState(() {
+                  //amountController.clear();
+                  needRefresh = true;
+                  if (account is Account) {
+                    selectedAccount = account;
+                  } else if (account is Token) {
+                    widget.arguments.token = account;
+                  }
+                  double currencyExchange = (selectedAccount.token.USD *
+                      (currency != "USD"
+                          ? widget.arguments.store.state.exchangeRatio
+                          : 1));
+                  amountController.text = EthAmountFormatter
+                      .removeDecimalZeroFormat(double.parse(double.parse(
+                              EthAmountFormatter.removeDecimalZeroFormat(
+                                  amountInDefaultCurrency /
+                                      (!defaultCurrencySelected
+                                          ? currencyExchange
+                                          : 1)))
+                          .toStringAsFixed(defaultCurrencySelected ? 2 : 6)));
+                });
+              }
+            },
+          )
+        : Container(
+            padding: EdgeInsets.only(bottom: 15.0),
+            child: FlatButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  side: BorderSide(color: HermezColors.lightGrey)),
+              onPressed: () async {
+                final account = await Navigator.of(parentContext).pushNamed(
+                    "/account_selector",
+                    arguments: AccountSelectorArguments(TransactionLevel.LEVEL2,
+                        TransactionType.SEND, widget.arguments.store));
+                if (account != null) {
+                  setState(() {
+                    //amountController.clear();
+                    needRefresh = true;
+                    if (account is Account) {
+                      selectedAccount = account;
+                    } else if (account is Token) {
+                      widget.arguments.token = account;
+                    }
+                    double currencyExchange = (selectedAccount.token.USD *
+                        (currency != "USD"
+                            ? widget.arguments.store.state.exchangeRatio
+                            : 1));
+                    amountController.text = EthAmountFormatter
+                        .removeDecimalZeroFormat(double.parse(double.parse(
+                                EthAmountFormatter.removeDecimalZeroFormat(
+                                    amountInDefaultCurrency /
+                                        (!defaultCurrencySelected
+                                            ? currencyExchange
+                                            : 1)))
+                            .toStringAsFixed(defaultCurrencySelected ? 2 : 6)));
+                  });
+                }
+              },
+              padding: EdgeInsets.all(20.0),
+              color: HermezColors.lightGrey,
+              textColor: HermezColors.blackTwo,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Select token',
+                            style: TextStyle(
+                              color: HermezColors.blackTwo,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ), //title to be name of the crypto
+            ));
+  }
 
-    String currencyFee = EthAmountFormatter.formatAmount(
-        (exitFee + withdrawFee) * currencyExchange, currency);
-    String tokenFee = EthAmountFormatter.formatAmount(
-        exitFee + withdrawFee, ethereumToken.symbol);
-    return Card(
-      margin: EdgeInsets.only(bottom: 15),
-      color: HermezColors.blackTwo,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        padding: EdgeInsets.only(top: 16, bottom: 16, right: 24, left: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: EdgeInsets.only(top: 8, right: 12),
-              child: SvgPicture.asset("assets/info.svg",
-                  color: HermezColors.lightGrey,
-                  alignment: Alignment.topLeft,
-                  height: 20),
-            ),
-            Flexible(
-              flex: 1,
-              child: Text(
-                'You don’t have enough ETH in your Ethereum wallet'
-                        ' to cover moving transaction fee (you need at least ' +
-                    currencyFee +
-                    ' ~ ' +
-                    tokenFee +
-                    ').',
-                style: TextStyle(
-                  color: HermezColors.lightGrey,
-                  fontFamily: 'ModernEra',
-                  fontSize: 15,
-                  height: 1.7,
-                  fontWeight: FontWeight.w500,
+  Widget _buildNoBalanceRow() {
+    if (needRefresh || selectedAccount == null) {
+      return Container();
+    } else {
+      final String currency = widget.arguments.store.state.defaultCurrency
+          .toString()
+          .split('.')
+          .last;
+      double currencyExchange = (selectedAccount.token.USD *
+          (currency != "USD" ? widget.arguments.store.state.exchangeRatio : 1));
+
+      double accountBalance = BalanceUtils.calculatePendingBalance(
+              TransactionLevel.LEVEL2,
+              selectedAccount,
+              selectedAccount.token.symbol,
+              widget.arguments.store) /
+          pow(10, selectedAccount.token.decimals);
+
+      String currencyMin =
+          EthAmountFormatter.formatAmount(amountInDefaultCurrency, currency);
+      String tokenMin = EthAmountFormatter.formatAmount(
+          amountInDefaultCurrency / currencyExchange,
+          selectedAccount.token.symbol);
+      if (accountBalance > amountInDefaultCurrency / currencyExchange) {
+        return Container();
+      } else {
+        return Card(
+          margin: EdgeInsets.only(bottom: 15),
+          color: HermezColors.blackTwo,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Container(
+            padding: EdgeInsets.only(top: 16, bottom: 16, right: 24, left: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 8, right: 12),
+                  child: SvgPicture.asset("assets/info.svg",
+                      color: HermezColors.lightGrey,
+                      alignment: Alignment.topLeft,
+                      height: 20),
                 ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );*/
+                Flexible(
+                  flex: 1,
+                  child: Text(
+                    'You don’t have enough ' +
+                        selectedAccount.token.symbol +
+                        ' in your Hermez wallet'
+                            ' to cover the transaction (you need at least ' +
+                        currencyMin +
+                        ' ~ ' +
+                        tokenMin +
+                        ').',
+                    style: TextStyle(
+                      color: HermezColors.lightGrey,
+                      fontFamily: 'ModernEra',
+                      fontSize: 15,
+                      height: 1.7,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildAmountRow(BuildContext context, dynamic element,
@@ -742,9 +701,26 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                                     if (selectedAccount != null ||
                                         widget.arguments.token != null) {
                                       setState(() {
-                                        amountController.clear();
                                         defaultCurrencySelected =
                                             !defaultCurrencySelected;
+                                        double currencyExchange =
+                                            (selectedAccount.token.USD *
+                                                (currency != "USD"
+                                                    ? widget.arguments.store
+                                                        .state.exchangeRatio
+                                                    : 1));
+                                        amountController.text = EthAmountFormatter
+                                            .removeDecimalZeroFormat(double.parse(
+                                                double.parse(EthAmountFormatter
+                                                        .removeDecimalZeroFormat(
+                                                            amountInDefaultCurrency /
+                                                                (!defaultCurrencySelected
+                                                                    ? currencyExchange
+                                                                    : 1)))
+                                                    .toStringAsFixed(
+                                                        defaultCurrencySelected
+                                                            ? 2
+                                                            : 6)));
                                       });
                                     }
                                   },
