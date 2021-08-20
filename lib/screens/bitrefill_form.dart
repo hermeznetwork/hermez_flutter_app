@@ -86,22 +86,30 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
   @override
   void initState() {
     super.initState();
-    defaultCurrencySelected = false;
+    defaultCurrencySelected = true;
     enoughGas = true;
     // TODO: calculate Total amount
     if (widget.arguments.items != null && widget.arguments.items.length > 0) {
+      final String currency = widget.arguments.store.state.defaultCurrency
+          .toString()
+          .split('.')
+          .last;
       double amount = 0;
       widget.arguments.items.forEach((bitrefillItem) {
-        amount += bitrefillItem.value * bitrefillItem.amount;
+        amount += (bitrefillItem.value * bitrefillItem.amount) /
+            (bitrefillItem.currency != "USD"
+                ? widget.arguments.store
+                    .getUSDExchangeRatio(bitrefillItem.currency)
+                : 1) *
+            (currency != "USD"
+                ? widget.arguments.store.state.exchangeRatio
+                : 1);
       });
-      amountController.text =
-          EthAmountFormatter.removeDecimalZeroFormat(amount);
+      amountController.text = EthAmountFormatter.removeDecimalZeroFormat(
+          double.parse(
+              double.parse(EthAmountFormatter.removeDecimalZeroFormat(amount))
+                  .toStringAsFixed(defaultCurrencySelected ? 2 : 6)));
     }
-    /*if (widget.arguments.addressTo != null &&
-        widget.arguments.addressTo.isNotEmpty) {
-      addressController.value =
-          TextEditingValue(text: widget.arguments.addressTo);
-    }*/
     needRefresh = true;
     showEstimatedFees = false;
     //selectedFeeSpeed = widget.arguments.store.state.defaultFee;
@@ -472,7 +480,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                                     ));
                             if (account != null) {
                               setState(() {
-                                amountController.clear();
+                                //amountController.clear();
                                 needRefresh = true;
                                 if (account is Account) {
                                   selectedAccount = account;
@@ -694,7 +702,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                         needRefresh = true;
                       });
                     },
-                    enabled: selectedAccount != null,
+                    enabled: false,
                     controller: amountController,
                     decimals: defaultCurrencySelected ? 2 : 6,
                   ),
@@ -717,65 +725,6 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       selectedAccount != null || widget.arguments.token != null
-                          /*&&
-                                  widget.arguments.transactionType !=
-                                      TransactionType.RECEIVE*/
-                          ? Expanded(
-                              child: Container(
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                      top: BorderSide.none,
-                                      right: BorderSide(
-                                          color: HermezColors.blueyGreyThree,
-                                          width: 1),
-                                      bottom: BorderSide.none,
-                                      left: BorderSide.none),
-                                ),
-                                child: FlatButton(
-                                  child: Text(
-                                    "Send All",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: HermezColors.blueyGreyTwo,
-                                      fontSize: 16,
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    if (!needRefresh) {
-                                      setState(() {
-                                        amountController.clear();
-                                        double amount = getMaxAmount();
-                                        amountIsValid =
-                                            isAmountValid(amount.toString());
-                                        if (amountIsValid) {
-                                          amountController.text =
-                                              amount.toStringAsFixed(
-                                                  defaultCurrencySelected
-                                                      ? amount.truncateToDouble() ==
-                                                              amount
-                                                          ? 0
-                                                          : 2
-                                                      : amount.truncateToDouble() ==
-                                                              amount
-                                                          ? 0
-                                                          : 6);
-                                          amountController.selection =
-                                              TextSelection.fromPosition(
-                                                  TextPosition(
-                                                      offset: amountController
-                                                          .text.length));
-                                        }
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                            )
-                          : Container(),
-                      selectedAccount != null || widget.arguments.token != null
                           ? Expanded(
                               child: Container(
                                 height: 48,
@@ -788,7 +737,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                                           color: HermezColors.blueyGreyThree,
                                           width: 1)),
                                 ),
-                                child: FlatButton.icon(
+                                child: TextButton.icon(
                                   onPressed: () {
                                     if (selectedAccount != null ||
                                         widget.arguments.token != null) {

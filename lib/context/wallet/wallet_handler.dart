@@ -993,6 +993,10 @@ class WalletHandler {
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
   }
 
+  double getUSDExchangeRatio(String currency) {
+    return _configurationService.getExchangeRatio(currency);
+  }
+
   Future<void> updateDefaultFee(WalletDefaultFee defaultFee) async {
     _configurationService.setDefaultFee(defaultFee);
     _store.dispatch(DefaultFeeUpdated(defaultFee));

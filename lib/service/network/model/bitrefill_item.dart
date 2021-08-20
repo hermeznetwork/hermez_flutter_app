@@ -6,6 +6,7 @@ class BitrefillItem {
   final String recipient;
   final num value;
   final int amount;
+  final String currency;
   final BitrefillGift giftInfo;
 
   BitrefillItem(
@@ -14,6 +15,7 @@ class BitrefillItem {
       this.recipient,
       this.value,
       this.amount,
+      this.currency,
       this.giftInfo});
 
   factory BitrefillItem.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class BitrefillItem {
       recipient: json['recipient'],
       value: json['value'],
       amount: json['amount'],
+      currency: json['currency'],
       giftInfo: giftInfo,
     );
   }
@@ -34,6 +37,7 @@ class BitrefillItem {
         'recipient': recipient,
         'value': value,
         'amount': amount,
+        'currency': currency,
         'giftInfo': giftInfo.toJson(),
       };
 }

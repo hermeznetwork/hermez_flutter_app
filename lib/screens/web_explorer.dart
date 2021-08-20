@@ -116,6 +116,7 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
                     value: jsonMap['value'] == 'custom'
                         ? num.parse(jsonMap['ranged_value'])
                         : num.parse(jsonMap['value']),
+                    currency: jsonMap['currency'],
                     giftInfo: bitrefillGift);
 
                 _items.add(item);

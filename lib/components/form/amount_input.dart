@@ -15,6 +15,7 @@ class AmountInput extends StatefulWidget {
     this.obscureText = false,
     this.decimals,
     this.enabled = true,
+    this.showMaxBtn = true,
   }) : super(key: key);
 
   final String labelText;
@@ -25,6 +26,7 @@ class AmountInput extends StatefulWidget {
   final int maxLines;
   final int decimals;
   final bool enabled;
+  final bool showMaxBtn;
   final TextEditingController controller;
 
   @override
