@@ -111,6 +111,9 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
                 BitrefillItem item = BitrefillItem(
                     id: jsonMap['id'],
                     slug: jsonMap['slug'],
+                    name: jsonMap['name'],
+                    iconImage: jsonMap['iconImage'],
+                    iconVersion: jsonMap['iconVersion'].toString(),
                     recipient: jsonMap['recipient'],
                     amount: jsonMap['amount'],
                     value: jsonMap['value'] == 'custom'

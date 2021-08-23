@@ -22,6 +22,7 @@ import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/token.dart';
 
 import 'account_selector.dart';
+import 'bitrefill_summary.dart';
 
 /*enum TransactionLevel { LEVEL1, LEVEL2 }
 
@@ -163,6 +164,10 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
         if (snapshot.hasData) {
           String feeText = getFeeText(snapshot.connectionState);
           BigInt estimatedFee = getEstimatedFee(); //snapshot.data;
+          final String currency = widget.arguments.store.state.defaultCurrency
+              .toString()
+              .split('.')
+              .last;
 
           return Container(
             padding: EdgeInsets.all(10),
@@ -183,7 +188,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                               ),
                               onPressed: isButtonEnabled()
                                   ? () {
-                                      /*this.onSubmit(
+                                      this.onSubmit(
                                           !defaultCurrencySelected
                                               ? double.parse(
                                                   amountController.value.text)
@@ -207,16 +212,10 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                                               ? selectedAccount.token
                                               : widget.arguments.token,
                                           estimatedFee.toDouble(),
-                                          widget.arguments.txLevel ==
-                                                  TransactionLevel.LEVEL1
-                                              ? ethereumToken
-                                              : selectedAccount != null
-                                                  ? selectedAccount.token
-                                                  : widget.arguments.token,
-                                          addressController.value.text,
-                                          gasLimit.toInt(),
-                                          getGasPrice(selectedFeeSpeed).toInt(),
-                                          depositGasLimit);*/
+                                          selectedAccount != null
+                                              ? selectedAccount.token
+                                              : widget.arguments.token,
+                                          emailController.value.text);
                                     }
                                   : null,
                               padding: EdgeInsets.only(
@@ -1149,71 +1148,26 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
         });
   }
 
-  void onSubmit(
-      double amount,
-      Token token,
-      double fee,
-      Token feeToken,
-      String address,
-      int gasLimit,
-      int gasPrice,
-      LinkedHashMap<String, BigInt> depositGasLimit) async {
-    /*if (widget.arguments.transactionType == TransactionType.RECEIVE) {
-      Navigator.of(context).pushReplacementNamed("/qrcode",
-          arguments: QRCodeArguments(
-              qrCodeType: QRCodeType.REQUEST_PAYMENT,
-              code: widget.arguments.txLevel == TransactionLevel.LEVEL1
-                  ? widget.arguments.store.state.ethereumAddress
-                  : getHermezAddress(
-                      widget.arguments.store.state.ethereumAddress),
-              store: widget.arguments.store,
-              amount: amount,
-              token: token,
-              isReceive: true));
-    } else {
-      String addressTo;
-      double withdrawEstimatedFee = 0;
-      if (widget.arguments.transactionType == TransactionType.DEPOSIT) {
-        addressTo = getCurrentEnvironment().contracts['Hermez'];
-      } else if ((widget.arguments.transactionType == TransactionType.EXIT ||
-              widget.arguments.transactionType == TransactionType.FORCEEXIT) &&
-          address.isEmpty) {
-        addressTo = getEthereumAddress(selectedAccount.hezEthereumAddress);
-        withdrawEstimatedFee =
-            (withdrawGasLimit * getGasPrice(selectedWithdrawFeeSpeed))
-                .toDouble();
-      } else {
-        addressTo = address;
-      }
-      Navigator.pushNamed(context, "/transaction_details",
-              arguments: TransactionDetailsArguments(
-                  store: widget.arguments.store,
-                  transactionType: widget.arguments.transactionType,
-                  transactionLevel: widget.arguments.txLevel,
-                  status: TransactionStatus.DRAFT,
-                  account: selectedAccount,
-                  token: selectedAccount.token,
-                  amount: amount,
-                  addressFrom: selectedAccount.hezEthereumAddress,
-                  addressTo: addressTo,
-                  fee: fee,
-                  withdrawEstimatedFee: withdrawEstimatedFee,
-                  selectedFeeSpeed: selectedFeeSpeed,
-                  selectedWithdrawFeeSpeed: selectedWithdrawFeeSpeed,
-                  gasLimit: gasLimit,
-                  gasPrice: gasPrice,
-                  depositGasLimit: depositGasLimit))
-          .then((results) {
-        if (results is PopWithResults) {
+  void onSubmit(double amount, Token token, double fee, Token feeToken,
+      String address) async {
+    Navigator.pushNamed(context, "/bitrefill_summary",
+            arguments: BitrefillSummaryArguments(
+                store: widget.arguments.store,
+                status: TransactionStatus.DRAFT,
+                account: selectedAccount,
+                amount: amount,
+                items: widget.arguments.items,
+                email: emailController.text))
+        .then((results) {
+      /*if (results is PopWithResults) {
           PopWithResults popResult = results;
           if (popResult.toPage == "/transaction_amount") {
             // TODO do stuff
           } else {
             Navigator.of(context).pop(results);
           }
-        }
-      });
-    }*/
+        }*/
+    });
   }
 
   Future<String> getClipBoardData() async {

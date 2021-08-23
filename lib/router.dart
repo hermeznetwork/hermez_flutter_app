@@ -3,6 +3,8 @@ import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/backup_info.dart';
 import 'package:hermez/screens/biometrics.dart';
 import 'package:hermez/screens/bitrefill_form.dart';
+import 'package:hermez/screens/bitrefill_items.dart';
+import 'package:hermez/screens/bitrefill_summary.dart';
 import 'package:hermez/screens/fee_selector.dart';
 import 'package:hermez/screens/first_deposit.dart';
 import 'package:hermez/screens/home.dart';
@@ -203,5 +205,15 @@ Map<String, WidgetBuilder> getRoutes(context) {
         ),
     '/bitrefill_form': (BuildContext context) =>
         BitrefillFormPage(arguments: ModalRoute.of(context).settings.arguments),
+    '/bitrefill_summary': (BuildContext context) => WalletTransferProvider(
+          builder: (context, store) {
+            return BitrefillSummaryPage(
+                arguments: ModalRoute.of(context).settings.arguments);
+          },
+        ),
+    '/bitrefill_items': (BuildContext context) {
+      return BitrefillItemsPage(
+          arguments: ModalRoute.of(context).settings.arguments);
+    },
   };
 }
