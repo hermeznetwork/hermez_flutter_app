@@ -112,6 +112,7 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
                     id: jsonMap['id'],
                     slug: jsonMap['slug'],
                     name: jsonMap['name'],
+                    baseName: jsonMap['baseName'],
                     iconImage: jsonMap['iconImage'],
                     iconVersion: jsonMap['iconVersion'].toString(),
                     recipient: jsonMap['recipient'],
@@ -119,6 +120,7 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
                     value: jsonMap['value'] == 'custom'
                         ? num.parse(jsonMap['ranged_value'])
                         : num.parse(jsonMap['value']),
+                    displayValue: jsonMap['displayValue'],
                     currency: jsonMap['currency'],
                     giftInfo: bitrefillGift);
 

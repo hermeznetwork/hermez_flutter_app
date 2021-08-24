@@ -117,6 +117,7 @@ flutter:
     # - tx_move.svg
     # Marketplace
     - vendor_bitrefill.svg
+    - gift.svg
     # Settings
     - settings_currency_conversion.svg
     - settings_view_explorer.svg

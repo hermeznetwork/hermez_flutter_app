@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
@@ -57,8 +58,8 @@ class _BitrefillItemsPageState extends State<BitrefillItemsPage> {
               padding: const EdgeInsets.all(16.0),
               separatorBuilder: (BuildContext context, int index) {
                 return Container(
-                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: Divider(color: HermezColors.steel));
+                  padding: const EdgeInsets.all(10.0),
+                );
               },
               itemBuilder: (context, i) {
                 final index = i;
@@ -80,17 +81,7 @@ class _BitrefillItemsPageState extends State<BitrefillItemsPage> {
                             children: [
                               Container(
                                 child: Text(
-                                  item.name
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(0, 1) +
-                                      item.name
-                                          .toString()
-                                          .split(".")
-                                          .last
-                                          .substring(1)
-                                          .toLowerCase(),
+                                  item.baseName,
                                   style: TextStyle(
                                       fontFamily: 'ModernEra',
                                       color: HermezColors.blackTwo,
@@ -103,6 +94,37 @@ class _BitrefillItemsPageState extends State<BitrefillItemsPage> {
                           ),
                         ),
                       ),
+                      item.giftInfo != null
+                          ? Container(
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.only(right: 10),
+                              child: SvgPicture.asset(
+                                'assets/gift.svg',
+                                width: 20,
+                                height: 20,
+                              ),
+                            )
+                          : Container(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            child: Text(
+                              (item.giftInfo != null
+                                      ? ""
+                                      : item.amount.toString() + " x ") +
+                                  item.displayValue,
+                              style: TextStyle(
+                                  fontFamily: 'ModernEra',
+                                  color: HermezColors.blackTwo,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.71,
+                                  fontSize: 16),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 );
@@ -113,12 +135,23 @@ class _BitrefillItemsPageState extends State<BitrefillItemsPage> {
   // takes in an object and color and returns a circle avatar with first letter and required color
   CircleAvatar _getLeadingWidget(BitrefillItem item) {
     return new CircleAvatar(
-        radius: 23,
-        child: Image.network(
-            "https://www.bitrefill.com/content/cn/b_rgb%3Affffff%2Cc_pad%2Ch_64%2Cw_64/v" +
-                item.iconVersion +
-                "/" +
-                item.iconImage +
-                ".jpg"));
+      radius: 23,
+      child: Image.network(
+        "https://www.bitrefill.com/content/cn/b_rgb%3Affffff%2Cc_pad%2Ch_64%2Cw_64/v" +
+            item.iconVersion +
+            "/" +
+            item.iconImage +
+            ".jpg",
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+
+          return Center(
+            child: new CircularProgressIndicator(color: HermezColors.orange),
+          );
+        },
+        /*errorBuilder: (context, error, stackTrace) =>
+            Text('Some errors occurred!'),*/
+      ),
+    );
   }
 }
