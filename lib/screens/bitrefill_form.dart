@@ -169,6 +169,11 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
               .split('.')
               .last;
 
+          double currencyExchange = (selectedAccount.token.USD *
+              (currency != "USD"
+                  ? widget.arguments.store.state.exchangeRatio
+                  : 1));
+
           return Container(
             padding: EdgeInsets.all(10),
             color: Colors.white,
@@ -189,25 +194,8 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                               onPressed: isButtonEnabled()
                                   ? () {
                                       this.onSubmit(
-                                          !defaultCurrencySelected
-                                              ? double.parse(
-                                                  amountController.value.text)
-                                              : double.parse((double.parse(
-                                                          amountController
-                                                              .value.text) /
-                                                      (selectedAccount != null
-                                                          ? selectedAccount
-                                                              .token.USD
-                                                          : widget.arguments
-                                                              .token.USD) *
-                                                      (currency != "USD"
-                                                          ? widget
-                                                              .arguments
-                                                              .store
-                                                              .state
-                                                              .exchangeRatio
-                                                          : 1))
-                                                  .toStringAsFixed(6)),
+                                          amountInDefaultCurrency /
+                                              currencyExchange,
                                           selectedAccount != null
                                               ? selectedAccount.token
                                               : widget.arguments.token,

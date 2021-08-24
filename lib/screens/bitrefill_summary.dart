@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_handler.dart';
@@ -452,16 +450,14 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
         //double fee =
         //    widget.arguments.gasLimit * widget.arguments.gasPrice.toDouble();
         currencyFee = EthAmountFormatter.formatAmount(
-            transactionFee /
-                pow(10, widget.arguments.account.token.decimals) *
-                (widget.arguments.account.token.USD *
-                    (currency != "USD"
-                        ? widget.arguments.store.state.exchangeRatio
-                        : 1)),
+            transactionFee *
+                (currency != "USD"
+                    ? widget.arguments.store.state.exchangeRatio
+                    : 1),
             currency);
 
         tokenFee = EthAmountFormatter.formatAmount(
-            transactionFee / pow(10, widget.arguments.account.token.decimals),
+            transactionFee / widget.arguments.account.token.USD,
             widget.arguments.account.token.symbol);
       }
 
@@ -593,8 +589,7 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
 
     final fee = isExistingAccount ? fees.existingAccount : fees.createAccount;
 
-    return double.parse(
-        (fee / widget.arguments.account.token.USD).toStringAsFixed(6));
+    return double.parse(fee.toStringAsFixed(6));
   }
 
   Future<bool> fetchData() async {
