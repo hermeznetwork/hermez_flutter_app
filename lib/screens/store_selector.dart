@@ -43,7 +43,7 @@ class _StoreSelectorPageState extends State<StoreSelectorPage> {
           child: Column(
               children: ListTile.divideTiles(
                   context: context,
-                  color: HermezColors.blueyGreyThree,
+                  color: HermezColors.transparent,
                   tiles: [
                 new GestureDetector(
                     onTap: () {

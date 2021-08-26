@@ -50,104 +50,129 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
           child: Column(
               children: ListTile.divideTiles(
                   context: context,
-                  color: HermezColors.blueyGreyThree,
+                  color: HermezColors.transparent,
                   tiles: [
-                new GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(
-                          widget.arguments.parentContext, "/web_explorer",
-                          arguments:
-                              WebExplorerArguments(widget.arguments.store));
-                    },
-                    child: Row(children: [
-                      Expanded(
-                        child: StoreCard(
-                          HermezColors.lightGrey,
-                          "https://cdn.freebiesupply.com/images/large/2x/amazon-logo-transparent.png",
-                          height: 120,
-                          padding: 10,
-                          amount: 50,
-                        ),
+                Row(children: [
+                  Expanded(
+                    child: new GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                            widget.arguments.parentContext, "/web_explorer",
+                            arguments:
+                                WebExplorerArguments(widget.arguments.store));
+                      },
+                      child: StoreCard(
+                        HermezColors.lightGrey,
+                        "https://cdn.freebiesupply.com/images/large/2x/amazon-logo-transparent.png",
+                        height: 120,
+                        padding: 10,
+                        amount: 50,
                       ),
-                      SizedBox(
-                        width: 15,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  Expanded(
+                    child: new GestureDetector(
+                      onTap: () {
+                        /*Navigator.pushNamed(
+                            widget.arguments.parentContext, "/web_explorer",
+                            arguments:
+                                WebExplorerArguments(widget.arguments.store));*/
+                      },
+                      child: StoreCard(
+                        HermezColors.lightGrey,
+                        "https://www.freepnglogos.com/uploads/netflix-logo-0.png",
+                        height: 120,
+                        padding: 10,
+                        amount: 10,
+                        enabled: false,
                       ),
-                      Expanded(
-                        child: StoreCard(
-                          HermezColors.lightGrey,
-                          "https://www.freepnglogos.com/uploads/netflix-logo-0.png",
-                          height: 120,
-                          padding: 10,
-                          amount: 10,
-                        ),
-                      ),
-                    ])),
+                    ),
+                  ),
+                ]),
                 SizedBox(
                   height: 15,
                 ),
-                new GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(
-                          widget.arguments.parentContext, "/web_explorer",
-                          arguments:
-                              WebExplorerArguments(widget.arguments.store));
-                    },
-                    child: Row(children: [
-                      Expanded(
-                        child: StoreCard(
-                          HermezColors.lightGrey,
-                          "https://upload.wikimedia.org/wikipedia/commons/c/c5/Ikea_logo.svg",
-                          height: 120,
-                          padding: 10,
-                          amount: 75,
-                        ),
+                Row(children: [
+                  Expanded(
+                    child: new GestureDetector(
+                      onTap: () {
+                        /*Navigator.pushNamed(
+                            widget.arguments.parentContext, "/web_explorer",
+                            arguments:
+                                WebExplorerArguments(widget.arguments.store));*/
+                      },
+                      child: StoreCard(
+                        HermezColors.lightGrey,
+                        "https://upload.wikimedia.org/wikipedia/commons/c/c5/Ikea_logo.svg",
+                        height: 120,
+                        padding: 10,
+                        amount: 75,
+                        enabled: false,
                       ),
-                      SizedBox(
-                        width: 15,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15,
+                  ),
+                  Expanded(
+                    child: new GestureDetector(
+                      onTap: () {
+                        /*Navigator.pushNamed(
+                            widget.arguments.parentContext, "/web_explorer",
+                            arguments:
+                                WebExplorerArguments(widget.arguments.store));*/
+                      },
+                      child: StoreCard(
+                        HermezColors.lightGrey,
+                        "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg",
+                        height: 120,
+                        padding: 10,
+                        amount: 15,
+                        enabled: false,
                       ),
-                      Expanded(
-                        child: StoreCard(
-                          HermezColors.lightGrey,
-                          "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg",
-                          height: 120,
-                          padding: 10,
-                          amount: 15,
-                        ),
-                      ),
-                    ])),
+                    ),
+                  ),
+                ]),
                 SizedBox(
                   height: 15,
                 ),
-                new GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(
-                          widget.arguments.parentContext, "/web_explorer",
-                          arguments:
-                              WebExplorerArguments(widget.arguments.store));
-                    },
-                    child: Row(children: [
-                      Expanded(
+                Row(
+                  children: [
+                    Expanded(
+                      child: new GestureDetector(
+                        onTap: () {
+                          /*Navigator.pushNamed(
+                              widget.arguments.parentContext, "/web_explorer",
+                              arguments:
+                                  WebExplorerArguments(widget.arguments.store));*/
+                        },
                         child: StoreCard(
                           HermezColors.lightGrey,
                           "https://cdn.freelogovectors.net/wp-content/uploads/2016/12/airbnb-logo.png",
                           height: 120,
                           padding: 10,
                           amount: 100,
+                          enabled: false,
                         ),
                       ),
-                      SizedBox(
-                        width: 15,
-                      ),
-                      Expanded(
-                          child:
-                              Container() /*StoreCard(
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Expanded(
+                        child:
+                            Container() /*StoreCard(
                           HermezColors.lightGrey,
                           "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg",
                           height: 130,
                           padding: 25,
                         ),*/
-                          ),
-                    ])),
+                        ),
+                  ],
+                ),
               ]).toList()),
         ),
       ),
