@@ -6,13 +6,15 @@ import 'package:hermez/utils/hermez_colors.dart';
 
 class StoreCard extends StatelessWidget {
   StoreCard(this.backgroundColor, this.imagePath,
-      {this.height = 200,
+      {this.height = 190,
       this.padding = 70,
       this.amount = 0,
       this.currency = "USD",
+      this.vendorColor = HermezColors.lightGrey,
       this.enabled = true});
 
   final Color backgroundColor;
+  final Color vendorColor;
   final String imagePath;
   final double height;
   final double padding;
@@ -22,14 +24,15 @@ class StoreCard extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: enabled ? 1 : 0.6,
-      child: enabled
-          ? content()
-          : ColorFiltered(
+        opacity: enabled ? 1 : 0.2,
+        child: /*enabled
+          ?*/
+            content()
+        /*: ColorFiltered(
               colorFilter: greyscale,
               child: content(),
-            ),
-    );
+            ),*/
+        );
   }
 
   Widget content() {
@@ -75,7 +78,7 @@ class StoreCard extends StatelessWidget {
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(16.0),
                           bottomRight: Radius.circular(16.0)),
-                      color: HermezColors.vendorBitrefill),
+                      color: vendorColor),
                   width: 60,
                   height: double.infinity,
                   child: Container(

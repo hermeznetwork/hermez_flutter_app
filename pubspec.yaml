@@ -118,6 +118,8 @@ flutter:
     # - tx_move.svg
     # Marketplace
     - vendor_bitrefill.svg
+    - vendor_coingate.png
+    - vendor_bidali.png
     - gift.svg
     # Settings
     - settings_currency_conversion.svg

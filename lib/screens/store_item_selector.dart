@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/components/wallet/store_card.dart';
@@ -5,11 +6,14 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/web_explorer.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
+import '../constants.dart';
+
 class StoreItemSelectorArguments {
   WalletHandler store;
   BuildContext parentContext;
+  Color vendorColor;
 
-  StoreItemSelectorArguments(this.store, this.parentContext);
+  StoreItemSelectorArguments(this.store, this.parentContext, this.vendorColor);
 }
 
 class StoreItemSelectorPage extends StatefulWidget {
@@ -67,6 +71,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         height: 120,
                         padding: 10,
                         amount: 50,
+                        vendorColor: widget.arguments.vendorColor,
                       ),
                     ),
                   ),
@@ -76,10 +81,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                   Expanded(
                     child: new GestureDetector(
                       onTap: () {
-                        /*Navigator.pushNamed(
-                            widget.arguments.parentContext, "/web_explorer",
-                            arguments:
-                                WebExplorerArguments(widget.arguments.store));*/
+                        showServiceAvailableSoonFlush();
                       },
                       child: StoreCard(
                         HermezColors.lightGrey,
@@ -87,6 +89,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         height: 120,
                         padding: 10,
                         amount: 10,
+                        vendorColor: widget.arguments.vendorColor,
                         enabled: false,
                       ),
                     ),
@@ -99,10 +102,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                   Expanded(
                     child: new GestureDetector(
                       onTap: () {
-                        /*Navigator.pushNamed(
-                            widget.arguments.parentContext, "/web_explorer",
-                            arguments:
-                                WebExplorerArguments(widget.arguments.store));*/
+                        showServiceAvailableSoonFlush();
                       },
                       child: StoreCard(
                         HermezColors.lightGrey,
@@ -111,6 +111,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         padding: 10,
                         amount: 75,
                         enabled: false,
+                        vendorColor: widget.arguments.vendorColor,
                       ),
                     ),
                   ),
@@ -120,10 +121,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                   Expanded(
                     child: new GestureDetector(
                       onTap: () {
-                        /*Navigator.pushNamed(
-                            widget.arguments.parentContext, "/web_explorer",
-                            arguments:
-                                WebExplorerArguments(widget.arguments.store));*/
+                        showServiceAvailableSoonFlush();
                       },
                       child: StoreCard(
                         HermezColors.lightGrey,
@@ -132,6 +130,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         padding: 10,
                         amount: 15,
                         enabled: false,
+                        vendorColor: widget.arguments.vendorColor,
                       ),
                     ),
                   ),
@@ -144,10 +143,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                     Expanded(
                       child: new GestureDetector(
                         onTap: () {
-                          /*Navigator.pushNamed(
-                              widget.arguments.parentContext, "/web_explorer",
-                              arguments:
-                                  WebExplorerArguments(widget.arguments.store));*/
+                          showServiceAvailableSoonFlush();
                         },
                         child: StoreCard(
                           HermezColors.lightGrey,
@@ -156,6 +152,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                           padding: 10,
                           amount: 100,
                           enabled: false,
+                          vendorColor: widget.arguments.vendorColor,
                         ),
                       ),
                     ),
@@ -177,5 +174,33 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
         ),
       ),
     );
+  }
+
+  void showServiceAvailableSoonFlush() {
+    Flushbar(
+      messageText: Text(
+        'Service will be available soon',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: HermezColors.blackTwo,
+          fontSize: 16,
+          fontFamily: 'ModernEra',
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      boxShadows: [
+        BoxShadow(
+          color: HermezColors.blueyGreyTwo.withAlpha(64),
+          offset: Offset(0, 4),
+          blurRadius: 16,
+          spreadRadius: 0,
+        ),
+      ],
+      borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      backgroundColor: Colors.white,
+      margin: EdgeInsets.all(16.0),
+      duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+    ).show(context);
   }
 }
