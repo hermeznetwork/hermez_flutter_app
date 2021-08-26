@@ -19,6 +19,7 @@ import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/recovery_phrase_confirm.dart';
 import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/screens/settings_details.dart';
+import 'package:hermez/screens/store_item_selector.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/screens/web_explorer.dart';
@@ -116,7 +117,10 @@ Map<String, WidgetBuilder> getRoutes(context) {
       return WebExplorerPage(
           arguments: ModalRoute.of(context).settings.arguments);
     },
-
+    '/store_item_selector': (BuildContext context) {
+      return StoreItemSelectorPage(
+          arguments: ModalRoute.of(context).settings.arguments);
+    },
     /*'/account_details': (BuildContext context) {
       // Cast the arguments to the correct type: ScreenArguments.
       final WalletAccountDetailsArguments args =

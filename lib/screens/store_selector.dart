@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/components/wallet/store_card.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/web_explorer.dart';
+import 'package:hermez/screens/store_item_selector.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class StoreSelectorArguments {
@@ -47,12 +47,14 @@ class _StoreSelectorPageState extends State<StoreSelectorPage> {
                   tiles: [
                 new GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(
-                          widget.arguments.parentContext, "/web_explorer",
-                          arguments:
-                              WebExplorerArguments(widget.arguments.store));
+                      Navigator.pushNamed(widget.arguments.parentContext,
+                          "/store_item_selector",
+                          arguments: StoreItemSelectorArguments(
+                              widget.arguments.store,
+                              widget.arguments.parentContext));
                     },
-                    child: StoreCard(HermezColors.vendorBitrefill)),
+                    child: StoreCard(HermezColors.vendorBitrefill,
+                        "assets/vendor_bitrefill.svg")),
               ]).toList()),
         ),
       ),

@@ -169,10 +169,12 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
               .split('.')
               .last;
 
-          double currencyExchange = (selectedAccount.token.USD *
-              (currency != "USD"
-                  ? widget.arguments.store.state.exchangeRatio
-                  : 1));
+          double currencyExchange = selectedAccount != null
+              ? (selectedAccount.token.USD *
+                  (currency != "USD"
+                      ? widget.arguments.store.state.exchangeRatio
+                      : 1))
+              : 1;
 
           return Container(
             padding: EdgeInsets.all(10),
@@ -918,6 +920,139 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
               ),
       ],
     );
+  }
+
+  Widget _buildSpeedRow() {
+    return ListTile(
+        title: Container(
+          padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      child: Text(
+                        "Speed",
+                        style: TextStyle(
+                            fontFamily: 'ModernEra',
+                            color: HermezColors.blackTwo,
+                            fontWeight: FontWeight.w500,
+                            height: 1.71,
+                            fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    Container(
+                      child: Text(
+                        "Normal",
+                        style: TextStyle(
+                            fontFamily: 'ModernEra',
+                            color: HermezColors.blueyGreyTwo,
+                            fontWeight: FontWeight.w500,
+                            height: 1.53,
+                            fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    child: Text(
+                      "1",
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
+                          color: HermezColors.blackTwo,
+                          fontWeight: FontWeight.w700,
+                          height: 1.71,
+                          fontSize: 16),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  Container(
+                    child: Text(
+                      "2",
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
+                          color: HermezColors.blueyGreyTwo,
+                          fontWeight: FontWeight.w500,
+                          height: 1.53,
+                          fontSize: 15),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  /*widget.arguments.transactionType ==
+                                    TransactionType.FORCEEXIT ||
+                                i == 1
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    child: Text(
+                                      speed,
+                                      style: TextStyle(
+                                          fontFamily: 'ModernEra',
+                                          color: HermezColors.blackTwo,
+                                          fontWeight: FontWeight.w700,
+                                          height: 1.73,
+                                          fontSize: 15),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  Container(
+                                    alignment: Alignment.center,
+                                    margin: EdgeInsets.only(left: 6, top: 4),
+                                    child: SvgPicture.asset(
+                                        'assets/arrow_right.svg',
+                                        color: HermezColors.blackTwo,
+                                        semanticsLabel: 'fee_selector'),
+                                  )
+                                ],
+                              )
+                            :*/
+                  Container(),
+                ],
+              ),
+            ],
+          ),
+        ),
+        onTap:
+            /*widget.arguments.transactionType ==
+                          TransactionType.FORCEEXIT ||
+                      i == 1
+                  ? () {
+                      Navigator.of(context).pushNamed("/fee_selector",
+                          arguments: FeeSelectorArguments(
+                              widget.arguments.store,
+                              selectedFee: i == 0
+                                  ? selectedFeeSpeed
+                                  : selectedWithdrawFeeSpeed,
+                              ethereumToken: ethereumToken,
+                              estimatedGas:
+                                  i == 0 ? gasLimit : withdrawGasLimit,
+                              gasPriceResponse: gasPriceResponse,
+                              onFeeSelected: (selectedFee) {
+                            setState(() {
+                              amountController.clear();
+                              if (i == 0) {
+                                selectedFeeSpeed = selectedFee;
+                              } else {
+                                selectedWithdrawFeeSpeed = selectedFee;
+                              }
+                              needRefresh = true;
+                            });
+                          }));
+                    }
+                  :*/
+            null);
   }
 
   //widget that builds the list
