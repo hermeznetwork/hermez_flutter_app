@@ -86,6 +86,18 @@ class _StoreSelectorPageState extends State<StoreSelectorPage> {
                             "assets/vendor_bidali.png",
                             enabled: false,
                           )),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      new GestureDetector(
+                          onTap: () {
+                            showServiceAvailableSoonFlush();
+                          },
+                          child: StoreCard(
+                            HermezColors.vendorCryptorefills,
+                            "assets/vendor_cryptorefills.png",
+                            enabled: false,
+                          )),
                     ]).toList()),
               ),
             ),

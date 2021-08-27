@@ -120,6 +120,7 @@ flutter:
     - vendor_bitrefill.svg
     - vendor_coingate.png
     - vendor_bidali.png
+    - vendor_cryptorefills.png
     - gift.svg
     # Settings
     - settings_currency_conversion.svg

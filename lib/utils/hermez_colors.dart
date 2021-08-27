@@ -44,4 +44,6 @@ class HermezColors {
   static const Color vendorCoingate = Color.fromRGBO(83, 38, 237, 1.0);
 
   static const Color vendorBidali = Color.fromRGBO(227, 81, 127, 1.0);
+
+  static const Color vendorCryptorefills = Color.fromRGBO(247, 177, 39, 1.0);
 }
