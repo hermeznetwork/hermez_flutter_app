@@ -9,10 +9,10 @@ import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/address_service.dart';
 import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
-import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/price_updater_service.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/addresses.dart' as addresses;
@@ -45,7 +45,7 @@ class WalletHandler {
       this._configurationService,
       this._storageService,
       this._hermezService,
-      this._exchangeService);
+      this._priceUpdaterService);
 
   final Store<Wallet, WalletAction> _store;
   final AddressService _addressService;
@@ -54,7 +54,7 @@ class WalletHandler {
   final StorageService _storageService;
   final ConfigurationService _configurationService;
   final HermezService _hermezService;
-  final ExchangeService _exchangeService;
+  final PriceUpdaterService _priceUpdaterService;
 
   Wallet get state => _store.state;
 
@@ -133,9 +133,9 @@ class WalletHandler {
     _store.dispatch(DefaultFeeUpdated(defaultFee));
 
     try {
-      final exchangeRatio = await _exchangeService.getFiatExchangeRates();
-      await _configurationService.setExchangeRatio(exchangeRatio);
-      _store.dispatch(ExchangeRatioUpdated(exchangeRatio[
+      final currenciesPrices = await _priceUpdaterService.getCurrenciesPrices();
+      await _configurationService.setExchangeRatio(currenciesPrices);
+      _store.dispatch(ExchangeRatioUpdated(currenciesPrices[
           (await _configurationService.getDefaultCurrency())
               .toString()
               .split(".")

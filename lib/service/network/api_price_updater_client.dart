@@ -8,20 +8,48 @@ import 'package:hermez/service/network/model/currencies_response.dart';
 import 'package:http/http.dart' as http2;
 
 import 'model/currency.dart';
+import 'model/price_token.dart';
+import 'model/tokens_response.dart';
 
-class ApiExchangeRateClient {
+class ApiPriceUpdaterClient {
   final String _baseAddress;
+  final String _apiKey;
 
+  final String TOKENS_URL = "/v1/tokens";
   final String CURRENCIES_URL = "/v1/currencies";
 
-  ApiExchangeRateClient(this._baseAddress);
+  ApiPriceUpdaterClient(this._baseAddress, this._apiKey);
 
-  // EXCHANGE RATE
-  Future<List<Currency>> getExchangeRates() async {
+  // TOKENS PRICES
+  Future<List<PriceToken>> getTokensPrices() async {
+    final response = await _get(TOKENS_URL, null);
+    final TokensResponse tokensResponse =
+        TokensResponse.fromJson(json.decode(response.body));
+    return tokensResponse.tokens;
+  }
+
+  // TOKEN PRICE
+  Future<PriceToken> getTokenPrice(int tokenId) async {
+    final response = await _get(TOKENS_URL + "/" + tokenId.toString(), null);
+    final PriceToken priceToken =
+        PriceToken.fromJson(json.decode(response.body));
+    return priceToken;
+  }
+
+  // CURRENCIES PRICES
+  Future<List<Currency>> getCurrenciesPrices() async {
     final response = await _get(CURRENCIES_URL, null);
     final CurrenciesResponse currenciesResponse =
         CurrenciesResponse.fromJson(json.decode(response.body));
     return currenciesResponse.currencies;
+  }
+
+  // CURRENCY PRICE
+  Future<Currency> getCurrencyPrice(String currency) async {
+    final response = await _get(CURRENCIES_URL + "/" + currency, null);
+    final Currency currencyResponse =
+        Currency.fromJson(json.decode(response.body));
+    return currencyResponse;
   }
 
   Future<http2.Response> _get(
@@ -37,65 +65,13 @@ class ApiExchangeRateClient {
         uri,
         headers: {
           HttpHeaders.acceptHeader: 'application/json',
+          "X-API-KEY": _apiKey
         },
       );
 
       return returnResponseOrThrowException(response);
     } on IOException catch (e) {
       print(e.toString());
-      throw NetworkException();
-    }
-  }
-
-  Future<http2.Response> _post(
-      String endpoint, Map<String, dynamic> body) async {
-    try {
-      var url = Uri.parse('$_baseAddress$endpoint');
-      final response = await http2.post(
-        url,
-        body: json.encode(body),
-        headers: {
-          HttpHeaders.acceptHeader: '*/*',
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-      );
-
-      return returnResponseOrThrowException(response);
-    } on IOException {
-      throw NetworkException();
-    }
-  }
-
-  Future<http2.Response> _put(dynamic task) async {
-    try {
-      var url = Uri.parse('$_baseAddress/todos/${task.id}');
-      final response = await http2.put(
-        url,
-        body: json.encode(task.toJson()),
-        headers: {
-          HttpHeaders.acceptHeader: 'application/json',
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-      );
-
-      return returnResponseOrThrowException(response);
-    } on IOException {
-      throw NetworkException();
-    }
-  }
-
-  Future<http2.Response> _delete(String id) async {
-    try {
-      var url = Uri.parse('$_baseAddress/todos/$id');
-      final response = await http2.delete(
-        url,
-        headers: {
-          HttpHeaders.acceptHeader: 'application/json',
-        },
-      );
-
-      return returnResponseOrThrowException(response);
-    } on IOException {
       throw NetworkException();
     }
   }

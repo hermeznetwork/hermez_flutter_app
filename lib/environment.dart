@@ -5,25 +5,36 @@ EnvParams params = Env().params['local'];
 
 class Env {
   Env() {
-    params['mainnet'] = EnvParams("https://etherscan.io",
-        "http://api.etherscan.io/api", ETHERSCAN_API_KEY);
+    params['mainnet'] = EnvParams(
+      "https://etherscan.io",
+      "http://api.etherscan.io/api",
+      ETHERSCAN_API_KEY,
+      "priceupdater.hermez.io",
+      PRICE_UPDATER_API_KEY_MAINNET,
+    );
 
     params['rinkeby'] = EnvParams(
       "https://rinkeby.etherscan.io",
       "http://api-rinkeby.etherscan.io/api",
       ETHERSCAN_API_KEY,
+      "priceupdater.testnet.hermez.io",
+      PRICE_UPDATER_API_KEY_RINKEBY,
     );
 
     params['goerli'] = EnvParams(
       "https://goerli.etherscan.io",
       "http://api-goerli.etherscan.io/api",
       ETHERSCAN_API_KEY,
+      "priceupdater.internaltestnet.hermez.io",
+      PRICE_UPDATER_API_KEY_GOERLI,
     );
 
     params['local'] = EnvParams(
       "https://etherscan.io",
       "http://api-goerli.etherscan.io/api",
       ETHERSCAN_API_KEY,
+      "priceupdater.internaltestnet.hermez.io",
+      PRICE_UPDATER_API_KEY_GOERLI,
     );
   }
 
@@ -39,10 +50,13 @@ class Env {
 }
 
 class EnvParams {
-  EnvParams(this.etherscanUrl, this.etherscanApiUrl, this.etherscanApiKey);
+  EnvParams(this.etherscanUrl, this.etherscanApiUrl, this.etherscanApiKey,
+      this.priceUpdaterApiUrl, this.priceUpdaterApiKey);
   final String etherscanUrl;
   final String etherscanApiUrl;
   final String etherscanApiKey;
+  final String priceUpdaterApiUrl;
+  final String priceUpdaterApiKey;
 }
 
 /// Gets the current supported environments
