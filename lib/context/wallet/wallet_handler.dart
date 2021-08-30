@@ -12,6 +12,7 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/service/price_updater_service.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
@@ -134,6 +135,7 @@ class WalletHandler {
 
     try {
       final currenciesPrices = await _priceUpdaterService.getCurrenciesPrices();
+      final tokensPrices = await _priceUpdaterService.getTokensPrices();
       await _configurationService.setExchangeRatio(currenciesPrices);
       _store.dispatch(ExchangeRatioUpdated(currenciesPrices[
           (await _configurationService.getDefaultCurrency())
@@ -380,8 +382,8 @@ class WalletHandler {
     await _explorerService.getBlockAvgTime();
   }
 
-  Future<List<Token>> getTokens({bool needRefresh = false}) async {
-    var supportedTokens;
+  Future<List<PriceToken>> getTokens({bool needRefresh = false}) async {
+    List<Token> supportedTokens;
     if (state.tokens != null &&
         state.tokens.length > 0 &&
         needRefresh == false) {
@@ -389,12 +391,19 @@ class WalletHandler {
     } else {
       supportedTokens = await _hermezService.getTokens();
     }
+
+    final tokensPrices = await _priceUpdaterService.getTokensPrices();
     return supportedTokens;
   }
 
   Future<Token> getTokenById(int tokenId) async {
     final supportedToken = await _hermezService.getTokenById(tokenId);
     return supportedToken;
+  }
+
+  Future<PriceToken> getPriceTokenById(int tokenId) async {
+    final priceToken = await _priceUpdaterService.getTokenPrice(tokenId);
+    return priceToken;
   }
 
   Future<List<Exit>> getExits(
@@ -923,7 +932,7 @@ class WalletHandler {
   /// @param {Object} fees - The recommended Fee object returned by the Coordinator
   /// @param {Boolean} iExistingAccount - Whether it's a existingAccount transfer
   /// @returns {number} - Transaction fee
-  double getFee(RecommendedFee fees, bool isExistingAccount, Token token,
+  double getFee(RecommendedFee fees, bool isExistingAccount, PriceToken token,
       TransactionType transactionType) {
     if (token.USD == 0) {
       return 0;

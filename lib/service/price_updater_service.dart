@@ -24,7 +24,7 @@ class PriceUpdaterService implements IPriceUpdaterService {
     LinkedHashMap<String, dynamic> result = LinkedHashMap<String, dynamic>();
     List<PriceToken> response = await _client.getTokensPrices();
     response.forEach((token) {
-      result[token.symbol] = token.USD;
+      result[token.symbol] = token;
     });
     return result;
   }
@@ -34,7 +34,7 @@ class PriceUpdaterService implements IPriceUpdaterService {
     LinkedHashMap<String, dynamic> result = LinkedHashMap<String, dynamic>();
     PriceToken response = await _client.getTokenPrice(tokenId);
     if (response != null) {
-      result[response.symbol] = response.USD;
+      result[response.symbol] = response;
     }
     return result;
   }

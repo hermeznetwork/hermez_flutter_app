@@ -419,62 +419,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     return EthAmountFormatter.formatAmount(resultAmount, symbol);
   }
 
-  /*String accountBalance() {
-    double resultValue = 0;
-    String result = "";
-    String locale = "";
-    String symbol = "";
-    final String currency =
-        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
-    if (currency == "EUR") {
-      locale = 'eu';
-      symbol = '€';
-    } else if (currency == "CNY") {
-      locale = 'en';
-      symbol = '\¥';
-    } else if (currency == "JPY") {
-      locale = 'en';
-      symbol = "\¥";
-    } else if (currency == "GBP") {
-      locale = 'en';
-      symbol = "\£";
-    } else {
-      locale = 'en';
-      symbol = '\$';
-    }
-    if (widget.arguments.account.token.USD != null) {
-      double value = widget.arguments.account.token.USD *
-          double.parse(widget.arguments.account.balance);
-      if (currency != "USD") {
-        value *= widget.arguments.store.state.exchangeRatio;
-      }
-      resultValue = resultValue + value;
-    }
-
-    pendingTransfers.forEach((poolTransaction) {
-      var amount = (getTokenAmountBigInt(
-                  double.parse(poolTransaction.amount) /
-                      pow(10, widget.arguments.account.token.decimals),
-                  widget.arguments.account.token.decimals)
-              .toDouble() /
-          pow(10, widget.arguments.account.token.decimals));
-      var fee = (getTokenAmountBigInt(
-                  (poolTransaction.fee *
-                          pow(10,
-                              widget.arguments.account.token.decimals - 3)) /
-                      pow(10, widget.arguments.account.token.decimals),
-                  widget.arguments.account.token.decimals)
-              .toDouble() /
-          pow(10, widget.arguments.account.token.decimals));
-      resultValue = resultValue - amount - fee;
-    });
-
-    //result += (resultValue / pow(10, 18)).toStringAsFixed(2);
-    result = NumberFormat.currency(locale: locale, symbol: symbol)
-        .format(resultValue / pow(10, widget.arguments.account.token.decimals));
-    return result;
-  }*/
-
   //widget that builds the list
   Widget _buildTransactionsList() {
     if (_isLoading && transactions.isEmpty) {

@@ -7,6 +7,7 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/addresses.dart';
@@ -528,15 +529,16 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                   if (widget.arguments.transactionType ==
                       TransactionType.RECEIVE) {
                     final Token token = _tokens[index];
+                    final PriceToken priceToken = widget.arguments.store.getPriceToken(token);
                     return AccountRow(
                         null,
                         token,
                         token.name,
                         token.symbol,
                         currency != "USD"
-                            ? token.USD *
+                            ? priceToken.USD *
                                 widget.arguments.store.state.exchangeRatio
-                            : token.USD,
+                            : priceToken.USD,
                         currency,
                         0,
                         false,
