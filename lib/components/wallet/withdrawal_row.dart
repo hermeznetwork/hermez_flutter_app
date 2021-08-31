@@ -3,15 +3,19 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/model/bucket.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/state_response.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 class WithdrawalRow extends StatelessWidget {
   WithdrawalRow(
     this.exit,
+    this.priceToken,
+    this.token,
     this.step,
     this.currency,
     this.exchangeRatio,
@@ -24,6 +28,8 @@ class WithdrawalRow extends StatelessWidget {
   });
 
   final Exit exit;
+  final PriceToken priceToken;
+  final Token token;
   final int step;
   final String currency;
   final double exchangeRatio;
@@ -149,8 +155,8 @@ class WithdrawalRow extends StatelessWidget {
                     child: Text(
                         EthAmountFormatter.formatAmount(
                             double.parse(exit.balance) /
-                                pow(10, exit.token.decimals),
-                            exit.token.symbol),
+                                pow(10, token.decimals),
+                            token.symbol),
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: Colors.white,
@@ -165,8 +171,8 @@ class WithdrawalRow extends StatelessWidget {
                     child: Text(
                         symbol +
                             (double.parse(exit.balance) /
-                                    pow(10, exit.token.decimals) *
-                                    exit.token.USD *
+                                    pow(10, token.decimals) *
+                                    priceToken.USD *
                                     (currency != "USD" ? exchangeRatio : 1))
                                 .toStringAsFixed(2),
                         // On Hold, Pending
@@ -494,9 +500,8 @@ class WithdrawalRow extends StatelessWidget {
   }
 
   int calculateRemainingTime() {
-    double exitAmount = double.parse(exit.balance) /
-        pow(10, exit.token.decimals) *
-        exit.token.USD;
+    double exitAmount =
+        double.parse(exit.balance) / pow(10, token.decimals) * priceToken.USD;
     int bucketBlockLastUpdate;
     int bucketBlocksEachCheck;
     //this.state.network.lastBatch.timestamp

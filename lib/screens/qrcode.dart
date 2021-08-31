@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/dialog/alert.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/constants.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/share_utils.dart';
@@ -55,7 +56,7 @@ class QRCodePage extends StatefulWidget {
 class _QRCodePageState extends State<QRCodePage> {
   static GlobalKey qrCodeKey = GlobalKey();
 
-  List<Token> _tokens;
+  List<PriceToken> _priceTokens;
   @override
   Widget build(BuildContext context) {
     String title;
@@ -435,7 +436,7 @@ class _QRCodePageState extends State<QRCodePage> {
                               showBarModalBottomSheet(
                                 context: context,
                                 builder: (context) => Scaffold(body: FutureBuilder(
-                                  future: fetchTokens(),
+                                  future: fetchPriceTokens(),
                                     builder: (buildContext, snapshot) {
                                       return handleTokensList(snapshot, context);
                                     }
@@ -469,8 +470,8 @@ class _QRCodePageState extends State<QRCodePage> {
     )));
   }
 
-  Future<List<Token>> fetchTokens() async {
-    return widget.arguments.store.getTokens();
+  Future<List<PriceToken>> fetchPriceTokens() async {
+    return widget.arguments.store.getPriceTokens();
   }
 
   Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
@@ -498,7 +499,7 @@ class _QRCodePageState extends State<QRCodePage> {
             ]));
       } else {
         if (snapshot.hasData && (snapshot.data as List).length > 0) {
-            _tokens = snapshot.data;
+            _priceTokens = snapshot.data;
             return buildTokensList(context);
         }
       }
@@ -507,7 +508,7 @@ class _QRCodePageState extends State<QRCodePage> {
 
   //widget that builds the list
   Widget buildTokensList(BuildContext parentContext) {
-    return  Column(
+    return Column(
       children: [
         SizedBox(
           height: 30,
@@ -538,7 +539,7 @@ class _QRCodePageState extends State<QRCodePage> {
             color: Colors.white,
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: _tokens.length,
+                itemCount: _priceTokens.length,
                 padding: const EdgeInsets.all(16.0),
                 itemBuilder: (context, i) {
                   final index = i;
@@ -547,16 +548,18 @@ class _QRCodePageState extends State<QRCodePage> {
                       .toString()
                       .split('.')
                       .last;
-                    final Token token = _tokens[index];
+                    final PriceToken priceToken = _priceTokens[index];
+                    final Token token = widget.arguments.store.state.tokens
+                        .firstWhere((Token token) => token.id == priceToken.itemId);
                     return AccountRow(
                         null,
                         token,
                         token.name,
                         token.symbol,
                         currency != "USD"
-                            ? token.USD *
+                            ? priceToken.USD *
                             widget.arguments.store.state.exchangeRatio
-                            : token.USD,
+                            : priceToken.USD,
                         currency,
                         0,
                         false,

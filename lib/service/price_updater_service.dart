@@ -7,8 +7,8 @@ import 'network/model/currency.dart';
 import 'network/model/price_token.dart';
 
 abstract class IPriceUpdaterService {
-  Future<LinkedHashMap<String, dynamic>> getTokensPrices();
-  Future<LinkedHashMap<String, dynamic>> getTokenPrice(int tokenId);
+  Future<List<PriceToken>> getTokensPrices();
+  Future<PriceToken> getTokenPrice(int tokenId);
   Future<LinkedHashMap<String, dynamic>> getCurrenciesPrices();
   Future<LinkedHashMap<String, dynamic>> getCurrencyPrice(String currency);
 }
@@ -20,23 +20,15 @@ class PriceUpdaterService implements IPriceUpdaterService {
   }
 
   @override
-  Future<LinkedHashMap<String, dynamic>> getTokensPrices() async {
-    LinkedHashMap<String, dynamic> result = LinkedHashMap<String, dynamic>();
-    List<PriceToken> response = await _client.getTokensPrices();
-    response.forEach((token) {
-      result[token.symbol] = token;
-    });
-    return result;
+  Future<List<PriceToken>> getTokensPrices() async {
+    List<PriceToken> tokensPrices = await _client.getTokensPrices();
+    return tokensPrices;
   }
 
   @override
-  Future<LinkedHashMap<String, dynamic>> getTokenPrice(int tokenId) async {
-    LinkedHashMap<String, dynamic> result = LinkedHashMap<String, dynamic>();
-    PriceToken response = await _client.getTokenPrice(tokenId);
-    if (response != null) {
-      result[response.symbol] = response;
-    }
-    return result;
+  Future<PriceToken> getTokenPrice(int tokenId) async {
+    PriceToken priceToken = await _client.getTokenPrice(tokenId);
+    return priceToken;
   }
 
   @override

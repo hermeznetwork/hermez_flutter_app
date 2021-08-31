@@ -7,6 +7,7 @@ import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 import '../context/wallet/wallet_handler.dart';
 
@@ -17,7 +18,7 @@ import '../context/wallet/wallet_handler.dart';
 class FeeSelectorArguments {
   final WalletHandler store;
   WalletDefaultFee selectedFee;
-  PriceToken ethereumToken;
+  Token ethereumToken;
   BigInt estimatedGas;
   GasPriceResponse gasPriceResponse;
   final void Function(WalletDefaultFee selectedFee) onFeeSelected;
@@ -185,7 +186,13 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                   widget.arguments.selectedFee != null
                                       ? Container(
                                           child: Text(
-                                            ((widget.arguments.ethereumToken
+                                            ((widget.arguments.store.state.priceTokens
+                                                            .firstWhere((PriceToken priceToken) =>
+                                                                priceToken.itemId ==
+                                                                widget
+                                                                    .arguments
+                                                                    .ethereumToken
+                                                                    .id)
                                                             .USD) *
                                                         (widget
                                                                     .arguments
@@ -202,9 +209,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                                                 .state
                                                                 .exchangeRatio
                                                             : 1) *
-                                                        (widget.arguments
-                                                                .estimatedGas
-                                                                .toInt() *
+                                                        (widget.arguments.estimatedGas.toInt() *
                                                             gasPrice /
                                                             pow(
                                                                 10,
@@ -214,11 +219,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                                                     .decimals)))
                                                     .toStringAsFixed(2) +
                                                 " " +
-                                                widget.arguments.store.state
-                                                    .defaultCurrency
-                                                    .toString()
-                                                    .split(".")
-                                                    .last,
+                                                widget.arguments.store.state.defaultCurrency.toString().split(".").last,
                                             style: TextStyle(
                                                 fontFamily: 'ModernEra',
                                                 color:

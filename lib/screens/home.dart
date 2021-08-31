@@ -16,6 +16,7 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/token.dart';
 import 'package:provider/provider.dart';
 
 import '../context/wallet/wallet_handler.dart';
@@ -187,7 +188,9 @@ class _HomePageState extends State<HomePage> {
                   List<Account> accounts =
                       await widget.arguments.store.getL1Accounts(true);
                   for (Account account in accounts) {
-                    if (account.token.symbol == scannedStrings[1]) {
+                    Token token = await widget.arguments.store
+                        .getTokenById(account.tokenId);
+                    if (token.symbol == scannedStrings[1]) {
                       accountFound = true;
                       Navigator.pushReplacementNamed(
                           context, "/transaction_amount",
@@ -226,7 +229,9 @@ class _HomePageState extends State<HomePage> {
                   List<Account> accounts =
                       await widget.arguments.store.getL2Accounts();
                   for (Account account in accounts) {
-                    if (account.token.symbol == scannedStrings[2]) {
+                    Token token = await widget.arguments.store
+                        .getTokenById(account.tokenId);
+                    if (token.symbol == scannedStrings[2]) {
                       accountFound = true;
                       Navigator.pushReplacementNamed(
                           context, "/transaction_amount",

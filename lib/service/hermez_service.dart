@@ -288,22 +288,23 @@ class HermezService implements IHermezService {
       bool instantWithdrawal,
       String hezEthereumAddress,
       String babyJubJub) async {
+    Token token =
+        await getTokenById(exit != null ? exit.tokenId : account.tokenId);
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
+
       return tx.withdrawGasLimit(
           amount,
           hezEthereumAddress,
-          exit != null
-              ? exit.accountIndex
-              : "hez:" + account.token.symbol + ":0",
-          exit != null ? exit.token : account.token,
+          exit != null ? exit.accountIndex : "hez:" + token.symbol + ":0",
+          token,
           babyJubJub,
           exit != null ? exit.batchNum : 0,
           exit.merkleProof.siblings != null ? exit.merkleProof.siblings : [],
           isInstant: isIntant);
     } else {
-      return tx.delayedWithdrawGasLimit(hezEthereumAddress, exit.token);
+      return tx.delayedWithdrawGasLimit(hezEthereumAddress, token);
     }
   }
 

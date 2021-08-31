@@ -1,6 +1,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
@@ -48,6 +49,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   List<Token> get tokens;
 
+  List<PriceToken> get priceTokens;
+
   List<Account> get l1Accounts;
 
   List<Account> get l2Accounts;
@@ -81,6 +84,7 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..exchangeRatio = 0.0
     ..txLevel = TransactionLevel.LEVEL1
     ..tokens = []
+    ..priceTokens = []
     ..l1Accounts = []
     ..l2Accounts = []
     ..pendingL2Txs = []

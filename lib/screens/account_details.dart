@@ -37,9 +37,12 @@ import '../context/wallet/wallet_handler.dart';
 class AccountDetailsArguments {
   final WalletHandler store;
   Account account;
+  PriceToken priceToken;
+  Token token;
   BuildContext parentContext;
 
-  AccountDetailsArguments(this.store, this.account, this.parentContext);
+  AccountDetailsArguments(this.store, this.account, this.priceToken, this.token,
+      this.parentContext);
 }
 
 class AccountDetailsPage extends StatefulWidget {
@@ -158,7 +161,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Text(widget.arguments.account.token.name, // name
+                          Text(widget.arguments.token.name, // name
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
                                   color: HermezColors.blackTwo,
@@ -209,15 +212,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                             BlinkingTextAnimationArguments(
                                                 HermezColors.blackTwo,
                                                 calculateBalance(widget
-                                                    .arguments
-                                                    .account
-                                                    .token
-                                                    .symbol),
+                                                    .arguments.token.symbol),
                                                 32,
                                                 FontWeight.w800))
                                     : Text(
-                                        calculateBalance(widget
-                                            .arguments.account.token.symbol),
+                                        calculateBalance(
+                                            widget.arguments.token.symbol),
                                         style: TextStyle(
                                             color: HermezColors.blackTwo,
                                             fontFamily: 'ModernEra',
@@ -414,7 +414,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             symbol,
             widget.arguments.store,
             historyTransactions: historyTransactions) /
-        pow(10, widget.arguments.account.token.decimals);
+        pow(10, widget.arguments.token.decimals);
 
     return EthAmountFormatter.formatAmount(resultAmount, symbol);
   }
@@ -489,6 +489,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
                   return WithdrawalRow(
                       exit,
+                      widget.arguments.priceToken,
+                      widget.arguments.token,
                       1,
                       currency,
                       widget.arguments.store.state.exchangeRatio,
@@ -513,7 +515,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       .split('.')
                       .last;
 
-                  return WithdrawalRow(exit, 2, currency,
+                  return WithdrawalRow(
+                      exit,
+                      widget.arguments.priceToken,
+                      widget.arguments.token,
+                      2,
+                      currency,
                       widget.arguments.store.state.exchangeRatio,
                       (bool completeDelayedWithdraw,
                           bool isInstantWithdraw) async {
@@ -556,7 +563,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 transactionType: TransactionType.WITHDRAW,
                                 transactionLevel: TransactionLevel.LEVEL1,
                                 status: TransactionStatus.DRAFT,
-                                token: exit.token,
+                                token: widget.arguments.token,
                                 exit: exit,
                                 amount: amountWithdraw.toDouble() /
                                     pow(10, exit.token.decimals),
@@ -1069,6 +1076,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             ),
                           ]),
                       onTap: () async {
+                        Token token = await widget.arguments.store
+                            .getTokenById(widget.arguments.account.tokenId);
                         var results = await Navigator.pushNamed(
                             context, "transaction_details",
                             arguments: TransactionDetailsArguments(
@@ -1078,7 +1087,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                     widget.arguments.store.state.txLevel,
                                 status: txStatus,
                                 account: widget.arguments.account,
-                                token: widget.arguments.account.token,
+                                token: token,
                                 amount: amount,
                                 fee: fee,
                                 transactionId: txId,

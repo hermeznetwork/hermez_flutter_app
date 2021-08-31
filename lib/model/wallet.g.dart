@@ -36,6 +36,8 @@ class _$Wallet extends Wallet {
   @override
   final List<Token> tokens;
   @override
+  final List<PriceToken> priceTokens;
+  @override
   final List<Account> l1Accounts;
   @override
   final List<Account> l2Accounts;
@@ -76,6 +78,7 @@ class _$Wallet extends Wallet {
       this.exchangeRatio,
       this.txLevel,
       this.tokens,
+      this.priceTokens,
       this.l1Accounts,
       this.l2Accounts,
       this.pendingL2Txs,
@@ -124,6 +127,7 @@ class _$Wallet extends Wallet {
         exchangeRatio == other.exchangeRatio &&
         txLevel == other.txLevel &&
         tokens == other.tokens &&
+        priceTokens == other.priceTokens &&
         l1Accounts == other.l1Accounts &&
         l2Accounts == other.l2Accounts &&
         pendingL2Txs == other.pendingL2Txs &&
@@ -157,15 +161,15 @@ class _$Wallet extends Wallet {
                                                                 $jc(
                                                                     $jc(
                                                                         $jc(
-                                                                            $jc($jc($jc($jc($jc($jc($jc(0, ethereumAddress.hashCode), ethereumPrivateKey.hashCode), hermezWallet.hashCode), hermezAddress.hashCode), hermezPublicKeyHex.hashCode), hermezPublicKeyBase64.hashCode),
-                                                                                tokensBalance.hashCode),
-                                                                            ethBalance.hashCode),
-                                                                        ethUSDPrice.hashCode),
-                                                                    defaultCurrency.hashCode),
-                                                                defaultFee.hashCode),
-                                                            exchangeRatio.hashCode),
-                                                        txLevel.hashCode),
-                                                    tokens.hashCode),
+                                                                            $jc($jc($jc($jc($jc($jc($jc($jc(0, ethereumAddress.hashCode), ethereumPrivateKey.hashCode), hermezWallet.hashCode), hermezAddress.hashCode), hermezPublicKeyHex.hashCode), hermezPublicKeyBase64.hashCode), tokensBalance.hashCode),
+                                                                                ethBalance.hashCode),
+                                                                            ethUSDPrice.hashCode),
+                                                                        defaultCurrency.hashCode),
+                                                                    defaultFee.hashCode),
+                                                                exchangeRatio.hashCode),
+                                                            txLevel.hashCode),
+                                                        tokens.hashCode),
+                                                    priceTokens.hashCode),
                                                 l1Accounts.hashCode),
                                             l2Accounts.hashCode),
                                         pendingL2Txs.hashCode),
@@ -196,6 +200,7 @@ class _$Wallet extends Wallet {
           ..add('exchangeRatio', exchangeRatio)
           ..add('txLevel', txLevel)
           ..add('tokens', tokens)
+          ..add('priceTokens', priceTokens)
           ..add('l1Accounts', l1Accounts)
           ..add('l2Accounts', l2Accounts)
           ..add('pendingL2Txs', pendingL2Txs)
@@ -271,6 +276,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   List<Token> _tokens;
   List<Token> get tokens => _$this._tokens;
   set tokens(List<Token> tokens) => _$this._tokens = tokens;
+
+  List<PriceToken> _priceTokens;
+  List<PriceToken> get priceTokens => _$this._priceTokens;
+  set priceTokens(List<PriceToken> priceTokens) =>
+      _$this._priceTokens = priceTokens;
 
   List<Account> _l1Accounts;
   List<Account> get l1Accounts => _$this._l1Accounts;
@@ -349,6 +359,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _exchangeRatio = _$v.exchangeRatio;
       _txLevel = _$v.txLevel;
       _tokens = _$v.tokens;
+      _priceTokens = _$v.priceTokens;
       _l1Accounts = _$v.l1Accounts;
       _l2Accounts = _$v.l2Accounts;
       _pendingL2Txs = _$v.pendingL2Txs;
@@ -398,6 +409,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
               exchangeRatio: exchangeRatio,
               txLevel: txLevel,
               tokens: tokens,
+              priceTokens: priceTokens,
               l1Accounts: l1Accounts,
               l2Accounts: l2Accounts,
               pendingL2Txs: pendingL2Txs,

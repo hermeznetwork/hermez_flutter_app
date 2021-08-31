@@ -135,7 +135,7 @@ class WalletHandler {
 
     try {
       final currenciesPrices = await _priceUpdaterService.getCurrenciesPrices();
-      final tokensPrices = await _priceUpdaterService.getTokensPrices();
+      //final tokensPrices = await _priceUpdaterService.getTokensPrices();
       await _configurationService.setExchangeRatio(currenciesPrices);
       _store.dispatch(ExchangeRatioUpdated(currenciesPrices[
           (await _configurationService.getDefaultCurrency())
@@ -194,6 +194,7 @@ class WalletHandler {
       //_store.dispatch(UpdatingWallet());
       print('Updating Wallet');
       List<Token> tokens = await getTokens(needRefresh: true);
+      List<PriceToken> priceTokens = await getPriceTokens(needRefresh: true);
       List<Account> l1Accounts = await getL1Accounts(true);
       List<Account> l2Accounts = await getL2Accounts();
       List<Exit> exits = await getExits();
@@ -204,6 +205,7 @@ class WalletHandler {
       List<dynamic> pendingForceExits = await getPendingForceExits();
       _store.dispatch(WalletUpdated(
           tokens,
+          priceTokens,
           l1Accounts,
           l2Accounts,
           exits,
@@ -238,7 +240,7 @@ class WalletHandler {
                 hezEthereumAddress: state.ethereumAddress,
                 itemId: 0,
                 nonce: 0,
-                token: token);
+                tokenId: token.id);
             accounts.add(account);
           } else {
             List<dynamic> transactions = await getEthereumTransactionsByAddress(
@@ -251,7 +253,7 @@ class WalletHandler {
                   hezEthereumAddress: state.ethereumAddress,
                   itemId: 0,
                   nonce: 0,
-                  token: token);
+                  tokenId: token.id);
               accounts.add(account);
             }
           }
@@ -276,7 +278,7 @@ class WalletHandler {
                 hezEthereumAddress: state.ethereumAddress,
                 itemId: 0,
                 nonce: 0,
-                token: token);
+                tokenId: token.id);
             accounts.add(account);
           } else {
             if (showZeroBalanceAccounts) {
@@ -291,7 +293,7 @@ class WalletHandler {
                     hezEthereumAddress: state.ethereumAddress,
                     itemId: 0,
                     nonce: 0,
-                    token: token);
+                    tokenId: token.id);
                 accounts.add(account);
                 //tokensBalance[token.symbol] = tokenBalance;
               }
@@ -342,7 +344,7 @@ class WalletHandler {
               hezEthereumAddress: state.ethereumAddress,
               itemId: 0,
               nonce: 0,
-              token: token);
+              tokenId: tokenId);
           return account;
         } else {
           var tokenBalance = BigInt.zero;
@@ -364,7 +366,7 @@ class WalletHandler {
               hezEthereumAddress: state.ethereumAddress,
               itemId: 0,
               nonce: 0,
-              token: token);
+              tokenId: tokenId);
           return account;
         }
       } else {
@@ -382,7 +384,7 @@ class WalletHandler {
     await _explorerService.getBlockAvgTime();
   }
 
-  Future<List<PriceToken>> getTokens({bool needRefresh = false}) async {
+  Future<List<Token>> getTokens({bool needRefresh = false}) async {
     List<Token> supportedTokens;
     if (state.tokens != null &&
         state.tokens.length > 0 &&
@@ -391,9 +393,19 @@ class WalletHandler {
     } else {
       supportedTokens = await _hermezService.getTokens();
     }
-
-    final tokensPrices = await _priceUpdaterService.getTokensPrices();
     return supportedTokens;
+  }
+
+  Future<List<PriceToken>> getPriceTokens({bool needRefresh = false}) async {
+    List<PriceToken> priceTokens;
+    if (state.tokens != null &&
+        state.tokens.length > 0 &&
+        needRefresh == false) {
+      priceTokens = state.priceTokens;
+    } else {
+      priceTokens = await _priceUpdaterService.getTokensPrices();
+    }
+    return priceTokens;
   }
 
   Future<Token> getTokenById(int tokenId) async {
@@ -693,7 +705,7 @@ class WalletHandler {
                                 .toString() ==
                             exit.balance &&
                         Token.fromJson(pendingWithdraw['token']).id ==
-                            exit.token.id &&
+                            exit.tokenId &&
                         (exit.instantWithdraw == null &&
                             exit.delayedWithdraw == null),
                     orElse: () => null);
@@ -873,8 +885,10 @@ class WalletHandler {
       'fee': fee,
     };
 
-    final success = await _hermezService.generateAndSendL2Tx(
-        exitTx, hermezWallet, account.token);
+    Token token = await getTokenById(account.tokenId);
+
+    final success =
+        await _hermezService.generateAndSendL2Tx(exitTx, hermezWallet, token);
 
     //_store.dispatch(TransactionFinished());
 
@@ -901,8 +915,10 @@ class WalletHandler {
       'fee': fee,
     };
 
+    Token token = await getTokenById(from.tokenId);
+
     final success = await _hermezService.generateAndSendL2Tx(
-        transferTx, hermezWallet, from.token);
+        transferTx, hermezWallet, token);
 
     //if (success) {
     //_store.dispatch(TransactionFinished());
@@ -1033,11 +1049,12 @@ class WalletHandler {
 
   Future<ForgedTransactionsResponse> getHermezTransactionsByAddress(
       String address, Account account, int fromItem) async {
+    Token token = await getTokenById(account.tokenId);
     ForgedTransactionsRequest request = ForgedTransactionsRequest(
         ethereumAddress: addresses.getHermezAddress(address),
         accountIndex: account.accountIndex,
-        batchNum: account.token.ethereumBlockNum,
-        tokenId: account.token.id,
+        batchNum: token.ethereumBlockNum,
+        tokenId: token.id,
         fromItem: fromItem);
     return _hermezService.getForgedTransactions(request);
   }

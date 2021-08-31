@@ -1,5 +1,6 @@
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
@@ -26,6 +27,7 @@ class UpdatingBalance extends WalletAction {}
 class WalletUpdated extends WalletAction {
   WalletUpdated(
     this.tokens,
+    this.priceTokens,
     this.l1Accounts,
     this.l2Accounts,
     this.exits,
@@ -38,6 +40,7 @@ class WalletUpdated extends WalletAction {
       this.pendingL1Txs, this.pendingForceExits*/
   );
   final List<Token> tokens;
+  final List<PriceToken> priceTokens;
   final List<Account> l1Accounts;
   final List<Account> l2Accounts;
   final List<Exit> exits;
@@ -112,6 +115,7 @@ Wallet reducer(Wallet state, WalletAction action) {
     return state.rebuild((b) => b
       ..loading = false
       ..tokens = action.tokens
+      ..priceTokens = action.priceTokens
       ..l1Accounts = action.l1Accounts
       ..l2Accounts = action.l2Accounts
       ..exits = action.exits
