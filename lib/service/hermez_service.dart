@@ -67,6 +67,8 @@ abstract class IHermezService {
       {BigInt gasLimit, int gasPrice = 0});
   Future<bool> generateAndSendL2Tx(
       Map transaction, HermezWallet wallet, Token token);
+  Future<String> generateAndSendL2Transaction(
+      Map transaction, HermezWallet wallet, Token token);
   Future<bool> sendL2Transaction(Transaction transaction, String bjj);
   Future<RecommendedFee> getRecommendedFee();
 }
@@ -171,6 +173,22 @@ class HermezService implements IHermezService {
       }
     } catch (e) {
       return false;
+    }
+  }
+
+  @override
+  Future<String> generateAndSendL2Transaction(
+      Map transaction, HermezWallet wallet, Token token) async {
+    try {
+      final l2TxResult =
+          await tx.generateAndSendL2Tx(transaction, wallet, token);
+      if (l2TxResult != null && l2TxResult['status'] == 200) {
+        return l2TxResult['id'];
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
     }
   }
 

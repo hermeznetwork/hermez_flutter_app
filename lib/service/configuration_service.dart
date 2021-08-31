@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/credential_response.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez_sdk/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -148,6 +149,18 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
+  Future<void> setHermezPayCredentials(CredentialResponse value) async {
+    await _secureStorage.write(
+        key: "hermezPayCredentials",
+        value: '${value.clientId}:${value.secret}');
+  }
+
+  @override
+  Future<void> setHermezPayAccessToken(String value) async {
+    await _secureStorage.write(key: "hermezPayAccessToken", value: value);
+  }
+
+  @override
   Future<void> setupDone(bool value) async {
     await _preferences.setBool("didSetupWallet", value);
   }
@@ -256,6 +269,26 @@ class ConfigurationService implements IConfigurationService {
     } else {
       return TransactionLevel.LEVEL1;
     }
+  }
+
+  @override
+  Future<Map<String, String>> getHermezPayCredentials() async {
+    String hermezPayCredentials =
+        await _secureStorage.read(key: "hermezPayCredentials");
+    if (hermezPayCredentials != null && hermezPayCredentials.length > 0) {
+      List<String> credentials = hermezPayCredentials.split(":");
+      Map<String, String> result = {};
+      result['clientId'] = credentials[0];
+      result['secret'] = credentials[1];
+      return result;
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<String> getHermezPayAccessToken() async {
+    return _secureStorage.read(key: 'hermezPayAccessToken');
   }
 
   @override

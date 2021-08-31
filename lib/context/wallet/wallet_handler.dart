@@ -11,7 +11,9 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
+import 'package:hermez/service/hermez_pay_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/network/model/credential_response.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
@@ -45,6 +47,7 @@ class WalletHandler {
       this._configurationService,
       this._storageService,
       this._hermezService,
+      this._hermezPayService,
       this._exchangeService);
 
   final Store<Wallet, WalletAction> _store;
@@ -54,6 +57,7 @@ class WalletHandler {
   final StorageService _storageService;
   final ConfigurationService _configurationService;
   final HermezService _hermezService;
+  final HermezPayService _hermezPayService;
   final ExchangeService _exchangeService;
 
   Wallet get state => _store.state;
@@ -154,6 +158,25 @@ class WalletHandler {
               .toString()
               .split(".")
               .last]));
+    }
+
+    // Get Access token for Hermez Pay
+    Map<String, String> hermezPayCredentials =
+        await _configurationService.getHermezPayCredentials();
+    if (hermezPayCredentials == null) {
+      CredentialResponse response = await _hermezPayService.initCredential();
+      await _configurationService.setHermezPayCredentials(response);
+      hermezPayCredentials = {};
+      hermezPayCredentials['clientId'] = response.clientId;
+      hermezPayCredentials['secret'] = response.secret;
+      print(response);
+    }
+    String
+        accessToken; //= await _configurationService.getHermezPayAccessToken();
+    if (accessToken == null) {
+      accessToken = await _hermezPayService.getAccessToken(
+          hermezPayCredentials['clientId'], hermezPayCredentials['secret']);
+      await _configurationService.setHermezPayAccessToken(accessToken);
     }
 
     //final state = await getState();
@@ -892,6 +915,35 @@ class WalletHandler {
     //_store.dispatch(TransactionFinished());
     //}
     return success;
+  }
+
+  Future<String> l2Transfer(
+      double amount, Account from, Account to, double fee) async {
+    _store.dispatch(TransactionStarted());
+
+    final hermezPrivateKey = await _configurationService.getHermezPrivateKey();
+    final hermezAddress = await _configurationService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+
+    final transferTx = {
+      'from': from.accountIndex,
+      'to': to.accountIndex != null
+          ? to.accountIndex
+          : to.hezEthereumAddress != null
+              ? to.hezEthereumAddress
+              : to.bjj,
+      'amount': HermezCompressedAmount.compressAmount(amount),
+      'fee': fee,
+    };
+
+    final l2TxId = await _hermezService.generateAndSendL2Transaction(
+        transferTx, hermezWallet, from.token);
+
+    //if (success) {
+    //_store.dispatch(TransactionFinished());
+    //}
+    return l2TxId;
   }
 
   Future<List<PoolTransaction>> getPoolTransactions(

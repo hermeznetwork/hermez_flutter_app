@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_handler.dart';
@@ -10,6 +12,7 @@ import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
+import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/recommended_fee.dart';
 
@@ -49,6 +52,7 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
   WalletTransferHandler transferStore;
   RecommendedFee fees;
   bool isLoading = false;
+  String bitrefillL2Address = "";
 
   @override
   void initState() {
@@ -134,7 +138,9 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
                                           if (pinSuccess != null) {
                                             if (pinSuccess == true) {
                                               var success = true;
-                                              //await handleFormSubmit();
+
+                                              //TODO:
+                                              await handleFormSubmit();
 
                                               if (success) {
                                                 Navigator.of(context)
@@ -606,5 +612,39 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
     //}
     fees = await widget.arguments.store.fetchFees();
     return true;
+  }
+
+  /// Bubbles up an event to send the transaction accordingly
+  /// @returns {void}
+  Future<bool> handleFormSubmit() async {
+    final accounts = await widget.arguments.store.getL2Accounts(
+        hezAddress: bitrefillL2Address,
+        tokenIds: [widget.arguments.account.token.id]);
+    bool accountCreated = true;
+    if (isHermezEthereumAddress(bitrefillL2Address)) {
+      final ethereumAddress = getEthereumAddress(bitrefillL2Address);
+      accountCreated = await widget.arguments.store
+          .getCreateAccountAuthorization(ethereumAddress);
+    }
+    var receiverAccount;
+    final fees = await widget.arguments.store.fetchFees();
+    var transactionFee;
+    if (accounts != null && accounts.length > 0 && accountCreated) {
+      receiverAccount = accounts[0];
+      transactionFee = getFee(fees, receiverAccount != null);
+    } else {
+      receiverAccount = Account(hezEthereumAddress: bitrefillL2Address);
+      transactionFee = getFee(fees, false);
+    }
+
+    final double amountTransfer = widget.arguments.amount *
+        pow(10, widget.arguments.account.token.decimals);
+
+    String l2TxId = await widget.arguments.store.l2Transfer(amountTransfer,
+        widget.arguments.account, receiverAccount, transactionFee);
+
+    if (l2TxId != null) {
+      // TODO: save info in local to check later the pay txs status and confirm with the server
+    }
   }
 }

@@ -7,6 +7,7 @@ import 'package:hermez/service/configuration_service.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
+import 'package:hermez/service/hermez_pay_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez_sdk/hermez_sdk.dart';
@@ -22,6 +23,8 @@ Future<List<SingleChildWidget>> createProviders(EnvParams walletParams) async {
       ConfigurationService(localStorage, secureStorage, storageService);
   final addressService = AddressService(configurationService);
   final hermezService = HermezService(configurationService);
+  final hermezPayService =
+      HermezPayService(walletParams.hermezPayUrl, configurationService);
   final exchangeService = ExchangeService();
   final client = HermezSDK.currentWeb3Client;
   final contractService = ContractService(
@@ -36,6 +39,7 @@ Future<List<SingleChildWidget>> createProviders(EnvParams walletParams) async {
     Provider.value(value: storageService),
     Provider.value(value: configurationService),
     Provider.value(value: hermezService),
+    Provider.value(value: hermezPayService),
     Provider.value(value: exchangeService)
   ];
 }

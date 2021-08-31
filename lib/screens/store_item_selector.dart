@@ -3,10 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hermez/components/wallet/store_card.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/web_explorer.dart';
+import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 import '../constants.dart';
+import 'bitrefill_form.dart';
 
 class StoreItemSelectorArguments {
   WalletHandler store;
@@ -28,6 +29,9 @@ class StoreItemSelectorPage extends StatefulWidget {
 class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
   @override
   Widget build(BuildContext context) {
+    final String currency =
+        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
+
     return Scaffold(
       appBar: new AppBar(
         title: new Text("Select item",
@@ -60,17 +64,38 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                   Expanded(
                     child: new GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(
+                        List<BitrefillItem> _items = [];
+                        BitrefillItem item = BitrefillItem(
+                            id: "80be3cbc-564c-4568-8f35-c46795bafdd5",
+                            slug: "amazon_es-spain",
+                            name: "Amazon.es Spain",
+                            baseName: "Amazon.es",
+                            iconImage: "amazon-icon",
+                            iconVersion: "1557911836",
+                            recipient: "raul@iden3.com",
+                            amount: 1,
+                            value: 20,
+                            displayValue: "€20.00",
+                            currency: "EUR",
+                            giftInfo: null);
+
+                        _items.add(item);
+
+                        Navigator.pushNamed(context, '/bitrefill_form',
+                            arguments: BitrefillFormArguments(
+                                _items, widget.arguments.store));
+                        /*Navigator.pushNamed(
                             widget.arguments.parentContext, "/web_explorer",
                             arguments:
-                                WebExplorerArguments(widget.arguments.store));
+                                WebExplorerArguments(widget.arguments.store));*/
                       },
                       child: StoreCard(
                         HermezColors.lightGrey,
                         "https://cdn.freebiesupply.com/images/large/2x/amazon-logo-transparent.png",
                         height: 120,
                         padding: 10,
-                        amount: 50,
+                        amount: 20,
+                        currency: currency,
                         vendorColor: widget.arguments.vendorColor,
                       ),
                     ),
@@ -89,6 +114,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         height: 120,
                         padding: 10,
                         amount: 10,
+                        currency: currency,
                         vendorColor: widget.arguments.vendorColor,
                         enabled: false,
                       ),
@@ -110,6 +136,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         height: 120,
                         padding: 10,
                         amount: 75,
+                        currency: currency,
                         enabled: false,
                         vendorColor: widget.arguments.vendorColor,
                       ),
@@ -129,6 +156,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         height: 120,
                         padding: 10,
                         amount: 15,
+                        currency: currency,
                         enabled: false,
                         vendorColor: widget.arguments.vendorColor,
                       ),
@@ -151,6 +179,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                           height: 120,
                           padding: 10,
                           amount: 100,
+                          currency: currency,
                           enabled: false,
                           vendorColor: widget.arguments.vendorColor,
                         ),
