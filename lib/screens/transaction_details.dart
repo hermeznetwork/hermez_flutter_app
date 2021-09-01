@@ -1736,6 +1736,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         "0x022e978fc14672830096f10388783e054389b5737b24ecd76138e1c8a3626e813e";
     Purchase purchase =
         await widget.arguments.store.getPayTransaction(transactionId);
+    if (purchase != null && purchase.confirmed == false) {
+      await widget.arguments.store.confirmPayTransaction(purchase.l2TxId);
+    }
     return purchase;
   }
 }

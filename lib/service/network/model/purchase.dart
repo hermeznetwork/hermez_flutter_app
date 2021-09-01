@@ -9,6 +9,9 @@ class Purchase {
   final String l2TxId;
   final String l1TxHash;
   final bool instant;
+  final String recipient;
+  final String currency;
+  final String account;
   final bool confirmed;
   final String lastUpdate;
 
@@ -23,6 +26,9 @@ class Purchase {
       this.l2TxId,
       this.l1TxHash,
       this.instant,
+      this.recipient,
+      this.currency,
+      this.account,
       this.confirmed,
       this.lastUpdate});
 
@@ -38,22 +44,60 @@ class Purchase {
         l2TxId: json['l2TxId'],
         l1TxHash: json['l1TxHash'],
         instant: json['instant'],
+        recipient: json['recipient'],
+        currency: json['currency'],
+        account: json['account'],
         confirmed: json['confirmed'],
         lastUpdate: json['lastUpdate']);
   }
 
-  Map<String, dynamic> toJson() => {
-        'itemId': itemId,
-        'provider': provider,
-        'product': product,
-        'amount': amount,
-        'price': price,
-        'completed': completed,
-        'operationId': operationId,
-        'l2TxId': l2TxId,
-        'l1TxHash': l1TxHash,
-        'instant': instant,
-        'confirmed': confirmed,
-        'lastUpdate': lastUpdate,
-      };
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = Map<String, dynamic>();
+    if (itemId != null) {
+      json['itemId'] = itemId;
+    }
+    if (provider != null) {
+      json['provider'] = provider;
+    }
+    if (product != null) {
+      json['product'] = product;
+    }
+    if (amount != null) {
+      json['amount'] = amount;
+    }
+    if (price != null) {
+      json['price'] = price;
+    }
+    if (completed != null) {
+      json['completed'] = completed;
+    }
+    if (operationId != null) {
+      json['operationId'] = operationId;
+    }
+    if (l2TxId != null) {
+      json['l2TxId'] = l2TxId;
+    }
+    if (l1TxHash != null) {
+      json['l1TxHash'] = l1TxHash;
+    }
+    if (instant != null) {
+      json['instant'] = instant;
+    }
+    if (recipient != null) {
+      json['recipient'] = recipient;
+    }
+    if (currency != null) {
+      json['currency'] = currency;
+    }
+    if (account != null) {
+      json['account'] = account;
+    }
+    if (confirmed != null) {
+      json['confirmed'] = confirmed;
+    }
+    if (lastUpdate != null) {
+      json['lastUpdate'] = lastUpdate;
+    }
+    return json;
+  }
 }

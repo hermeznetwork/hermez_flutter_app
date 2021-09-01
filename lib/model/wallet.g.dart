@@ -40,6 +40,8 @@ class _$Wallet extends Wallet {
   @override
   final List<Account> l2Accounts;
   @override
+  final List<Purchase> payTransactions;
+  @override
   final List<PoolTransaction> pendingL2Txs;
   @override
   final List<dynamic> pendingL1Transfers;
@@ -78,6 +80,7 @@ class _$Wallet extends Wallet {
       this.tokens,
       this.l1Accounts,
       this.l2Accounts,
+      this.payTransactions,
       this.pendingL2Txs,
       this.pendingL1Transfers,
       this.pendingDeposits,
@@ -126,6 +129,7 @@ class _$Wallet extends Wallet {
         tokens == other.tokens &&
         l1Accounts == other.l1Accounts &&
         l2Accounts == other.l2Accounts &&
+        payTransactions == other.payTransactions &&
         pendingL2Txs == other.pendingL2Txs &&
         pendingL1Transfers == other.pendingL1Transfers &&
         pendingDeposits == other.pendingDeposits &&
@@ -280,6 +284,11 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   List<Account> get l2Accounts => _$this._l2Accounts;
   set l2Accounts(List<Account> l2Accounts) => _$this._l2Accounts = l2Accounts;
 
+  List<Purchase> _payTransactions;
+  List<Purchase> get payTransactions => _$this._payTransactions;
+  set payTransactions(List<Purchase> payTransactions) =>
+      _$this._payTransactions = payTransactions;
+
   List<PoolTransaction> _pendingL2Txs;
   List<PoolTransaction> get pendingL2Txs => _$this._pendingL2Txs;
   set pendingL2Txs(List<PoolTransaction> pendingL2Txs) =>
@@ -351,6 +360,7 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
       _tokens = _$v.tokens;
       _l1Accounts = _$v.l1Accounts;
       _l2Accounts = _$v.l2Accounts;
+      _payTransactions = _$v.payTransactions;
       _pendingL2Txs = _$v.pendingL2Txs;
       _pendingL1Transfers = _$v.pendingL1Transfers;
       _pendingDeposits = _$v.pendingDeposits;

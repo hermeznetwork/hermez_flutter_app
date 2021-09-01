@@ -74,8 +74,8 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                             iconVersion: "1557911836",
                             recipient: "raul@iden3.com",
                             amount: 1,
-                            value: 20,
-                            displayValue: "€20.00",
+                            value: 5,
+                            displayValue: "€5.00",
                             currency: "EUR",
                             giftInfo: null);
 
@@ -94,7 +94,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         "https://cdn.freebiesupply.com/images/large/2x/amazon-logo-transparent.png",
                         height: 120,
                         padding: 10,
-                        amount: 20,
+                        amount: 5,
                         currency: currency,
                         vendorColor: widget.arguments.vendorColor,
                       ),

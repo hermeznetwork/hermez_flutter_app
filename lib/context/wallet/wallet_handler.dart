@@ -13,6 +13,7 @@ import 'package:hermez/service/exchange_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_pay_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/service/network/model/credential_response.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/network/model/purchase.dart';
@@ -218,6 +219,7 @@ class WalletHandler {
       List<Token> tokens = await getTokens();
       List<Account> l1Accounts = await getL1Accounts(true);
       List<Account> l2Accounts = await getL2Accounts();
+      List<Purchase> payTransactions = await getPayTransactions();
       List<Exit> exits = await getExits();
       List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
       List<dynamic> pendingL1Transfers = await getPendingTransfers();
@@ -228,6 +230,7 @@ class WalletHandler {
           tokens,
           l1Accounts,
           l2Accounts,
+          payTransactions,
           exits,
           pendingL2Txs,
           pendingL1Transfers,
@@ -947,9 +950,40 @@ class WalletHandler {
     return l2TxId;
   }
 
+  Future<List<Purchase>> getPayTransactions() async {
+    final accessToken = await _configurationService.getHermezPayAccessToken();
+    final account = await _configurationService.getBabyJubJubBase64();
+    _hermezPayService.getAllPurchases(account, accessToken);
+  }
+
   Future<Purchase> getPayTransaction(String transactionId) async {
-    String accessToken = await _configurationService.getHermezPayAccessToken();
+    final accessToken = await _configurationService.getHermezPayAccessToken();
     return _hermezPayService.getPurchase(transactionId, accessToken);
+  }
+
+  Future<bool> requestPayTransaction(
+      BitrefillItem item, String recipient, String transactionId) async {
+    final accessToken = await _configurationService.getHermezPayAccessToken();
+    final account = await _configurationService.getBabyJubJubBase64();
+    final purchase = Purchase(
+      provider: "bitrefill",
+      product: item.slug,
+      amount: item.amount,
+      price: item.value.toString(),
+      l2TxId: transactionId,
+      instant: true,
+      recipient: recipient,
+      currency: item.currency,
+      account: account,
+    );
+    return await _hermezPayService.requestPurchase(purchase, accessToken);
+  }
+
+  Future<bool> confirmPayTransaction(String transactionId) async {
+    final accessToken = await _configurationService.getHermezPayAccessToken();
+    String l1TxHash =
+        await _hermezPayService.confirmPurchase(transactionId, accessToken);
+    return l1TxHash != null;
   }
 
   Future<List<PoolTransaction>> getPoolTransactions(

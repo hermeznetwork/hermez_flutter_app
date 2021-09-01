@@ -13,6 +13,7 @@ import 'package:visa/engine/visa.dart';
 
 import 'model/access_token_response.dart';
 import 'model/credential_response.dart';
+import 'model/purchase.dart';
 
 class ApiHermezPayClient implements Visa {
   final String _baseAddress;
@@ -22,9 +23,12 @@ class ApiHermezPayClient implements Visa {
   final String CREDENTIALS_URL = "/oauth2/credentials/";
   final String HEALTH_URL = "/health";
   final String METRICS_URL = "/metrics";
-  final String PURCHASE_URL = "/v1/purchase";
+  final String V1_URL = "/v1";
+  final String PURCHASE_URL = "/purchase";
   final String PROVIDERS_URL = "/v1/providers";
   final String PRODUCTS_URL = "/v1/products";
+  final String CONFIRM_URL = "/confirm";
+  final String ACCOUNT_URL = "/account";
 
   ApiHermezPayClient(this._baseAddress);
 
@@ -57,21 +61,25 @@ class ApiHermezPayClient implements Visa {
     return credentialResponse;
   }
 
-  Future<bool> requestPurchase(String token) async {
-    Map<String, dynamic> body = {};
-    body['provider'] = "proveedor";
-    body['product'] = "producto";
-    body['amount'] = 3;
-    body['price'] = "0.1";
-    body['l2TxId'] =
-        "0x022e978fc14672830096f10388783e054389b5737b24ecd76138e1c8a3626e813e";
-    body['instant'] = true;
-    final response = await _post(PURCHASE_URL, body, token);
+  Future<bool> requestPurchase(Purchase purchase, String token) async {
+    final response =
+        await _post(V1_URL + PURCHASE_URL, purchase.toJson(), token);
     return response.statusCode == 200;
   }
 
-  Future<PurchasesResponse> confirmPurchase(String l2TxId, String token) async {
-    final response = await _post(PURCHASE_URL + '$l2TxId', null, token);
+  Future<String> confirmPurchase(String l2TxId, String token) async {
+    final response = await _post(
+        V1_URL + PURCHASE_URL + '/$l2TxId' + CONFIRM_URL, null, token);
+    final String l1TxId = json.decode(response.body);
+    return l1TxId;
+  }
+
+  Future<PurchasesResponse> getAllPurchases(
+      String hermezAddress, String token) async {
+    final response = await _get(
+        V1_URL + ACCOUNT_URL + '/$hermezAddress' + PURCHASE_URL,
+        null,
+        'Bearer $token');
     final PurchasesResponse purchaseResponse =
         PurchasesResponse.fromJson(json.decode(response.body));
     return purchaseResponse;
@@ -79,7 +87,7 @@ class ApiHermezPayClient implements Visa {
 
   Future<PurchasesResponse> getPurchase(String l2TxId, String token) async {
     final response =
-        await _get(PURCHASE_URL + '/$l2TxId', null, 'Bearer $token');
+        await _get(V1_URL + PURCHASE_URL + '/$l2TxId', null, 'Bearer $token');
     final PurchasesResponse purchaseResponse =
         PurchasesResponse.fromJson(json.decode(response.body));
     return purchaseResponse;

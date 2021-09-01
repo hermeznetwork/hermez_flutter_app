@@ -1510,6 +1510,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
         double.parse(amountController.value.text) > 0 &&
         emailIsValid &&
         emailController.value.text.isNotEmpty &&
+        selectedAccount != null &&
         needRefresh == false;
   }
 

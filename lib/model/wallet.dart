@@ -1,6 +1,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/purchase.dart';
 import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
@@ -51,6 +52,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
   List<Account> get l1Accounts;
 
   List<Account> get l2Accounts;
+
+  List<Purchase> get payTransactions;
 
   List<PoolTransaction> get pendingL2Txs;
 

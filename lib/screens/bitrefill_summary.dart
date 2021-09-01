@@ -8,6 +8,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/secrets/keys.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -52,7 +53,7 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
   WalletTransferHandler transferStore;
   RecommendedFee fees;
   bool isLoading = false;
-  String bitrefillL2Address = "";
+  String bitrefillL2Address = HERMEZ_PAY_BITREFILL_L2_ADDRESS;
 
   @override
   void initState() {
@@ -154,7 +155,7 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
                                                   Navigator.of(context).pop(
                                                     PopWithResults(
                                                       fromPage:
-                                                          "/transaction_details",
+                                                          "/bitrefill_summary",
                                                       toPage: "/home",
                                                       results: {
                                                         "pop_result": true
@@ -637,14 +638,23 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
       transactionFee = getFee(fees, false);
     }
 
-    final double amountTransfer = widget.arguments.amount *
-        pow(10, widget.arguments.account.token.decimals);
+    /*final double amountTransfer = widget.arguments.amount *
+        pow(10, widget.arguments.account.token.decimals);*/
+
+    final double amountTransfer = (widget.arguments.amount *
+            pow(10, widget.arguments.account.token.decimals) ~/
+            pow(10, widget.arguments.account.token.decimals - 6) *
+            pow(10, widget.arguments.account.token.decimals - 6))
+        .toDouble();
 
     String l2TxId = await widget.arguments.store.l2Transfer(amountTransfer,
         widget.arguments.account, receiverAccount, transactionFee);
 
     if (l2TxId != null) {
-      // TODO: save info in local to check later the pay txs status and confirm with the server
+      return await widget.arguments.store.requestPayTransaction(
+          widget.arguments.items[0], widget.arguments.email, l2TxId);
+    } else {
+      return false;
     }
   }
 }

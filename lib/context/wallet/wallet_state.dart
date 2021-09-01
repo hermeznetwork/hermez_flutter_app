@@ -1,5 +1,6 @@
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/purchase.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
@@ -28,6 +29,7 @@ class WalletUpdated extends WalletAction {
     this.tokens,
     this.l1Accounts,
     this.l2Accounts,
+    this.payTransactions,
     this.exits,
     this.pendingL2Txs,
     this.pendingL1Transfers,
@@ -40,6 +42,7 @@ class WalletUpdated extends WalletAction {
   final List<Token> tokens;
   final List<Account> l1Accounts;
   final List<Account> l2Accounts;
+  final List<Purchase> payTransactions;
   final List<Exit> exits;
   final List<PoolTransaction> pendingL2Txs;
   final List<dynamic> pendingL1Transfers;
@@ -114,6 +117,7 @@ Wallet reducer(Wallet state, WalletAction action) {
       ..tokens = action.tokens
       ..l1Accounts = action.l1Accounts
       ..l2Accounts = action.l2Accounts
+      ..payTransactions = action.payTransactions
       ..exits = action.exits
       ..pendingL2Txs = action.pendingL2Txs
       ..pendingL1Transfers = action.pendingL1Transfers

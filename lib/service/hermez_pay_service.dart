@@ -6,15 +6,15 @@ import 'configuration_service.dart';
 import 'network/api_hermez_pay_client.dart';
 import 'network/model/credential_response.dart';
 import 'network/model/purchase.dart';
-import 'network/model/purchases_response.dart';
 
 abstract class IHermezPayService {
   Future<CredentialResponse> initCredential();
   Future<String> getAccessToken(String username, String password);
   Future<CredentialResponse> getCredential(int userId, String token);
-  Future<bool> requestPurchase(String token);
+  Future<bool> requestPurchase(Purchase purchase, String token);
+  Future<List<Purchase>> getAllPurchases(String hermezAddress, String token);
   Future<Purchase> getPurchase(String l2TxId, String token);
-  Future<PurchasesResponse> confirmPurchase(String l2TxId, String token);
+  Future<String> confirmPurchase(String l2TxId, String token);
 }
 
 class HermezPayService implements IHermezPayService {
@@ -48,9 +48,23 @@ class HermezPayService implements IHermezPayService {
   }
 
   @override
-  Future<bool> requestPurchase(String token) async {
-    bool response = await _apiHermezPayClient().requestPurchase(token);
+  Future<bool> requestPurchase(Purchase purchase, String token) async {
+    bool response =
+        await _apiHermezPayClient().requestPurchase(purchase, token);
     return response;
+  }
+
+  @override
+  Future<List<Purchase>> getAllPurchases(
+      String hermezAddress, String token) async {
+    final response =
+        await _apiHermezPayClient().getAllPurchases(hermezAddress, token);
+    if (response != null &&
+        response.purchases != null &&
+        response.purchases.length > 0) {
+      return response.purchases;
+    }
+    return null;
   }
 
   @override
@@ -65,7 +79,7 @@ class HermezPayService implements IHermezPayService {
   }
 
   @override
-  Future<PurchasesResponse> confirmPurchase(String l2TxId, String token) async {
+  Future<String> confirmPurchase(String l2TxId, String token) async {
     final response = await _apiHermezPayClient().confirmPurchase(l2TxId, token);
     return response;
   }

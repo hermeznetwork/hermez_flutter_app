@@ -6,11 +6,15 @@ class PurchasesResponse {
   PurchasesResponse({this.purchases});
 
   factory PurchasesResponse.fromJson(List<dynamic> json) {
-    List<Purchase> purchases =
-        json.map((item) => Purchase.fromJson(item)).toList();
-    return PurchasesResponse(
-      purchases: purchases,
-    );
+    if (json != null) {
+      List<Purchase> purchases =
+          json.map((item) => Purchase.fromJson(item)).toList();
+      return PurchasesResponse(
+        purchases: purchases,
+      );
+    } else {
+      return PurchasesResponse();
+    }
   }
 
   Map<String, dynamic> toJson() => {
