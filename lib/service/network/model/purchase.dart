@@ -1,4 +1,4 @@
-class PurchaseResponse {
+class Purchase {
   final int itemId;
   final String provider;
   final String product;
@@ -12,7 +12,7 @@ class PurchaseResponse {
   final bool confirmed;
   final String lastUpdate;
 
-  PurchaseResponse(
+  Purchase(
       {this.itemId,
       this.provider,
       this.product,
@@ -26,8 +26,8 @@ class PurchaseResponse {
       this.confirmed,
       this.lastUpdate});
 
-  factory PurchaseResponse.fromJson(Map<String, dynamic> json) {
-    return PurchaseResponse(
+  factory Purchase.fromJson(Map<String, dynamic> json) {
+    return Purchase(
         itemId: json['itemId'],
         provider: json['provider'],
         product: json['product'],

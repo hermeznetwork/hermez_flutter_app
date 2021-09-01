@@ -15,6 +15,7 @@ import 'package:hermez/service/hermez_pay_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/credential_response.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/purchase.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/addresses.dart' as addresses;
@@ -944,6 +945,11 @@ class WalletHandler {
     //_store.dispatch(TransactionFinished());
     //}
     return l2TxId;
+  }
+
+  Future<Purchase> getPayTransaction(String transactionId) async {
+    String accessToken = await _configurationService.getHermezPayAccessToken();
+    return _hermezPayService.getPurchase(transactionId, accessToken);
   }
 
   Future<List<PoolTransaction>> getPoolTransactions(

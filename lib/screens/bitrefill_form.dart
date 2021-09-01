@@ -313,7 +313,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                                                 TransactionType.SEND)
                                         ? Container()
                                         :*/
-                                    snapshot.connectionState ==
+                                    /*snapshot.connectionState ==
                                             ConnectionState.done
                                         ? /*widget.arguments.transactionType ==
                                                         TransactionType.EXIT ||
@@ -354,7 +354,7 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                                               strokeWidth: 2,
                                             ),
                                             width: 10,
-                                            height: 10),
+                                            height: 10),*/
                                   ],
                                 ),
                               ),

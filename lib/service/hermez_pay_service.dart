@@ -5,15 +5,16 @@ import 'package:hermez/service/network/model/access_token_response.dart';
 import 'configuration_service.dart';
 import 'network/api_hermez_pay_client.dart';
 import 'network/model/credential_response.dart';
-import 'network/model/purchase_response.dart';
+import 'network/model/purchase.dart';
+import 'network/model/purchases_response.dart';
 
 abstract class IHermezPayService {
   Future<CredentialResponse> initCredential();
   Future<String> getAccessToken(String username, String password);
   Future<CredentialResponse> getCredential(int userId, String token);
   Future<bool> requestPurchase(String token);
-  Future<PurchaseResponse> getPurchase(String l2TxId, String token);
-  Future<PurchaseResponse> confirmPurchase(String l2TxId, String token);
+  Future<Purchase> getPurchase(String l2TxId, String token);
+  Future<PurchasesResponse> confirmPurchase(String l2TxId, String token);
 }
 
 class HermezPayService implements IHermezPayService {
@@ -53,13 +54,18 @@ class HermezPayService implements IHermezPayService {
   }
 
   @override
-  Future<PurchaseResponse> getPurchase(String l2TxId, String token) async {
+  Future<Purchase> getPurchase(String l2TxId, String token) async {
     final response = await _apiHermezPayClient().getPurchase(l2TxId, token);
-    return response;
+    if (response != null &&
+        response.purchases != null &&
+        response.purchases.length > 0) {
+      return response.purchases[0];
+    }
+    return null;
   }
 
   @override
-  Future<PurchaseResponse> confirmPurchase(String l2TxId, String token) async {
+  Future<PurchasesResponse> confirmPurchase(String l2TxId, String token) async {
     final response = await _apiHermezPayClient().confirmPurchase(l2TxId, token);
     return response;
   }

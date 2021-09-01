@@ -608,6 +608,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             widget.arguments.parentContext)
                         .pushNamed("/transaction_details",
                             arguments: TransactionDetailsArguments(
+                                parentContext: widget.arguments.parentContext,
                                 store: widget.arguments.store,
                                 transactionType: TransactionType.WITHDRAW,
                                 transactionLevel: TransactionLevel.LEVEL1,
@@ -748,6 +749,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                     widget.arguments.parentContext)
                                 .pushNamed("/transaction_details",
                                     arguments: TransactionDetailsArguments(
+                                        parentContext:
+                                            widget.arguments.parentContext,
                                         store: widget.arguments.store,
                                         transactionType:
                                             TransactionType.WITHDRAW,
@@ -1128,6 +1131,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         var results = await Navigator.pushNamed(
                             context, "transaction_details",
                             arguments: TransactionDetailsArguments(
+                                parentContext: widget.arguments.parentContext,
                                 store: widget.arguments.store,
                                 transactionType: txType,
                                 transactionLevel:

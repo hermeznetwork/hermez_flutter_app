@@ -1349,6 +1349,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       }
       Navigator.pushNamed(context, "/transaction_details",
               arguments: TransactionDetailsArguments(
+                  parentContext: context,
                   store: widget.arguments.store,
                   transactionType: widget.arguments.transactionType,
                   transactionLevel: widget.arguments.txLevel,

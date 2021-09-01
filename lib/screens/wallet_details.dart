@@ -888,6 +888,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       await Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/transaction_details",
                               arguments: TransactionDetailsArguments(
+                                  parentContext: widget.arguments.parentContext,
                                   store: widget.arguments.store,
                                   transactionType: TransactionType.WITHDRAW,
                                   transactionLevel: TransactionLevel.LEVEL1,
@@ -1030,6 +1031,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                 widget.arguments.parentContext)
                             .pushNamed("/transaction_details",
                                 arguments: TransactionDetailsArguments(
+                                    parentContext:
+                                        widget.arguments.parentContext,
                                     store: widget.arguments.store,
                                     transactionType: TransactionType.WITHDRAW,
                                     transactionLevel: TransactionLevel.LEVEL1,

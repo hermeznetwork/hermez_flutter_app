@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:hermez/service/network/api_client_exceptions.dart';
-import 'package:hermez/service/network/model/purchase_response.dart';
+import 'package:hermez/service/network/model/purchases_response.dart';
 import 'package:http/http.dart' as http2;
 import 'package:visa/auth-data.dart';
 import 'package:visa/engine/oauth.dart';
@@ -50,12 +50,8 @@ class ApiHermezPayClient implements Visa {
   }
 
   Future<CredentialResponse> getCredential(int userId, String token) async {
-    final response = await _get(
-        CREDENTIALS_URL + '$userId',
-        {
-          'Authorization': 'Bearer $token',
-        },
-        null);
+    final response =
+        await _get(CREDENTIALS_URL + '$userId', null, 'Bearer $token');
     final CredentialResponse credentialResponse =
         CredentialResponse.fromJson(json.decode(response.body));
     return credentialResponse;
@@ -74,22 +70,18 @@ class ApiHermezPayClient implements Visa {
     return response.statusCode == 200;
   }
 
-  Future<PurchaseResponse> confirmPurchase(String l2TxId, String token) async {
+  Future<PurchasesResponse> confirmPurchase(String l2TxId, String token) async {
     final response = await _post(PURCHASE_URL + '$l2TxId', null, token);
-    final PurchaseResponse purchaseResponse =
-        PurchaseResponse.fromJson(json.decode(response.body));
+    final PurchasesResponse purchaseResponse =
+        PurchasesResponse.fromJson(json.decode(response.body));
     return purchaseResponse;
   }
 
-  Future<PurchaseResponse> getPurchase(String l2TxId, String token) async {
-    final response = await _get(
-        PURCHASE_URL + '$l2TxId',
-        {
-          'Authorization': 'Bearer $token',
-        },
-        null);
-    final PurchaseResponse purchaseResponse =
-        PurchaseResponse.fromJson(json.decode(response.body));
+  Future<PurchasesResponse> getPurchase(String l2TxId, String token) async {
+    final response =
+        await _get(PURCHASE_URL + '/$l2TxId', null, 'Bearer $token');
+    final PurchasesResponse purchaseResponse =
+        PurchasesResponse.fromJson(json.decode(response.body));
     return purchaseResponse;
   }
 

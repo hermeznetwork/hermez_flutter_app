@@ -10,7 +10,9 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/info.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/purchase.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -25,10 +27,12 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../context/transfer/wallet_transfer_provider.dart';
+import 'bitrefill_items.dart';
 import 'fee_selector.dart';
 import 'move_info.dart';
 
 class TransactionDetailsArguments {
+  final BuildContext parentContext;
   final WalletHandler store;
   final TransactionType transactionType;
   final TransactionLevel transactionLevel;
@@ -61,6 +65,7 @@ class TransactionDetailsArguments {
   final bool completeDelayedWithdrawal;
 
   TransactionDetailsArguments({
+    this.parentContext,
     this.store,
     this.transactionType,
     this.transactionLevel,
@@ -100,6 +105,7 @@ class TransactionDetailsPage extends StatefulWidget {
 
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Account ethereumAccount;
+  Purchase purchase;
   GasPriceResponse gasPriceResponse;
   WalletTransferHandler transferStore;
   bool isLoading = false;
@@ -171,8 +177,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                       tiles: [
                                 _buildExitInfoRow(context),
                                 _buildStatusRow(),
-                                _buildFromRow(),
-                                _buildToRow(),
+                                purchase != null ? null : _buildFromRow(),
+                                purchase == null
+                                    ? _buildToRow()
+                                    : _buildRecipientRow(),
+                                purchase == null
+                                    ? null
+                                    : _buildItemsRow(context),
                                 _buildFeeRow(context),
                                 _buildWithdrawFeeRow(context),
                                 _buildDateRow(),
@@ -568,8 +579,15 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         statusText = "Draft";
         break;
       case TransactionStatus.CONFIRMED:
-        statusText = "Confirmed";
-        break;
+        {
+          if (purchase != null &&
+              (purchase.completed == false || purchase.confirmed == false)) {
+            statusText = "Pending";
+          } else {
+            statusText = "Confirmed";
+          }
+          break;
+        }
       case TransactionStatus.PENDING:
         statusText = "Pending";
         break;
@@ -1393,6 +1411,130 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         : Container();
   }
 
+  Widget _buildRecipientRow() {
+    return ListTile(
+      contentPadding: EdgeInsets.only(top: 20, bottom: 20),
+      title: Text('Recipient',
+          style: TextStyle(
+            color: HermezColors.blackTwo,
+            fontSize: 16,
+            fontFamily: 'ModernEra',
+            fontWeight: FontWeight.w500,
+          )),
+      trailing: Text("raul@iden3.com",
+          style: TextStyle(
+            color: HermezColors.black,
+            fontSize: 16,
+            fontFamily: 'ModernEra',
+            fontWeight: FontWeight.w700,
+          )),
+    );
+  }
+
+  Widget _buildItemsRow(BuildContext context) {
+    var statusText = purchase.amount.toString() +
+        (purchase.amount != 1 ? " Items" : " Item");
+
+    return ListTile(
+        contentPadding: EdgeInsets.only(top: 20, bottom: 20),
+        title: Container(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      child: Text(
+                        'Items',
+                        style: TextStyle(
+                            fontFamily: 'ModernEra',
+                            color: HermezColors.blackTwo,
+                            fontWeight: FontWeight.w500,
+                            height: 1.71,
+                            fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                              fontFamily: 'ModernEra',
+                              color: HermezColors.blackTwo,
+                              fontWeight: FontWeight.w700,
+                              height: 1.73,
+                              fontSize: 15),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.only(left: 6, top: 6),
+                        child: SvgPicture.asset('assets/arrow_right.svg',
+                            color: HermezColors.blackTwo,
+                            semanticsLabel: 'fee_selector'),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
+        onTap: () {
+          List<BitrefillItem> _items = [];
+          BitrefillItem item = BitrefillItem(
+              id: "80be3cbc-564c-4568-8f35-c46795bafdd5",
+              slug: "amazon_es-spain",
+              name: "Amazon.es Spain",
+              baseName: "Amazon.es",
+              iconImage: "amazon-icon",
+              iconVersion: "1557911836",
+              recipient: "raul@iden3.com",
+              amount: 1,
+              value: 20,
+              displayValue: "€20.00",
+              currency: "EUR",
+              giftInfo: null);
+
+          _items.add(item);
+          Navigator.of(widget.arguments.parentContext).pushNamed(
+              "/bitrefill_items",
+              arguments: BitrefillItemsArguments(_items));
+        });
+
+    return ListTile(
+      contentPadding: EdgeInsets.only(top: 20, bottom: 20),
+      title: Text('Items',
+          style: TextStyle(
+            color: HermezColors.blackTwo,
+            fontSize: 16,
+            fontFamily: 'ModernEra',
+            fontWeight: FontWeight.w500,
+          )),
+      trailing: Text(statusText,
+          style: TextStyle(
+            color: HermezColors.black,
+            fontSize: 16,
+            fontFamily: 'ModernEra',
+            fontWeight: FontWeight.w700,
+          )),
+    );
+  }
+
   /// Calculates the fee for the transaction.
   /// It takes the appropriate recomended fee in USD from the coordinator
   /// and converts it to token value.
@@ -1565,6 +1707,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     } else if (widget.arguments.transactionLevel == TransactionLevel.LEVEL1 &&
         widget.arguments.transactionType != TransactionType.RECEIVE) {
       ethereumAccount = await getEthereumAccount();
+    } else if (widget.arguments.transactionLevel == TransactionLevel.LEVEL2 &&
+        widget.arguments.transactionType == TransactionType.SEND) {
+      // TODO get Hermez Pay info
+      String transactionId = widget.arguments.transactionId;
+      purchase = await getPayTransaction(transactionId);
     }
 
     //needRefresh = false;
@@ -1582,5 +1729,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     GasPriceResponse gasPriceResponse =
         await widget.arguments.store.getGasPrice();
     return gasPriceResponse;
+  }
+
+  Future<Purchase> getPayTransaction(String transactionId) async {
+    transactionId =
+        "0x022e978fc14672830096f10388783e054389b5737b24ecd76138e1c8a3626e813e";
+    Purchase purchase =
+        await widget.arguments.store.getPayTransaction(transactionId);
+    return purchase;
   }
 }
