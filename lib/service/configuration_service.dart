@@ -24,6 +24,7 @@ abstract class IConfigurationService {
   Future<void> setBiometricsFace(bool value);
   Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value);
   Future<void> setLevelSelected(TransactionLevel value);
+  Future<void> setHermezPayCredentials(CredentialResponse value);
   Future<void> setupDone(bool value);
   Future<void> backupDone(bool value);
   Future<String> getMnemonic();
@@ -40,6 +41,7 @@ abstract class IConfigurationService {
   bool getBiometricsFace();
   double getExchangeRatio(String currency);
   Future<TransactionLevel> getLevelSelected();
+  Future<Map<String, String>> getHermezPayCredentials();
   bool didSetupWallet();
   bool didBackupWallet();
   /*Future<bool> setLatestNonce(int value);
@@ -153,11 +155,6 @@ class ConfigurationService implements IConfigurationService {
     await _secureStorage.write(
         key: "hermezPayCredentials",
         value: '${value.clientId}:${value.secret}');
-  }
-
-  @override
-  Future<void> setHermezPayAccessToken(String value) async {
-    await _secureStorage.write(key: "hermezPayAccessToken", value: value);
   }
 
   @override
@@ -284,11 +281,6 @@ class ConfigurationService implements IConfigurationService {
     } else {
       return null;
     }
-  }
-
-  @override
-  Future<String> getHermezPayAccessToken() async {
-    return _secureStorage.read(key: 'hermezPayAccessToken');
   }
 
   @override

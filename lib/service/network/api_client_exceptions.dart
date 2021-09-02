@@ -1,9 +1,13 @@
-class UnknownApiException implements Exception{
+class UnknownApiException implements Exception {
   int httpCode;
 
   UnknownApiException(this.httpCode);
 }
 
-class ItemNotFoundException implements Exception{}
-class InternalServerErrorException implements Exception{}
-class NetworkException implements Exception{}
+class ItemNotFoundException implements Exception {}
+
+class UnauthorizedException implements Exception {}
+
+class InternalServerErrorException implements Exception {}
+
+class NetworkException implements Exception {}

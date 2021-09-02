@@ -1,69 +1,43 @@
 import 'dart:async';
 
-import 'package:hermez/service/network/model/access_token_response.dart';
-
 import 'configuration_service.dart';
 import 'network/api_hermez_pay_client.dart';
-import 'network/model/credential_response.dart';
 import 'network/model/pay_product.dart';
 import 'network/model/pay_provider.dart';
 import 'network/model/purchase.dart';
 
 abstract class IHermezPayService {
-  Future<CredentialResponse> initCredential();
-  Future<String> getAccessToken(String username, String password);
-  Future<CredentialResponse> getCredential(int userId, String token);
-  Future<bool> requestPurchase(Purchase purchase, String token);
-  Future<List<Purchase>> getAllPurchases(String hermezAddress, String token);
-  Future<Purchase> getPurchase(String l2TxId, String token);
-  Future<String> confirmPurchase(String l2TxId, String token);
-  Future<List<PayProvider>> getAllProviders(String token);
-  Future<PayProvider> getProvider(int providerId, String token);
-  Future<List<PayProduct>> getAllProducts(int providerId, String token);
+  Future<bool> requestPurchase(Purchase purchase);
+  Future<List<Purchase>> getAllPurchases(String hermezAddress);
+  Future<Purchase> getPurchase(String l2TxId);
+  Future<String> confirmPurchase(String l2TxId);
+  Future<List<PayProvider>> getAllProviders();
+  Future<PayProvider> getProvider(int providerId);
+  Future<List<PayProduct>> getAllProducts(int providerId);
 }
 
 class HermezPayService implements IHermezPayService {
   String _baseUrl;
   IConfigurationService _configService;
+  ApiHermezPayClient _apiClient;
   HermezPayService(this._baseUrl, this._configService);
 
   ApiHermezPayClient _apiHermezPayClient() {
-    return ApiHermezPayClient(_baseUrl);
+    if (_apiClient == null) {
+      _apiClient = ApiHermezPayClient(_baseUrl, _configService);
+    }
+    return _apiClient;
   }
 
   @override
-  Future<CredentialResponse> initCredential() async {
-    CredentialResponse credentialResponse =
-        await _apiHermezPayClient().initCredential();
-    return credentialResponse;
-  }
-
-  @override
-  Future<CredentialResponse> getCredential(int userId, String token) async {
-    CredentialResponse credentialResponse =
-        await _apiHermezPayClient().getCredential(userId, token);
-    return credentialResponse;
-  }
-
-  @override
-  Future<String> getAccessToken(String username, String password) async {
-    AccessTokenResponse accessTokenResponse =
-        await _apiHermezPayClient().getAccessToken(username, password);
-    return accessTokenResponse.accessToken;
-  }
-
-  @override
-  Future<bool> requestPurchase(Purchase purchase, String token) async {
-    bool response =
-        await _apiHermezPayClient().requestPurchase(purchase, token);
+  Future<bool> requestPurchase(Purchase purchase) async {
+    bool response = await _apiHermezPayClient().requestPurchase(purchase);
     return response;
   }
 
   @override
-  Future<List<Purchase>> getAllPurchases(
-      String hermezAddress, String token) async {
-    final response =
-        await _apiHermezPayClient().getAllPurchases(hermezAddress, token);
+  Future<List<Purchase>> getAllPurchases(String hermezAddress) async {
+    final response = await _apiHermezPayClient().getAllPurchases(hermezAddress);
     if (response != null &&
         response.purchases != null &&
         response.purchases.length > 0) {
@@ -73,8 +47,8 @@ class HermezPayService implements IHermezPayService {
   }
 
   @override
-  Future<Purchase> getPurchase(String l2TxId, String token) async {
-    final response = await _apiHermezPayClient().getPurchase(l2TxId, token);
+  Future<Purchase> getPurchase(String l2TxId) async {
+    final response = await _apiHermezPayClient().getPurchase(l2TxId);
     if (response != null &&
         response.purchases != null &&
         response.purchases.length > 0) {
@@ -84,13 +58,13 @@ class HermezPayService implements IHermezPayService {
   }
 
   @override
-  Future<String> confirmPurchase(String l2TxId, String token) async {
-    final response = await _apiHermezPayClient().confirmPurchase(l2TxId, token);
+  Future<String> confirmPurchase(String l2TxId) async {
+    final response = await _apiHermezPayClient().confirmPurchase(l2TxId);
     return response;
   }
 
-  Future<List<PayProvider>> getAllProviders(String token) async {
-    final response = await _apiHermezPayClient().getAllProviders(token);
+  Future<List<PayProvider>> getAllProviders() async {
+    final response = await _apiHermezPayClient().getAllProviders();
     if (response != null &&
         response.providers != null &&
         response.providers.length > 0) {
@@ -99,14 +73,13 @@ class HermezPayService implements IHermezPayService {
     return null;
   }
 
-  Future<PayProvider> getProvider(int providerId, String token) async {
-    final response = await _apiHermezPayClient().getProvider(providerId, token);
+  Future<PayProvider> getProvider(int providerId) async {
+    final response = await _apiHermezPayClient().getProvider(providerId);
     return response;
   }
 
-  Future<List<PayProduct>> getAllProducts(int providerId, String token) async {
-    final response =
-        await _apiHermezPayClient().getAllProducts(providerId, token);
+  Future<List<PayProduct>> getAllProducts(int providerId) async {
+    final response = await _apiHermezPayClient().getAllProducts(providerId);
     if (response != null &&
         response.products != null &&
         response.products.length > 0) {

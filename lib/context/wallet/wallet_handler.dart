@@ -14,7 +14,6 @@ import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_pay_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
-import 'package:hermez/service/network/model/credential_response.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/network/model/pay_product.dart';
 import 'package:hermez/service/network/model/pay_provider.dart';
@@ -166,7 +165,7 @@ class WalletHandler {
     }
 
     // Get Access token for Hermez Pay
-    Map<String, String> hermezPayCredentials =
+    /*Map<String, String> hermezPayCredentials =
         await _configurationService.getHermezPayCredentials();
     if (hermezPayCredentials == null) {
       CredentialResponse response = await _hermezPayService.initCredential();
@@ -182,7 +181,7 @@ class WalletHandler {
       accessToken = await _hermezPayService.getAccessToken(
           hermezPayCredentials['clientId'], hermezPayCredentials['secret']);
       await _configurationService.setHermezPayAccessToken(accessToken);
-    }
+    }*/
 
     //final state = await getState();
 
@@ -222,7 +221,7 @@ class WalletHandler {
       List<Token> tokens = await getTokens();
       List<Account> l1Accounts = await getL1Accounts(true);
       List<Account> l2Accounts = await getL2Accounts();
-      List<Purchase> payTransactions = await getPayTransactions();
+      List<Purchase> payTransactions = await checkPendingPayTransactions();
       List<Exit> exits = await getExits();
       List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
       List<dynamic> pendingL1Transfers = await getPendingTransfers();
@@ -953,31 +952,27 @@ class WalletHandler {
     return l2TxId;
   }
 
-  Future<List<Purchase>> getPayTransactions() async {
-    final accessToken = await _configurationService.getHermezPayAccessToken();
+  Future<List<Purchase>> checkPendingPayTransactions() async {
     final account = await _configurationService.getBabyJubJubBase64();
-    List<Purchase> purchases =
-        await _hermezPayService.getAllPurchases(account, accessToken);
+    List<Purchase> purchases = await _hermezPayService.getAllPurchases(account);
     purchases
         .where((purchase) => purchase.confirmed == false)
         .forEach((purchase) async {
       ForgedTransaction forgedTransaction =
           await _hermezService.getTransactionById(purchase.l2TxId);
       if (forgedTransaction != null) {
-        await _hermezPayService.confirmPurchase(purchase.l2TxId, accessToken);
+        await _hermezPayService.confirmPurchase(purchase.l2TxId);
       }
     });
     return purchases;
   }
 
   Future<Purchase> getPayTransaction(String transactionId) async {
-    final accessToken = await _configurationService.getHermezPayAccessToken();
-    return _hermezPayService.getPurchase(transactionId, accessToken);
+    return _hermezPayService.getPurchase(transactionId);
   }
 
   Future<bool> requestPayTransaction(PayProvider provider, BitrefillItem item,
       String recipient, String transactionId) async {
-    final accessToken = await _configurationService.getHermezPayAccessToken();
     final account = await _configurationService.getBabyJubJubBase64();
     final purchase = Purchase(
       provider: provider.name,
@@ -990,26 +985,21 @@ class WalletHandler {
       currency: item.currency,
       account: account,
     );
-    return await _hermezPayService.requestPurchase(purchase, accessToken);
+    return await _hermezPayService.requestPurchase(purchase);
   }
 
   Future<bool> confirmPayTransaction(String transactionId) async {
-    final accessToken = await _configurationService.getHermezPayAccessToken();
-    String l1TxHash =
-        await _hermezPayService.confirmPurchase(transactionId, accessToken);
+    String l1TxHash = await _hermezPayService.confirmPurchase(transactionId);
     return l1TxHash != null;
   }
 
   Future<List<PayProvider>> getPayProviders() async {
-    final accessToken = await _configurationService.getHermezPayAccessToken();
-    final response = await _hermezPayService.getAllProviders(accessToken);
+    final response = await _hermezPayService.getAllProviders();
     return response;
   }
 
   Future<List<PayProduct>> getPayProducts(int providerId) async {
-    final accessToken = await _configurationService.getHermezPayAccessToken();
-    final response =
-        await _hermezPayService.getAllProducts(providerId, accessToken);
+    final response = await _hermezPayService.getAllProducts(providerId);
     return response;
   }
 

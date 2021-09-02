@@ -1421,7 +1421,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             fontFamily: 'ModernEra',
             fontWeight: FontWeight.w500,
           )),
-      trailing: Text("raul@iden3.com",
+      trailing: Text(purchase.recipient,
           style: TextStyle(
             color: HermezColors.black,
             fontSize: 16,
@@ -1734,7 +1734,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Future<Purchase> getPayTransaction(String transactionId) async {
     Purchase purchase =
         await widget.arguments.store.getPayTransaction(transactionId);
-    if (purchase != null && purchase.confirmed == false) {
+    if (purchase != null &&
+        purchase.confirmed == false &&
+        widget.arguments.status == TransactionStatus.CONFIRMED) {
       await widget.arguments.store.confirmPayTransaction(purchase.l2TxId);
     }
     return purchase;

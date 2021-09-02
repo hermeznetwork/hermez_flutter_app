@@ -83,7 +83,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                       baseName: "Amazon.es",
                                       iconImage: "amazon-icon",
                                       iconVersion: "1557911836",
-                                      recipient: "raul@iden3.com",
+                                      //recipient: "raul@iden3.com",
                                       amount: 1,
                                       value: 5,
                                       displayValue: "€5.00",
