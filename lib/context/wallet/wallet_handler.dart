@@ -28,6 +28,7 @@ import 'package:hermez_sdk/hermez_compressed_amount.dart';
 import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
+import 'package:hermez_sdk/model/forged_transaction.dart';
 import 'package:hermez_sdk/model/forged_transactions_request.dart';
 import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
@@ -955,7 +956,18 @@ class WalletHandler {
   Future<List<Purchase>> getPayTransactions() async {
     final accessToken = await _configurationService.getHermezPayAccessToken();
     final account = await _configurationService.getBabyJubJubBase64();
-    _hermezPayService.getAllPurchases(account, accessToken);
+    List<Purchase> purchases =
+        await _hermezPayService.getAllPurchases(account, accessToken);
+    purchases
+        .where((purchase) => purchase.confirmed == false)
+        .forEach((purchase) async {
+      ForgedTransaction forgedTransaction =
+          await _hermezService.getTransactionById(purchase.l2TxId);
+      if (forgedTransaction != null) {
+        await _hermezPayService.confirmPurchase(purchase.l2TxId, accessToken);
+      }
+    });
+    return purchases;
   }
 
   Future<Purchase> getPayTransaction(String transactionId) async {

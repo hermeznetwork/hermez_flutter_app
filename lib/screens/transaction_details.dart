@@ -1497,16 +1497,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         onTap: () {
           List<BitrefillItem> _items = [];
           BitrefillItem item = BitrefillItem(
-              id: "80be3cbc-564c-4568-8f35-c46795bafdd5",
-              slug: "amazon_es-spain",
+              id: purchase.itemId.toString(),
+              slug: purchase.product,
               name: "Amazon.es Spain",
               baseName: "Amazon.es",
               iconImage: "amazon-icon",
               iconVersion: "1557911836",
-              recipient: "raul@iden3.com",
-              amount: 1,
-              value: 20,
-              displayValue: "€20.00",
+              recipient: purchase.recipient,
+              amount: purchase.amount,
+              value: double.parse(purchase.price),
+              displayValue: '€${purchase.price * purchase.amount}.00',
               currency: "EUR",
               giftInfo: null);
 
@@ -1732,8 +1732,6 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   Future<Purchase> getPayTransaction(String transactionId) async {
-    transactionId =
-        "0x022e978fc14672830096f10388783e054389b5737b24ecd76138e1c8a3626e813e";
     Purchase purchase =
         await widget.arguments.store.getPayTransaction(transactionId);
     if (purchase != null && purchase.confirmed == false) {
