@@ -129,8 +129,8 @@ class _WebExplorerPageState extends State<WebExplorerPage> {
 
               if (_items.length > 0) {
                 Navigator.pushReplacementNamed(context, '/bitrefill_form',
-                    arguments:
-                        BitrefillFormArguments(_items, widget.arguments.store));
+                    arguments: BitrefillFormArguments(
+                        null, _items, widget.arguments.store));
               }
             }
           },

@@ -14,10 +14,12 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/pay_provider.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/email_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/utils/pop_result.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/token.dart';
 
@@ -31,6 +33,7 @@ enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT }
 enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }*/
 
 class BitrefillFormArguments {
+  PayProvider provider;
   List<BitrefillItem> items;
   final WalletHandler store;
   Token token;
@@ -43,6 +46,7 @@ class BitrefillFormArguments {
   final bool allowChangeLevel;*/
 
   BitrefillFormArguments(
+    this.provider,
     this.items,
     this.store, {
     this.token,
@@ -1279,17 +1283,18 @@ class _BitrefillFormPageState extends State<BitrefillFormPage>
                 status: TransactionStatus.DRAFT,
                 account: selectedAccount,
                 amount: amount,
+                provider: widget.arguments.provider,
                 items: widget.arguments.items,
                 email: emailController.text))
         .then((results) {
-      /*if (results is PopWithResults) {
-          PopWithResults popResult = results;
-          if (popResult.toPage == "/transaction_amount") {
-            // TODO do stuff
-          } else {
-            Navigator.of(context).pop(results);
-          }
-        }*/
+      if (results is PopWithResults) {
+        PopWithResults popResult = results;
+        if (popResult.toPage == "/bitrefill_form") {
+          // TODO do stuff
+        } else {
+          Navigator.of(context).pop(results);
+        }
+      }
     });
   }
 

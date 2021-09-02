@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hermez/components/wallet/store_card.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/store_item_selector.dart';
+import 'package:hermez/service/network/model/pay_provider.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 import '../constants.dart';
@@ -25,6 +26,8 @@ class StoreSelectorPage extends StatefulWidget {
 }
 
 class _StoreSelectorPageState extends State<StoreSelectorPage> {
+  List<PayProvider> _providers;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,69 +43,84 @@ class _StoreSelectorPageState extends State<StoreSelectorPage> {
           leading: new Container(),
         ),
         backgroundColor: Colors.white,
-        body: SafeArea(
-            child: Column(children: <Widget>[
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                    children: ListTile.divideTiles(
-                        context: context,
-                        color: HermezColors.transparent,
-                        tiles: [
-                      new GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(widget.arguments.parentContext,
-                                "/store_item_selector",
-                                arguments: StoreItemSelectorArguments(
-                                    widget.arguments.store,
-                                    widget.arguments.parentContext,
-                                    HermezColors.vendorBitrefill));
-                          },
-                          child: StoreCard(HermezColors.vendorBitrefill,
-                              "assets/vendor_bitrefill.svg")),
-                      SizedBox(
-                        height: 20,
+        body: FutureBuilder(
+            future: fetchData(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return SafeArea(
+                  child: Column(children: <Widget>[
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                              children: ListTile.divideTiles(
+                                  context: context,
+                                  color: HermezColors.transparent,
+                                  tiles: [
+                                new GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                          widget.arguments.parentContext,
+                                          "/store_item_selector",
+                                          arguments: StoreItemSelectorArguments(
+                                              widget.arguments.store,
+                                              widget.arguments.parentContext,
+                                              _providers[0],
+                                              HermezColors.vendorBitrefill));
+                                    },
+                                    child: StoreCard(
+                                        HermezColors.vendorBitrefill,
+                                        "assets/vendor_bitrefill.svg")),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                new GestureDetector(
+                                    onTap: () {
+                                      showServiceAvailableSoonFlush();
+                                    },
+                                    child: StoreCard(
+                                      HermezColors.vendorCoingate,
+                                      "assets/vendor_coingate.png",
+                                      enabled: false,
+                                    )),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                new GestureDetector(
+                                    onTap: () {
+                                      showServiceAvailableSoonFlush();
+                                    },
+                                    child: StoreCard(
+                                      HermezColors.vendorBidali,
+                                      "assets/vendor_bidali.png",
+                                      enabled: false,
+                                    )),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                new GestureDetector(
+                                    onTap: () {
+                                      showServiceAvailableSoonFlush();
+                                    },
+                                    child: StoreCard(
+                                      HermezColors.vendorCryptorefills,
+                                      "assets/vendor_cryptorefills.png",
+                                      enabled: false,
+                                    )),
+                              ]).toList()),
+                        ),
                       ),
-                      new GestureDetector(
-                          onTap: () {
-                            showServiceAvailableSoonFlush();
-                          },
-                          child: StoreCard(
-                            HermezColors.vendorCoingate,
-                            "assets/vendor_coingate.png",
-                            enabled: false,
-                          )),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      new GestureDetector(
-                          onTap: () {
-                            showServiceAvailableSoonFlush();
-                          },
-                          child: StoreCard(
-                            HermezColors.vendorBidali,
-                            "assets/vendor_bidali.png",
-                            enabled: false,
-                          )),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      new GestureDetector(
-                          onTap: () {
-                            showServiceAvailableSoonFlush();
-                          },
-                          child: StoreCard(
-                            HermezColors.vendorCryptorefills,
-                            "assets/vendor_cryptorefills.png",
-                            enabled: false,
-                          )),
-                    ]).toList()),
-              ),
-            ),
-          )
-        ])));
+                    )
+                  ]),
+                );
+              } else {
+                return new Center(
+                  child:
+                      new CircularProgressIndicator(color: HermezColors.orange),
+                );
+              }
+            }));
   }
 
   void showServiceAvailableSoonFlush() {
@@ -131,5 +149,10 @@ class _StoreSelectorPageState extends State<StoreSelectorPage> {
       margin: EdgeInsets.all(16.0),
       duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
     ).show(context);
+  }
+
+  Future<bool> fetchData() async {
+    _providers = await widget.arguments.store.getPayProviders();
+    return true;
   }
 }

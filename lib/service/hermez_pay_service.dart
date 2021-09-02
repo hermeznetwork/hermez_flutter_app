@@ -5,6 +5,8 @@ import 'package:hermez/service/network/model/access_token_response.dart';
 import 'configuration_service.dart';
 import 'network/api_hermez_pay_client.dart';
 import 'network/model/credential_response.dart';
+import 'network/model/pay_product.dart';
+import 'network/model/pay_provider.dart';
 import 'network/model/purchase.dart';
 
 abstract class IHermezPayService {
@@ -15,6 +17,9 @@ abstract class IHermezPayService {
   Future<List<Purchase>> getAllPurchases(String hermezAddress, String token);
   Future<Purchase> getPurchase(String l2TxId, String token);
   Future<String> confirmPurchase(String l2TxId, String token);
+  Future<List<PayProvider>> getAllProviders(String token);
+  Future<PayProvider> getProvider(int providerId, String token);
+  Future<List<PayProduct>> getAllProducts(int providerId, String token);
 }
 
 class HermezPayService implements IHermezPayService {
@@ -82,5 +87,31 @@ class HermezPayService implements IHermezPayService {
   Future<String> confirmPurchase(String l2TxId, String token) async {
     final response = await _apiHermezPayClient().confirmPurchase(l2TxId, token);
     return response;
+  }
+
+  Future<List<PayProvider>> getAllProviders(String token) async {
+    final response = await _apiHermezPayClient().getAllProviders(token);
+    if (response != null &&
+        response.providers != null &&
+        response.providers.length > 0) {
+      return response.providers;
+    }
+    return null;
+  }
+
+  Future<PayProvider> getProvider(int providerId, String token) async {
+    final response = await _apiHermezPayClient().getProvider(providerId, token);
+    return response;
+  }
+
+  Future<List<PayProduct>> getAllProducts(int providerId, String token) async {
+    final response =
+        await _apiHermezPayClient().getAllProducts(providerId, token);
+    if (response != null &&
+        response.products != null &&
+        response.products.length > 0) {
+      return response.products;
+    }
+    return null;
   }
 }

@@ -10,6 +10,7 @@ import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/secrets/keys.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
+import 'package:hermez/service/network/model/pay_provider.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
@@ -26,6 +27,7 @@ class BitrefillSummaryArguments {
   final Account account;
   final double amount;
   final String email;
+  final PayProvider provider;
   final List<BitrefillItem> items;
   final WalletDefaultCurrency preferredCurrency;
 
@@ -35,6 +37,7 @@ class BitrefillSummaryArguments {
     this.account,
     this.amount,
     this.email,
+    this.provider,
     this.items,
     this.preferredCurrency,
   });
@@ -652,7 +655,10 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
 
     if (l2TxId != null) {
       return await widget.arguments.store.requestPayTransaction(
-          widget.arguments.items[0], widget.arguments.email, l2TxId);
+          widget.arguments.provider,
+          widget.arguments.items[0],
+          widget.arguments.email,
+          l2TxId);
     } else {
       return false;
     }

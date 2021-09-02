@@ -16,6 +16,8 @@ import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/service/network/model/credential_response.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/pay_product.dart';
+import 'package:hermez/service/network/model/pay_provider.dart';
 import 'package:hermez/service/network/model/purchase.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
@@ -961,12 +963,12 @@ class WalletHandler {
     return _hermezPayService.getPurchase(transactionId, accessToken);
   }
 
-  Future<bool> requestPayTransaction(
-      BitrefillItem item, String recipient, String transactionId) async {
+  Future<bool> requestPayTransaction(PayProvider provider, BitrefillItem item,
+      String recipient, String transactionId) async {
     final accessToken = await _configurationService.getHermezPayAccessToken();
     final account = await _configurationService.getBabyJubJubBase64();
     final purchase = Purchase(
-      provider: "bitrefill",
+      provider: provider.name,
       product: item.slug,
       amount: item.amount,
       price: item.value.toString(),
@@ -984,6 +986,19 @@ class WalletHandler {
     String l1TxHash =
         await _hermezPayService.confirmPurchase(transactionId, accessToken);
     return l1TxHash != null;
+  }
+
+  Future<List<PayProvider>> getPayProviders() async {
+    final accessToken = await _configurationService.getHermezPayAccessToken();
+    final response = await _hermezPayService.getAllProviders(accessToken);
+    return response;
+  }
+
+  Future<List<PayProduct>> getPayProducts(int providerId) async {
+    final accessToken = await _configurationService.getHermezPayAccessToken();
+    final response =
+        await _hermezPayService.getAllProducts(providerId, accessToken);
+    return response;
   }
 
   Future<List<PoolTransaction>> getPoolTransactions(

@@ -13,6 +13,9 @@ import 'package:visa/engine/visa.dart';
 
 import 'model/access_token_response.dart';
 import 'model/credential_response.dart';
+import 'model/pay_provider.dart';
+import 'model/products_response.dart';
+import 'model/providers_response.dart';
 import 'model/purchase.dart';
 
 class ApiHermezPayClient implements Visa {
@@ -25,8 +28,8 @@ class ApiHermezPayClient implements Visa {
   final String METRICS_URL = "/metrics";
   final String V1_URL = "/v1";
   final String PURCHASE_URL = "/purchase";
-  final String PROVIDERS_URL = "/v1/providers";
-  final String PRODUCTS_URL = "/v1/products";
+  final String PROVIDERS_URL = "/providers";
+  final String PRODUCTS_URL = "/products";
   final String CONFIRM_URL = "/confirm";
   final String ACCOUNT_URL = "/account";
 
@@ -91,6 +94,29 @@ class ApiHermezPayClient implements Visa {
     final PurchasesResponse purchaseResponse =
         PurchasesResponse.fromJson(json.decode(response.body));
     return purchaseResponse;
+  }
+
+  Future<ProvidersResponse> getAllProviders(String token) async {
+    final response = await _get(V1_URL + PROVIDERS_URL, null, 'Bearer $token');
+    final ProvidersResponse providersResponse =
+        ProvidersResponse.fromJson(json.decode(response.body));
+    return providersResponse;
+  }
+
+  Future<PayProvider> getProvider(int providerId, String token) async {
+    final response = await _get(
+        V1_URL + PROVIDERS_URL + '/$providerId', null, 'Bearer $token');
+    final PayProvider payProvider =
+        PayProvider.fromJson(json.decode(response.body));
+    return payProvider;
+  }
+
+  Future<ProductsResponse> getAllProducts(int providerId, String token) async {
+    final response = await _get(
+        V1_URL + PRODUCTS_URL + '/$providerId', null, 'Bearer $token');
+    final ProductsResponse productsResponse =
+        ProductsResponse.fromJson(json.decode(response.body));
+    return productsResponse;
   }
 
   Future<http2.Response> _get(String endpoint,
