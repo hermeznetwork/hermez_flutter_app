@@ -164,25 +164,6 @@ class WalletHandler {
               .last]));
     }
 
-    // Get Access token for Hermez Pay
-    /*Map<String, String> hermezPayCredentials =
-        await _configurationService.getHermezPayCredentials();
-    if (hermezPayCredentials == null) {
-      CredentialResponse response = await _hermezPayService.initCredential();
-      await _configurationService.setHermezPayCredentials(response);
-      hermezPayCredentials = {};
-      hermezPayCredentials['clientId'] = response.clientId;
-      hermezPayCredentials['secret'] = response.secret;
-      print(response);
-    }
-    String
-        accessToken; //= await _configurationService.getHermezPayAccessToken();
-    if (accessToken == null) {
-      accessToken = await _hermezPayService.getAccessToken(
-          hermezPayCredentials['clientId'], hermezPayCredentials['secret']);
-      await _configurationService.setHermezPayAccessToken(accessToken);
-    }*/
-
     //final state = await getState();
 
     /*final exchangeRatio = await _hermezService.getEURUSDExchangeRatio();

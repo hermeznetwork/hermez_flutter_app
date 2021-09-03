@@ -641,9 +641,6 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
       transactionFee = getFee(fees, false);
     }
 
-    /*final double amountTransfer = widget.arguments.amount *
-        pow(10, widget.arguments.account.token.decimals);*/
-
     final double amountTransfer = (widget.arguments.amount *
             pow(10, widget.arguments.account.token.decimals) ~/
             pow(10, widget.arguments.account.token.decimals - 6) *
