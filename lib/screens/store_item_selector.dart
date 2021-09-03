@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +43,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
 
     return Scaffold(
         appBar: new AppBar(
+          automaticallyImplyLeading: false,
           title: new Text("Select item",
               style: TextStyle(
                   fontFamily: 'ModernEra',
@@ -49,13 +52,38 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                   fontSize: 20)),
           centerTitle: true,
           elevation: 0.0,
-          leading: new Container(),
+          leading: IconButton(
+            icon:
+                Icon(Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back),
+            onPressed: () => Navigator.pop(context, false),
+          ),
           actions: <Widget>[
-            new IconButton(
-                icon: new Icon(Icons.close),
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                }),
+            Stack(children: [
+              new IconButton(
+                  icon: new Icon(Icons.shopping_cart_outlined),
+                  onPressed: () {
+                    //Navigator.of(context).pop(false);
+                  }),
+              Positioned(
+                  bottom: 35,
+                  right: 25,
+                  child: Stack(children: [
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: 6.0, right: 6.0, top: 3.0, bottom: 3.0),
+                      decoration: BoxDecoration(
+                        color: HermezColors.darkOrange,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text("1",
+                          style: TextStyle(
+                              fontFamily: 'ModernEra',
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12)),
+                    )
+                  ]))
+            ]),
           ],
         ),
         backgroundColor: Colors.white,
