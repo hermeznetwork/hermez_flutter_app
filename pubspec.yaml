@@ -156,6 +156,7 @@ flutter:
     - paste.png
     - force_exit.png
     - qr_code.png
+    - assets/raw/hermezpay-mqtt.crt
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

@@ -340,3 +340,4 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/dart,java,kotlin,androidstudio,swift,xcode,flutter
+*.crt

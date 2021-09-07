@@ -80,6 +80,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     });
 
     await widget.arguments.store.getAccounts();
+
     setState(() {
       _isLoading = false;
     });

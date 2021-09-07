@@ -1167,7 +1167,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   }
 
   Future<void> fetchData() async {
-    _stateResponse = await getState();
+      _stateResponse = await getState();
     if (_needRefresh) {
       await widget.arguments.store.getAccounts();
     }
