@@ -1,9 +1,9 @@
-import 'package:hermez/service/network/model/pay_purchase_item.dart';
-
-class Purchase {
+class PurchaseOld {
   final int itemId;
   final String provider;
-  final List<PurchaseItem> products;
+  final String product;
+  final int amount;
+  final String price;
   final bool completed;
   final int operationId;
   final String l2TxId;
@@ -15,10 +15,12 @@ class Purchase {
   final bool confirmed;
   final String lastUpdate;
 
-  Purchase(
+  PurchaseOld(
       {this.itemId,
       this.provider,
-      this.products,
+      this.product,
+      this.amount,
+      this.price,
       this.completed,
       this.operationId,
       this.l2TxId,
@@ -30,14 +32,13 @@ class Purchase {
       this.confirmed,
       this.lastUpdate});
 
-  factory Purchase.fromJson(Map<String, dynamic> json) {
-    List<PurchaseItem> products = (json['products'] as List)
-        .map((item) => PurchaseItem.fromJson(item))
-        .toList();
-    return Purchase(
+  factory PurchaseOld.fromJson(Map<String, dynamic> json) {
+    return PurchaseOld(
         itemId: json['itemId'],
         provider: json['provider'],
-        products: products,
+        product: json['product'],
+        amount: json['amount'],
+        price: json['price'],
         completed: json['completed'],
         operationId: json['operationId'],
         l2TxId: json['l2TxId'],
@@ -58,8 +59,14 @@ class Purchase {
     if (provider != null) {
       json['provider'] = provider;
     }
-    if (products != null) {
-      json['products'] = products;
+    if (product != null) {
+      json['product'] = product;
+    }
+    if (amount != null) {
+      json['amount'] = amount;
+    }
+    if (price != null) {
+      json['price'] = price;
     }
     if (completed != null) {
       json['completed'] = completed;

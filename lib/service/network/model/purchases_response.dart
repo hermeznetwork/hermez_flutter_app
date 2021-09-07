@@ -1,14 +1,14 @@
-import 'package:hermez/service/network/model/purchase.dart';
+import 'package:hermez/service/network/model/purchase_old.dart';
 
 class PurchasesResponse {
-  final List<Purchase> purchases;
+  final List<PurchaseOld> purchases;
 
   PurchasesResponse({this.purchases});
 
   factory PurchasesResponse.fromJson(List<dynamic> json) {
     if (json != null) {
-      List<Purchase> purchases =
-          json.map((item) => Purchase.fromJson(item)).toList();
+      List<PurchaseOld> purchases =
+          json.map((item) => PurchaseOld.fromJson(item)).toList();
       return PurchasesResponse(
         purchases: purchases,
       );

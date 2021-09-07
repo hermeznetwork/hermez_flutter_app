@@ -500,7 +500,7 @@ class WithdrawalRow extends StatelessWidget {
     int bucketBlockLastUpdate;
     int bucketBlocksEachCheck;
     //this.state.network.lastBatch.timestamp
-    double batchFrequencyTime = this.state.metrics.batchFrequency;
+    num batchFrequencyTime = this.state.metrics.batchFrequency;
 
     int lastBatchNum = this.state.network.lastBatch.batchNum ?? 0;
     String lastBatchDate = this.state.network.lastBatch.timestamp ?? 0;

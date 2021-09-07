@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:hermez/service/network/model/purchase_old.dart';
+
 import 'configuration_service.dart';
 import 'network/api_hermez_pay_client.dart';
 import 'network/model/pay_product.dart';
@@ -8,8 +10,8 @@ import 'network/model/purchase.dart';
 
 abstract class IHermezPayService {
   Future<bool> requestPurchase(Purchase purchase);
-  Future<List<Purchase>> getAllPurchases(String hermezAddress);
-  Future<Purchase> getPurchase(String l2TxId);
+  Future<List<PurchaseOld>> getAllPurchases(String hermezAddress);
+  Future<PurchaseOld> getPurchase(String l2TxId);
   Future<String> confirmPurchase(String l2TxId);
   Future<List<PayProvider>> getAllProviders();
   Future<PayProvider> getProvider(int providerId);
@@ -36,7 +38,7 @@ class HermezPayService implements IHermezPayService {
   }
 
   @override
-  Future<List<Purchase>> getAllPurchases(String hermezAddress) async {
+  Future<List<PurchaseOld>> getAllPurchases(String hermezAddress) async {
     final response = await _apiHermezPayClient().getAllPurchases(hermezAddress);
     if (response != null &&
         response.purchases != null &&
@@ -47,7 +49,7 @@ class HermezPayService implements IHermezPayService {
   }
 
   @override
-  Future<Purchase> getPurchase(String l2TxId) async {
+  Future<PurchaseOld> getPurchase(String l2TxId) async {
     final response = await _apiHermezPayClient().getPurchase(l2TxId);
     if (response != null &&
         response.purchases != null &&

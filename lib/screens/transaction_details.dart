@@ -12,7 +12,7 @@ import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez/service/network/model/purchase.dart';
+import 'package:hermez/service/network/model/purchase_old.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -105,7 +105,7 @@ class TransactionDetailsPage extends StatefulWidget {
 
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Account ethereumAccount;
-  Purchase purchase;
+  PurchaseOld purchase;
   GasPriceResponse gasPriceResponse;
   WalletTransferHandler transferStore;
   bool isLoading = false;
@@ -1432,6 +1432,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   }
 
   Widget _buildItemsRow(BuildContext context) {
+    //var statusText = purchase.products.length.toString() +
+    //    (purchase.products.length != 1 ? " Items" : " Item");
     var statusText = purchase.amount.toString() +
         (purchase.amount != 1 ? " Items" : " Item");
 
@@ -1496,21 +1498,25 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         ),
         onTap: () {
           List<BitrefillItem> _items = [];
+          //purchase.products.forEach((product) {
           BitrefillItem item = BitrefillItem(
               id: purchase.itemId.toString(),
-              slug: purchase.product,
+              slug: purchase.product, //product.name,
               name: "Amazon.es Spain",
               baseName: "Amazon.es",
               iconImage: "amazon-icon",
               iconVersion: "1557911836",
               recipient: purchase.recipient,
-              amount: purchase.amount,
-              value: double.parse(purchase.price),
-              displayValue: '€${purchase.price * purchase.amount}.00',
-              currency: "EUR",
+              amount: purchase.amount, //product.amount,
+              value: double.parse(purchase.price), //product.price),
+              displayValue:
+                  '€${purchase.price * purchase.amount}.00', //'€${product.price * product.amount}.00',
+              currency: purchase.currency,
               giftInfo: null);
 
           _items.add(item);
+          //});
+
           Navigator.of(widget.arguments.parentContext).pushNamed(
               "/bitrefill_items",
               arguments: BitrefillItemsArguments(_items));
@@ -1731,8 +1737,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     return gasPriceResponse;
   }
 
-  Future<Purchase> getPayTransaction(String transactionId) async {
-    Purchase purchase =
+  Future<PurchaseOld> getPayTransaction(String transactionId) async {
+    PurchaseOld purchase =
         await widget.arguments.store.getPayTransaction(transactionId);
     if (purchase != null &&
         purchase.confirmed == false &&

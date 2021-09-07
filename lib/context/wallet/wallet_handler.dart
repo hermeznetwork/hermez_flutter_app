@@ -17,7 +17,9 @@ import 'package:hermez/service/network/model/bitrefill_item.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/service/network/model/pay_product.dart';
 import 'package:hermez/service/network/model/pay_provider.dart';
+import 'package:hermez/service/network/model/pay_purchase_item.dart';
 import 'package:hermez/service/network/model/purchase.dart';
+import 'package:hermez/service/network/model/purchase_old.dart';
 import 'package:hermez/service/storage_service.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/addresses.dart' as addresses;
@@ -202,7 +204,7 @@ class WalletHandler {
       List<Token> tokens = await getTokens();
       List<Account> l1Accounts = await getL1Accounts(true);
       List<Account> l2Accounts = await getL2Accounts();
-      List<Purchase> payTransactions = await checkPendingPayTransactions();
+      List<PurchaseOld> payTransactions = await checkPendingPayTransactions();
       List<Exit> exits = await getExits();
       List<PoolTransaction> pendingL2Txs = await getPoolTransactions();
       List<dynamic> pendingL1Transfers = await getPendingTransfers();
@@ -933,37 +935,44 @@ class WalletHandler {
     return l2TxId;
   }
 
-  Future<List<Purchase>> checkPendingPayTransactions() async {
+  Future<List<PurchaseOld>> checkPendingPayTransactions() async {
     final account = await _configurationService.getBabyJubJubBase64();
-    List<Purchase> purchases = await _hermezPayService.getAllPurchases(account);
-    purchases
-        .where((purchase) => purchase.confirmed == false)
-        .forEach((purchase) async {
-      ForgedTransaction forgedTransaction =
-          await _hermezService.getTransactionById(purchase.l2TxId);
-      if (forgedTransaction != null) {
-        await _hermezPayService.confirmPurchase(purchase.l2TxId);
-      }
-    });
+    List<PurchaseOld> purchases =
+        await _hermezPayService.getAllPurchases(account);
+    if (purchases != null) {
+      purchases
+          .where((purchase) => purchase.confirmed == false)
+          .forEach((purchase) async {
+        ForgedTransaction forgedTransaction =
+            await _hermezService.getTransactionById(purchase.l2TxId);
+        if (forgedTransaction != null) {
+          await _hermezPayService.confirmPurchase(purchase.l2TxId);
+        }
+      });
+    }
     return purchases;
   }
 
-  Future<Purchase> getPayTransaction(String transactionId) async {
+  Future<PurchaseOld> getPayTransaction(String transactionId) async {
     return _hermezPayService.getPurchase(transactionId);
   }
 
-  Future<bool> requestPayTransaction(PayProvider provider, BitrefillItem item,
-      String recipient, String transactionId) async {
+  Future<bool> requestPayTransaction(PayProvider provider,
+      List<BitrefillItem> items, String recipient, String transactionId) async {
     final account = await _configurationService.getBabyJubJubBase64();
+    List<PurchaseItem> products = [];
+    items.forEach((item) {
+      PurchaseItem product = PurchaseItem(
+          name: item.slug, amount: item.amount, price: item.value.toString());
+      products.add(product);
+    });
     final purchase = Purchase(
       provider: provider.name,
-      product: item.slug,
-      amount: item.amount,
-      price: item.value.toString(),
+      products: products,
       l2TxId: transactionId,
       instant: true,
       recipient: recipient,
-      currency: item.currency,
+      currency: items != null && items.length > 0 ? items[0].currency : "USD",
       account: account,
     );
     return await _hermezPayService.requestPurchase(purchase);

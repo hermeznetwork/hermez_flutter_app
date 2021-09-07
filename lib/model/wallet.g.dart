@@ -40,7 +40,7 @@ class _$Wallet extends Wallet {
   @override
   final List<Account> l2Accounts;
   @override
-  final List<Purchase> payTransactions;
+  final List<PurchaseOld> payTransactions;
   @override
   final List<PoolTransaction> pendingL2Txs;
   @override
@@ -284,9 +284,9 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   List<Account> get l2Accounts => _$this._l2Accounts;
   set l2Accounts(List<Account> l2Accounts) => _$this._l2Accounts = l2Accounts;
 
-  List<Purchase> _payTransactions;
-  List<Purchase> get payTransactions => _$this._payTransactions;
-  set payTransactions(List<Purchase> payTransactions) =>
+  List<PurchaseOld> _payTransactions;
+  List<PurchaseOld> get payTransactions => _$this._payTransactions;
+  set payTransactions(List<PurchaseOld> payTransactions) =>
       _$this._payTransactions = payTransactions;
 
   List<PoolTransaction> _pendingL2Txs;

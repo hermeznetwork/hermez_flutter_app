@@ -374,19 +374,22 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
+              /*Expanded(
                 child: SingleChildScrollView(
-                  child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          buildAmountSelector(),
-                          SizedBox(height: 20),
-                          buildValueSelector(setModalState),
-                        ],
-                      )),
+                  child: */
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    buildAmountSelector(),
+                    SizedBox(height: 20),
+                    buildValueSelector(setModalState),
+                  ],
                 ),
               ),
+              /*,),
+                ),
+              ),*/
               _buildButton(
                   "Add to Cart",
                   _selectedItemAmount > 0 && _selectedFixedValueIndex >= 0

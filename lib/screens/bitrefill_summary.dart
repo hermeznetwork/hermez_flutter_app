@@ -653,7 +653,7 @@ class _BitrefillSummaryPageState extends State<BitrefillSummaryPage> {
     if (l2TxId != null) {
       return await widget.arguments.store.requestPayTransaction(
           widget.arguments.provider,
-          widget.arguments.items[0],
+          widget.arguments.items,
           widget.arguments.email,
           l2TxId);
     } else {

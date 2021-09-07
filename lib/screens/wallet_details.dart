@@ -140,7 +140,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   List<PoolTransaction> fetchPendingExits() {
-    List<PoolTransaction> poolTxs = widget.arguments.store.state.pendingL2Txs;
+    List<PoolTransaction> poolTxs =
+        List.from(widget.arguments.store.state.pendingL2Txs);
     poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
     return poolTxs;
   }
@@ -148,7 +149,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<dynamic> fetchPendingForceExits(
       List<Exit> exits, List<PoolTransaction> pendingExits) {
     final accountPendingForceExits =
-        widget.arguments.store.state.pendingForceExits;
+        List.from(widget.arguments.store.state.pendingForceExits);
 
     /*exits.forEach((exit) {
       var pendingExit = pendingExits.firstWhere(
