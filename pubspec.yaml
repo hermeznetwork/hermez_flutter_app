@@ -55,6 +55,7 @@ dependencies:
   modal_bottom_sheet: ^2.0.0
   flutter_inappwebview: ^5.3.2
   mqtt_client: ^9.6.0
+  flutter_rating_bar: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -121,6 +122,7 @@ flutter:
     - vendor_bidali.png
     - vendor_cryptorefills.png
     - gift.svg
+    - filter.png
     # Settings
     - settings_currency_conversion.svg
     - settings_view_explorer.svg

@@ -11,7 +11,8 @@ class StoreCard extends StatelessWidget {
       this.amount = 0,
       this.currency = "USD",
       this.vendorColor = HermezColors.lightGrey,
-      this.enabled = true});
+      this.enabled = true,
+      this.onInfoPressed});
 
   final Color backgroundColor;
   final Color vendorColor;
@@ -21,6 +22,7 @@ class StoreCard extends StatelessWidget {
   final num amount;
   final String currency;
   final bool enabled;
+  final Function onInfoPressed;
 
   Widget build(BuildContext context) {
     return Opacity(
@@ -48,20 +50,38 @@ class StoreCard extends StatelessWidget {
         children: [
           Flexible(
             flex: 1,
-            child: Container(
-              width: double.infinity,
-              height: height,
-              padding: EdgeInsets.all(padding),
-              child: isURL
-                  ? isSVG
-                      ? SvgPicture.network(imagePath)
-                      : Image.network(imagePath)
-                  : isSVG
-                      ? SvgPicture.asset(
-                          imagePath,
-                        )
-                      : Image.asset(imagePath),
-            ),
+            child: Stack(children: [
+              enabled && onInfoPressed != null
+                  ? Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: onInfoPressed,
+                        child: Container(
+                          margin: EdgeInsets.only(top: 10, right: 10),
+                          child: SvgPicture.asset("assets/info.svg",
+                              color: HermezColors.blueyGreyTwo,
+                              alignment: Alignment.topRight,
+                              height: 20),
+                        ),
+                      ),
+                    )
+                  : Container(),
+              Container(
+                width: double.infinity,
+                height: height,
+                padding: EdgeInsets.all(padding),
+                child: isURL
+                    ? isSVG
+                        ? SvgPicture.network(imagePath)
+                        : Image.network(imagePath)
+                    : isSVG
+                        ? SvgPicture.asset(
+                            imagePath,
+                          )
+                        : Image.asset(imagePath),
+              ),
+            ]),
           ),
           amount != 0
               ? Container(
