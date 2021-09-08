@@ -201,6 +201,7 @@ class WalletHandler {
     try {
       //_store.dispatch(UpdatingWallet());
       print('Updating Wallet');
+      //await connect();
       List<Token> tokens = await getTokens();
       List<Account> l1Accounts = await getL1Accounts(true);
       List<Account> l2Accounts = await getL2Accounts();

@@ -20,7 +20,7 @@ Future<MqttServerClient> connect() async {
 
   /// Security context
 
-  ByteData data = await rootBundle.load('assets/raw/hermezpay-mqtt.crt');
+  ByteData data = await rootBundle.load('lib/secrets/hermezpay-mqtt.crt');
   final context = SecurityContext.defaultContext;
   context.setTrustedCertificatesBytes(data.buffer.asUint8List());
   //final currDir =
