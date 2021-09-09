@@ -47,6 +47,9 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
   int _selectedFixedValueIndex = -1;
   int _selectedItemAmount = -1;
 
+  List<PayProduct> _searchList = [];
+  bool _needRefresh = true;
+
   @override
   Widget build(BuildContext context) {
     final String currency =
@@ -129,7 +132,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                           child: Center(
                             child: TextField(
                               controller: _searchController,
-                              onChanged: (value) {},
+                              onChanged: searchOperation,
                               cursorColor: HermezColors.orange,
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
@@ -160,10 +163,10 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                         _searchController.clear();
                                         FocusScope.of(context).unfocus();
                                       });
-
-                                      showFlush(
-                                          'Service will be available soon',
-                                          context);
+                                      showBarModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => buildFilterList(),
+                                      );
                                     },
                                     icon: ImageIcon(
                                         AssetImage('assets/filter.png'),
@@ -210,13 +213,32 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                           children: ListTile.divideTiles(
                                               context: context,
                                               color: HermezColors.transparent,
-                                              tiles: [
-                                                Row(children: [
-                                                  Expanded(
-                                                    child: new GestureDetector(
-                                                      onTap: () {
-                                                        //List<BitrefillItem> _items = [];
-                                                        /*BitrefillItem item = BitrefillItem(
+                                              tiles: List.generate(
+                                                  _searchList.length ==
+                                                          (_searchList.length ~/
+                                                                  2) *
+                                                              2
+                                                      ? (_searchList.length ~/
+                                                          2)
+                                                      : (_searchList.length ~/
+                                                              2) +
+                                                          1,
+                                                  (index) => Row(
+                                                      children: List.generate(
+                                                          2,
+                                                          (rowIndex) =>
+                                                              Expanded(
+                                                                child: ((index *
+                                                                                2) +
+                                                                            (rowIndex +
+                                                                                1)) <=
+                                                                        _searchList
+                                                                            .length
+                                                                    ? new GestureDetector(
+                                                                        onTap: _searchList[(index * 2) + rowIndex].enabled
+                                                                            ? () {
+                                                                                //List<BitrefillItem> _items = [];
+                                                                                /*BitrefillItem item = BitrefillItem(
                                               id: _products[0].id.toString(),
                                               slug: _products[0].name,
                                               name: "Amazon.es Spain",
@@ -232,19 +254,15 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                           setState(() {
                                             _items.add(item);
                                           });*/
-                                                        _selectedItemAmount = 1;
-                                                        amountController.text =
-                                                            _selectedItemAmount
-                                                                .toString();
-                                                        _selectedFixedValueIndex =
-                                                            -1;
-                                                        showBarModalBottomSheet(
-                                                          context: context,
-                                                          builder: (context) =>
-                                                              buildItemDetails(),
-                                                        );
+                                                                                _selectedItemAmount = 1;
+                                                                                amountController.text = _selectedItemAmount.toString();
+                                                                                _selectedFixedValueIndex = -1;
+                                                                                showBarModalBottomSheet(
+                                                                                  context: context,
+                                                                                  builder: (context) => buildItemDetails(),
+                                                                                );
 
-                                                        /*Navigator.pushNamed(
+                                                                                /*Navigator.pushNamed(
                                           context, '/bitrefill_form',
                                           arguments: BitrefillFormArguments(
                                               widget.arguments.provider,
@@ -261,184 +279,55 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                       }
                                     }
                                   });*/
-                                                        /*Navigator.pushNamed(
+                                                                                /*Navigator.pushNamed(
                             widget.arguments.parentContext, "/web_explorer",
                             arguments:
                                 WebExplorerArguments(widget.arguments.store));*/
-                                                      },
-                                                      child: StoreCard(
-                                                        HermezColors.lightGrey,
-                                                        "https://cdn.freebiesupply.com/images/large/2x/amazon-logo-transparent.png",
-                                                        height: 120,
-                                                        padding: 20,
-                                                        //amount: 5,
-                                                        currency: currency,
-                                                        vendorColor: widget
-                                                            .arguments
-                                                            .vendorColor,
-                                                        onInfoPressed: () {
-                                                          showBarModalBottomSheet(
-                                                            context: context,
-                                                            builder: (context) =>
-                                                                buildItemInfo(),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 15,
-                                                  ),
-                                                  Expanded(
-                                                    child: new GestureDetector(
-                                                      onTap: () {
-                                                        showFlush(
-                                                            'Service will be available soon',
-                                                            context);
-                                                      },
-                                                      child: StoreCard(
-                                                        HermezColors.lightGrey,
-                                                        "https://www.freepnglogos.com/uploads/netflix-logo-0.png",
-                                                        height: 120,
-                                                        padding: 20,
-                                                        //amount: 10,
-                                                        currency: currency,
-                                                        vendorColor: widget
-                                                            .arguments
-                                                            .vendorColor,
-                                                        enabled: false,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ]),
-                                                SizedBox(
-                                                  height: 15,
-                                                ),
-                                                Row(children: [
-                                                  Expanded(
-                                                    child: new GestureDetector(
-                                                      onTap: () {
-                                                        showFlush(
-                                                            'Service will be available soon',
-                                                            context);
-                                                      },
-                                                      child: StoreCard(
-                                                        HermezColors.lightGrey,
-                                                        "https://upload.wikimedia.org/wikipedia/commons/c/c5/Ikea_logo.svg",
-                                                        height: 120,
-                                                        padding: 20,
-                                                        //amount: 75,
-                                                        currency: currency,
-                                                        enabled: false,
-                                                        vendorColor: widget
-                                                            .arguments
-                                                            .vendorColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 15,
-                                                  ),
-                                                  Expanded(
-                                                    child: new GestureDetector(
-                                                      onTap: () {
-                                                        showFlush(
-                                                            'Service will be available soon',
-                                                            context);
-                                                      },
-                                                      child: StoreCard(
-                                                        HermezColors.lightGrey,
-                                                        "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg",
-                                                        height: 120,
-                                                        padding: 20,
-                                                        //amount: 15,
-                                                        currency: currency,
-                                                        enabled: false,
-                                                        vendorColor: widget
-                                                            .arguments
-                                                            .vendorColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ]),
-                                                SizedBox(
-                                                  height: 15,
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child:
-                                                          new GestureDetector(
-                                                        onTap: () {
-                                                          showFlush(
-                                                              'Service will be available soon',
-                                                              context);
-                                                        },
-                                                        child: StoreCard(
-                                                          HermezColors
-                                                              .lightGrey,
-                                                          "https://cdn.freelogovectors.net/wp-content/uploads/2016/12/airbnb-logo.png",
-                                                          height: 120,
-                                                          padding: 20,
-                                                          //amount: 100,
-                                                          currency: currency,
-                                                          enabled: false,
-                                                          vendorColor: widget
-                                                              .arguments
-                                                              .vendorColor,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 15,
-                                                    ),
-                                                    Expanded(
-                                                        child:
-                                                            Container() /*StoreCard(
-                          HermezColors.lightGrey,
-                          "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg",
-                          height: 130,
-                          padding: 25,
-                        ),*/
-                                                        ),
-                                                  ],
-                                                ),
-                                              ]).toList()),
+                                                                              }
+                                                                            : () {
+                                                                                showFlush('Service will be available soon', context);
+                                                                              },
+                                                                        child:
+                                                                            Container(
+                                                                          margin:
+                                                                              EdgeInsets.all(6),
+                                                                          child:
+                                                                              StoreCard(
+                                                                            HermezColors.lightGrey,
+                                                                            _searchList[(index * 2) + rowIndex].imageUrl,
+                                                                            height:
+                                                                                120,
+                                                                            padding:
+                                                                                20,
+                                                                            enabled:
+                                                                                _searchList[(index * 2) + rowIndex].enabled,
+                                                                            //amount: 5,
+                                                                            currency:
+                                                                                currency,
+                                                                            vendorColor:
+                                                                                widget.arguments.vendorColor,
+                                                                            onInfoPressed: _searchList[(index * 2) + rowIndex].enabled
+                                                                                ? () {
+                                                                                    showBarModalBottomSheet(
+                                                                                      context: context,
+                                                                                      builder: (context) => buildItemInfo(),
+                                                                                    );
+                                                                                  }
+                                                                                : null,
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                    : Container(),
+                                                              ))))).toList()),
                                     ),
-
-                                    /*_buildButton(
-                                "Continue",
-                                _items != null && _items.length > 0
-                                    ? () {
-                                        Navigator.pushNamed(
-                                                context, '/bitrefill_form',
-                                                arguments:
-                                                    BitrefillFormArguments(
-                                                        widget
-                                                            .arguments.provider,
-                                                        _items,
-                                                        widget.arguments.store))
-                                            .then((results) {
-                                          if (results is PopWithResults) {
-                                            PopWithResults popResult = results;
-                                            if (popResult.toPage ==
-                                                "/store_item_selector") {
-                                              // TODO do stuff
-                                            } else {
-                                              Navigator.of(context)
-                                                  .pop(results);
-                                            }
-                                          }
-                                        });
-                                      }
-                                    : null),*/
                                   ],
                                 );
                               } else {
-                                return new Center(
+                                return Expanded(
+                                    child: Center(
                                   child: new CircularProgressIndicator(
                                       color: HermezColors.orange),
-                                );
+                                ));
                               }
                             }),
                       ]),
@@ -494,17 +383,59 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
           spreadRadius: 0,
         ),
       ],
+      flushbarPosition: FlushbarPosition.BOTTOM,
+      flushbarStyle: FlushbarStyle.FLOATING,
       borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
       borderRadius: BorderRadius.all(Radius.circular(12)),
       backgroundColor: Colors.white,
       margin: EdgeInsets.all(16.0),
+      isDismissible: true,
       duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
-    ).show(context);
+    ).show(_listKey.currentContext);
   }
 
   Future<bool> fetchData() async {
-    _products = await widget.arguments.store
+    /*_products =*/ await widget.arguments.store
         .getPayProducts(widget.arguments.provider.id);
+    _products = [];
+    _products.add(PayProduct(
+        id: 1,
+        name: "Amazon",
+        providerId: 1,
+        imageUrl:
+            "https://cdn.freebiesupply.com/images/large/2x/amazon-logo-transparent.png"));
+    _products.add(PayProduct(
+        id: 2,
+        name: "Netflix",
+        providerId: 1,
+        imageUrl: "https://www.freepnglogos.com/uploads/netflix-logo-0.png",
+        enabled: false));
+    _products.add(PayProduct(
+        id: 3,
+        name: "Ikea",
+        providerId: 1,
+        imageUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/c/c5/Ikea_logo.svg",
+        enabled: false));
+    _products.add(PayProduct(
+        id: 4,
+        name: "Spotify",
+        providerId: 1,
+        imageUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg",
+        enabled: false));
+    _products.add(PayProduct(
+        id: 5,
+        name: "Airbnb",
+        providerId: 1,
+        imageUrl:
+            "https://cdn.freelogovectors.net/wp-content/uploads/2016/12/airbnb-logo.png",
+        enabled: false));
+
+    if (_needRefresh) {
+      _searchList = List.from(_products);
+      _needRefresh = false;
+    }
     return true;
   }
 
@@ -1169,6 +1100,15 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
     });
   }
 
+  Widget buildFilterList() {
+    return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) {
+      return Container(
+        color: Colors.white,
+      );
+    });
+  }
+
   // takes in an object and color and returns a circle avatar with first letter and required color
   CircleAvatar _getLeadingWidget(BitrefillItem item) {
     return new CircleAvatar(
@@ -1225,5 +1165,20 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
         ),
       ),
     ]);
+  }
+
+  void searchOperation(String searchText) {
+    _searchList.clear();
+    if (searchText == null || searchText.isEmpty) {
+      _searchList = List.from(_products);
+    } else {
+      //if (_isSearching != null) {
+      _products.forEach((product) {
+        if (product.name.toLowerCase().contains(searchText.toLowerCase())) {
+          _searchList.add(product);
+        }
+      });
+    }
+    setState(() {});
   }
 }

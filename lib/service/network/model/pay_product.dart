@@ -3,7 +3,15 @@ class PayProduct {
   final String name;
   final int providerId;
 
-  PayProduct({this.id, this.name, this.providerId});
+  final String imageUrl;
+  final bool enabled;
+
+  PayProduct(
+      {this.id,
+      this.name,
+      this.providerId,
+      this.imageUrl,
+      this.enabled = true});
 
   factory PayProduct.fromJson(Map<String, dynamic> json) {
     return PayProduct(
