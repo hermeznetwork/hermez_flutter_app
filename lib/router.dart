@@ -5,6 +5,8 @@ import 'package:hermez/screens/biometrics.dart';
 import 'package:hermez/screens/bitrefill_form.dart';
 import 'package:hermez/screens/bitrefill_items.dart';
 import 'package:hermez/screens/bitrefill_summary.dart';
+import 'package:hermez/screens/category_selector.dart';
+import 'package:hermez/screens/country_selector.dart';
 import 'package:hermez/screens/fee_selector.dart';
 import 'package:hermez/screens/first_deposit.dart';
 import 'package:hermez/screens/home.dart';
@@ -140,8 +142,10 @@ Map<String, WidgetBuilder> getRoutes(context) {
     },
     '/qrcode': (BuildContext context) =>
         QRCodePage(arguments: ModalRoute.of(context).settings.arguments),
-    //'/currency_selector': (BuildContext context) =>
-    //    SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
+    '/country_selector': (BuildContext context) =>
+        CountrySelectorPage(store: ModalRoute.of(context).settings.arguments),
+    '/category_selector': (BuildContext context) =>
+        CategorySelectorPage(store: ModalRoute.of(context).settings.arguments),
     '/first_deposit': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {

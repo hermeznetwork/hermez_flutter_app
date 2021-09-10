@@ -123,6 +123,11 @@ flutter:
     - vendor_cryptorefills.png
     - gift.svg
     - filter.png
+    - country.png
+    - category.png
+    - assets/raw/countries.json
+    - assets/raw/categories.json
+    - assets/raw/country-by-flag.json
     # Settings
     - settings_currency_conversion.svg
     - settings_view_explorer.svg

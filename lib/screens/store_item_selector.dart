@@ -165,7 +165,8 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                       });
                                       showBarModalBottomSheet(
                                         context: context,
-                                        builder: (context) => buildFilterList(),
+                                        builder: (context) =>
+                                            buildFilterList(context),
                                       );
                                     },
                                     icon: ImageIcon(
@@ -1100,12 +1101,143 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
     });
   }
 
-  Widget buildFilterList() {
+  Widget buildFilterList(BuildContext parentContext) {
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter setModalState) {
-      return Container(
+      return SafeArea(
+          child: Container(
         color: Colors.white,
-      );
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: 2,
+          //set the item count so that index won't be out of range
+          padding: const EdgeInsets.all(16.0),
+          //add some padding to make it look good
+          itemBuilder: (context, i) {
+            //item builder returns a row for each index i=0,1,2,3,4
+            // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
+
+            // final index = i ~/ 2; //get the actual index excluding dividers.
+            String title = "";
+            String subtitle = "";
+            String icon = "";
+
+            final index = i;
+            switch (index) {
+              case 0:
+                title = "Country";
+                subtitle = "Spain";
+                icon = "assets/country.png";
+                break;
+
+              case 1:
+                title = "Category";
+                subtitle = "Top products";
+                icon = "assets/category.png";
+                break;
+            }
+
+            bool isSVG = (icon != null && icon.endsWith(".svg"));
+            bool isPNG = (icon != null && icon.endsWith(".png"));
+
+            return ListTile(
+              leading: Container(
+                //alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(top: 16.0),
+                child: isSVG
+                    ? SvgPicture.asset(
+                        icon,
+                        /*height: 20,
+                width: 20,*/
+                        fit: BoxFit.scaleDown,
+                      )
+                    : Image.asset(icon,
+                        height: 23, width: 23, fit: BoxFit.scaleDown),
+              ),
+              trailing: Container(
+                  padding: EdgeInsets.only(top: 35.0),
+                  child: SvgPicture.asset("assets/arrow_right.svg",
+                      height: 12, color: HermezColors.blackTwo)),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: EdgeInsets.only(
+                          top: 30.0, bottom: subtitle != null ? 8.0 : 30.0),
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                            color: HermezColors.black,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ),
+                  subtitle != null
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            child: Text(
+                              subtitle,
+                              style: TextStyle(
+                                  color: HermezColors.blueyGreyTwo,
+                                  fontFamily: 'ModernEra',
+                                  height: 1.5,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        )
+                      : Container(),
+                ],
+              ),
+              onTap: () {
+                switch (index) {
+                  case 0:
+                    //  Currency conversion
+                    Navigator.pushNamed(context, '/country_selector',
+                            arguments: widget.arguments.store)
+                        .then((results) {
+                      Navigator.of(context).pop(results);
+                      /*if (results is PopWithResults) {
+                        PopWithResults popResult = results;
+                        if (popResult.toPage == "/store_item_selector") {
+                          // TODO do stuff
+                        } else {
+                          Navigator.of(context).pop(results);
+                        }
+                      }*/
+                    });
+                    break;
+                  case 1:
+                    //  Currency conversion
+                    Navigator.of(parentContext)
+                        .pushNamed("/category_selector",
+                            arguments: widget.arguments.store)
+                        .then((results) {
+                      Navigator.of(context).pop(results);
+                      /*if (results is PopWithResults) {
+                        PopWithResults popResult = results;
+                        if (popResult.toPage == "/store_item_selector") {
+                          // TODO do stuff
+                        } else {
+                          Navigator.of(context).pop(results);
+                        }
+                      }*/
+                    });
+                    break;
+                }
+              },
+            ); //iterate through indexes and get the next colour
+            //return _buildRow(context, element, color); //build the row widget
+          },
+        ),
+      ));
     });
   }
 

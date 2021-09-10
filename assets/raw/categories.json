@@ -1,0 +1,102 @@
+[
+  {
+    "id": "topup",
+    "name": "Prepaid Phones"
+  },
+  {
+    "id": "data",
+    "name": "Data"
+  },
+  {
+    "id": "pin",
+    "name": "Phone vouchers / PIN"
+  },
+  {
+    "id": "digitaltv",
+    "name": "Digital TV"
+  },
+  {
+    "id": "All giftcards",
+    "name": "All giftcards"
+  },
+  {
+    "id": "bundle",
+    "name": "Bundles"
+  },
+  {
+    "id": "Restaurants & Food",
+    "name": "Restaurants & Food"
+  },
+  {
+    "id": "Entertainment",
+    "name": "Entertainment"
+  },
+  {
+    "id": "Travel",
+    "name": "Travel"
+  },
+  {
+    "id": "Clothing",
+    "name": "Clothing"
+  },
+  {
+    "id": "House & Home",
+    "name": "House & Home"
+  },
+  {
+    "id": "Groceries",
+    "name": "Groceries"
+  },
+  {
+    "id": "Sports",
+    "name": "Sports"
+  },
+  {
+    "id": "Gaming",
+    "name": "Gaming"
+  },
+  {
+    "id": "Golf",
+    "name": "Golf"
+  },
+  {
+    "id": "Flights",
+    "name": "Flights"
+  },
+  {
+    "id": "Hotels",
+    "name": "Hotels"
+  },
+  {
+    "id": "Renovations",
+    "name": "Renovations"
+  },
+  {
+    "id": "Maternity / Toys",
+    "name": "Maternity / Toys"
+  },
+  {
+    "id": "Gifts for her",
+    "name": "Gifts for her"
+  },
+  {
+    "id": "Gifts for him",
+    "name": "Gifts for him"
+  },
+  {
+    "id": "Uber",
+    "name": "Uber"
+  },
+  {
+    "id": "Spa",
+    "name": "Spa"
+  },
+  {
+    "id": "Coffee",
+    "name": "Coffee"
+  },
+  {
+    "id": "Wine / Cocktails",
+    "name": "Wine / Cocktails"
+  }
+]
