@@ -164,6 +164,10 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
     data = data.replaceAll("\n", "");
     dynamic json = jsonDecode(data);
     _countries = (json as List).map((item) => Country2.fromJson(item)).toList();
+    if (_needRefresh) {
+      _searchList = List.from(_countries);
+      _needRefresh = false;
+    }
     return _countries;
   }
 
@@ -174,6 +178,10 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
     data = data.replaceAll("\n", "");
     dynamic json = jsonDecode(data);
     _countries = (json as List).map((item) => Country2.fromJson(item)).toList();
+    if (_needRefresh) {
+      _searchList = List.from(_countries);
+      _needRefresh = false;
+    }
     return _countries;
   }
 
