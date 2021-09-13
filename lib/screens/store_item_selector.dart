@@ -123,14 +123,16 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         ]),
                       ],
                       bottom: AppBar(
-                        automaticallyImplyLeading: false,
-                        elevation: 0.0,
-                        title: Container(
-                          width: double.infinity,
-                          height: 40,
-                          color: Colors.white,
-                          child: Center(
-                            child: TextField(
+                          automaticallyImplyLeading: false,
+                          elevation: 0.0,
+                          title: Container(
+                            width: double.infinity,
+                            height: 40,
+                            color: Colors.white,
+                            child:
+                                /*Center(
+                              child:*/
+                                TextField(
                               controller: _searchController,
                               onChanged: searchOperation,
                               cursorColor: HermezColors.orange,
@@ -152,27 +154,50 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                   Icons.search,
                                   color: HermezColors.blueyGreyTwo,
                                 ),
-                                suffixIcon: new Container(
-                                  padding: EdgeInsets.symmetric(vertical: 2),
-                                  child: IconButton(
-                                    splashRadius: 1,
-                                    onPressed: () {
-                                      //here
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                        _searchController.clear();
-                                        FocusScope.of(context).unfocus();
-                                      });
-                                      showBarModalBottomSheet(
-                                        context: context,
-                                        builder: (context) =>
-                                            buildFilterList(context),
-                                      );
-                                    },
-                                    icon: ImageIcon(
-                                        AssetImage('assets/filter.png'),
-                                        color: HermezColors.blueyGreyTwo),
-                                  ),
+                                suffixIcon: IconButton(
+                                  iconSize: 24,
+                                  splashRadius: 1,
+                                  onPressed: () {
+                                    //here
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      _searchController.clear();
+                                      FocusScope.of(context).unfocus();
+                                    });
+
+                                    /*showBarModalBottomSheet(
+                                      context: context,
+                                      builder: (context) =>
+                                          buildFilterList(context),
+                                    );*/
+                                    Navigator.pushNamed(
+                                        context, '/country_selector',
+                                        arguments: widget.arguments.store);
+                                  },
+                                  icon: Stack(children: [
+                                    ClipOval(
+                                        child: Container(
+                                      height: 24.0,
+                                      width: 24.0,
+                                      child: SvgPicture.network(
+                                        'https://restcountries.eu/data/esp.svg',
+                                        fit: BoxFit.fill,
+                                        allowDrawingOutsideViewBox: true,
+                                        /*errorBuilder: (context, error, stackTrace) =>
+            Text('Some errors occurred!'),*/
+                                      ),
+                                    )),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: SvgPicture.asset(
+                                        'assets/arrow_down.svg',
+                                        fit: BoxFit.fill,
+                                        height: 7,
+                                        color: HermezColors.black,
+                                      ),
+                                    )
+                                  ]),
                                 ),
                                 contentPadding: EdgeInsets.only(
                                     left: 12, right: 12, top: 8, bottom: 8),
@@ -194,9 +219,34 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                     borderRadius: BorderRadius.circular(20)),
                               ),
                             ),
+                            //),
                           ),
-                        ),
-                      ),
+                          actions: [
+                            Container(
+                              margin: EdgeInsets.symmetric(vertical: 10),
+                              child: IconButton(
+                                splashRadius: 1,
+                                onPressed: () {
+                                  //here
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    _searchController.clear();
+                                    FocusScope.of(context).unfocus();
+                                  });
+                                  /*showBarModalBottomSheet(
+                                    context: context,
+                                    builder: (context) =>
+                                        buildFilterList(context),
+                                  );*/
+                                  Navigator.of(context).pushNamed(
+                                      "/category_selector",
+                                      arguments: widget.arguments.store);
+                                },
+                                icon: ImageIcon(AssetImage('assets/filter.png'),
+                                    color: HermezColors.blueyGreyTwo),
+                              ),
+                            ),
+                          ]),
                     ),
                     // Other Sliver Widgets
                     SliverList(
@@ -1199,7 +1249,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
               onTap: () {
                 switch (index) {
                   case 0:
-                    //  Currency conversion
+                    //  Country Selector
                     Navigator.pushNamed(context, '/country_selector',
                             arguments: widget.arguments.store)
                         .then((results) {
@@ -1215,7 +1265,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                     });
                     break;
                   case 1:
-                    //  Currency conversion
+                    //  Category Selector
                     Navigator.of(parentContext)
                         .pushNamed("/category_selector",
                             arguments: widget.arguments.store)

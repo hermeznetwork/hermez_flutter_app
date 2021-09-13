@@ -20,8 +20,8 @@ class CountrySelectorPage extends StatefulWidget {
 }
 
 class _CountrySelectorPageState extends State<CountrySelectorPage> {
-  List<Country2> _countries = [];
-  List<Country2> _searchList = [];
+  List<Country> _countries = [];
+  List<Country> _searchList = [];
   bool _needRefresh = true;
   final TextEditingController _searchController = new TextEditingController();
   @override
@@ -126,58 +126,15 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
         ),
       ),
     );
-
-    return Scaffold(
-      //key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text("Select a country",
-            style: TextStyle(
-                fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
-                fontWeight: FontWeight.w800,
-                fontSize: 20)),
-        centerTitle: true,
-        elevation: 0.0,
-        backgroundColor: Colors.white,
-      ),
-      backgroundColor: Colors.white,
-      body: FutureBuilder(
-          future: fetchData(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Column(
-                children: <Widget>[
-                  buildCurrencyList(),
-                ],
-              );
-            } else {
-              return Container();
-            }
-          }),
-    );
   }
 
-  Future<List<Country2>> fetchData() async {
+  Future<List<Country>> fetchData() async {
     String data = await DefaultAssetBundle.of(context)
         .loadString("assets/raw/countries.json");
 
     data = data.replaceAll("\n", "");
     dynamic json = jsonDecode(data);
-    _countries = (json as List).map((item) => Country2.fromJson(item)).toList();
-    if (_needRefresh) {
-      _searchList = List.from(_countries);
-      _needRefresh = false;
-    }
-    return _countries;
-  }
-
-  Future<List<Country2>> fetchData2() async {
-    String data = await DefaultAssetBundle.of(context)
-        .loadString("assets/raw/country-by-flag.json");
-
-    data = data.replaceAll("\n", "");
-    dynamic json = jsonDecode(data);
-    _countries = (json as List).map((item) => Country2.fromJson(item)).toList();
+    _countries = (json as List).map((item) => Country.fromJson(item)).toList();
     if (_needRefresh) {
       _searchList = List.from(_countries);
       _needRefresh = false;
@@ -200,12 +157,8 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
     setState(() {});
   }
 
-  Image imageFromBase64String(String base64String) {
-    return Image.memory(base64Decode(base64String));
-  }
-
   // takes in an object and color and returns a circle avatar with first letter and required color
-  Widget _getLeadingWidget(Country2 item) {
+  Widget _getLeadingWidget(Country item) {
     return CircleAvatar(
         radius: 25,
         child: ClipOval(
@@ -239,7 +192,7 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
         // final index = i ~/ 2; //get the actual index excluding dividers.
         final index = i;
 
-        Country2 country = _searchList.elementAt(index);
+        Country country = _searchList.elementAt(index);
         //final MaterialColor color = _colors[index %
         //    _colors.length]; //iterate through indexes and get the next colour
         return ListTile(
@@ -297,32 +250,13 @@ class _CountrySelectorPageState extends State<CountrySelectorPage> {
 }
 
 class Country {
-  final String country;
-  final String abbreviation;
-
-  Country({this.country, this.abbreviation});
-
-  factory Country.fromJson(Map<String, dynamic> json) {
-    return Country(
-      country: json['country'],
-      abbreviation: json['abbreviation'],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'country': country,
-        'abbreviation': abbreviation,
-      };
-}
-
-class Country2 {
   final String name;
   final String flag;
 
-  Country2({this.name, this.flag});
+  Country({this.name, this.flag});
 
-  factory Country2.fromJson(Map<String, dynamic> json) {
-    return Country2(
+  factory Country.fromJson(Map<String, dynamic> json) {
+    return Country(
       name: json['name'],
       flag: json['flag'],
     );
