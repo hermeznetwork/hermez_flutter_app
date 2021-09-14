@@ -531,8 +531,20 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                 needRefresh = true;
                                 if (account is Account) {
                                   selectedAccount = account;
+                                  selectedToken = widget
+                                      .arguments.store.state.tokens
+                                      .firstWhere((token) =>
+                                          token.id == account.tokenId);
+                                  selectedPriceToken = widget
+                                      .arguments.store.state.priceTokens
+                                      .firstWhere((priceToken) =>
+                                          priceToken.id == account.tokenId);
                                 } else if (account is Token) {
                                   widget.arguments.token = account;
+                                  selectedPriceToken = widget
+                                      .arguments.store.state.priceTokens
+                                      .firstWhere((priceToken) =>
+                                          priceToken.id == account.id);
                                 }
                               });
                             }
@@ -558,8 +570,20 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   needRefresh = true;
                                   if (account is Account) {
                                     selectedAccount = account;
+                                    selectedToken = widget
+                                        .arguments.store.state.tokens
+                                        .firstWhere((token) =>
+                                            token.id == account.tokenId);
+                                    selectedPriceToken = widget
+                                        .arguments.store.state.priceTokens
+                                        .firstWhere((priceToken) =>
+                                            priceToken.id == account.tokenId);
                                   } else if (account is Token) {
                                     widget.arguments.token = account;
+                                    selectedPriceToken = widget
+                                        .arguments.store.state.priceTokens
+                                        .firstWhere((priceToken) =>
+                                            priceToken.id == account.id);
                                   }
                                 });
                               }
