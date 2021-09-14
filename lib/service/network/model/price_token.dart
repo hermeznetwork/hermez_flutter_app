@@ -1,7 +1,7 @@
 class PriceToken {
-  final int itemId;
-  /*final int id;
-  final int ethereumBlockNum;
+  /*final int itemId;*/
+  final int id;
+  /*final int ethereumBlockNum;
   final String ethereumAddress;
   final String name;
   final String symbol;
@@ -10,9 +10,9 @@ class PriceToken {
   final String usdUpdate;
 
   PriceToken(
-      {this.itemId,
-      /*this.id,
-      this.ethereumBlockNum,
+      {/*this.itemId,*/
+      this.id,
+      /*this.ethereumBlockNum,
       this.ethereumAddress,
       this.name,
       this.symbol,
@@ -22,9 +22,9 @@ class PriceToken {
 
   factory PriceToken.fromJson(Map<String, dynamic> json) {
     return PriceToken(
-      itemId: json['itemId'],
-      /*id: json['id'],
-      ethereumBlockNum: json['ethereumBlockNum'],
+      /*itemId: json['itemId'],*/
+      id: json['id'],
+      /*ethereumBlockNum: json['ethereumBlockNum'],
       ethereumAddress: json['ethereumAddress'],
       name: json['name'],
       symbol: json['symbol'],
@@ -35,9 +35,9 @@ class PriceToken {
   }
 
   Map<String, dynamic> toJson() => {
-        'itemId': itemId,
-        /*'id': id,
-        'ethereumBlockNum': ethereumBlockNum,
+        /*'itemId': itemId,*/
+        'id': id,
+        /*'ethereumBlockNum': ethereumBlockNum,
         'ethereumAddress': ethereumAddress,
         'name': name,
         'symbol': symbol,

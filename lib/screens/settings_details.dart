@@ -8,11 +8,14 @@ import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/remove_account_info.dart';
 import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/environment.dart';
+import 'package:hermez_sdk/model/account.dart';
+import 'package:hermez_sdk/model/token.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -293,6 +296,13 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                                   widget.arguments.store))
                           .then((selectedAccount) {
                         if (selectedAccount != null) {
+                          Token token = widget.arguments.store.state.tokens
+                              .firstWhere((token) =>
+                                  token.id == (selectedAccount as Account).tokenId);
+                          PriceToken priceToken = widget
+                              .arguments.store.state.priceTokens
+                              .firstWhere((priceToken) =>
+                                  priceToken.id == (selectedAccount as Account).tokenId);
                           // Force withdrawal
                           Navigator.pushNamed(widget.arguments.parentContext,
                                   "/transaction_amount",
@@ -301,6 +311,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                                       TransactionLevel.LEVEL2,
                                       TransactionType.FORCEEXIT,
                                       account: selectedAccount,
+                                      token: token,
+                                      priceToken: priceToken,
                                       allowChangeLevel: false))
                               .then((results) {
                             if (results is PopWithResults) {

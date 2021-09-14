@@ -50,7 +50,7 @@ class BalanceUtils {
         Token token = store.state.tokens
             .firstWhere((token) => token.id == account.tokenId);
         PriceToken priceToken = store.state.priceTokens
-            .firstWhere((priceToken) => priceToken.itemId == account.tokenId);
+            .firstWhere((priceToken) => priceToken.id == account.tokenId);
         if (priceToken.USD != null) {
           tokens.add(token);
           double value = priceToken.USD *
@@ -67,7 +67,7 @@ class BalanceUtils {
     // calculate withdraws amount
     tokens.forEach((token) {
       PriceToken priceToken = store.state.priceTokens
-          .firstWhere((priceToken) => priceToken.itemId == token.id);
+          .firstWhere((priceToken) => priceToken.id == token.id);
       if (txLevel == TransactionLevel.LEVEL2) {
         // Pending transfers and Pending Exits L2
         pendingWithdraws
@@ -194,7 +194,7 @@ class BalanceUtils {
     Token token =
         store.state.tokens.firstWhere((token) => token.id == account.tokenId);
     PriceToken priceToken = store.state.priceTokens
-        .firstWhere((priceToken) => priceToken.itemId == token.id);
+        .firstWhere((priceToken) => priceToken.id == token.id);
     if (txLevel == TransactionLevel.LEVEL2) {
       // Pending transfers and Pending Exits L2
       store.state.pendingL2Txs

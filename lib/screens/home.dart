@@ -13,6 +13,7 @@ import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/screens/wallet_selector.dart';
 import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/account.dart';
@@ -188,8 +189,11 @@ class _HomePageState extends State<HomePage> {
                   List<Account> accounts =
                       await widget.arguments.store.getL1Accounts(true);
                   for (Account account in accounts) {
-                    Token token = await widget.arguments.store
-                        .getTokenById(account.tokenId);
+                    Token token = widget.arguments.store.state.tokens
+                        .firstWhere((token) => token.id == account.tokenId);
+                    PriceToken priceToken =
+                        widget.arguments.store.state.priceTokens.firstWhere(
+                            (priceToken) => priceToken.id == account.tokenId);
                     if (token.symbol == scannedStrings[1]) {
                       accountFound = true;
                       Navigator.pushReplacementNamed(
@@ -199,6 +203,8 @@ class _HomePageState extends State<HomePage> {
                               TransactionLevel.LEVEL1,
                               TransactionType.SEND,
                               account: account,
+                              token: token,
+                              priceToken: priceToken,
                               addressTo: scannedStrings[0],
                               amount: double.parse(scannedStrings[2]),
                               allowChangeLevel: false));
@@ -229,8 +235,11 @@ class _HomePageState extends State<HomePage> {
                   List<Account> accounts =
                       await widget.arguments.store.getL2Accounts();
                   for (Account account in accounts) {
-                    Token token = await widget.arguments.store
-                        .getTokenById(account.tokenId);
+                    Token token = widget.arguments.store.state.tokens
+                        .firstWhere((token) => token.id == account.tokenId);
+                    PriceToken priceToken =
+                        widget.arguments.store.state.priceTokens.firstWhere(
+                            (priceToken) => priceToken.id == account.tokenId);
                     if (token.symbol == scannedStrings[2]) {
                       accountFound = true;
                       Navigator.pushReplacementNamed(
@@ -240,6 +249,8 @@ class _HomePageState extends State<HomePage> {
                               TransactionLevel.LEVEL2,
                               TransactionType.SEND,
                               account: account,
+                              token: token,
+                              priceToken: priceToken,
                               addressTo:
                                   scannedStrings[0] + ":" + scannedStrings[1],
                               amount: double.parse(scannedStrings[3]),

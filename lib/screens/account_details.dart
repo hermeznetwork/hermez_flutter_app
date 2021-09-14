@@ -278,7 +278,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 "/transaction_amount",
                 arguments: TransactionAmountArguments(widget.arguments.store,
                     widget.arguments.store.state.txLevel, TransactionType.SEND,
-                    account: widget.arguments.account, allowChangeLevel: false),
+                    account: widget.arguments.account,
+                    token: widget.arguments.token,
+                    priceToken: widget.arguments.priceToken,
+                    allowChangeLevel: false),
               );
               if (results is PopWithResults) {
                 PopWithResults popResult = results;
@@ -375,6 +378,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             ? TransactionType.DEPOSIT
                             : TransactionType.EXIT,
                         account: widget.arguments.account,
+                        token: widget.arguments.token,
+                        priceToken: widget.arguments.priceToken,
                         allowChangeLevel: false),
                   );
                   if (results is PopWithResults) {
@@ -565,6 +570,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 transactionLevel: TransactionLevel.LEVEL1,
                                 status: TransactionStatus.DRAFT,
                                 token: widget.arguments.token,
+                                priceToken: widget.arguments.priceToken,
                                 exit: exit,
                                 amount: amountWithdraw.toDouble() /
                                     pow(10, widget.arguments.token.decimals),
@@ -1083,8 +1089,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             ),
                           ]),
                       onTap: () async {
-                        Token token = await widget.arguments.store
-                            .getTokenById(widget.arguments.account.tokenId);
                         var results = await Navigator.pushNamed(
                             context, "transaction_details",
                             arguments: TransactionDetailsArguments(
@@ -1094,7 +1098,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                     widget.arguments.store.state.txLevel,
                                 status: txStatus,
                                 account: widget.arguments.account,
-                                token: token,
+                                token: widget.arguments.token,
+                                priceToken: widget.arguments.priceToken,
                                 amount: amount,
                                 fee: fee,
                                 transactionId: txId,

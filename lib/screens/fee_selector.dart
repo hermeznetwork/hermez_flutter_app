@@ -188,7 +188,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                           child: Text(
                                             ((widget.arguments.store.state.priceTokens
                                                             .firstWhere((PriceToken priceToken) =>
-                                                                priceToken.itemId ==
+                                                                priceToken.id ==
                                                                 widget
                                                                     .arguments
                                                                     .ethereumToken

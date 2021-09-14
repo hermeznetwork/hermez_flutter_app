@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/wallet_details.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
@@ -11,6 +12,7 @@ import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/token.dart';
 
 import '../context/wallet/wallet_handler.dart';
 import 'account_selector.dart';
@@ -421,6 +423,16 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                             widget.arguments.store));
                                   }
                                   if (selectedAccount != null) {
+                                    Token token = widget
+                                        .arguments.store.state.tokens
+                                        .firstWhere((token) =>
+                                            token.id ==
+                                            selectedAccount.tokenId);
+                                    PriceToken priceToken = widget
+                                        .arguments.store.state.priceTokens
+                                        .firstWhere((priceToken) =>
+                                            priceToken.id ==
+                                            selectedAccount.tokenId);
                                     Navigator.pushNamed(
                                         widget.arguments.parentContext,
                                         "/transaction_amount",
@@ -429,6 +441,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                           TransactionLevel.LEVEL1,
                                           TransactionType.DEPOSIT,
                                           account: selectedAccount,
+                                          token: token,
+                                          priceToken: priceToken,
                                           allowChangeLevel: true,
                                         )).then((value) {
                                       setState(() {});
@@ -458,6 +472,16 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                                 widget.arguments.store));
                                   }
                                   if (selectedAccount != null) {
+                                    Token token = widget
+                                        .arguments.store.state.tokens
+                                        .firstWhere((token) =>
+                                            token.id ==
+                                            selectedAccount.tokenId);
+                                    PriceToken priceToken = widget
+                                        .arguments.store.state.priceTokens
+                                        .firstWhere((priceToken) =>
+                                            priceToken.id ==
+                                            selectedAccount.tokenId);
                                     Navigator.pushNamed(
                                         widget.arguments.parentContext,
                                         "/transaction_amount",
@@ -466,6 +490,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                           TransactionLevel.LEVEL2,
                                           TransactionType.EXIT,
                                           account: selectedAccount,
+                                          token: token,
+                                          priceToken: priceToken,
                                           allowChangeLevel: true,
                                         )).then((value) {
                                       setState(() {});
@@ -482,6 +508,18 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               TransactionType.DEPOSIT,
                                               widget.arguments.store));
                                   if (selectedAccount != null) {
+                                    Token token = widget
+                                        .arguments.store.state.tokens
+                                        .firstWhere((token) =>
+                                            token.id ==
+                                            (selectedAccount as Account)
+                                                .tokenId);
+                                    PriceToken priceToken = widget
+                                        .arguments.store.state.priceTokens
+                                        .firstWhere((priceToken) =>
+                                            priceToken.id ==
+                                            (selectedAccount as Account)
+                                                .tokenId);
                                     Navigator.pushNamed(
                                         widget.arguments.parentContext,
                                         "/transaction_amount",
@@ -490,6 +528,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                           TransactionLevel.LEVEL1,
                                           TransactionType.DEPOSIT,
                                           account: selectedAccount,
+                                          token: token,
+                                          priceToken: priceToken,
                                           allowChangeLevel: true,
                                         )).then((value) {
                                       setState(() {});

@@ -427,11 +427,11 @@ class WalletHandler {
     if (state.priceTokens != null &&
         state.priceTokens.length > 0 &&
         state.priceTokens
-                .firstWhere((priceToken) => priceToken.itemId == tokenId) !=
+                .firstWhere((priceToken) => priceToken.id == tokenId) !=
             null &&
         needRefresh == false) {
       priceToken = state.priceTokens
-          .firstWhere((priceToken) => priceToken.itemId == tokenId);
+          .firstWhere((priceToken) => priceToken.id == tokenId);
     } else {
       priceToken = await _priceUpdaterService.getTokenPrice(tokenId);
     }

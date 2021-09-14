@@ -56,7 +56,6 @@ class WalletDetailsPage extends StatefulWidget {
 class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<Account> _accounts;
   List<Token> _tokens;
-  List<PriceToken> _priceTokens;
   List<Exit> _exits = [];
   List<Exit> _filteredExits = [];
   List<bool> _allowedInstantWithdraws = [];
@@ -417,128 +416,134 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       // data loaded:
       _accounts = snapshot.data;
     }
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          _accounts != null && _accounts.length > 0
-              ? SizedBox(width: 20.0)
-              : Container(),
-          _accounts != null && _accounts.length > 0
-              ? Expanded(
-                  child: FlatButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      onPressed: () async {
-                        List<Account> accounts = _accounts
-                            .takeWhile(
-                                (account) => double.parse(account.balance) > 0)
-                            .toList();
-                        Account account;
-                        if (accounts.length == 1) {
-                          account = accounts[0];
-                        }
-                        var results = await Navigator.pushNamed(
-                            widget.arguments.parentContext,
-                            "/transaction_amount",
-                            arguments: TransactionAmountArguments(
-                              widget.arguments.store,
-                              widget.arguments.store.state.txLevel,
-                              TransactionType.SEND,
-                              account: account,
-                            ));
-                        if (results is PopWithResults) {
-                          PopWithResults popResult = results;
-                          if (popResult.toPage == "/home") {
-                            _onRefresh();
-                          } else {
-                            Navigator.of(context).pop(results);
-                          }
-                        }
-                      },
-                      padding: EdgeInsets.all(10.0),
-                      color: Colors.transparent,
-                      textColor: HermezColors.blackTwo,
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            width: 80,
-                            height: 80,
-                            child: SvgPicture.asset(
-                              "assets/bt_send.svg",
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Text(
-                            'Send',
-                            style: TextStyle(
-                              color: HermezColors.blackTwo,
-                              fontFamily: 'ModernEra',
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      )),
-                )
-              : Container(),
-          SizedBox(width: 20.0),
-          Expanded(
-            child:
-                // takes in an object and color and returns a circle avatar with first letter and required color
-                FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    onPressed: () {
-                      if (widget.arguments.store.state.txLevel ==
-                          TransactionLevel.LEVEL1) {
-                        Navigator.of(widget.arguments.parentContext).pushNamed(
-                          "/qrcode",
-                          arguments: QRCodeArguments(
-                              qrCodeType: QRCodeType.ETHEREUM,
-                              code:
-                                  widget.arguments.store.state.ethereumAddress,
-                              store: widget.arguments.store,
-                              isReceive: true),
-                        );
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <
+        Widget>[
+      _accounts != null && _accounts.length > 0
+          ? SizedBox(width: 20.0)
+          : Container(),
+      _accounts != null && _accounts.length > 0
+          ? Expanded(
+              child: FlatButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  onPressed: () async {
+                    List<Account> accounts = _accounts
+                        .takeWhile(
+                            (account) => double.parse(account.balance) > 0)
+                        .toList();
+                    Account account;
+                    Token token;
+                    PriceToken priceToken;
+                    if (accounts.length == 1) {
+                      account = accounts[0];
+                      token = widget.arguments.store.state.tokens
+                          .firstWhere((token) => token.id == account.tokenId);
+                      priceToken = widget.arguments.store.state.priceTokens
+                          .firstWhere(
+                              (priceToken) => priceToken.id == account.tokenId);
+                    }
+                    var results = await Navigator.pushNamed(
+                        widget.arguments.parentContext, "/transaction_amount",
+                        arguments: TransactionAmountArguments(
+                          widget.arguments.store,
+                          widget.arguments.store.state.txLevel,
+                          TransactionType.SEND,
+                          account: account,
+                          token: token,
+                          priceToken: priceToken,
+                        ));
+                    if (results is PopWithResults) {
+                      PopWithResults popResult = results;
+                      if (popResult.toPage == "/home") {
+                        _onRefresh();
                       } else {
-                        Navigator.of(widget.arguments.parentContext).pushNamed(
-                          "/qrcode",
-                          arguments: QRCodeArguments(
-                              qrCodeType: QRCodeType.HERMEZ,
-                              code: getHermezAddress(
-                                  widget.arguments.store.state.ethereumAddress),
-                              store: widget.arguments.store,
-                              isReceive: true),
-                        );
+                        Navigator.of(context).pop(results);
                       }
-                    },
-                    padding: EdgeInsets.all(10.0),
-                    color: Colors.transparent,
-                    textColor: HermezColors.blackTwo,
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          width: 80,
-                          height: 80,
-                          child: SvgPicture.asset(
-                            "assets/bt_receive.svg",
-                            fit: BoxFit.cover,
-                          ),
+                    }
+                  },
+                  padding: EdgeInsets.all(10.0),
+                  color: Colors.transparent,
+                  textColor: HermezColors.blackTwo,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        width: 80,
+                        height: 80,
+                        child: SvgPicture.asset(
+                          "assets/bt_send.svg",
+                          fit: BoxFit.cover,
                         ),
-                        Text(
-                          'Receive',
-                          style: TextStyle(
-                            color: HermezColors.blackTwo,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w700,
-                          ),
+                      ),
+                      Text(
+                        'Send',
+                        style: TextStyle(
+                          color: HermezColors.blackTwo,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w700,
                         ),
-                      ],
-                    )),
-          ),
-          SizedBox(width: 20.0),
-        ]);
+                      ),
+                    ],
+                  )),
+            )
+          : Container(),
+      SizedBox(width: 20.0),
+      Expanded(
+        child:
+            // takes in an object and color and returns a circle avatar with first letter and required color
+            FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                onPressed: () {
+                  if (widget.arguments.store.state.txLevel ==
+                      TransactionLevel.LEVEL1) {
+                    Navigator.of(widget.arguments.parentContext).pushNamed(
+                      "/qrcode",
+                      arguments: QRCodeArguments(
+                          qrCodeType: QRCodeType.ETHEREUM,
+                          code: widget.arguments.store.state.ethereumAddress,
+                          store: widget.arguments.store,
+                          isReceive: true),
+                    );
+                  } else {
+                    Navigator.of(widget.arguments.parentContext).pushNamed(
+                      "/qrcode",
+                      arguments: QRCodeArguments(
+                          qrCodeType: QRCodeType.HERMEZ,
+                          code: getHermezAddress(
+                              widget.arguments.store.state.ethereumAddress),
+                          store: widget.arguments.store,
+                          isReceive: true),
+                    );
+                  }
+                },
+                padding: EdgeInsets.all(10.0),
+                color: Colors.transparent,
+                textColor: HermezColors.blackTwo,
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      width: 80,
+                      height: 80,
+                      child: SvgPicture.asset(
+                        "assets/bt_receive.svg",
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Text(
+                      'Receive',
+                      style: TextStyle(
+                        color: HermezColors.blackTwo,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                )),
+      ),
+      SizedBox(width: 20.0),
+    ]);
   }
 
   Widget handleAccountsList(AsyncSnapshot snapshot) {
@@ -768,7 +773,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     .split('.')
                     .last;
                 final Token token = _tokens[index];
-                final PriceToken priceToken = _priceTokens[index];
+                final PriceToken priceToken = widget
+                    .arguments.store.state.priceTokens
+                    .firstWhere((priceToken) => priceToken.id == token.id);
                 return AccountRow(
                     null,
                     token,
@@ -835,9 +842,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
               final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
-              final PriceToken priceToken =
-                  widget.arguments.store.state.priceTokens.firstWhere(
-                      (priceToken) => priceToken.itemId == exit.tokenId);
+              final PriceToken priceToken = widget
+                  .arguments.store.state.priceTokens
+                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);
 
               return WithdrawalRow(
                   exit,
@@ -868,9 +875,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
               final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
-              final PriceToken priceToken =
-                  widget.arguments.store.state.priceTokens.firstWhere(
-                      (priceToken) => priceToken.itemId == exit.tokenId);
+              final PriceToken priceToken = widget
+                  .arguments.store.state.priceTokens
+                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);
 
               return WithdrawalRow(
                 exit,
@@ -996,9 +1003,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
               final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
-              final PriceToken priceToken =
-                  widget.arguments.store.state.priceTokens.firstWhere(
-                      (priceToken) => priceToken.itemId == exit.tokenId);
+              final PriceToken priceToken = widget
+                  .arguments.store.state.priceTokens
+                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);
 
               return WithdrawalRow(
                 exit,
@@ -1102,8 +1109,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   _filteredExits.length -
                   _pendingWithdraws.length;
               final Account account = _accounts[index];
-              final Token token = _tokens[index];
-              final PriceToken priceToken = _priceTokens[index];
+              final Token token = widget.arguments.store.state.tokens
+                  .firstWhere((token) => token.id == account.tokenId);
+              final PriceToken priceToken = widget
+                  .arguments.store.state.priceTokens
+                  .firstWhere((priceToken) => priceToken.id == account.tokenId);
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency
@@ -1123,7 +1133,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
               return AccountRow(
                   account,
-                  null,
+                  token,
                   token.name,
                   token.symbol,
                   currency != "USD"

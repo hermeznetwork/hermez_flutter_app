@@ -550,7 +550,7 @@ class _QRCodePageState extends State<QRCodePage> {
                       .last;
                     final PriceToken priceToken = _priceTokens[index];
                     final Token token = widget.arguments.store.state.tokens
-                        .firstWhere((Token token) => token.id == priceToken.itemId);
+                        .firstWhere((Token token) => token.id == priceToken.id);
                     return AccountRow(
                         null,
                         token,
