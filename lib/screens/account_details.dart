@@ -9,6 +9,7 @@ import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
@@ -37,11 +38,11 @@ import '../context/wallet/wallet_handler.dart';
 class AccountDetailsArguments {
   final WalletHandler store;
   Account account;
-  PriceToken priceToken;
   Token token;
+  PriceToken priceToken;
   BuildContext parentContext;
 
-  AccountDetailsArguments(this.store, this.account, this.priceToken, this.token,
+  AccountDetailsArguments(this.store, this.account, this.token, this.priceToken,
       this.parentContext);
 }
 

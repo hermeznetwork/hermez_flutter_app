@@ -16,6 +16,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/qrcode.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -55,6 +56,7 @@ class WalletDetailsPage extends StatefulWidget {
 class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<Account> _accounts;
   List<Token> _tokens;
+  List<PriceToken> _priceTokens;
   List<Exit> _exits = [];
   List<Exit> _filteredExits = [];
   List<bool> _allowedInstantWithdraws = [];
@@ -95,12 +97,12 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       _pendingDeposits = fetchPendingDeposits();
       _pendingDeposits.forEach((pendingDeposit) {
         Account existingAccount = accounts.firstWhere(
-            (account) => (account.token.id == pendingDeposit['token']['id']),
+            (account) => (account.tokenId == pendingDeposit['token']['id']),
             orElse: () => null);
         if (existingAccount == null) {
           Account pendingAccount = Account(
               balance: pendingDeposit['value'],
-              token: Token.fromJson(pendingDeposit['token']));
+              tokenId: pendingDeposit['token']['id']);
           accounts.add(pendingAccount);
         }
       });
@@ -124,7 +126,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 (exit.accountIndex + exit.batchNum.toString()) ||
             (pendingWithdraw['instant'] == false &&
                 exit.delayedWithdrawRequest != null &&
-                Token.fromJson(pendingWithdraw['token']).id == exit.token.id)) {
+                Token.fromJson(pendingWithdraw['token']).id == exit.tokenId)) {
           return true;
         }
       }
@@ -133,8 +135,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     _allowedInstantWithdraws = [];
     for (int i = 0; i < _filteredExits.length; i++) {
       Exit exit = _filteredExits[i];
+      final Token token = widget.arguments.store.state.tokens
+          .firstWhere((token) => token.id == exit.tokenId);
       bool isAllowed = await widget.arguments.store
-          .isInstantWithdrawalAllowed(double.parse(exit.balance), exit.token);
+          .isInstantWithdrawalAllowed(double.parse(exit.balance), token);
       _allowedInstantWithdraws.add(isAllowed);
     }
   }
@@ -764,14 +768,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     .split('.')
                     .last;
                 final Token token = _tokens[index];
+                final PriceToken priceToken = _priceTokens[index];
                 return AccountRow(
                     null,
                     token,
                     token.name,
                     token.symbol,
                     currency != "USD"
-                        ? token.USD * widget.arguments.store.state.exchangeRatio
-                        : token.USD,
+                        ? priceToken.USD *
+                            widget.arguments.store.state.exchangeRatio
+                        : priceToken.USD,
                     currency,
                     0,
                     false,
@@ -827,8 +833,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .split('.')
                   .last;
 
+              final Token token = widget.arguments.store.state.tokens
+                  .firstWhere((token) => token.id == exit.tokenId);
+              final PriceToken priceToken =
+                  widget.arguments.store.state.priceTokens.firstWhere(
+                      (priceToken) => priceToken.itemId == exit.tokenId);
+
               return WithdrawalRow(
                   exit,
+                  token,
+                  priceToken,
                   1,
                   currency,
                   widget.arguments.store.state.exchangeRatio,
@@ -852,8 +866,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .split('.')
                   .last;
 
+              final Token token = widget.arguments.store.state.tokens
+                  .firstWhere((token) => token.id == exit.tokenId);
+              final PriceToken priceToken =
+                  widget.arguments.store.state.priceTokens.firstWhere(
+                      (priceToken) => priceToken.itemId == exit.tokenId);
+
               return WithdrawalRow(
                 exit,
+                token,
+                priceToken,
                 2,
                 currency,
                 widget.arguments.store.state.exchangeRatio,
@@ -892,10 +914,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   transactionType: TransactionType.WITHDRAW,
                                   transactionLevel: TransactionLevel.LEVEL1,
                                   status: TransactionStatus.DRAFT,
-                                  token: exit.token,
+                                  token: token,
+                                  priceToken: priceToken,
                                   exit: exit,
                                   amount: amountWithdraw.toDouble() /
-                                      pow(10, exit.token.decimals),
+                                      pow(10, token.decimals),
                                   addressFrom: addressFrom,
                                   addressTo: addressTo,
                                   gasLimit: gasLimit.toInt(),
@@ -929,7 +952,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   _pendingExits.length -
                   _pendingForceExits.length;
               final pendingWithdraw = _pendingWithdraws[index];
-              final Token token = Token.fromJson(pendingWithdraw['token']);
+              final int tokenId = pendingWithdraw['token']['id'];
 
               final Exit exit = _exits.firstWhere(
                   (exit) => exit.itemId == pendingWithdraw['itemId'],
@@ -940,7 +963,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           pendingWithdraw['instant'] == false
                               ? pendingWithdraw['blockNum']
                               : null,
-                      token: token,
+                      tokenId: tokenId,
                       balance: pendingWithdraw['amount']
                           .toString()
                           .replaceAll('.0', '')));
@@ -971,8 +994,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 step = 2;
               }
 
+              final Token token = widget.arguments.store.state.tokens
+                  .firstWhere((token) => token.id == exit.tokenId);
+              final PriceToken priceToken =
+                  widget.arguments.store.state.priceTokens.firstWhere(
+                      (priceToken) => priceToken.itemId == exit.tokenId);
+
               return WithdrawalRow(
                 exit,
+                token,
+                priceToken,
                 step,
                 currency,
                 widget.arguments.store.state.exchangeRatio,
@@ -1020,7 +1051,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           exit.merkleProof.siblings.forEach((element) {
                             gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
                           });
-                          if (exit.token.id != 0) {
+                          if (exit.tokenId != 0) {
                             gasLimit +=
                                 BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
                           }
@@ -1034,10 +1065,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                     transactionType: TransactionType.WITHDRAW,
                                     transactionLevel: TransactionLevel.LEVEL1,
                                     status: TransactionStatus.DRAFT,
-                                    token: exit.token,
+                                    token: token,
+                                    priceToken: priceToken,
                                     exit: exit,
                                     amount: amountWithdraw.toDouble() /
-                                        pow(10, exit.token.decimals),
+                                        pow(10, token.decimals),
                                     addressFrom: addressFrom,
                                     addressTo: addressTo,
                                     gasLimit: gasLimit.toInt(),
@@ -1070,6 +1102,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   _filteredExits.length -
                   _pendingWithdraws.length;
               final Account account = _accounts[index];
+              final Token token = _tokens[index];
+              final PriceToken priceToken = _priceTokens[index];
 
               final String currency = widget
                   .arguments.store.state.defaultCurrency
@@ -1082,7 +1116,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 isPendingDeposit = true;
               }
               _pendingDeposits.forEach((pendingDeposit) {
-                if (account.token.id == (pendingDeposit['token'])['id']) {
+                if (account.tokenId == (pendingDeposit['token'])['id']) {
                   isPendingDeposit = true;
                 }
               });
@@ -1090,19 +1124,19 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               return AccountRow(
                   account,
                   null,
-                  account.token.name,
-                  account.token.symbol,
+                  token.name,
+                  token.symbol,
                   currency != "USD"
-                      ? account.token.USD *
+                      ? priceToken.USD *
                           widget.arguments.store.state.exchangeRatio
-                      : account.token.USD,
+                      : priceToken.USD,
                   currency,
                   BalanceUtils.calculatePendingBalance(
                           widget.arguments.transactionLevel,
                           account,
-                          account.token.symbol,
+                          token.symbol,
                           widget.arguments.store) /
-                      pow(10, account.token.decimals),
+                      pow(10, token.decimals),
                   false,
                   true,
                   isPendingDeposit,
@@ -1136,8 +1170,12 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 } else {
                   var needRefresh = await Navigator.of(context).pushNamed(
                       "account_details",
-                      arguments: AccountDetailsArguments(widget.arguments.store,
-                          account, widget.arguments.parentContext));
+                      arguments: AccountDetailsArguments(
+                          widget.arguments.store,
+                          account,
+                          token,
+                          priceToken,
+                          widget.arguments.parentContext));
                   if (needRefresh != null && needRefresh == true) {
                     _onRefresh();
                   } else {
@@ -1185,6 +1223,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     result = BalanceUtils.balanceOfAccounts(
         txLevel,
         _accounts,
+        widget.arguments.store,
         currency,
         widget.arguments.store.state.exchangeRatio,
         [], // pendingWithdraws

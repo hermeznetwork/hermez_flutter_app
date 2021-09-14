@@ -332,9 +332,9 @@ class HermezService implements IHermezService {
         completeDelayedWithdrawal == false) {
       try {
         bool isInstant = instantWithdrawal == null ? true : instantWithdrawal;
-
+        Token token = await getTokenById(exit.tokenId);
         final txHash = await tx
-            .withdraw(amount, exit.accountIndex, exit.token, babyJubJub,
+            .withdraw(amount, exit.accountIndex, token, babyJubJub,
                 exit.batchNum, exit.merkleProof.siblings, privateKey,
                 isInstant: isInstant, gasLimit: gasLimit, gasPrice: gasPrice)
             .then((txHash) async {
@@ -349,7 +349,7 @@ class HermezService implements IHermezService {
                     (pendingWithdraw) =>
                         pendingWithdraw['instant'] == false &&
                         Token.fromJson(pendingWithdraw['token']).id ==
-                            exit.token.id,
+                            exit.tokenId,
                     orElse: () => null);
                 if (pendingDelayedWithdraw != null) {
                   amount += pendingDelayedWithdraw['amount'];
@@ -369,7 +369,7 @@ class HermezService implements IHermezService {
               'instant': isInstant,
               'date': DateTime.now().millisecondsSinceEpoch,
               'amount': amount,
-              'token': exit.token.toJson(),
+              'token': token.toJson(),
               'status': 'pending'
             });
           }
@@ -382,9 +382,9 @@ class HermezService implements IHermezService {
       }
     } else {
       try {
-        final txHash = await tx
-            .delayedWithdraw(exit.token, privateKey)
-            .then((txHash) async {
+        Token token = await getTokenById(exit.tokenId);
+        final txHash =
+            await tx.delayedWithdraw(token, privateKey).then((txHash) async {
           if (txHash != null) {
             String status = 'completed';
             final withdrawalId = exit.accountIndex + exit.batchNum.toString();
@@ -408,11 +408,12 @@ class HermezService implements IHermezService {
 
   Future<BigInt> forceExitGasLimit(
       double amount, String hezEthereumAddress, Account account) async {
+    Token token = await getTokenById(account.tokenId);
     return await tx.forceExitGasLimit(
         HermezCompressedAmount.compressAmount(amount),
         hezEthereumAddress,
         account.accountIndex,
-        account.token);
+        token);
   }
 
   @override
@@ -420,9 +421,10 @@ class HermezService implements IHermezService {
       Account account, String privateKey,
       {BigInt gasLimit, int gasPrice = 0}) async {
     try {
+      Token token = await getTokenById(account.tokenId);
       final txHash = await tx
           .forceExit(HermezCompressedAmount.compressAmount(amount.toDouble()),
-              account.accountIndex, account.token, privateKey,
+              account.accountIndex, token, privateKey,
               gasLimit: gasLimit, gasPrice: gasPrice)
           .then((txHash) async {
         if (txHash != null) {
@@ -431,7 +433,7 @@ class HermezService implements IHermezService {
             'accountIndex': account.accountIndex,
             'fromHezEthereumAddress': hezEthereumAddress,
             'toHezEthereumAddress': hezEthereumAddress,
-            'token': account.token.toJson(),
+            'token': token.toJson(),
             'amount': amount,
             'state': 'pend',
             'timestamp': DateTime.now().millisecondsSinceEpoch,

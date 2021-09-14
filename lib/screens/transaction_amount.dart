@@ -14,6 +14,7 @@ import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/qrcode_scanner.dart';
 import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
@@ -44,6 +45,7 @@ class TransactionAmountArguments {
   TransactionType transactionType;
   final Account account;
   Token token;
+  final PriceToken priceToken;
   final double amount;
   final String addressTo;
   final bool allowChangeLevel;
@@ -52,6 +54,7 @@ class TransactionAmountArguments {
   TransactionAmountArguments(this.store, this.txLevel, this.transactionType,
       {this.account,
       this.token,
+      this.priceToken,
       this.amount,
       this.addressTo,
       this.allowChangeLevel});
@@ -69,14 +72,17 @@ class TransactionAmountPage extends StatefulWidget {
 class _TransactionAmountPageState extends State<TransactionAmountPage>
 /*with AfterLayoutMixin<TransactionAmountPage>*/ {
   Account selectedAccount;
+  Token selectedToken;
+  PriceToken selectedPriceToken;
   bool needRefresh = true;
   bool amountIsValid = true;
   bool addressIsValid = true;
   bool accountIsCreated = true;
   bool showEstimatedFees = false;
   bool defaultCurrencySelected;
-  Token ethereumToken;
   Account ethereumAccount;
+  Token ethereumToken;
+  PriceToken ethereumPriceToken;
   bool enoughGas;
   LinkedHashMap<String, BigInt> depositGasLimit;
   BigInt gasLimit;
@@ -106,6 +112,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     selectedFeeSpeed = widget.arguments.store.state.defaultFee;
     selectedWithdrawFeeSpeed = widget.arguments.store.state.defaultFee;
     selectedAccount = widget.arguments.account;
+    selectedToken = widget.arguments.token;
+    selectedPriceToken = widget.arguments.priceToken;
   }
 
   @override
@@ -236,11 +244,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                               : double.parse((double.parse(
                                                           amountController
                                                               .value.text) /
-                                                      (selectedAccount != null
-                                                          ? selectedAccount
-                                                              .token.USD
+                                                      (selectedPriceToken !=
+                                                              null
+                                                          ? selectedPriceToken
+                                                              .USD
                                                           : widget.arguments
-                                                              .token.USD) *
+                                                              .priceToken.USD) *
                                                       (currency != "USD"
                                                           ? widget
                                                               .arguments
@@ -249,15 +258,15 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                               .exchangeRatio
                                                           : 1))
                                                   .toStringAsFixed(6)),
-                                          selectedAccount != null
-                                              ? selectedAccount.token
+                                          selectedToken != null
+                                              ? selectedToken
                                               : widget.arguments.token,
                                           estimatedFee.toDouble(),
                                           widget.arguments.txLevel ==
                                                   TransactionLevel.LEVEL1
                                               ? ethereumToken
-                                              : selectedAccount != null
-                                                  ? selectedAccount.token
+                                              : selectedToken != null
+                                                  ? selectedToken
                                                   : widget.arguments.token,
                                           addressController.value.text,
                                           gasLimit.toInt(),
@@ -445,10 +454,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                             .arguments.store.state.l2Accounts
                                             .firstWhere(
                                                 (account) =>
-                                                    account.token.symbol ==
-                                                    selectedAccount
-                                                        .token.symbol,
+                                                    account.tokenId ==
+                                                    selectedAccount.tokenId,
                                                 orElse: () => null);
+                                        //selectedToken = await widget.arguments.store.getTokenById(selectedAccount.tokenId);
                                       }
                                       widget.arguments.transactionType =
                                           TransactionType.EXIT;
@@ -460,9 +469,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                             .arguments.store.state.l1Accounts
                                             .firstWhere(
                                                 (account) =>
-                                                    account.token.symbol ==
-                                                    selectedAccount
-                                                        .token.symbol,
+                                                    account.tokenId ==
+                                                    selectedAccount.tokenId,
                                                 orElse: () => null);
                                       }
                                       widget.arguments.transactionType =
@@ -482,28 +490,28 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                       ? AccountRow(
                           selectedAccount,
                           widget.arguments.token,
-                          selectedAccount != null
-                              ? selectedAccount.token.name
+                          selectedToken != null
+                              ? selectedToken.name
                               : widget.arguments.token.name,
-                          selectedAccount != null
-                              ? selectedAccount.token.symbol
+                          selectedToken != null
+                              ? selectedToken.symbol
                               : widget.arguments.token.symbol,
                           currency != "USD"
-                              ? (selectedAccount != null
-                                      ? selectedAccount.token.USD
-                                      : widget.arguments.token.USD) *
+                              ? (selectedPriceToken != null
+                                      ? selectedPriceToken.USD
+                                      : widget.arguments.priceToken.USD) *
                                   widget.arguments.store.state.exchangeRatio
-                              : selectedAccount != null
-                                  ? selectedAccount.token.USD
-                                  : widget.arguments.token.USD,
+                              : selectedPriceToken != null
+                                  ? selectedPriceToken.USD
+                                  : widget.arguments.priceToken.USD,
                           currency,
                           selectedAccount != null
                               ? BalanceUtils.calculatePendingBalance(
                                       widget.arguments.txLevel,
                                       selectedAccount,
-                                      selectedAccount.token.symbol,
+                                      selectedToken.symbol,
                                       widget.arguments.store) /
-                                  pow(10, selectedAccount.token.decimals)
+                                  pow(10, selectedToken.decimals)
                               : 0,
                           true,
                           defaultCurrencySelected,
@@ -616,7 +624,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   Widget _buildNoGasRow() {
     final String currency =
         widget.arguments.store.state.defaultCurrency.toString().split('.').last;
-    double currencyExchange = (ethereumToken.USD *
+    double currencyExchange = (ethereumPriceToken.USD *
         (currency != "USD" ? widget.arguments.store.state.exchangeRatio : 1));
     double exitFee = 0;
     double withdrawFee = 0;
@@ -712,8 +720,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                             selectedAccount == null &&
                                 widget.arguments.token == null
                         ? currency
-                        : selectedAccount != null
-                            ? selectedAccount.token.symbol
+                        : selectedToken != null
+                            ? selectedToken.symbol
                             : widget.arguments.token.symbol,
                     style: TextStyle(
                       color: HermezColors.black,
@@ -852,8 +860,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   ),
                                   label: Text(
                                     defaultCurrencySelected
-                                        ? selectedAccount != null
-                                            ? selectedAccount.token.symbol
+                                        ? selectedToken != null
+                                            ? selectedToken.symbol
                                             : widget.arguments.token.symbol
                                         : currency,
                                     textAlign: TextAlign.center,
@@ -910,7 +918,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                       ),
                     ),
                     Text(
-                      (enoughGas || selectedAccount.token.id == 0)
+                      (enoughGas || selectedAccount.tokenId == 0)
                           ? 'You don’t have enough funds.'
                           : 'Insufficient ETH to cover gas fee.',
                       style: TextStyle(
@@ -1119,19 +1127,22 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           String speed = "";
           if (i == 0) {
             Token token;
+            PriceToken priceToken;
             if (widget.arguments.transactionType == TransactionType.EXIT) {
               title = "Hermez fee";
-              token = selectedAccount.token;
+              token = selectedToken;
+              priceToken = selectedPriceToken;
             } else if (widget.arguments.transactionType ==
                 TransactionType.FORCEEXIT) {
               title = "Ethereum fee";
               token = ethereumToken;
+              priceToken = ethereumPriceToken;
             }
             BigInt estimatedFee = getEstimatedFee();
             currencyFee = EthAmountFormatter.formatAmount(
                 estimatedFee.toDouble() /
                     pow(10, token.decimals) *
-                    (token.USD *
+                    (priceToken.USD *
                         (currency != "USD"
                             ? widget.arguments.store.state.exchangeRatio
                             : 1)),
@@ -1157,7 +1168,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             currencyFee = EthAmountFormatter.formatAmount(
                 estimatedFee.toDouble() /
                     pow(10, ethereumToken.decimals) *
-                    (ethereumToken.USD *
+                    (ethereumPriceToken.USD *
                         (currency != "USD"
                             ? widget.arguments.store.state.exchangeRatio
                             : 1)),
@@ -1354,7 +1365,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   transactionLevel: widget.arguments.txLevel,
                   status: TransactionStatus.DRAFT,
                   account: selectedAccount,
-                  token: selectedAccount.token,
+                  token: selectedToken,
+                  priceToken: selectedPriceToken,
                   amount: amount,
                   addressFrom: selectedAccount.hezEthereumAddress,
                   addressTo: addressTo,
@@ -1404,7 +1416,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       // fee l1 (withdraw)
       withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-      if (selectedAccount != null && selectedAccount.token.id != 0) {
+      if (selectedAccount != null && selectedAccount.tokenId != 0) {
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
       }
 
@@ -1414,12 +1426,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           (gasLimit * gasPrice) + (withdrawGasLimit * withdrawGasPrice));
 
       double amount = 0;
-      if (selectedAccount != null) {
+      if (selectedPriceToken != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  selectedAccount.token.USD;
+                  selectedPriceToken.USD;
         }
       }
       amountIsValid =
@@ -1430,10 +1442,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       // fee withdraw l1 --> 230k + Transfer cost + (31k * siblings.length)
       gasPriceResponse = await widget.arguments.store.getGasPrice();
       ethereumToken = await getEthereumToken();
+      ethereumPriceToken =
+          await widget.arguments.store.getPriceTokenById(ethereumToken.id);
       ethereumAccount = await getEthereumAccount();
       withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
       withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-      if (selectedAccount != null && selectedAccount.token.id != 0) {
+      if (selectedAccount != null && selectedAccount.tokenId != 0) {
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
       }
 
@@ -1443,19 +1457,19 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         StateResponse state = await widget.arguments.store.getState();
         RecommendedFee fees = state.recommendedFee;
         gasLimit = BigInt.from(fees.existingAccount /
-            selectedAccount.token.USD *
-            pow(10, selectedAccount.token.decimals));
+            selectedPriceToken.USD *
+            pow(10, selectedToken.decimals));
       }
       gasPrice = getGasPrice(selectedWithdrawFeeSpeed);
       enoughGas = await isEnoughGas(withdrawGasLimit * gasPrice);
 
       double amount = 0;
-      if (selectedAccount != null) {
+      if (selectedPriceToken != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  selectedAccount.token.USD;
+                  selectedPriceToken.USD;
         }
       }
       amountIsValid =
@@ -1465,36 +1479,34 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         // calculate fee L1
         gasPriceResponse = await widget.arguments.store.getGasPrice();
         ethereumToken = await getEthereumToken();
+        ethereumPriceToken =
+            await widget.arguments.store.getPriceTokenById(ethereumToken.id);
         ethereumAccount = await getEthereumAccount();
         double amount = 0;
-        if (selectedAccount != null) {
+        if (selectedPriceToken != null) {
           if (amountController.value.text.isNotEmpty) {
             amount = !defaultCurrencySelected
                 ? double.parse(amountController.value.text)
                 : double.parse(amountController.value.text) /
-                    selectedAccount.token.USD;
+                    selectedPriceToken.USD;
           }
         }
         String from = widget.arguments.store.state.ethereumAddress;
         String to = getCurrentEnvironment().contracts['Hermez'];
         if (isEthereumAddress(addressController.value.text)) {
           to = addressController.value.text;
-        } else if (selectedAccount != null && selectedAccount.token.id != 0) {
-          to = selectedAccount.token.ethereumAddress;
+        } else if (selectedToken != null && selectedToken.id != 0) {
+          to = selectedToken.ethereumAddress;
         }
         BigInt value = BigInt.one;
         if (amount > 0) {
           value = BigInt.from(amount *
-              pow(
-                  10,
-                  selectedAccount != null
-                      ? selectedAccount.token.decimals
-                      : 18));
+              pow(10, selectedToken != null ? selectedToken.decimals : 18));
         }
 
-        gasLimit = selectedAccount != null
+        gasLimit = selectedToken != null
             ? await widget.arguments.store
-                .getGasLimit(from, to, value, selectedAccount.token)
+                .getGasLimit(from, to, value, selectedToken)
             : BigInt.zero;
         gasPrice = getGasPrice(selectedFeeSpeed);
         enoughGas = await isEnoughGas(gasLimit * gasPrice);
@@ -1507,18 +1519,18 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           StateResponse state = await widget.arguments.store.getState();
           RecommendedFee fees = state.recommendedFee;
           gasLimit = BigInt.from(fees.existingAccount /
-              selectedAccount.token.USD *
-              pow(10, selectedAccount.token.decimals));
+              selectedPriceToken.USD *
+              pow(10, selectedToken.decimals));
         }
         enoughGas = await isEnoughGas(gasLimit);
 
         double amount = 0;
-        if (selectedAccount != null) {
+        if (selectedPriceToken != null) {
           if (amountController.value.text.isNotEmpty) {
             amount = !defaultCurrencySelected
                 ? double.parse(amountController.value.text)
                 : double.parse(amountController.value.text) /
-                    selectedAccount.token.USD;
+                    selectedPriceToken.USD;
           }
         }
         amountIsValid =
@@ -1528,16 +1540,17 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         widget.arguments.transactionType == TransactionType.WITHDRAW) {
       // calculate fee L1
       gasPriceResponse = await widget.arguments.store.getGasPrice();
-      ethereumToken = await getEthereumToken();
       ethereumAccount = await getEthereumAccount();
+      ethereumToken = await getEthereumToken();
+      ethereumPriceToken = await getEthereumPriceToken();
 
       if (widget.arguments.transactionType == TransactionType.DEPOSIT) {
         String addressTo = getCurrentEnvironment().contracts['Hermez'];
         gasLimit = BigInt.zero;
-        if (selectedAccount != null) {
+        if (selectedToken != null) {
           double amountToEstimate = BigInt.one.toDouble();
           depositGasLimit = await widget.arguments.store
-              .depositGasLimit(amountToEstimate, selectedAccount.token);
+              .depositGasLimit(amountToEstimate, selectedToken);
           depositGasLimit.forEach((String key, BigInt value) {
             gasLimit += value;
           });
@@ -1548,17 +1561,19 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         //(CALCULATE FOR MOVE L1 - L2 Swaps)
         // fee withdraw l1 --> 230k + Transfer cost + (31k * siblings.length)
         gasPriceResponse = await widget.arguments.store.getGasPrice();
-        ethereumToken = await getEthereumToken();
         ethereumAccount = await getEthereumAccount();
+        ethereumToken = await getEthereumToken();
+        ethereumPriceToken = await getEthereumPriceToken();
+
         withdrawGasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-        if (selectedAccount != null && selectedAccount.token.id != 0) {
+        if (selectedAccount != null && selectedAccount.tokenId != 0) {
           withdrawGasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
         }
       } else if (widget.arguments.transactionType == TransactionType.WITHDRAW) {
         gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
         gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING * 4);
-        if (selectedAccount != null && selectedAccount.token.id != 0) {
+        if (selectedAccount != null && selectedAccount.tokenId != 0) {
           gasLimit += BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
         }
         gasPrice = getGasPrice(selectedFeeSpeed);
@@ -1566,12 +1581,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       }
 
       double amount = 0;
-      if (selectedAccount != null) {
+      if (selectedPriceToken != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  selectedAccount.token.USD;
+                  selectedPriceToken.USD;
         }
       }
       amountIsValid =
@@ -1665,10 +1680,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
     if (selectedAccount != null) {
       if (widget.arguments.transactionType == TransactionType.DEPOSIT &&
-              selectedAccount.token.id == 0 ||
+              selectedAccount.tokenId == 0 ||
           (widget.arguments.transactionType != TransactionType.DEPOSIT &&
               widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-              selectedAccount.token.id == 0) ||
+              selectedAccount.tokenId == 0) ||
           widget.arguments.transactionType == TransactionType.EXIT ||
           (widget.arguments.transactionType == TransactionType.SEND &&
               widget.arguments.txLevel == TransactionLevel.LEVEL2)) {
@@ -1680,23 +1695,23 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           .split('.')
           .last;
       double currencyValue = 0;
-      if (selectedAccount != null) {
+      if (selectedPriceToken != null) {
         currencyValue = defaultCurrencySelected
-            ? selectedAccount.token.USD *
+            ? selectedPriceToken.USD *
                 (currency != 'USD'
                     ? widget.arguments.store.state.exchangeRatio
                     : 1)
             : 1;
 
         balance = double.parse((double.parse(selectedAccount.balance) /
-                pow(10, selectedAccount.token.decimals) *
+                pow(10, selectedToken.decimals) *
                 currencyValue)
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
 
         amount = double.parse((double.parse(value) +
                 (currencyValue *
                     estimatedFee.toDouble() /
-                    pow(10, selectedAccount.token.decimals)))
+                    pow(10, selectedToken.decimals)))
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
       }
     }
@@ -1708,10 +1723,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     double amount = 0;
     BigInt estimatedFee = BigInt.zero;
     if (widget.arguments.transactionType == TransactionType.DEPOSIT &&
-            selectedAccount.token.id == 0 ||
+            selectedAccount.tokenId == 0 ||
         (widget.arguments.transactionType != TransactionType.DEPOSIT &&
             widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            selectedAccount.token.id == 0) ||
+            selectedAccount.tokenId == 0) ||
         widget.arguments.transactionType == TransactionType.EXIT ||
         (widget.arguments.transactionType == TransactionType.SEND &&
             widget.arguments.txLevel == TransactionLevel.LEVEL2)) {
@@ -1720,23 +1735,23 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
     final String currency =
         widget.arguments.store.state.defaultCurrency.toString().split('.').last;
-    if (selectedAccount != null) {
+    if (selectedPriceToken != null) {
       double currencyValue = defaultCurrencySelected
-          ? selectedAccount.token.USD *
+          ? selectedPriceToken.USD *
               (currency != 'USD'
                   ? widget.arguments.store.state.exchangeRatio
                   : 1)
           : 1;
 
       double balance = double.parse((double.parse(selectedAccount.balance) /
-              pow(10, selectedAccount.token.decimals) *
+              pow(10, selectedToken.decimals) *
               currencyValue)
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
 
       amount = double.parse((balance -
               (currencyValue *
                   estimatedFee.toDouble() /
-                  pow(10, selectedAccount.token.decimals)))
+                  pow(10, selectedToken.decimals)))
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
     }
     if (amount < 0) {
@@ -1760,13 +1775,17 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     }
   }
 
+  Future<Account> getEthereumAccount() async {
+    Account ethereumAccount = await widget.arguments.store.getL1Account(0);
+    return ethereumAccount;
+  }
+
   Future<Token> getEthereumToken() async {
     return await widget.arguments.store.getTokenById(0);
   }
 
-  Future<Account> getEthereumAccount() async {
-    Account ethereumAccount = await widget.arguments.store.getL1Account(0);
-    return ethereumAccount;
+  Future<PriceToken> getEthereumPriceToken() async {
+    return await widget.arguments.store.getPriceTokenById(0);
   }
 
   BigInt getEstimatedFee() {
@@ -1825,7 +1844,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       // fee force exit l1
       double exitFee = estimatedFee.toDouble() /
           pow(10, ethereumToken.decimals) *
-          (ethereumToken.USD *
+          (ethereumPriceToken.USD *
               (currency != "USD"
                   ? widget.arguments.store.state.exchangeRatio
                   : 1));
@@ -1836,7 +1855,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       BigInt withdrawEstimatedFee = withdrawGasLimit * withdrawGasPrice;
       double withdrawFee = withdrawEstimatedFee.toDouble() /
           pow(10, ethereumToken.decimals) *
-          (ethereumToken.USD *
+          (ethereumPriceToken.USD *
               (currency != "USD"
                   ? widget.arguments.store.state.exchangeRatio
                   : 1));
@@ -1849,10 +1868,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       // calculate fee l2 (exit) and l1 (withdraw)
 
       // fee l2 (exit)
-      Token token = selectedAccount.token;
+      Token token = selectedToken;
+      PriceToken priceToken = selectedPriceToken;
       double exitFee = estimatedFee.toDouble() /
           pow(10, token.decimals) *
-          (token.USD *
+          (priceToken.USD *
               (currency != "USD"
                   ? widget.arguments.store.state.exchangeRatio
                   : 1));
@@ -1862,7 +1882,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       BigInt withdrawEstimatedFee = withdrawGasLimit * withdrawGasPrice;
       double withdrawFee = withdrawEstimatedFee.toDouble() /
           pow(10, ethereumToken.decimals) *
-          (ethereumToken.USD *
+          (ethereumPriceToken.USD *
               (currency != "USD"
                   ? widget.arguments.store.state.exchangeRatio
                   : 1));
@@ -1873,16 +1893,19 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       return 'Total estimated fee ' + feeSend;
     } else if (widget.arguments.transactionType == TransactionType.SEND) {
       Token token;
+      PriceToken priceToken;
       if (widget.arguments.txLevel == TransactionLevel.LEVEL1) {
         token = ethereumToken;
+        priceToken = ethereumPriceToken;
       } else {
-        token = selectedAccount.token;
+        token = selectedToken;
+        priceToken = selectedPriceToken;
       }
       String feeSend = EthAmountFormatter.formatAmount(
           estimatedFee.toDouble() /
               pow(10, token.decimals) *
               (defaultCurrencySelected
-                  ? (token.USD *
+                  ? (priceToken.USD *
                       (currency != "USD"
                           ? widget.arguments.store.state.exchangeRatio
                           : 1))
@@ -1896,7 +1919,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           estimatedFee.toDouble() /
               pow(10, ethereumToken.decimals) *
               (defaultCurrencySelected
-                  ? (ethereumToken.USD *
+                  ? (ethereumPriceToken.USD *
                       (currency != "USD"
                           ? widget.arguments.store.state.exchangeRatio
                           : 1))

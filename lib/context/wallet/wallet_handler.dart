@@ -396,10 +396,23 @@ class WalletHandler {
     return supportedTokens;
   }
 
-  Future<List<PriceToken>> getPriceTokens({bool needRefresh = false}) async {
-    List<PriceToken> priceTokens;
+  Future<Token> getTokenById(int tokenId, {bool needRefresh = false}) async {
+    Token supportedToken;
     if (state.tokens != null &&
         state.tokens.length > 0 &&
+        state.tokens.firstWhere((token) => token.id == tokenId) != null &&
+        needRefresh == false) {
+      supportedToken = state.tokens.firstWhere((token) => token.id == tokenId);
+    } else {
+      supportedToken = await _hermezService.getTokenById(tokenId);
+    }
+    return supportedToken;
+  }
+
+  Future<List<PriceToken>> getPriceTokens({bool needRefresh = false}) async {
+    List<PriceToken> priceTokens;
+    if (state.priceTokens != null &&
+        state.priceTokens.length > 0 &&
         needRefresh == false) {
       priceTokens = state.priceTokens;
     } else {
@@ -408,13 +421,20 @@ class WalletHandler {
     return priceTokens;
   }
 
-  Future<Token> getTokenById(int tokenId) async {
-    final supportedToken = await _hermezService.getTokenById(tokenId);
-    return supportedToken;
-  }
-
-  Future<PriceToken> getPriceTokenById(int tokenId) async {
-    final priceToken = await _priceUpdaterService.getTokenPrice(tokenId);
+  Future<PriceToken> getPriceTokenById(int tokenId,
+      {bool needRefresh = false}) async {
+    PriceToken priceToken;
+    if (state.priceTokens != null &&
+        state.priceTokens.length > 0 &&
+        state.priceTokens
+                .firstWhere((priceToken) => priceToken.itemId == tokenId) !=
+            null &&
+        needRefresh == false) {
+      priceToken = state.priceTokens
+          .firstWhere((priceToken) => priceToken.itemId == tokenId);
+    } else {
+      priceToken = await _priceUpdaterService.getTokenPrice(tokenId);
+    }
     return priceToken;
   }
 

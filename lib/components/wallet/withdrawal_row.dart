@@ -14,8 +14,8 @@ import 'package:hermez_sdk/model/token.dart';
 class WithdrawalRow extends StatelessWidget {
   WithdrawalRow(
     this.exit,
-    this.priceToken,
     this.token,
+    this.priceToken,
     this.step,
     this.currency,
     this.exchangeRatio,
@@ -28,8 +28,8 @@ class WithdrawalRow extends StatelessWidget {
   });
 
   final Exit exit;
-  final PriceToken priceToken;
   final Token token;
+  final PriceToken priceToken;
   final int step;
   final String currency;
   final double exchangeRatio;

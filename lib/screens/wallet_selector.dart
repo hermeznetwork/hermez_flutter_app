@@ -738,6 +738,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
     result = BalanceUtils.balanceOfAccounts(
         txLevel,
         _accounts,
+        widget.arguments.store,
         currency,
         widget.arguments.store.state.exchangeRatio,
         pendingWithdraws,

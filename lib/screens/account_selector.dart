@@ -516,10 +516,6 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                 padding: const EdgeInsets.all(16.0),
                 //add some padding to make it look good
                 itemBuilder: (context, i) {
-                  //item builder returns a row for each index i=0,1,2,3,4
-                  // if (i.isOdd) return Divider(); //if index = 1,3,5 ... return a divider to make it visually appealing
-
-                  // final index = i ~/ 2; //get the actual index excluding dividers.
                   final index = i;
                   final String currency = widget
                       .arguments.store.state.defaultCurrency
@@ -529,50 +525,75 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                   if (widget.arguments.transactionType ==
                       TransactionType.RECEIVE) {
                     final Token token = _tokens[index];
-                    final PriceToken priceToken = widget.arguments.store.getPriceToken(token);
-                    return AccountRow(
-                        null,
-                        token,
-                        token.name,
-                        token.symbol,
-                        currency != "USD"
-                            ? priceToken.USD *
-                                widget.arguments.store.state.exchangeRatio
-                            : priceToken.USD,
-                        currency,
-                        0,
-                        false,
-                        true,
-                        false,
-                        true, (Account account, Token token, String tokenId,
-                            String amount) async {
-                      Navigator.maybePop(parentContext, token);
-                    });
+                    return FutureBuilder(
+                        future:
+                            widget.arguments.store.getPriceTokenById(token.id),
+                        builder: (context, snap) {
+                          if (snap.hasData) {
+                            PriceToken priceToken = snap.data;
+                            return AccountRow(
+                                null,
+                                token,
+                                token.name,
+                                token.symbol,
+                                currency != "USD"
+                                    ? priceToken.USD *
+                                        widget
+                                            .arguments.store.state.exchangeRatio
+                                    : priceToken.USD,
+                                currency,
+                                0,
+                                false,
+                                true,
+                                false,
+                                true, (Account account, Token token,
+                                    String tokenId, String amount) async {
+                              Navigator.maybePop(parentContext, token);
+                            });
+                          } else {
+                            return Container();
+                          }
+                        });
                   } else {
                     final Account account = _accounts[index];
-                    return AccountRow(
-                        account,
-                        null,
-                        account.token.name,
-                        account.token.symbol,
-                        currency != "USD"
-                            ? account.token.USD *
-                                widget.arguments.store.state.exchangeRatio
-                            : account.token.USD,
-                        currency,
-                        BalanceUtils.calculatePendingBalance(
-                                widget.arguments.txLevel,
+                    return FutureBuilder(
+                        future: Future.wait([
+                          widget.arguments.store.getTokenById(account.tokenId),
+                          widget.arguments.store
+                              .getPriceTokenById(account.tokenId)
+                        ]),
+                        builder: (context, snap) {
+                          if (snap.hasData) {
+                            Token token = snap.data[0];
+                            PriceToken priceToken = snap.data[1];
+                            return AccountRow(
                                 account,
-                                account.token.symbol,
-                                widget.arguments.store) /
-                            pow(10, account.token.decimals),
-                        false,
-                        true,
-                        false,
-                        false, (Account account, Token token, String tokenId,
-                            String amount) {
-                      Navigator.maybePop(parentContext, account);
-                    });
+                                null,
+                                token.name,
+                                token.symbol,
+                                currency != "USD"
+                                    ? priceToken.USD *
+                                        widget
+                                            .arguments.store.state.exchangeRatio
+                                    : priceToken.USD,
+                                currency,
+                                BalanceUtils.calculatePendingBalance(
+                                        widget.arguments.txLevel,
+                                        account,
+                                        token.symbol,
+                                        widget.arguments.store) /
+                                    pow(10, token.decimals),
+                                false,
+                                true,
+                                false,
+                                false, (Account account, Token token,
+                                    String tokenId, String amount) {
+                              Navigator.maybePop(parentContext, account);
+                            });
+                          } else {
+                            return Container();
+                          }
+                        });
                   }
                 },
               ),
