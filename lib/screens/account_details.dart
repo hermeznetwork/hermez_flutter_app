@@ -490,8 +490,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
                   return WithdrawalRow(
                       exit,
-                      widget.arguments.priceToken,
                       widget.arguments.token,
+                      widget.arguments.priceToken,
                       1,
                       currency,
                       widget.arguments.store.state.exchangeRatio,
@@ -518,8 +518,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
                   return WithdrawalRow(
                       exit,
-                      widget.arguments.priceToken,
                       widget.arguments.token,
+                      widget.arguments.priceToken,
                       2,
                       currency,
                       widget.arguments.store.state.exchangeRatio,
@@ -567,7 +567,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 token: widget.arguments.token,
                                 exit: exit,
                                 amount: amountWithdraw.toDouble() /
-                                    pow(10, exit.token.decimals),
+                                    pow(10, widget.arguments.token.decimals),
                                 addressFrom: addressFrom,
                                 addressTo: addressTo,
                                 gasLimit: gasLimit.toInt(),
@@ -608,7 +608,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               pendingWithdraw['instant'] == false
                                   ? pendingWithdraw['blockNum']
                                   : null,
-                          token: token,
+                          tokenId: token.id,
                           balance: pendingWithdraw['amount']
                               .toString()
                               .replaceAll('.0', '')));
@@ -642,6 +642,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
                   return WithdrawalRow(
                     exit,
+                    widget.arguments.token,
+                    widget.arguments.priceToken,
                     step,
                     currency,
                     widget.arguments.store.state.exchangeRatio,
@@ -690,7 +692,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 gasLimit +=
                                     BigInt.from(GAS_LIMIT_WITHDRAW_SIBLING);
                               });
-                              if (exit.token.id != 0) {
+                              if (exit.tokenId != 0) {
                                 gasLimit +=
                                     BigInt.from(GAS_LIMIT_WITHDRAW_ERC20_TX);
                               }
@@ -706,10 +708,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                         transactionLevel:
                                             TransactionLevel.LEVEL1,
                                         status: TransactionStatus.DRAFT,
-                                        token: exit.token,
+                                        token: widget.arguments.token,
+                                        priceToken: widget.arguments.priceToken,
                                         exit: exit,
                                         amount: amountWithdraw.toDouble() /
-                                            pow(10, exit.token.decimals),
+                                            pow(
+                                                10,
+                                                widget
+                                                    .arguments.token.decimals),
                                         addressFrom: addressFrom,
                                         addressTo: addressTo,
                                         gasLimit: gasLimit.toInt(),
@@ -875,7 +881,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       }
                     }
                     amount = double.parse(value) /
-                        pow(10, widget.arguments.account.token.decimals);
+                        pow(10, widget.arguments.token.decimals);
                     if (transaction.L1orL2 == "L2") {
                       feeValue = getFeeValue(
                               transaction.l2info.fee, double.parse(value))
@@ -897,7 +903,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       feeValue = '0';
                     }
                     amount = double.parse(value) /
-                        pow(10, widget.arguments.account.token.decimals);
+                        pow(10, widget.arguments.token.decimals);
                     fee = double.parse(feeValue);
                   }
 
@@ -1041,8 +1047,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                             Container(
                               padding: EdgeInsets.all(5.0),
                               child: Text(
-                                EthAmountFormatter.formatAmount(amount,
-                                    widget.arguments.account.token.symbol),
+                                EthAmountFormatter.formatAmount(
+                                    amount, widget.arguments.token.symbol),
                                 style: TextStyle(
                                   color: HermezColors.black,
                                   fontSize: 16,
@@ -1058,7 +1064,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 (isNegative ? "- " : "") +
                                     EthAmountFormatter.formatAmount(
                                         (amount *
-                                            widget.arguments.account.token.USD *
+                                            widget.arguments.priceToken.USD *
                                             (currency != 'USD'
                                                 ? widget.arguments.store.state
                                                     .exchangeRatio
@@ -1143,11 +1149,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       }).toList();
       pendingExits =
           await fetchL2PendingExits(widget.arguments.account.accountIndex);
-      exits = fetchExits(widget.arguments.account.token.id);
+      exits = fetchExits(widget.arguments.account.tokenId);
       pendingForceExits = await fetchPendingForceExits(
-          widget.arguments.account.token.id, exits, pendingExits);
+          widget.arguments.account.tokenId, exits, pendingExits);
       pendingWithdraws =
-          await fetchPendingWithdraws(widget.arguments.account.token.id);
+          await fetchPendingWithdraws(widget.arguments.account.tokenId);
       filteredExits = List.from(exits);
       filteredExits.removeWhere((Exit exit) {
         for (dynamic pendingWithdraw in pendingWithdraws) {
@@ -1156,7 +1162,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
               (pendingWithdraw['instant'] == false &&
                   exit.delayedWithdrawRequest != null &&
                   Token.fromJson(pendingWithdraw['token']).id ==
-                      exit.token.id)) {
+                      exit.tokenId)) {
             return true;
           }
         }
@@ -1165,12 +1171,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       allowedInstantWithdraws = [];
       for (int i = 0; i < filteredExits.length; i++) {
         Exit exit = filteredExits[i];
+        Token token = await widget.arguments.store.getTokenById(exit.tokenId);
         bool isAllowed = await widget.arguments.store
-            .isInstantWithdrawalAllowed(double.parse(exit.balance), exit.token);
+            .isInstantWithdrawalAllowed(double.parse(exit.balance), token);
         allowedInstantWithdraws.add(isAllowed);
       }
       pendingDeposits =
-          await fetchPendingDeposits(widget.arguments.account.token.id);
+          await fetchPendingDeposits(widget.arguments.account.tokenId);
       final List<ForgedTransaction> pendingDepositsTxs =
           pendingDeposits.map((pendingDeposit) {
         DateTime date = DateTime.fromMillisecondsSinceEpoch(
@@ -1211,15 +1218,15 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       });
     } else {
       pendingTransfers =
-          await fetchPendingTransfers(widget.arguments.account.token.id);
+          await fetchPendingTransfers(widget.arguments.account.tokenId);
       pendingExits =
-          fetchL2PendingExitsByTokenId(widget.arguments.account.token.id);
-      exits = fetchExits(widget.arguments.account.token.id);
+          fetchL2PendingExitsByTokenId(widget.arguments.account.tokenId);
+      exits = fetchExits(widget.arguments.account.tokenId);
       pendingForceExits = await fetchPendingForceExits(
-          widget.arguments.account.token.id, exits, pendingExits);
+          widget.arguments.account.tokenId, exits, pendingExits);
       filteredExits = exits.toList();
       pendingWithdraws =
-          await fetchPendingWithdraws(widget.arguments.account.token.id);
+          await fetchPendingWithdraws(widget.arguments.account.tokenId);
       filteredExits.removeWhere((Exit exit) {
         for (dynamic pendingWithdraw in pendingWithdraws) {
           if (pendingWithdraw["id"] ==
@@ -1227,7 +1234,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
               (pendingWithdraw['instant'] == false &&
                   exit.delayedWithdrawRequest != null &&
                   Token.fromJson(pendingWithdraw['token']).id ==
-                      exit.token.id)) {
+                      exit.tokenId)) {
             return true;
           }
         }
@@ -1236,12 +1243,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       allowedInstantWithdraws = [];
       for (int i = 0; i < filteredExits.length; i++) {
         Exit exit = filteredExits[i];
+        Token token = await widget.arguments.store.getTokenById(exit.tokenId);
         bool isAllowed = await widget.arguments.store
-            .isInstantWithdrawalAllowed(double.parse(exit.balance), exit.token);
+            .isInstantWithdrawalAllowed(double.parse(exit.balance), token);
         allowedInstantWithdraws.add(isAllowed);
       }
       pendingDeposits =
-          await fetchPendingDeposits(widget.arguments.account.token.id);
+          await fetchPendingDeposits(widget.arguments.account.tokenId);
       historyTransactions = await fetchHistoryTransactions();
       List<dynamic> fullTxs = List.from(historyTransactions);
       if (transactions.isEmpty) {
@@ -1286,7 +1294,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
           .getAccount(widget.arguments.account.accountIndex);
     } else {
       return widget.arguments.store
-          .getL1Account(widget.arguments.account.token.id);
+          .getL1Account(widget.arguments.account.tokenId);
     }
   }
 
@@ -1360,7 +1368,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   List<Exit> fetchExits(int tokenId) {
     List<Exit> exits = List.from(widget.arguments.store.state.exits);
-    exits.removeWhere((exit) => exit.token.id != tokenId);
+    exits.removeWhere((exit) => exit.tokenId != tokenId);
     return exits;
   }
 
@@ -1376,7 +1384,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
       return await widget.arguments.store.getEthereumTransactionsByAddress(
           widget.arguments.store.state.ethereumAddress,
-          widget.arguments.account.token,
+          widget.arguments.token,
           fromItem);
     } else {
       final transactionsResponse = await widget.arguments.store
