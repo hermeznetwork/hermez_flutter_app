@@ -1566,10 +1566,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     //if (needRefresh == true) {
     if (widget.arguments.status == TransactionStatus.DRAFT) {
       ethereumAccount = await getEthereumAccount();
+      ethereumToken = widget.arguments.store.state.tokens.firstWhere((Token token) => token.id == ethereumAccount.tokenId);
+      ethereumPriceToken = widget.arguments.store.state.priceTokens.firstWhere((PriceToken priceToken) => priceToken.id == ethereumAccount.tokenId);
       gasPriceResponse = await getGasPriceResponse();
     } else if (widget.arguments.transactionLevel == TransactionLevel.LEVEL1 &&
         widget.arguments.transactionType != TransactionType.RECEIVE) {
       ethereumAccount = await getEthereumAccount();
+      ethereumToken = widget.arguments.store.state.tokens.firstWhere((Token token) => token.id == ethereumAccount.tokenId);
+      ethereumPriceToken = widget.arguments.store.state.priceTokens.firstWhere((PriceToken priceToken) => priceToken.id == ethereumAccount.tokenId);
     }
 
     //needRefresh = false;

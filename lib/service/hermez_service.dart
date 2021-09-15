@@ -78,10 +78,12 @@ class HermezService implements IHermezService {
   @override
   Future<StateResponse> getState() async {
     final StateResponse state = await api.getState();
-    final baseApiUrl = state.network.nextForgers[0].coordinator.URL;
-    Uri uri = Uri.parse(baseApiUrl);
-
-    api.setBaseApiUrl(uri.host);
+    if (state.network.nextForgers != null &&
+        state.network.nextForgers.length > 0) {
+      final baseApiUrl = state.network.nextForgers[0].coordinator.URL;
+      Uri uri = Uri.parse(baseApiUrl);
+      api.setBaseApiUrl(uri.host);
+    }
     return state;
   }
 
