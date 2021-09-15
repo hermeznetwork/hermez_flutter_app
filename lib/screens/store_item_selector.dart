@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/form/amount_input.dart';
+import 'package:hermez/components/store/category_tag.dart';
 import 'package:hermez/components/wallet/store_card.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/bitrefill_item.dart';
@@ -16,6 +19,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../constants.dart';
 import 'bitrefill_form.dart';
+import 'category_selector.dart';
 
 class StoreItemSelectorArguments {
   WalletHandler store;
@@ -42,6 +46,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
   GlobalKey<ScaffoldMessengerState> _listKey = GlobalKey();
   List<PayProduct> _products;
   List<BitrefillItem> _items = [];
+  List<Category> _categories = [];
   final TextEditingController amountController = TextEditingController();
   final TextEditingController _searchController = new TextEditingController();
   int _selectedFixedValueIndex = -1;
@@ -123,105 +128,105 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                         ]),
                       ],
                       bottom: AppBar(
-                          automaticallyImplyLeading: false,
-                          elevation: 0.0,
-                          title: Container(
-                            width: double.infinity,
-                            height: 40,
-                            color: Colors.white,
-                            child:
-                                /*Center(
+                        automaticallyImplyLeading: false,
+                        elevation: 0.0,
+                        title: Container(
+                          width: double.infinity,
+                          height: 40,
+                          color: Colors.white,
+                          child:
+                              /*Center(
                               child:*/
-                                TextField(
-                              controller: _searchController,
-                              onChanged: searchOperation,
-                              cursorColor: HermezColors.orange,
-                              style: TextStyle(
+                              TextField(
+                            controller: _searchController,
+                            onChanged: searchOperation,
+                            cursorColor: HermezColors.orange,
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                color: HermezColors.blackTwo,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16),
+                            decoration: InputDecoration(
+                              labelText: 'Search a product',
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              hintStyle: TextStyle(
                                   fontFamily: 'ModernEra',
-                                  color: HermezColors.blackTwo,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16),
-                              decoration: InputDecoration(
-                                labelText: 'Search a product',
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                                hintStyle: TextStyle(
-                                    fontFamily: 'ModernEra',
-                                    color: HermezColors.blueyGreyTwo,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16),
-                                prefixIcon: Icon(
-                                  Icons.search,
                                   color: HermezColors.blueyGreyTwo,
-                                ),
-                                suffixIcon: IconButton(
-                                  iconSize: 24,
-                                  splashRadius: 1,
-                                  onPressed: () {
-                                    //here
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      _searchController.clear();
-                                      FocusScope.of(context).unfocus();
-                                    });
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: HermezColors.blueyGreyTwo,
+                              ),
+                              suffixIcon: IconButton(
+                                iconSize: 24,
+                                splashRadius: 1,
+                                onPressed: () {
+                                  //here
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    _searchController.clear();
+                                    FocusScope.of(context).unfocus();
+                                  });
 
-                                    /*showBarModalBottomSheet(
+                                  /*showBarModalBottomSheet(
                                       context: context,
                                       builder: (context) =>
                                           buildFilterList(context),
                                     );*/
-                                    Navigator.pushNamed(
-                                        context, '/country_selector',
-                                        arguments: widget.arguments.store);
-                                  },
-                                  icon: Stack(children: [
-                                    ClipOval(
-                                        child: Container(
-                                      height: 24.0,
-                                      width: 24.0,
-                                      child: SvgPicture.network(
-                                        'https://restcountries.eu/data/esp.svg',
-                                        fit: BoxFit.fill,
-                                        allowDrawingOutsideViewBox: true,
-                                        /*errorBuilder: (context, error, stackTrace) =>
+                                  Navigator.pushNamed(
+                                      context, '/country_selector',
+                                      arguments: widget.arguments.store);
+                                },
+                                icon: Stack(children: [
+                                  ClipOval(
+                                      child: Container(
+                                    height: 24.0,
+                                    width: 24.0,
+                                    child: SvgPicture.network(
+                                      'https://restcountries.eu/data/esp.svg',
+                                      fit: BoxFit.fill,
+                                      allowDrawingOutsideViewBox: true,
+                                      /*errorBuilder: (context, error, stackTrace) =>
             Text('Some errors occurred!'),*/
-                                      ),
-                                    )),
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: SvgPicture.asset(
-                                        'assets/arrow_down.svg',
-                                        fit: BoxFit.fill,
-                                        height: 7,
-                                        color: HermezColors.black,
-                                      ),
-                                    )
-                                  ]),
-                                ),
-                                contentPadding: EdgeInsets.only(
-                                    left: 12, right: 12, top: 8, bottom: 8),
-                                filled: true,
-                                fillColor: Colors.white,
-                                alignLabelWithHint: true,
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: HermezColors.orange),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: HermezColors.blueyGreyTwo),
-                                    borderRadius: BorderRadius.circular(20)),
-                                border: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: HermezColors.lightGrey),
-                                    borderRadius: BorderRadius.circular(20)),
+                                    ),
+                                  )),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: SvgPicture.asset(
+                                      'assets/arrow_down.svg',
+                                      fit: BoxFit.fill,
+                                      height: 7,
+                                      color: HermezColors.black,
+                                    ),
+                                  )
+                                ]),
                               ),
+                              contentPadding: EdgeInsets.only(
+                                  left: 12, right: 12, top: 8, bottom: 8),
+                              filled: true,
+                              fillColor: Colors.white,
+                              alignLabelWithHint: true,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: HermezColors.orange),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: HermezColors.blueyGreyTwo),
+                                  borderRadius: BorderRadius.circular(20)),
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: HermezColors.lightGrey),
+                                  borderRadius: BorderRadius.circular(20)),
                             ),
-                            //),
                           ),
-                          actions: [
+                          //),
+                        ),
+                        /*actions: [
                             Container(
                               margin: EdgeInsets.symmetric(vertical: 10),
                               child: IconButton(
@@ -246,7 +251,8 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                                     color: HermezColors.blueyGreyTwo),
                               ),
                             ),
-                          ]),
+                          ]*/
+                      ),
                     ),
                     // Other Sliver Widgets
                     SliverList(
@@ -257,6 +263,7 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
                               if (snapshot.hasData) {
                                 return Column(
                                   children: [
+                                    buildCategoriesSelected(),
                                     Padding(
                                       padding: const EdgeInsets.all(20.0),
                                       child: Column(
@@ -439,10 +446,10 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
       borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
       borderRadius: BorderRadius.all(Radius.circular(12)),
       backgroundColor: Colors.white,
-      margin: EdgeInsets.all(16.0),
+      margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 90),
       isDismissible: true,
       duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
-    ).show(_listKey.currentContext);
+    ).show(context);
   }
 
   Future<bool> fetchData() async {
@@ -483,11 +490,58 @@ class _StoreItemSelectorPageState extends State<StoreItemSelectorPage> {
             "https://cdn.freelogovectors.net/wp-content/uploads/2016/12/airbnb-logo.png",
         enabled: false));
 
+    String data = await DefaultAssetBundle.of(context)
+        .loadString("assets/raw/categories.json");
+
+    data = data.replaceAll("\n", "");
+    dynamic json = jsonDecode(data);
+    _categories =
+        (json as List).map((item) => Category.fromJson(item)).toList();
+
     if (_needRefresh) {
       _searchList = List.from(_products);
       _needRefresh = false;
     }
     return true;
+  }
+
+  Widget buildCategoriesSelected() {
+    return Container(
+      padding: EdgeInsets.only(left: 0, right: 0, top: 10),
+      child: ShaderMask(
+        shaderCallback: (Rect rect) {
+          return LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Colors.white,
+              Colors.transparent,
+              Colors.transparent,
+              Colors.white
+            ],
+            stops: [0.0, 0.075, 0.925, 1.0],
+          ).createShader(rect);
+        },
+        blendMode: BlendMode.dstOut,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            margin: EdgeInsets.only(left: 20, right: 20),
+            child: Row(
+              children: List.generate(_categories.length + 1, (index) {
+                if (index > 0) {
+                  Category category = _categories[index - 1];
+                  return CategoryTag(title: category.name);
+                } else {
+                  return CategoryTag(title: "All", selected: true);
+                }
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget buildItemInfo() {
