@@ -18,8 +18,11 @@ abstract class IExplorerService {
       {String sort = 'desc', int startblock = 0});
   Future<BigInt> getTokenBalanceByAccountAddress(
       String tokenAddress, String accountAddress);
+  // TODO UNUSED
   Future<Map<String, dynamic>> getTokenInfo(String tokenAddress);
+  // TODO DEPRECATED??
   Future<List<dynamic>> getListOfTokensByAddress(String address);
+  Future<void> getBlockAvgTime({String sort = 'desc'});
 }
 
 class ExplorerService implements IExplorerService {
@@ -208,6 +211,7 @@ class ExplorerService implements IExplorerService {
     }
   }
 
+  // TODO UNUSED
   Future<Map<String, dynamic>> getTokenInfo(String tokenAddress) async {
     try {
       Map<String, dynamic> resp = await _get(
