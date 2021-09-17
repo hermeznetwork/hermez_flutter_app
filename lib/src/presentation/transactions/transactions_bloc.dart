@@ -25,12 +25,13 @@ class TransactionsBloc extends Bloc<TransactionsState> {
       List<Transaction> transactions) {
     final formatCurrency = NumberFormat.simpleCurrency(locale: 'es-ES');
 
-    return transactions
+    /*return transactions
         .map((transaction) => TransactionItemState(
             transaction.id,
             transaction.image,
             transaction.title,
             formatCurrency.format(transaction.price)))
-        .toList();
+        .toList();*/
+    return null;
   }
 }

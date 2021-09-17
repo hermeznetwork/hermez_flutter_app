@@ -1,3 +1,5 @@
+import 'package:hermez/src/domain/wallets/wallet.dart';
+
 abstract class WalletRepository {
-  Future<bool> getWallets();
+  Future<List<Wallet>> getWallets();
 }

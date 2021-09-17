@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hermez/context/setup/wallet_setup_provider.dart';
-import 'package:hermez/screens/pin.dart';
-import 'package:hermez/utils/hermez_colors.dart';
+import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
+import 'package:hermez/src/presentation/wallets/wallets_state.dart';
 
-import 'info.dart';
+import '../dependencies_provider.dart';
 
 /*class IntroPage extends StatefulWidget {
   IntroPage({Key key, this.store}) : super(key: key);
@@ -15,11 +13,36 @@ import 'info.dart';
   _IntroPageState createState() => _IntroPageState();
 }*/
 
-class IntroPage extends HookWidget {
+class IntroPage extends StatelessWidget /*HookWidget*/ {
+  final WalletsBloc _bloc;
+
+  IntroPage() : _bloc = getIt<WalletsBloc>() {
+    _bloc.fetchData();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final store = useWalletSetup(context);
-    return Scaffold(
+    //final store = useWalletSetup(context);
+    //final bloc = BlocProvider.of<WalletsBloc>(context);
+
+    return StreamBuilder<WalletsState>(
+        initialData: _bloc.state,
+        stream: _bloc.observableState,
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+
+          if (state is LoadingWalletsState) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ErrorWalletsState) {
+            return Center(child: Text(state.message));
+          } else {
+            return Container(); /*_renderIntroContent(context, state);*/
+          }
+        });
+  }
+}
+
+/*return Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
         backgroundColor: HermezColors.lightOrange,
@@ -82,7 +105,8 @@ class IntroPage extends HookWidget {
                             "/pin",
                             arguments: PinArguments(null, true, false));
                         if (success != null && success == true) {
-                          String mnemonic = await store.generateMnemonic();
+                          String mnemonic =
+                              ""; //await store.generateMnemonic();
                           Navigator.of(context).pushNamed("/info",
                               arguments: InfoArguments(
                                   "info_backup_success.png",
@@ -149,4 +173,4 @@ class IntroPage extends HookWidget {
       ),
     );
   }
-}
+}*/

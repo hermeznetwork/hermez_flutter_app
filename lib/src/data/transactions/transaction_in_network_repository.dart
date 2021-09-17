@@ -6,12 +6,11 @@ import 'package:hermez_sdk/model/forged_transaction.dart';
 import 'package:hermez_sdk/model/forged_transactions_request.dart';
 import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
-import 'package:hermez_sdk/model/token.dart';
 
-class TransactionInRemoteRepository extends ApiBaseClient
+class TransactionInNetworkRepository extends ApiBaseClient
     implements TransactionRepository {
   final ExplorerService _explorerService;
-  TransactionInRemoteRepository(this._explorerService, baseAddress)
+  TransactionInNetworkRepository(this._explorerService, baseAddress)
       : super(baseAddress);
 
   @override
@@ -38,13 +37,12 @@ class TransactionInRemoteRepository extends ApiBaseClient
 
   @override
   Future<List> getEthereumTransactionsByAddress(
-      String address, Token token, int fromItem) async {
-    if (token.symbol == "ETH") {
+      String address, String tokenAddress) async {
+    if (tokenAddress.isEmpty) {
       return _explorerService.getTransactionsByAccountAddress(address);
     } else {
-      List<dynamic> transactions =
-          await _explorerService.getTokenTransferEventsByAccountAddress(
-              address, token.ethereumAddress);
+      List<dynamic> transactions = await _explorerService
+          .getTokenTransferEventsByAccountAddress(address, tokenAddress);
       return transactions;
     }
   }

@@ -9,5 +9,7 @@ abstract class AccountRepository {
       int limit = DEFAULT_PAGE_SIZE});
   Future<Account> getL2AccountByAddress(String hezAddress);
   Future<Account> getL2AccountByAccountIndex(String accountIndex);
+  Future<List<Account>> getL1Accounts(
+      String ethereumAddress, bool showZeroBalanceAccounts, List<int> tokenIds);
   Future<Account> getL1Account(String ethereumAddress, int tokenId);
 }

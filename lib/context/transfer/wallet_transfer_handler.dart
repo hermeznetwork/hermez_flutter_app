@@ -24,6 +24,7 @@ class WalletTransferHandler {
 
   WalletTransfer get state => _store.state;
 
+  // TODO NOT USED??
   Future<BigInt> getEstimatedFeeInWei(
       String from, String to, String amount, Token token) async {
     var completer = new Completer<BigInt>();

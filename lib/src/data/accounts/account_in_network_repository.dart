@@ -1,10 +1,18 @@
+import 'package:hermez/service/contract_service.dart';
+import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
 import 'package:hermez_sdk/api.dart' as api;
 import 'package:hermez_sdk/constants.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/token.dart';
+import 'package:web3dart/web3dart.dart' as web3;
 
-class AccountInRemoteRepository implements AccountRepository {
+class AccountInNetworkRepository implements AccountRepository {
+  final ContractService _contractService;
+  final HermezService _hermezService;
+
+  AccountInNetworkRepository(this._contractService, this._hermezService);
+
   @override
   Future<List<Account>> getL2Accounts(String hezAddress, List<int> tokenIds,
       {int fromItem = 0,
@@ -27,6 +35,9 @@ class AccountInRemoteRepository implements AccountRepository {
     final response = await api.getAccount(accountIndex);
     return response;
   }
+
+  Future<List<Account>> getL1Accounts(String ethereumAddress,
+      bool showZeroBalanceAccounts, List<int> tokenIds) async {}
 
   Future<Account> getL1Account(String ethereumAddress, int tokenId) async {
     final supportedTokens = await _hermezService.getTokens();

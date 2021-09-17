@@ -28,7 +28,9 @@ import 'context/wallet/wallet_provider.dart';
 Map<String, WidgetBuilder> getRoutes(context) {
   return {
     '/': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
+      return IntroPage(); //BlocProvider(
+      //bloc: getIt<WalletsBloc>(), child: IntroPage());
+      /*var configurationService = Provider.of<ConfigurationService>(context);
       if (configurationService.didSetupWallet()) {
         return PinPage(
             arguments:
@@ -40,7 +42,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
         return WalletSetupProvider(builder: (context, store) {
           return IntroPage();
         });
-      }
+      }*/
     },
     '/home': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);

@@ -1,45 +1,37 @@
 import 'package:flutter/widgets.dart';
 
-abstract class TransactionsState {
-  final String searchTerm;
+abstract class WalletsState {
+  WalletsState();
 
-  TransactionsState(this.searchTerm);
+  factory WalletsState.loading() => LoadingWalletsState();
 
-  factory TransactionsState.loading({String searchTerm}) =>
-      LoadingTransactionsState(searchTerm: searchTerm);
+  factory WalletsState.loaded(List<WalletItemState> wallets) =>
+      LoadedWalletsState(wallets: wallets);
 
-  factory TransactionsState.loaded(
-          String searchTerm, List<TransactionItemState> transactions) =>
-      LoadedTransactionsState(
-          searchTerm: searchTerm, transactions: transactions);
-
-  factory TransactionsState.error(String searchTerm, String message) =>
-      ErrorTransactionsState(searchTerm: searchTerm, message: message);
+  factory WalletsState.error(String message) =>
+      ErrorWalletsState(message: message);
 }
 
-class LoadingTransactionsState extends TransactionsState {
-  LoadingTransactionsState({String searchTerm}) : super(searchTerm);
+class LoadingWalletsState extends WalletsState {
+  LoadingWalletsState();
 }
 
-class LoadedTransactionsState extends TransactionsState {
-  final List<TransactionItemState> transactions;
+class LoadedWalletsState extends WalletsState {
+  final List<WalletItemState> wallets;
 
-  LoadedTransactionsState({String searchTerm, @required this.transactions})
-      : super(searchTerm);
+  LoadedWalletsState({@required this.wallets});
 }
 
-class ErrorTransactionsState<T> extends TransactionsState {
+class ErrorWalletsState<T> extends WalletsState {
   final String message;
 
-  ErrorTransactionsState({@required String searchTerm, @required this.message})
-      : super(searchTerm);
+  ErrorWalletsState({@required this.message});
 }
 
-class TransactionItemState {
-  final String id;
-  final String image;
-  final String title;
-  final String price;
+class WalletItemState {
+  final bool l2Wallet;
+  final String address;
+  final String totalBalance;
 
-  TransactionItemState(this.id, this.image, this.title, this.price);
+  WalletItemState(this.l2Wallet, this.address, this.totalBalance);
 }

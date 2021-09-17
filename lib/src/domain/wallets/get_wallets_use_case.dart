@@ -1,3 +1,4 @@
+import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
 
 class GetWalletsUseCase {
@@ -5,7 +6,7 @@ class GetWalletsUseCase {
 
   GetWalletsUseCase(this._walletRepository);
 
-  Future<bool> execute() {
+  Future<List<Wallet>> execute() {
     return _walletRepository.getWallets();
   }
 }
