@@ -1,3 +1,4 @@
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/src/data/accounts/account_in_network_repository.dart';
 import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/data/network/explorer_service.dart';
@@ -38,8 +39,8 @@ class WalletInNetworkRepository implements WalletRepository {
     if (_accountInNetworkRepository != null) {
       List<hezAccount.Account> l2HezAccounts =
           await _accountInNetworkRepository.getL2Accounts(hermezAddress, []);
-      List<hezAccount.Account> l1HezAccounts = await _accountInNetworkRepository
-          .getL1Accounts(ethereumAddress, false, []);
+      List<hezAccount.Account> l1HezAccounts =
+          await _accountInNetworkRepository.getL1Accounts(ethereumAddress);
 
       l2HezAccounts.map((l2Account) async {
         Token token =
@@ -98,5 +99,24 @@ class WalletInNetworkRepository implements WalletRepository {
         l1Accounts: l1Accounts,
         l2Accounts: l2Accounts));
     return wallets;
+  }
+
+  @override
+  Future<void> resetWallet() async {
+    await _configurationService.setMnemonic("");
+    await _configurationService.setPrivateKey("");
+    await _configurationService.setHermezPrivateKey("");
+    await _configurationService.setBabyJubJubHex("");
+    await _configurationService.setBabyJubJubBase64("");
+    await _configurationService.setEthereumAddress("");
+    await _configurationService.setHermezAddress("");
+    await _configurationService.setPasscode("");
+    await _configurationService.setBiometricsFingerprint(false);
+    await _configurationService.setBiometricsFace(false);
+    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.USD);
+    await _configurationService.setDefaultFee(WalletDefaultFee.AVERAGE);
+    await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
+    await _configurationService.setupDone(false);
+    await _configurationService.backupDone(false);
   }
 }

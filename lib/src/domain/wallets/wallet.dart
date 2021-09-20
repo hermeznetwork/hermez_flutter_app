@@ -1,5 +1,9 @@
 import 'package:hermez/src/domain/accounts/account.dart';
 
+enum WalletDefaultCurrency { USD, EUR, CNY, JPY, GBP }
+
+enum WalletDefaultFee { SLOW, AVERAGE, FAST }
+
 class Wallet {
   final String l1Address;
   final String l2Address;
