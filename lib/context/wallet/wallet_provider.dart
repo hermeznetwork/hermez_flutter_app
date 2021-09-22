@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/service/address_service.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';

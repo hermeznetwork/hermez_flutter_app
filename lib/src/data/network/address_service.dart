@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:hermez/constants.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/utils/hd_key.dart';
 import 'package:hermez_sdk/addresses.dart' as addresses;
 import 'package:hermez_sdk/hermez_wallet.dart';
@@ -12,6 +12,7 @@ import 'package:web3dart/crypto.dart';
 abstract class IAddressService {
   String generateMnemonic();
   String entropyToMnemonic(String entropyMnemonic);
+  bool isValidMnemonic(String mnemonic);
   Future<String> setupFromMnemonic(String mnemonic);
   Future<bool> setupFromPrivateKey(String privateKey);
   String getPrivateKey(String mnemonic);
@@ -31,10 +32,12 @@ class AddressService implements IAddressService {
     return bip39.generateMnemonic();
   }
 
+  @override
   String entropyToMnemonic(String entropyMnemonic) {
     return bip39.entropyToMnemonic(entropyMnemonic);
   }
 
+  @override
   bool isValidMnemonic(String mnemonic) {
     try {
       final cryptMnemonic = bip39.mnemonicToEntropy(mnemonic);

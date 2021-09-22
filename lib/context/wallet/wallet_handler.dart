@@ -7,7 +7,7 @@ import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/address_service.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
@@ -440,10 +440,8 @@ class WalletHandler {
 
   Future<List<Exit>> getExits(
       {bool onlyPendingWithdraws = true, int tokenId = -1}) async {
-    final exits = await _hermezService.getExits(
-        web3.EthereumAddress.fromHex(state.ethereumAddress),
-        onlyPendingWithdraws: onlyPendingWithdraws,
-        tokenId: tokenId);
+    final exits = await _hermezService.getExits(state.hermezAddress,
+        onlyPendingWithdraws: onlyPendingWithdraws, tokenId: tokenId);
     exits.sort((exit1, exit2) {
       return exit2.itemId.compareTo(exit1.itemId);
     });
@@ -769,10 +767,9 @@ class WalletHandler {
     return _hermezService.getRecommendedFee();
   }
 
-  Future<bool> getCreateAccountAuthorization(String ethereumAddress) async {
+  Future<bool> getCreateAccountAuthorization(String hermezAddress) async {
     final createAccountAuth =
-        await _hermezService.getCreateAccountAuthorization(
-            web3.EthereumAddress.fromHex(ethereumAddress));
+        await _hermezService.getCreateAccountAuthorization(hermezAddress);
     return createAccountAuth != null;
   }
 
@@ -788,10 +785,7 @@ class WalletHandler {
           HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
       final signature =
           await hermezWallet.signCreateAccountAuthorization(ethereumPrivateKey);
-      return _hermezService.authorizeAccountCreation(
-          web3.EthereumAddress.fromHex(ethereumAddress),
-          hermezWallet.publicKeyBase64,
-          signature);
+      return _hermezService.authorizeAccountCreation();
     } else {
       return true;
     }
@@ -804,8 +798,7 @@ class WalletHandler {
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    return _hermezService.depositGasLimit(
-        amount, hermezAddress, token, hermezWallet.publicKeyCompressedHex);
+    return _hermezService.depositGasLimit(amount, token);
   }
 
   Future<bool> deposit(double amount, Token token,
@@ -815,8 +808,7 @@ class WalletHandler {
     final hermezAddress = await _configurationService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
-    return _hermezService.deposit(amount, hermezAddress, token,
-        hermezWallet.publicKeyCompressedHex, state.ethereumPrivateKey,
+    return _hermezService.deposit(amount, token,
         approveGasLimit: approveGasLimit,
         depositGasLimit: depositGasLimit,
         gasPrice: gasPrice);
@@ -831,13 +823,7 @@ class WalletHandler {
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.withdrawGasLimit(
-        amount,
-        account,
-        exit,
-        completeDelayedWithdrawal,
-        instantWithdrawal,
-        hermezAddress,
-        hermezWallet.publicKeyCompressedHex);
+        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal);
   }
 
   Future<bool> withdraw(double amount, Account account, Exit exit,
@@ -850,16 +836,8 @@ class WalletHandler {
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final success = await _hermezService.withdraw(
-        amount,
-        account,
-        exit,
-        completeDelayedWithdrawal,
-        instantWithdrawal,
-        hermezAddress,
-        hermezWallet.publicKeyCompressedHex,
-        state.ethereumPrivateKey,
-        gasLimit: gasLimit,
-        gasPrice: gasPrice);
+        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal,
+        gasLimit: gasLimit, gasPrice: gasPrice);
 
     return success;
   }
@@ -877,7 +855,7 @@ class WalletHandler {
   Future<BigInt> forceExitGasLimit(double amount, Account account) async {
     //_store.dispatch(TransactionStarted());
     final hermezAddress = await _configurationService.getHermezAddress();
-    return _hermezService.forceExitGasLimit(amount, hermezAddress, account);
+    return _hermezService.forceExitGasLimit(amount, account);
   }
 
   Future<bool> forceExit(double amount, Account account,
@@ -885,8 +863,7 @@ class WalletHandler {
     _store.dispatch(TransactionStarted());
     final hermezAddress = await _configurationService.getHermezAddress();
 
-    return _hermezService.forceExit(
-        amount, hermezAddress, account, state.ethereumPrivateKey,
+    return _hermezService.forceExit(amount, account,
         gasLimit: gasLimit, gasPrice: gasPrice);
   }
 
@@ -907,8 +884,7 @@ class WalletHandler {
 
     Token token = await getTokenById(account.tokenId);
 
-    final success =
-        await _hermezService.generateAndSendL2Tx(exitTx, hermezWallet, token);
+    final success = await _hermezService.generateAndSendL2Tx(exitTx, token.id);
 
     //_store.dispatch(TransactionFinished());
 
@@ -937,8 +913,8 @@ class WalletHandler {
 
     Token token = await getTokenById(from.tokenId);
 
-    final success = await _hermezService.generateAndSendL2Tx(
-        transferTx, hermezWallet, token);
+    final success =
+        await _hermezService.generateAndSendL2Tx(transferTx, token.id);
 
     //if (success) {
     //_store.dispatch(TransactionFinished());
@@ -957,8 +933,7 @@ class WalletHandler {
   }
 
   Future<bool> sendL2Transaction(Transaction transaction) async {
-    final result = await _hermezService.sendL2Transaction(
-        transaction, await _configurationService.getBabyJubJubHex());
+    final result = await _hermezService.sendL2Transaction(transaction);
     return result;
   }
 

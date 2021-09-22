@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/recovery_phrase_utils.dart';
 

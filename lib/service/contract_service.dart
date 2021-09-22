@@ -11,7 +11,7 @@ import 'package:hermez_sdk/model/token.dart';
 import 'package:hermez_sdk/tokens.dart';
 import 'package:web3dart/web3dart.dart';
 
-import 'configuration_service.dart';
+import 'configuration_service_old.dart';
 
 typedef TransferEvent = void Function(
     EthereumAddress from, EthereumAddress to, BigInt value);

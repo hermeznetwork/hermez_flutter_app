@@ -2,6 +2,7 @@ import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/src/data/transactions/transaction_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
+import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez_sdk/api.dart' as api;
 import 'package:hermez_sdk/constants.dart';
 import 'package:hermez_sdk/model/account.dart';
@@ -62,9 +63,11 @@ class AccountInNetworkRepository implements AccountRepository {
                 tokenId: token.id);
             accounts.add(account);
           } else {
-            List<dynamic> transactions = await _transactionInNetworkRepository
-                .getEthereumTransactionsByAddress(
-                    ethereumAddress, token.ethereumAddress);
+            List<dynamic> transactions =
+                await _transactionInNetworkRepository.getTransactions(
+                    layerFilter: LayerFilter.L1,
+                    address: ethereumAddress,
+                    tokenId: token.id);
             if (transactions != null && transactions.isNotEmpty) {
               final account = Account(
                   accountIndex: token.id.toString(),
@@ -101,9 +104,11 @@ class AccountInNetworkRepository implements AccountRepository {
             accounts.add(account);
           } else {
             if (showZeroBalanceAccounts) {
-              List<dynamic> transactions = await _transactionInNetworkRepository
-                  .getEthereumTransactionsByAddress(
-                      ethereumAddress, token.ethereumAddress);
+              List<dynamic> transactions =
+                  await _transactionInNetworkRepository.getTransactions(
+                      layerFilter: LayerFilter.L1,
+                      address: ethereumAddress,
+                      tokenId: token.id);
               if (transactions != null && transactions.isNotEmpty) {
                 final account = Account(
                     accountIndex: token.id.toString(),
@@ -167,6 +172,21 @@ class AccountInNetworkRepository implements AccountRepository {
       }
     } else {
       return null;
+    }
+  }
+
+  Future<bool> getCreateAccountAuthorization(String hermezAddress) async {
+    final createAccountAuth =
+        await _hermezService.getCreateAccountAuthorization(hermezAddress);
+    return createAccountAuth != null;
+  }
+
+  Future<bool> authorizeAccountCreation(String hermezAddress) async {
+    final accountCreated = await getCreateAccountAuthorization(hermezAddress);
+    if (!accountCreated) {
+      return _hermezService.authorizeAccountCreation();
+    } else {
+      return true;
     }
   }
 }

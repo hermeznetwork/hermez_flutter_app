@@ -7,7 +7,7 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/screens/pin.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/screens/remove_account_info.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -298,11 +298,13 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                         if (selectedAccount != null) {
                           Token token = widget.arguments.store.state.tokens
                               .firstWhere((token) =>
-                                  token.id == (selectedAccount as Account).tokenId);
+                                  token.id ==
+                                  (selectedAccount as Account).tokenId);
                           PriceToken priceToken = widget
                               .arguments.store.state.priceTokens
                               .firstWhere((priceToken) =>
-                                  priceToken.id == (selectedAccount as Account).tokenId);
+                                  priceToken.id ==
+                                  (selectedAccount as Account).tokenId);
                           // Force withdrawal
                           Navigator.pushNamed(widget.arguments.parentContext,
                                   "/transaction_amount",

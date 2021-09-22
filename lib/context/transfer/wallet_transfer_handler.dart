@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/context/transfer/wallet_transfer_state.dart';
 import 'package:hermez/model/wallet_transfer.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez_sdk/model/token.dart';

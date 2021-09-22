@@ -1,11 +1,10 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/context/transfer/wallet_transfer_handler.dart';
 import 'package:hermez/context/transfer/wallet_transfer_state.dart';
 import 'package:hermez/model/wallet_transfer.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/service/contract_service.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-
 import 'package:provider/provider.dart';
 
 import '../hook_provider.dart';

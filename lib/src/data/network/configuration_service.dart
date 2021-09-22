@@ -2,9 +2,9 @@ import 'dart:collection';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/constants.dart';
-import 'package:hermez/model/wallet.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/src/data/network/storage_service.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez_sdk/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,22 +46,29 @@ abstract class IConfigurationService {
   Future<List<dynamic>> getPendingWithdraws();
   dynamic getPendingWithdraw(String pendingWithdrawId);
   Future<void> addPendingWithdraw(dynamic pendingWithdraw);
-  void updatePendingWithdraw(
+  Future<void> updatePendingWithdraw(
       String nameToUpdate, String valueToUpdate, String valueId,
       {String nameId = 'id'});
-  void removePendingWithdraw(String value, {String name = 'id'});
+  Future<void> removePendingWithdraw(String value, {String name = 'id'});
   //dynamic getPendingDelayedWithdraw(String pendingWithdrawId);
   //void addPendingDelayedWithdraw(dynamic pendingDelayedWithdraw);
   //void removePendingDelayedWithdraw(String pendingDelayedWithdrawId);
   // L1 Deposits
-  void addPendingDeposit(dynamic pendingDeposit);
-  void removePendingDeposit(String pendingDepositId);
+  Future<List<dynamic>> getPendingDeposits();
+  Future<void> addPendingDeposit(dynamic pendingDeposit);
+  Future<void> updatePendingDepositId(
+      String transactionHash, String transactionId);
+  Future<void> removePendingDeposit(String pendingDepositId);
   // L1 Transfers
-  void addPendingTransfer(dynamic pendingTransfer);
-  void removePendingTransfer(String pendingTransferId);
+  Future<List<dynamic>> getPendingTransfers();
+  Future<void> addPendingTransfer(dynamic pendingTransfer);
+  Future<void> removePendingTransfer(String pendingTransferId);
   // L1 Force Exit
-  void addPendingForceExit(dynamic pendingForceExit);
-  void removePendingForceExit(String value, {String name = 'id'});
+  Future<List<dynamic>> getPendingForceExits();
+  Future<void> addPendingForceExit(dynamic pendingForceExit);
+  Future<void> updatePendingForceExitId(
+      String transactionHash, String transactionId);
+  Future<void> removePendingForceExit(String value, {String name = 'id'});
 }
 
 class ConfigurationService implements IConfigurationService {
@@ -278,6 +285,19 @@ class ConfigurationService implements IConfigurationService {
   }*/
 
   @override
+  Future<List<dynamic>> getPendingForceExits() async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    final storage =
+        await _storageService.getStorage(PENDING_FORCE_EXITS_KEY, false);
+
+    final List accountPendingForceExits = _storageService
+        .getItemsByHermezAddress(storage, chainId, ethereumAddress);
+    return accountPendingForceExits;
+  }
+
+  @override
   Future<List<dynamic>> getPendingWithdraws() async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
@@ -322,7 +342,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} pendingWithdrawId - The pendingWithdraw identifier to remove from the pool
   /// @returns {void}
   @override
-  void removePendingWithdraw(String value, {String name = 'id'}) async {
+  Future<void> removePendingWithdraw(String value, {String name = 'id'}) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
@@ -331,7 +351,7 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  void updatePendingWithdraw(
+  Future<void> updatePendingWithdraw(
       String nameToUpdate, String valueToUpdate, String valueId,
       {String nameId = 'id'}) async {
     final chainId = getCurrentEnvironment().chainId.toString();
@@ -344,6 +364,19 @@ class ConfigurationService implements IConfigurationService {
         {'name': nameId, 'value': valueId},
         {nameToUpdate: valueToUpdate},
         false);
+  }
+
+  @override
+  Future<List<dynamic>> getPendingTransfers() async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final ethereumAddress = await getEthereumAddress();
+
+    final storage =
+        await _storageService.getStorage(PENDING_TRANSFERS_KEY, false);
+
+    final List accountPendingTransfers = _storageService
+        .getItemsByHermezAddress(storage, chainId, ethereumAddress);
+    return accountPendingTransfers;
   }
 
 /*/// Gets a pendingWithdraw from the pendingWithdraw pool
@@ -438,11 +471,24 @@ class ConfigurationService implements IConfigurationService {
   }
   }*/
 
+  @override
+  Future<List<dynamic>> getPendingDeposits() async {
+    final chainId = getCurrentEnvironment().chainId.toString();
+    final hermezEthereumAddress = await getHermezAddress();
+
+    final storage =
+        await _storageService.getStorage(PENDING_DEPOSITS_KEY, false);
+
+    final List accountPendingDeposits = _storageService.getItemsByHermezAddress(
+        storage, chainId, hermezEthereumAddress);
+    return accountPendingDeposits;
+  }
+
   /// Adds a pendingDeposit to the pendingDeposits store
   /// @param {string} pendingDeposit - The pendingDeposit to add to the store
   /// @returns {void}
   @override
-  void addPendingDeposit(dynamic pendingDeposit) async {
+  Future<void> addPendingDeposit(dynamic pendingDeposit) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
@@ -454,7 +500,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} transactionId - The transaction identifier used to remove a pendingDeposit from the store
   /// @returns {void}
   @override
-  void removePendingDeposit(String transactionHash) async {
+  Future<void> removePendingDeposit(String transactionHash) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
 
@@ -462,7 +508,7 @@ class ConfigurationService implements IConfigurationService {
         hermezEthereumAddress, 'hash', transactionHash, false);
   }
 
-  void updatePendingDepositId(
+  Future<void> updatePendingDepositId(
       String transactionHash, String transactionId) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
@@ -504,7 +550,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} pendingTransfer - The pendingTransfer to add to the store
   /// @returns {void}
   @override
-  void addPendingTransfer(dynamic pendingTransfer) async {
+  Future<void> addPendingTransfer(dynamic pendingTransfer) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final ethereumAddress = await getEthereumAddress();
 
@@ -516,7 +562,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} transactionId - The transaction identifier used to remove a pendingTransfer from the store
   /// @returns {void}
   @override
-  void removePendingTransfer(String transactionHash) async {
+  Future<void> removePendingTransfer(String transactionHash) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final ethereumAddress = await getEthereumAddress();
 
@@ -528,7 +574,7 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} pendingTransfer - The pendingTransfer to add to the store
   /// @returns {void}
   @override
-  void addPendingForceExit(dynamic pendingForceExit) async {
+  Future<void> addPendingForceExit(dynamic pendingForceExit) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final ethereumAddress = await getEthereumAddress();
 
@@ -540,7 +586,8 @@ class ConfigurationService implements IConfigurationService {
   /// @param {string} transactionId - The transaction identifier used to remove a pendingTransfer from the store
   /// @returns {void}
   @override
-  void removePendingForceExit(String value, {String name = 'id'}) async {
+  Future<void> removePendingForceExit(String value,
+      {String name = 'id'}) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final ethereumAddress = await getEthereumAddress();
 
@@ -548,7 +595,8 @@ class ConfigurationService implements IConfigurationService {
         PENDING_FORCE_EXITS_KEY, chainId, ethereumAddress, name, value, false);
   }
 
-  void updatePendingForceExitId(
+  @override
+  Future<void> updatePendingForceExitId(
       String transactionHash, String transactionId) async {
     final chainId = getCurrentEnvironment().chainId.toString();
     final hermezEthereumAddress = await getHermezAddress();
@@ -562,7 +610,7 @@ class ConfigurationService implements IConfigurationService {
         false);
   }
 
-  /*function checkPendingDeposits () {
+/*function checkPendingDeposits () {
     return (dispatch, getState) => {
     const { global: { wallet, pendingDeposits, ethereumNetworkTask } } = getState()
 

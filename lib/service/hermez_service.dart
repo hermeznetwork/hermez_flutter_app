@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:hermez_sdk/addresses.dart' as addresses;
 import 'package:hermez_sdk/api.dart' as api;
 import 'package:hermez_sdk/constants.dart';
 import 'package:hermez_sdk/hermez_compressed_amount.dart';
@@ -23,16 +22,14 @@ import 'package:hermez_sdk/tx.dart' as tx;
 import 'package:hermez_sdk/tx_pool.dart' as tx_pool;
 import 'package:hermez_sdk/tx_utils.dart';
 import 'package:web3dart/crypto.dart';
-import 'package:web3dart/web3dart.dart' as web3;
 
-import 'configuration_service.dart';
+import 'configuration_service_old.dart';
 
 abstract class IHermezService {
   Future<StateResponse> getState();
-  Future<bool> authorizeAccountCreation(
-      web3.EthereumAddress ethereumAddress, String bjj, String signature);
+  Future<bool> authorizeAccountCreation();
   Future<CreateAccountAuthorization> getCreateAccountAuthorization(
-      web3.EthereumAddress ethereumAddress);
+      String hermezAddress);
   Future<List<Account>> getAccounts(String hezAddress, List<int> tokenIds,
       {int fromItem = 0,
       api.PaginationOrder order = api.PaginationOrder.ASC,
@@ -82,10 +79,17 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<bool> authorizeAccountCreation(web3.EthereumAddress ethereumAddress,
-      String bjj, String signature) async {
-    final response = await api.postCreateAccountAuthorization(
-        addresses.getHermezAddress(ethereumAddress.hex), bjj, signature);
+  Future<bool> authorizeAccountCreation() async {
+    final ethereumPrivateKey = await _configService.getPrivateKey();
+    final hermezPrivateKey = await _configService.getHermezPrivateKey();
+    final hermezAddress = await _configService.getHermezAddress();
+    final hermezWallet =
+        HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
+    String bjj = hermezWallet.publicKeyBase64;
+    final signature =
+        await hermezWallet.signCreateAccountAuthorization(ethereumPrivateKey);
+    final response =
+        await api.postCreateAccountAuthorization(hermezAddress, bjj, signature);
     if (response != null) {
       return response.statusCode == 200;
     } else {
@@ -95,9 +99,8 @@ class HermezService implements IHermezService {
 
   @override
   Future<CreateAccountAuthorization> getCreateAccountAuthorization(
-      web3.EthereumAddress ethereumAddress) async {
-    final response = await api.getCreateAccountAuthorization(
-        addresses.getHermezAddress(ethereumAddress.hex));
+      String hermezAddress) async {
+    final response = await api.getCreateAccountAuthorization(hermezAddress);
     return response;
   }
 

@@ -1,4 +1,3 @@
-import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/src/data/accounts/account_in_network_repository.dart';
 import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/data/network/explorer_service.dart';
@@ -7,6 +6,7 @@ import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/data/transactions/transaction_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
 import 'package:hermez_sdk/model/account.dart' as hezAccount;
@@ -47,18 +47,19 @@ class WalletInNetworkRepository implements WalletRepository {
             tokens.firstWhere((token) => token.id == l2Account.tokenId);
         PriceToken priceToken = priceTokens
             .firstWhere((priceToken) => priceToken.id == l2Account.tokenId);
-        /* ForgedTransactionsRequest transactionsRequest =
-          ForgedTransactionsRequest();
-      ForgedTransactionsResponse transactionsResponse =
-          await _transactionInNetworkRepository
-              .getForgedTransactions(transactionsRequest);*/
+        List<dynamic> transactions =
+            await _transactionInNetworkRepository.getTransactions(
+                layerFilter: LayerFilter.L2,
+                address: l2Account.hezEthereumAddress,
+                accountIndex: l2Account.accountIndex,
+                tokenId: token.id);
         l2Accounts.add(Account(
             l2Account: true,
             address: l2Account.hezEthereumAddress,
             bjj: l2Account.bjj,
             accountIndex: l2Account.accountIndex,
             balance: l2Account.balance,
-            //transactions: transactionsResponse.transactions,
+            transactions: transactions,
             token: token,
             price: priceToken));
       });
@@ -68,6 +69,11 @@ class WalletInNetworkRepository implements WalletRepository {
             tokens.firstWhere((token) => token.id == l1Account.tokenId);
         PriceToken priceToken = priceTokens
             .firstWhere((priceToken) => priceToken.id == l1Account.tokenId);
+        List<dynamic> transactions =
+            await _transactionInNetworkRepository.getTransactions(
+                layerFilter: LayerFilter.L1,
+                address: l1Account.hezEthereumAddress,
+                tokenId: token.id);
         /*List<dynamic> transactions = await _transactionInNetworkRepository
           .getEthereumTransactionsByAddress(
               ethereumAddress, token.id == 0 ? "" : token.ethereumAddress);*/
@@ -99,24 +105,5 @@ class WalletInNetworkRepository implements WalletRepository {
         l1Accounts: l1Accounts,
         l2Accounts: l2Accounts));
     return wallets;
-  }
-
-  @override
-  Future<void> resetWallet() async {
-    await _configurationService.setMnemonic("");
-    await _configurationService.setPrivateKey("");
-    await _configurationService.setHermezPrivateKey("");
-    await _configurationService.setBabyJubJubHex("");
-    await _configurationService.setBabyJubJubBase64("");
-    await _configurationService.setEthereumAddress("");
-    await _configurationService.setHermezAddress("");
-    await _configurationService.setPasscode("");
-    await _configurationService.setBiometricsFingerprint(false);
-    await _configurationService.setBiometricsFace(false);
-    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.USD);
-    await _configurationService.setDefaultFee(WalletDefaultFee.AVERAGE);
-    await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
-    await _configurationService.setupDone(false);
-    await _configurationService.backupDone(false);
   }
 }

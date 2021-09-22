@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/src/data/network/configuration_service.dart';
-//import 'package:hermez/service/configuration_service_old.dart';
+import 'package:hermez/screens/info.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:local_auth/local_auth.dart';
-
-import 'info.dart';
 
 class PinArguments {
   final String title;

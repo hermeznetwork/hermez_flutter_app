@@ -12,7 +12,7 @@ import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/wallet_details.dart';
 import 'package:hermez/screens/wallet_selector.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/service/network/model/price_token.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/addresses.dart';

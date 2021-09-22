@@ -9,15 +9,23 @@ import 'package:hermez/src/data/network/explorer_service.dart';
 import 'package:hermez/src/data/network/hermez_service.dart';
 import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/data/network/storage_service.dart';
+import 'package:hermez/src/data/onboarding/onboarding_in_network_repository.dart';
 import 'package:hermez/src/data/wallets/wallet_in_network_repository.dart';
+import 'package:hermez/src/domain/onboarding/onboarding_repository.dart';
+import 'package:hermez/src/domain/onboarding/usecases/confirm_mnemonic_use_case.dart';
+import 'package:hermez/src/domain/onboarding/usecases/create_mnemonic_use_case.dart';
+import 'package:hermez/src/domain/onboarding/usecases/import_private_key_use_case.dart';
 import 'package:hermez/src/domain/wallets/get_wallets_use_case.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
+import 'package:hermez/src/presentation/onboarding/onboarding_bloc.dart';
 import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
 import 'package:hermez_sdk/hermez_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constants.dart';
 import 'environment.dart';
+import 'src/domain/onboarding/usecases/check_mnemonic_use_case.dart';
+import 'src/domain/onboarding/usecases/import_mnemonic_use_case.dart';
 
 final getIt = GetIt.instance;
 
@@ -69,7 +77,23 @@ void registerWalletDependencies() {
 
 void registerSettingsDependencies() {}
 
-void registerOnboardingDependencies() {}
+void registerOnboardingDependencies() {
+  getIt.registerFactory(
+      () => OnboardingBloc(getIt(), getIt(), getIt(), getIt(), getIt()));
+
+  getIt.registerLazySingleton(() => CreateMnemonicUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ConfirmMnemonicUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => CheckMnemonicUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ImportMnemonicUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ImportPrivateKeyUseCase(getIt()));
+
+  getIt.registerLazySingleton<OnboardingRepository>(
+      () => OnboardingInNetworkRepository(getIt(), getIt()));
+}
 
 void registerTransferDependencies() {}
 

@@ -6,7 +6,9 @@ import 'package:hermez_sdk/model/forged_transaction.dart';
 import 'package:hermez_sdk/model/forged_transactions_request.dart';
 import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/transaction.dart';
 
 enum LayerFilter { ALL, L1, L2 }
 
@@ -22,9 +24,6 @@ abstract class TransactionRepository {
       ForgedTransactionsRequest request);
 
   Future<ForgedTransaction> getForgedTransactionById(String transactionId);
-
-  Future<List<dynamic>> getEthereumTransactionsByAddress(String address,
-      {int tokenId = 0});
 
   Future<List<PoolTransaction>> getPoolTransactions([String accountIndex]);
 
@@ -56,6 +55,8 @@ abstract class TransactionRepository {
       bool completeDelayedWithdrawal, bool instantWithdrawal,
       {BigInt gasLimit, int gasPrice = 0});
 
+  Future<bool> isInstantWithdrawalAllowed(double amount, Token token);
+
   Future<BigInt> forceExitGasLimit(double amount, Account account);
 
   Future<bool> forceExit(double amount, Account account,
@@ -64,4 +65,8 @@ abstract class TransactionRepository {
   Future<bool> exit(double amount, Account account, double fee);
 
   Future<bool> transfer(double amount, Account from, Account to, double fee);
+
+  Future<bool> sendL2Transaction(Transaction transaction);
+
+  Future<RecommendedFee> fetchFees();
 }

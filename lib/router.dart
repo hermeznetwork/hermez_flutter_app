@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/screens/account_selector.dart';
-import 'package:hermez/screens/backup_info.dart';
-import 'package:hermez/screens/biometrics.dart';
-import 'package:hermez/screens/fee_selector.dart';
-import 'package:hermez/screens/first_deposit.dart';
-import 'package:hermez/screens/home.dart';
-import 'package:hermez/screens/import.dart';
-import 'package:hermez/screens/info.dart';
-import 'package:hermez/screens/intro.dart';
-import 'package:hermez/screens/move_info.dart';
 import 'package:hermez/screens/pin.dart';
-import 'package:hermez/screens/qrcode.dart';
-import 'package:hermez/screens/qrcode_scanner.dart';
-import 'package:hermez/screens/recovery_phrase.dart';
-import 'package:hermez/screens/recovery_phrase_confirm.dart';
-import 'package:hermez/screens/remove_account_info.dart';
-import 'package:hermez/screens/settings_details.dart';
 import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/screens/transaction_details.dart';
-import 'package:hermez/service/configuration_service.dart';
-import 'package:provider/provider.dart';
+import 'package:hermez/src/data/network/configuration_service.dart';
+//import 'package:hermez/service/configuration_service_old.dart';
+import 'package:hermez/src/presentation/onboarding/widgets/import.dart';
+import 'package:hermez/src/presentation/onboarding/widgets/intro.dart';
 
-import 'context/setup/wallet_setup_provider.dart';
 import 'context/transfer/wallet_transfer_provider.dart';
-import 'context/wallet/wallet_provider.dart';
+import 'dependencies_provider.dart';
 
 Map<String, WidgetBuilder> getRoutes(context) {
   return {
     '/': (BuildContext context) {
+      var configurationService = getIt<IConfigurationService>();
+      if (configurationService.didSetupWallet()) {
+        return PinPage(
+            arguments:
+                PinArguments("Enter passcode", false, false, onSuccess: () {
+              Navigator.pushReplacementNamed(context, '/home');
+            }),
+            configurationService: configurationService);
+      } else {
+        //return WalletSetupProvider(builder: (context, store) {
+        return IntroPage();
+        //});
+      }
       return IntroPage(); //BlocProvider(
       //bloc: getIt<WalletsBloc>(), child: IntroPage());
       /*var configurationService = Provider.of<ConfigurationService>(context);
@@ -44,8 +43,11 @@ Map<String, WidgetBuilder> getRoutes(context) {
         });
       }*/
     },
-    '/home': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
+    '/import': (BuildContext context) {
+      return ImportWalletPage();
+    },
+    /*'/home': (BuildContext context) {
+      var configurationService = getIt<IConfigurationService>();
       if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
           final bool showHermezWallet =
@@ -60,12 +62,12 @@ Map<String, WidgetBuilder> getRoutes(context) {
           return HomePage(arguments: args);
         });
       } else {
-        return WalletSetupProvider(builder: (context, store) {
+        //return WalletSetupProvider(builder: (context, store) {
           return IntroPage();
-        });
+        //});
       }
-    },
-    '/pin': (BuildContext context) {
+    },*/
+    /*'/pin': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       return PinPage(
           arguments: ModalRoute.of(context).settings.arguments,
@@ -144,7 +146,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
       return WalletSetupProvider(builder: (context, store) {
         return IntroPage();
       });
-    },
+    },*/
 
     //(BuildContext context) {
     /*var configurationService = Provider.of<ConfigurationService>(context);
@@ -163,11 +165,11 @@ Map<String, WidgetBuilder> getRoutes(context) {
 
           return WalletCreatePage("Create wallet");
         }),*/
-    '/import': (BuildContext context) => WalletSetupProvider(
+    /*'/import': (BuildContext context) => WalletSetupProvider(
           builder: (context, store) {
             return ImportWalletPage(store: store);
           },
-        ),
+        ),*/
     //'/amount': (BuildContext context) => AmountPage(),
     /*'/receiver': (BuildContext context) =>
         ReceiverPage(arguments: ModalRoute.of(context).settings.arguments),*/

@@ -1,10 +1,16 @@
 import 'dart:collection';
+import 'dart:math';
+import 'dart:typed_data';
 
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/src/data/network/configuration_service.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/api.dart';
 import 'package:hermez_sdk/environment.dart';
@@ -15,6 +21,7 @@ import 'package:hermez_sdk/model/forged_transaction.dart';
 import 'package:hermez_sdk/model/forged_transactions_request.dart';
 import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
+import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:hermez_sdk/model/transaction.dart';
 import 'package:hermez_sdk/tx_utils.dart';
@@ -39,19 +46,13 @@ class TransactionInNetworkRepository implements TransactionRepository {
     switch (layerFilter) {
       case LayerFilter.ALL:
         final hermezAddress = await _configurationService.getHermezAddress();
-        Token token = await getToken(tokenId);
-        ForgedTransactionsRequest request = ForgedTransactionsRequest(
-            ethereumAddress: hermezAddress,
-            accountIndex: accountIndex,
-            batchNum: token.ethereumBlockNum,
-            tokenId: tokenId,
-            fromItem: fromItem);
-        ForgedTransactionsResponse forgedTransactionsResponse =
-            await _hermezService.getForgedTransactions(request);
-        response.addAll(forgedTransactionsResponse.transactions);
+        final hermezTransactions = await _getHermezTransactionsByAddress(
+            hermezAddress, accountIndex,
+            tokenId: tokenId, fromItem: fromItem);
+        response.addAll(hermezTransactions.transactions);
         final ethereumAddress =
             await _configurationService.getEthereumAddress();
-        final ethereumTransactions = await getEthereumTransactionsByAddress(
+        final ethereumTransactions = await _getEthereumTransactionsByAddress(
             ethereumAddress,
             tokenId: tokenId);
         response.addAll(ethereumTransactions);
@@ -59,23 +60,17 @@ class TransactionInNetworkRepository implements TransactionRepository {
       case LayerFilter.L1:
         final ethereumAddress =
             await _configurationService.getEthereumAddress();
-        final ethereumTransactions = await getEthereumTransactionsByAddress(
+        final ethereumTransactions = await _getEthereumTransactionsByAddress(
             ethereumAddress,
             tokenId: tokenId);
         response.addAll(ethereumTransactions);
         break;
       case LayerFilter.L2:
         final hermezAddress = await _configurationService.getHermezAddress();
-        Token token = await getToken(tokenId);
-        ForgedTransactionsRequest request = ForgedTransactionsRequest(
-            ethereumAddress: hermezAddress,
-            accountIndex: accountIndex,
-            batchNum: token.ethereumBlockNum,
-            tokenId: tokenId,
-            fromItem: fromItem);
-        ForgedTransactionsResponse forgedTransactionsResponse =
-            await _hermezService.getForgedTransactions(request);
-        response.addAll(forgedTransactionsResponse.transactions);
+        final hermezTransactions = await _getHermezTransactionsByAddress(
+            hermezAddress, accountIndex,
+            tokenId: tokenId, fromItem: fromItem);
+        response.addAll(hermezTransactions.transactions);
         break;
     }
     return response;
@@ -113,8 +108,7 @@ class TransactionInNetworkRepository implements TransactionRepository {
     return response;
   }
 
-  @override
-  Future<List<dynamic>> getEthereumTransactionsByAddress(String address,
+  Future<List<dynamic>> _getEthereumTransactionsByAddress(String address,
       {int tokenId = 0}) async {
     if (tokenId == 0) {
       return _explorerService.getTransactionsByAccountAddress(address);
@@ -127,12 +121,13 @@ class TransactionInNetworkRepository implements TransactionRepository {
     }
   }
 
-  Future<ForgedTransactionsResponse> getHermezTransactionsByAddress(
-      String address, Account account, int fromItem) async {
-    Token token = await getToken(account.tokenId);
+  Future<ForgedTransactionsResponse> _getHermezTransactionsByAddress(
+      String address, String accountIndex,
+      {int tokenId = 0, int fromItem = 0}) async {
+    Token token = await getToken(tokenId);
     ForgedTransactionsRequest request = ForgedTransactionsRequest(
-        ethereumAddress: addresses.getHermezAddress(address),
-        accountIndex: account.accountIndex,
+        ethereumAddress: address,
+        accountIndex: accountIndex,
         batchNum: token.ethereumBlockNum,
         tokenId: token.id,
         fromItem: fromItem);
@@ -451,7 +446,7 @@ class TransactionInNetworkRepository implements TransactionRepository {
             await _contractService.getTxReceipt(transactionHash);
         final ethereumAddress =
             await _configurationService.getEthereumAddress();
-        List<dynamic> transactions = await getEthereumTransactionsByAddress(
+        List<dynamic> transactions = await _getEthereumTransactionsByAddress(
             ethereumAddress,
             tokenId: Token.fromJson(pendingTransfer['token']).id);
         final transactionFound = transactions.firstWhere(
@@ -508,6 +503,13 @@ class TransactionInNetworkRepository implements TransactionRepository {
   }
 
   @override
+  Future<bool> isInstantWithdrawalAllowed(double amount, Token token) async {
+    final success =
+        await _hermezService.isInstantWithdrawalAllowed(amount, token);
+    return success;
+  }
+
+  @override
   Future<BigInt> forceExitGasLimit(double amount, Account account) async {
     return _hermezService.forceExitGasLimit(amount, account);
   }
@@ -550,9 +552,92 @@ class TransactionInNetworkRepository implements TransactionRepository {
     return success;
   }
 
+  @override
   Future<bool> sendL2Transaction(Transaction transaction) async {
     final result = await _hermezService.sendL2Transaction(transaction);
     return result;
+  }
+
+  /// Fetches the recommended fees from the Coordinator
+  /// @returns {RecommendedFee}
+  @override
+  Future<RecommendedFee> fetchFees() {
+    return _hermezService.getRecommendedFee();
+  }
+
+  /// Calculates the fee for the transaction.
+  /// It takes the appropriate recomended fee in USD from the coordinator
+  /// and converts it to token value.
+  /// @param {Object} fees - The recommended Fee object returned by the Coordinator
+  /// @param {Boolean} iExistingAccount - Whether it's a existingAccount transfer
+  /// @returns {number} - Transaction fee
+  double getFee(RecommendedFee fees, bool isExistingAccount, PriceToken token,
+      TransactionType transactionType) {
+    if (token.USD == 0) {
+      return 0;
+    }
+
+    final fee = (isExistingAccount ||
+            transactionType == TransactionType.EXIT ||
+            transactionType == TransactionType.FORCEEXIT)
+        ? fees.existingAccount
+        : fees.createAccount;
+
+    return double.parse((fee / token.USD).toStringAsFixed(6));
+  }
+
+  Future<GasPriceResponse> getGasPrice() async {
+    GasPriceResponse gasPrice = await _contractService.getGasPrice();
+    return gasPrice;
+  }
+
+  Future<BigInt> getGasLimit(String from, String to, BigInt amount, Token token,
+      {Uint8List data}) async {
+    web3.EthereumAddress fromAddress;
+    web3.EthereumAddress toAddress;
+    if (from != null && from.isNotEmpty) {
+      fromAddress = web3.EthereumAddress.fromHex(from);
+    }
+    if (to != null && to.isNotEmpty) {
+      toAddress = web3.EthereumAddress.fromHex(to);
+    }
+
+    BigInt maxGas = await _contractService.getEstimatedGas(
+        fromAddress, toAddress, amount, data, token);
+    return maxGas;
+  }
+
+  Future<BigInt> getEstimatedGas(String from, String to, BigInt amount,
+      Token token, WalletDefaultFee feeSpeed,
+      {Uint8List data}) async {
+    web3.EthereumAddress fromAddress;
+    web3.EthereumAddress toAddress;
+    if (from != null && from.isNotEmpty) {
+      fromAddress = web3.EthereumAddress.fromHex(from);
+    }
+    if (to != null && to.isNotEmpty) {
+      toAddress = web3.EthereumAddress.fromHex(to);
+    }
+    GasPriceResponse gasPriceResponse = await getGasPrice();
+    BigInt maxGas = await _contractService.getEstimatedGas(
+        fromAddress, toAddress, amount, data, token);
+
+    BigInt gasPrice = BigInt.zero;
+    switch (feeSpeed) {
+      case WalletDefaultFee.SLOW:
+        gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
+        break;
+      case WalletDefaultFee.AVERAGE:
+        gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
+        break;
+      case WalletDefaultFee.FAST:
+        gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
+        break;
+    }
+
+    BigInt estimatedFee = gasPrice * maxGas;
+
+    return estimatedFee;
   }
 
   /*@override

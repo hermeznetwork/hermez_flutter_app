@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+//import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/screens/account_selector.dart';
 import 'package:hermez/screens/qrcode.dart';

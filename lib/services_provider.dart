@@ -3,7 +3,7 @@ import 'package:hermez/constants.dart';
 import 'package:hermez/environment.dart';
 import 'package:hermez/secrets/keys.dart';
 import 'package:hermez/service/address_service.dart';
-import 'package:hermez/service/configuration_service.dart';
+import 'package:hermez/service/configuration_service_old.dart';
 import 'package:hermez/service/contract_service.dart';
 import 'package:hermez/service/explorer_service.dart';
 import 'package:hermez/service/hermez_service.dart';
