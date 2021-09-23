@@ -4,12 +4,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
-import 'package:hermez/model/wallet.dart';
-import 'package:hermez/screens/qrcode.dart';
-import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez/screens/transaction_details.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
@@ -28,8 +29,6 @@ import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:hermez_sdk/tx_utils.dart';
 import 'package:intl/intl.dart';
-
-import '../context/wallet/wallet_handler.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable

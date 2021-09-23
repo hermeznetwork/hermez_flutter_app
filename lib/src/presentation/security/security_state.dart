@@ -1,42 +1,45 @@
 import 'package:flutter/widgets.dart';
 
 abstract class SecurityState {
-  final OnboardingItemState onboardingItem;
-  SecurityState({@required this.onboardingItem});
+  final PinItemState pinItem;
+  SecurityState({@required this.pinItem});
 
-  factory SecurityState.init() => InitOnboardingState();
+  factory SecurityState.init() => InitPinState();
 
-  factory SecurityState.mnemonicCreated(OnboardingItemState onboardingItem) =>
-      MnemonicCreatedState(onboardingItem: onboardingItem);
+  factory SecurityState.pinCreated(PinItemState pinItem) =>
+      PinCreatedState(pinItem: pinItem);
 
-  factory SecurityState.mnemonicConfirmed() => MnemonicConfirmedState();
+  factory SecurityState.pinConfirmed(PinItemState pinItem) =>
+      PinConfirmedState(pinItem: pinItem);
 
   factory SecurityState.error(String message) =>
-      ErrorOnboardingState(message: message);
+      ErrorPinState(message: message);
 }
 
-class InitOnboardingState extends SecurityState {
-  InitOnboardingState();
+class InitPinState extends SecurityState {
+  InitPinState();
 }
 
-class MnemonicCreatedState extends SecurityState {
-  final OnboardingItemState onboardingItem;
+class PinCreatedState extends SecurityState {
+  final PinItemState pinItem;
 
-  MnemonicCreatedState({@required this.onboardingItem});
+  PinCreatedState({@required this.pinItem});
 }
 
-class MnemonicConfirmedState extends SecurityState {
-  MnemonicConfirmedState();
+class PinConfirmedState extends SecurityState {
+  final PinItemState pinItem;
+
+  PinConfirmedState({@required this.pinItem});
 }
 
-class ErrorOnboardingState<T> extends SecurityState {
+class ErrorPinState<T> extends SecurityState {
   final String message;
 
-  ErrorOnboardingState({@required this.message});
+  ErrorPinState({@required this.message});
 }
 
-class OnboardingItemState {
-  final String mnemonic;
+class PinItemState {
+  final String pin;
 
-  OnboardingItemState(this.mnemonic);
+  PinItemState(this.pin);
 }

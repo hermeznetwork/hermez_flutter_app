@@ -1,6 +1,7 @@
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart' as wallet;
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
@@ -59,12 +60,12 @@ class UpdatingWallet extends WalletAction {}
 
 class DefaultCurrencyUpdated extends WalletAction {
   DefaultCurrencyUpdated(this.defaultCurrency);
-  final WalletDefaultCurrency defaultCurrency;
+  final wallet.WalletDefaultCurrency defaultCurrency;
 }
 
 class DefaultFeeUpdated extends WalletAction {
   DefaultFeeUpdated(this.defaultFee);
-  final WalletDefaultFee defaultFee;
+  final wallet.WalletDefaultFee defaultFee;
 }
 
 class ExchangeRatioUpdated extends WalletAction {

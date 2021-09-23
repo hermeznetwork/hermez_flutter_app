@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/screens/info.dart';
-import 'package:hermez/service/configuration_service_old.dart';
-import 'package:hermez/utils/biometrics_utils.dart';
+import 'package:hermez/dependencies_provider.dart';
+import 'package:hermez/src/data/network/configuration_service.dart';
+import 'package:hermez/src/presentation/home/widgets/info.dart';
+import 'package:hermez/src/presentation/security/security_bloc.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -46,6 +47,10 @@ class _PinPageState extends State<PinPage> {
 
   bool fingerprintEnabled = false;
   bool faceEnabled = false;
+
+  final SecurityBloc _bloc;
+
+  _PinPageState() : _bloc = getIt<SecurityBloc>();
 
   @override
   void initState() {
@@ -650,42 +655,26 @@ class _PinPageState extends State<PinPage> {
 
   Future<void> checkBiometrics() async {
     if (!widget.arguments.creatingPin) {
-      if (await BiometricsUtils.canCheckBiometrics() &&
-          await BiometricsUtils.isDeviceSupported()) {
-        List<BiometricType> availableBiometrics =
-            await BiometricsUtils.getAvailableBiometrics();
-        if (availableBiometrics.contains(BiometricType.face) &&
-            widget.configurationService.getBiometricsFace()) {
+      _bloc.checkBiometrics(BiometricType.face).then((enabled) {
+        if (enabled) {
           setState(() {
             faceEnabled = true;
           });
-          // Face ID.
-          bool authenticated =
-              await BiometricsUtils.authenticateWithBiometrics('Scan your face'
-                  ' to authenticate');
-          if (authenticated) {
-            if (widget.arguments.onSuccess != null) {
-              widget.arguments.onSuccess();
-            } else if (Navigator.canPop(context)) {
-              Navigator.pop(context, true);
-            }
-          }
-        } else if (availableBiometrics.contains(BiometricType.fingerprint) &&
-            widget.configurationService.getBiometricsFingerprint()) {
+        }
+      });
+      _bloc.checkBiometrics(BiometricType.fingerprint).then((enabled) {
+        if (enabled) {
           setState(() {
             fingerprintEnabled = true;
           });
-          // Touch ID.
-          bool authenticated = await BiometricsUtils.authenticateWithBiometrics(
-              'Scan your fingerprint'
-              ' to authenticate');
-          if (authenticated) {
-            if (widget.arguments.onSuccess != null) {
-              widget.arguments.onSuccess();
-            } else if (Navigator.canPop(context)) {
-              Navigator.pop(context, true);
-            }
-          }
+        }
+      });
+      bool authenticated = await _bloc.authenticateBiometrics();
+      if (authenticated) {
+        if (widget.arguments.onSuccess != null) {
+          widget.arguments.onSuccess();
+        } else if (Navigator.canPop(context)) {
+          Navigator.pop(context, true);
         }
       }
     }

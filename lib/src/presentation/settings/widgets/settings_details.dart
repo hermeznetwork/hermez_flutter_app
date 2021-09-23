@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/constants.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/pin.dart';
-import 'package:hermez/screens/recovery_phrase.dart';
-import 'package:hermez/screens/remove_account_info.dart';
-import 'package:hermez/service/configuration_service_old.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/src/data/network/configuration_service.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
+import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
+import 'package:hermez/src/presentation/settings/widgets/remove_account_info.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
@@ -18,10 +21,6 @@ import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../constants.dart';
-import 'account_selector.dart';
-import 'transaction_amount.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

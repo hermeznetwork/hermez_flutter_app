@@ -26,9 +26,9 @@ class _$Wallet extends Wallet {
   @override
   final double ethUSDPrice;
   @override
-  final WalletDefaultCurrency defaultCurrency;
+  final wallet.WalletDefaultCurrency defaultCurrency;
   @override
-  final WalletDefaultFee defaultFee;
+  final wallet.WalletDefaultFee defaultFee;
   @override
   final double exchangeRatio;
   @override
@@ -254,14 +254,14 @@ class WalletBuilder implements Builder<Wallet, WalletBuilder> {
   set tokensBalance(Map<String, BigInt> tokensBalance) =>
       _$this._tokensBalance = tokensBalance;
 
-  WalletDefaultCurrency _defaultCurrency;
-  WalletDefaultCurrency get defaultCurrency => _$this._defaultCurrency;
-  set defaultCurrency(WalletDefaultCurrency defaultCurrency) =>
+  wallet.WalletDefaultCurrency _defaultCurrency;
+  wallet.WalletDefaultCurrency get defaultCurrency => _$this._defaultCurrency;
+  set defaultCurrency(wallet.WalletDefaultCurrency defaultCurrency) =>
       _$this._defaultCurrency = defaultCurrency;
 
-  WalletDefaultFee _defaultFee;
-  WalletDefaultFee get defaultFee => _$this._defaultFee;
-  set defaultFee(WalletDefaultFee defaultFee) =>
+  wallet.WalletDefaultFee _defaultFee;
+  wallet.WalletDefaultFee get defaultFee => _$this._defaultFee;
+  set defaultFee(wallet.WalletDefaultFee defaultFee) =>
       _$this._defaultFee = defaultFee;
 
   double _exchangeRatio;

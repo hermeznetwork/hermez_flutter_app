@@ -2,9 +2,9 @@ import 'dart:collection';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hermez/constants.dart';
-import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/src/data/network/storage_service.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez_sdk/environment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

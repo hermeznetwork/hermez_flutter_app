@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/qrcode.dart';
+import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/addresses.dart';
 

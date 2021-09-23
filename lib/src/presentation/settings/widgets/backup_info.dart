@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hermez/screens/recovery_phrase.dart';
+import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class BackupInfoPage extends StatelessWidget {

@@ -1,5 +1,5 @@
-import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 
 abstract class SettingRepository {
   Future<void> updateDefaultCurrency(WalletDefaultCurrency defaultCurrency);

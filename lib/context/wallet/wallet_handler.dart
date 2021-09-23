@@ -5,16 +5,17 @@ import 'dart:typed_data';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/model/wallet.dart';
-import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez/service/address_service.dart';
-import 'package:hermez/service/configuration_service_old.dart';
-import 'package:hermez/service/contract_service.dart';
-import 'package:hermez/service/explorer_service.dart';
-import 'package:hermez/service/hermez_service.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez/service/network/model/price_token.dart';
-import 'package:hermez/service/price_updater_service.dart';
-import 'package:hermez/service/storage_service.dart';
+import 'package:hermez/src/data/network/address_service.dart';
+import 'package:hermez/src/data/network/configuration_service.dart';
+import 'package:hermez/src/data/network/contract_service.dart';
+import 'package:hermez/src/data/network/explorer_service.dart';
+import 'package:hermez/src/data/network/hermez_service.dart';
+import 'package:hermez/src/data/network/price_updater_service.dart';
+import 'package:hermez/src/data/network/storage_service.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart' as wallet;
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/addresses.dart' as addresses;
 import 'package:hermez_sdk/api.dart';
@@ -980,7 +981,7 @@ class WalletHandler {
   }
 
   Future<BigInt> getEstimatedGas(String from, String to, BigInt amount,
-      Token token, WalletDefaultFee feeSpeed,
+      Token token, wallet.WalletDefaultFee feeSpeed,
       {Uint8List data}) async {
     web3.EthereumAddress fromAddress;
     web3.EthereumAddress toAddress;
@@ -996,13 +997,13 @@ class WalletHandler {
 
     BigInt gasPrice = BigInt.zero;
     switch (feeSpeed) {
-      case WalletDefaultFee.SLOW:
+      case wallet.WalletDefaultFee.SLOW:
         gasPrice = BigInt.from(gasPriceResponse.safeLow * pow(10, 8));
         break;
-      case WalletDefaultFee.AVERAGE:
+      case wallet.WalletDefaultFee.AVERAGE:
         gasPrice = BigInt.from(gasPriceResponse.average * pow(10, 8));
         break;
-      case WalletDefaultFee.FAST:
+      case wallet.WalletDefaultFee.FAST:
         gasPrice = BigInt.from(gasPriceResponse.fast * pow(10, 8));
         break;
     }
@@ -1013,14 +1014,14 @@ class WalletHandler {
   }
 
   Future<void> updateDefaultCurrency(
-      WalletDefaultCurrency defaultCurrency) async {
+      wallet.WalletDefaultCurrency defaultCurrency) async {
     _configurationService.setDefaultCurrency(defaultCurrency);
     _store.dispatch(ExchangeRatioUpdated(_configurationService
         .getExchangeRatio(defaultCurrency.toString().split(".").last)));
     _store.dispatch(DefaultCurrencyUpdated(defaultCurrency));
   }
 
-  Future<void> updateDefaultFee(WalletDefaultFee defaultFee) async {
+  Future<void> updateDefaultFee(wallet.WalletDefaultFee defaultFee) async {
     _configurationService.setDefaultFee(defaultFee);
     _store.dispatch(DefaultFeeUpdated(defaultFee));
   }
@@ -1070,8 +1071,9 @@ class WalletHandler {
     await _configurationService.setPasscode("");
     await _configurationService.setBiometricsFingerprint(false);
     await _configurationService.setBiometricsFace(false);
-    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.USD);
-    await _configurationService.setDefaultFee(WalletDefaultFee.AVERAGE);
+    await _configurationService
+        .setDefaultCurrency(wallet.WalletDefaultCurrency.USD);
+    await _configurationService.setDefaultFee(wallet.WalletDefaultFee.AVERAGE);
     await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
     await _configurationService.setupDone(false);
     await _configurationService.backupDone(false);

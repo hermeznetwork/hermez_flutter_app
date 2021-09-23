@@ -1,5 +1,5 @@
-import 'package:hermez/service/contract_service.dart';
-import 'package:hermez/service/hermez_service.dart';
+import 'package:hermez/src/data/network/contract_service.dart';
+import 'package:hermez/src/data/network/hermez_service.dart';
 import 'package:hermez/src/data/transactions/transaction_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/screens/transaction_amount.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class MoveRow extends StatelessWidget {

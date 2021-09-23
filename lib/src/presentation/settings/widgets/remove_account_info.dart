@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/screens/pin.dart';
+import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class RemoveAccountInfoArguments {

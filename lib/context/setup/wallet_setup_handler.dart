@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hermez/model/wallet_setup.dart';
-import 'package:hermez/service/address_service.dart';
+import 'package:hermez/src/data/network/address_service.dart';
 
 import 'wallet_setup_state.dart';
 

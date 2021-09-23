@@ -8,7 +8,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/dialog/alert.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/constants.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/share_utils.dart';
@@ -16,9 +18,6 @@ import 'package:hermez_sdk/model/token.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-
-import '../context/wallet/wallet_handler.dart';
-import 'transaction_amount.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable

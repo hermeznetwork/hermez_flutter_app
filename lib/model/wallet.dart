@@ -1,7 +1,8 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
-import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart' as wallet;
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
@@ -9,10 +10,6 @@ import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/token.dart';
 
 part 'wallet.g.dart';
-
-enum WalletDefaultCurrency { USD, EUR, CNY, JPY, GBP }
-
-enum WalletDefaultFee { SLOW, AVERAGE, FAST }
 
 abstract class Wallet implements Built<Wallet, WalletBuilder> {
   @nullable
@@ -39,9 +36,9 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
 
   double get ethUSDPrice;
 
-  WalletDefaultCurrency get defaultCurrency;
+  wallet.WalletDefaultCurrency get defaultCurrency;
 
-  WalletDefaultFee get defaultFee;
+  wallet.WalletDefaultFee get defaultFee;
 
   double get exchangeRatio;
 
@@ -79,8 +76,8 @@ abstract class Wallet implements Built<Wallet, WalletBuilder> {
     ..tokensBalance = BuiltMap<String, BigInt>().toMap()
     ..ethBalance = BigInt.from(0)
     ..ethUSDPrice = 0
-    ..defaultCurrency = WalletDefaultCurrency.USD
-    ..defaultFee = WalletDefaultFee.AVERAGE
+    ..defaultCurrency = wallet.WalletDefaultCurrency.USD
+    ..defaultFee = wallet.WalletDefaultFee.AVERAGE
     ..exchangeRatio = 0.0
     ..txLevel = TransactionLevel.LEVEL1
     ..tokens = []

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hermez/model/wallet.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-
-import '../context/wallet/wallet_handler.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable

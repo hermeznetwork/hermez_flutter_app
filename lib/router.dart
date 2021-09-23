@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:hermez/screens/account_selector.dart';
-import 'package:hermez/screens/pin.dart';
-import 'package:hermez/screens/transaction_amount.dart';
-import 'package:hermez/screens/transaction_details.dart';
 import 'package:hermez/src/data/network/configuration_service.dart';
-//import 'package:hermez/service/configuration_service_old.dart';
+import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
+import 'package:hermez/src/presentation/home/widgets/home.dart';
 import 'package:hermez/src/presentation/onboarding/widgets/import.dart';
 import 'package:hermez/src/presentation/onboarding/widgets/intro.dart';
+import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 
 import 'context/transfer/wallet_transfer_provider.dart';
+import 'context/wallet/wallet_provider.dart';
 import 'dependencies_provider.dart';
 
 Map<String, WidgetBuilder> getRoutes(context) {
@@ -46,7 +47,13 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/import': (BuildContext context) {
       return ImportWalletPage();
     },
-    /*'/home': (BuildContext context) {
+    '/pin': (BuildContext context) {
+      var configurationService = getIt<IConfigurationService>();
+      return PinPage(
+          arguments: ModalRoute.of(context).settings.arguments,
+          configurationService: configurationService);
+    },
+    '/home': (BuildContext context) {
       var configurationService = getIt<IConfigurationService>();
       if (configurationService.didSetupWallet()) {
         return WalletProvider(builder: (context, store) {
@@ -63,10 +70,10 @@ Map<String, WidgetBuilder> getRoutes(context) {
         });
       } else {
         //return WalletSetupProvider(builder: (context, store) {
-          return IntroPage();
+        return IntroPage();
         //});
       }
-    },*/
+    },
     /*'/pin': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       return PinPage(

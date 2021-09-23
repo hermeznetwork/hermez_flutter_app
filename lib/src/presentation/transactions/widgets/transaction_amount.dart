@@ -10,11 +10,14 @@ import 'package:hermez/components/form/amount_input.dart';
 import 'package:hermez/components/form/paper_form.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/move_row.dart';
-import 'package:hermez/model/wallet.dart';
-import 'package:hermez/screens/qrcode_scanner.dart';
-import 'package:hermez/screens/transaction_details.dart';
+import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
+import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
+import 'package:hermez/src/presentation/qrcode/widgets/qrcode_scanner.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
@@ -29,10 +32,7 @@ import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:web3dart/crypto.dart';
 
-import '../context/wallet/wallet_handler.dart';
-import 'account_selector.dart';
 import 'fee_selector.dart';
-import 'qrcode.dart';
 
 enum TransactionLevel { LEVEL1, LEVEL2 }
 
@@ -174,7 +174,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                     padding: EdgeInsets.only(
                         left: 12.0, right: 12.0, top: 4, bottom: 4),
                     child: Text(
-                      widget.arguments.txLevel == TransactionLevel.LEVEL1
+                      widget.arguments.store.state.txLevel ==
+                              TransactionLevel.LEVEL1
                           ? "L1"
                           : "L2",
                       style: TextStyle(
@@ -262,7 +263,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                               ? selectedToken
                                               : widget.arguments.token,
                                           estimatedFee.toDouble(),
-                                          widget.arguments.txLevel ==
+                                          widget.arguments.store.state
+                                                      .txLevel ==
                                                   TransactionLevel.LEVEL1
                                               ? ethereumToken
                                               : selectedToken != null
@@ -303,7 +305,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               alignment: Alignment.center,
                               margin: EdgeInsets.only(top: 24.0),
                               child: TextButton(
-                                onPressed: ((widget.arguments.txLevel ==
+                                onPressed: ((widget.arguments.store.state
+                                                    .txLevel ==
                                                 TransactionLevel.LEVEL2 &&
                                             widget.arguments.transactionType ==
                                                 TransactionType.SEND) ||
@@ -345,7 +348,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                     Text(
                                       feeText,
                                       style: TextStyle(
-                                        color: ((widget.arguments.txLevel ==
+                                        color: ((widget.arguments.store.state
+                                                            .txLevel ==
                                                         TransactionLevel
                                                             .LEVEL2 &&
                                                     widget.arguments
@@ -358,7 +362,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                             : HermezColors.blackTwo,
                                         fontSize: 16,
                                         fontFamily: 'ModernEra',
-                                        fontWeight: (widget.arguments.txLevel ==
+                                        fontWeight: (widget.arguments.store
+                                                            .state.txLevel ==
                                                         TransactionLevel
                                                             .LEVEL2 &&
                                                     widget.arguments
@@ -371,7 +376,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                                    (widget.arguments.txLevel ==
+                                    (widget.arguments.store.state.txLevel ==
                                                 TransactionLevel.LEVEL2 &&
                                             widget.arguments.transactionType ==
                                                 TransactionType.SEND)
@@ -380,7 +385,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                 ConnectionState.done
                                             ? widget.arguments.transactionType ==
                                                         TransactionType.EXIT ||
-                                                    widget.arguments.transactionType ==
+                                                    widget.arguments
+                                                            .transactionType ==
                                                         TransactionType
                                                             .FORCEEXIT
                                                 ? Container(
@@ -391,10 +397,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                         showEstimatedFees
                                                             ? 'assets/arrow_up.svg'
                                                             : 'assets/arrow_down.svg',
-                                                        color: HermezColors
-                                                            .blackTwo,
-                                                        semanticsLabel:
-                                                            'fee_selector'))
+                                                        color:
+                                                            HermezColors.blackTwo,
+                                                        semanticsLabel: 'fee_selector'))
                                                 : Container(
                                                     alignment: Alignment.center,
                                                     margin: EdgeInsets.only(
@@ -439,7 +444,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           widget.arguments.transactionType ==
                               TransactionType.DEPOSIT
                       ? MoveRow(
-                          widget.arguments.txLevel,
+                          widget.arguments.store.state.txLevel,
                           widget.arguments.allowChangeLevel &&
                                   needRefresh == false
                               ? () async {
@@ -507,7 +512,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           currency,
                           selectedAccount != null
                               ? BalanceUtils.calculatePendingBalance(
-                                      widget.arguments.txLevel,
+                                      widget.arguments.store.state.txLevel,
                                       selectedAccount,
                                       selectedToken.symbol,
                                       widget.arguments.store) /
@@ -521,7 +526,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                             final account = await Navigator.of(parentContext)
                                 .pushNamed("/account_selector",
                                     arguments: AccountSelectorArguments(
-                                      widget.arguments.txLevel,
+                                      widget.arguments.store.state.txLevel,
                                       widget.arguments.transactionType,
                                       widget.arguments.store,
                                     ));
@@ -561,7 +566,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               final account = await Navigator.of(parentContext)
                                   .pushNamed("/account_selector",
                                       arguments: AccountSelectorArguments(
-                                          widget.arguments.txLevel,
+                                          widget.arguments.store.state.txLevel,
                                           widget.arguments.transactionType,
                                           widget.arguments.store));
                               if (account != null) {
@@ -655,7 +660,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
         widget.arguments.transactionType == TransactionType.DEPOSIT ||
         widget.arguments.transactionType == TransactionType.WITHDRAW ||
-        (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+        (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
             widget.arguments.transactionType == TransactionType.SEND)) {
       // fee l1
       BigInt gasPrice = getGasPrice(selectedFeeSpeed);
@@ -979,8 +984,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                 Expanded(
                   child: AddressInput(
                     controller: addressController,
-                    layerOne:
-                        widget.arguments.txLevel == TransactionLevel.LEVEL1,
+                    layerOne: widget.arguments.store.state.txLevel ==
+                        TransactionLevel.LEVEL1,
                     onChanged: (value) async {
                       bool valid = await isAddressValid(value);
                       bool accountCreated = await isCreatedHermezAccount(value);
@@ -1034,7 +1039,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                 Navigator.of(context).pushNamed("/scanner",
                                     arguments: QRCodeScannerArguments(
                                         store: widget.arguments.store,
-                                        type: widget.arguments.txLevel ==
+                                        type: widget.arguments.store.state
+                                                    .txLevel ==
                                                 TransactionLevel.LEVEL1
                                             ? QRCodeScannerType.ETHEREUM_ADDRESS
                                             : QRCodeScannerType.HERMEZ_ADDRESS,
@@ -1359,7 +1365,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       Navigator.of(context).pushReplacementNamed("/qrcode",
           arguments: QRCodeArguments(
               qrCodeType: QRCodeType.REQUEST_PAYMENT,
-              code: widget.arguments.txLevel == TransactionLevel.LEVEL1
+              code: widget.arguments.store.state.txLevel ==
+                      TransactionLevel.LEVEL1
                   ? widget.arguments.store.state.ethereumAddress
                   : getHermezAddress(
                       widget.arguments.store.state.ethereumAddress),
@@ -1386,7 +1393,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
               arguments: TransactionDetailsArguments(
                   store: widget.arguments.store,
                   transactionType: widget.arguments.transactionType,
-                  transactionLevel: widget.arguments.txLevel,
+                  transactionLevel: widget.arguments.store.state.txLevel,
                   status: TransactionStatus.DRAFT,
                   account: selectedAccount,
                   token: selectedToken,
@@ -1499,7 +1506,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       amountIsValid =
           isAmountValid(EthAmountFormatter.removeDecimalZeroFormat(amount));
     } else if (widget.arguments.transactionType == TransactionType.SEND) {
-      if (widget.arguments.txLevel == TransactionLevel.LEVEL1) {
+      if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
         // calculate fee L1
         gasPriceResponse = await widget.arguments.store.getGasPrice();
         ethereumToken = await getEthereumToken();
@@ -1634,7 +1641,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           double.parse(amountController.value.text) > 0 &&
           widget.arguments.token != null &&
           needRefresh == false;
-    } else if (widget.arguments.txLevel == TransactionLevel.LEVEL1) {
+    } else if (widget.arguments.store.state.txLevel ==
+        TransactionLevel.LEVEL1) {
       if (widget.arguments.transactionType == TransactionType.SEND) {
         return amountIsValid &&
             enoughGas &&
@@ -1671,12 +1679,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   Future<bool> isAddressValid(String address) async {
     return address.isEmpty ||
-        (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+        (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
             AddressUtils.isValidEthereumAddress(address) &&
             strip0x(widget.arguments.store.state.ethereumAddress
                     .toLowerCase()) !=
                 strip0x(address.toLowerCase())) ||
-        (widget.arguments.txLevel == TransactionLevel.LEVEL2 &&
+        (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2 &&
             (isHermezEthereumAddress(address) &&
                     getHermezAddress(
                                 widget.arguments.store.state.ethereumAddress)
@@ -1706,11 +1714,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       if (widget.arguments.transactionType == TransactionType.DEPOSIT &&
               selectedAccount.tokenId == 0 ||
           (widget.arguments.transactionType != TransactionType.DEPOSIT &&
-              widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+              widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
               selectedAccount.tokenId == 0) ||
           widget.arguments.transactionType == TransactionType.EXIT ||
           (widget.arguments.transactionType == TransactionType.SEND &&
-              widget.arguments.txLevel == TransactionLevel.LEVEL2)) {
+              widget.arguments.store.state.txLevel ==
+                  TransactionLevel.LEVEL2)) {
         estimatedFee = getEstimatedFee();
       }
       //}
@@ -1749,11 +1758,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     if (widget.arguments.transactionType == TransactionType.DEPOSIT &&
             selectedAccount.tokenId == 0 ||
         (widget.arguments.transactionType != TransactionType.DEPOSIT &&
-            widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+            widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
             selectedAccount.tokenId == 0) ||
         widget.arguments.transactionType == TransactionType.EXIT ||
         (widget.arguments.transactionType == TransactionType.SEND &&
-            widget.arguments.txLevel == TransactionLevel.LEVEL2)) {
+            widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2)) {
       estimatedFee = getEstimatedFee();
     }
 
@@ -1785,7 +1794,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   Future<bool> isEnoughGas(BigInt gasFee) async {
-    if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+    if ((widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 &&
             widget.arguments.transactionType != TransactionType.RECEIVE) ||
         widget.arguments.transactionType == TransactionType.EXIT ||
         widget.arguments.transactionType == TransactionType.FORCEEXIT) {
@@ -1822,7 +1831,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   BigInt getGasPrice(WalletDefaultFee feeSpeed) {
     BigInt gasPrice = BigInt.one;
-    if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 ||
+    if ((widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1 ||
             widget.arguments.transactionType == TransactionType.EXIT ||
             widget.arguments.transactionType == TransactionType.FORCEEXIT) &&
         gasPriceResponse != null &&
@@ -1918,7 +1927,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     } else if (widget.arguments.transactionType == TransactionType.SEND) {
       Token token;
       PriceToken priceToken;
-      if (widget.arguments.txLevel == TransactionLevel.LEVEL1) {
+      if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1) {
         token = ethereumToken;
         priceToken = ethereumPriceToken;
       } else {

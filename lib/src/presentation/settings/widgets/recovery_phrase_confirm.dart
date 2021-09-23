@@ -3,11 +3,10 @@ import 'dart:math';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
-import 'package:hermez/service/configuration_service_old.dart';
+import 'package:hermez/src/data/network/configuration_service.dart';
+import 'package:hermez/src/presentation/home/widgets/info.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/recovery_phrase_utils.dart';
-
-import 'info.dart';
 
 class RecoveryPhraseConfirmPage extends StatefulWidget {
   RecoveryPhraseConfirmPage({Key key, this.configurationService})

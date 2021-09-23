@@ -12,11 +12,13 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/model/wallet.dart';
-import 'package:hermez/screens/qrcode.dart';
-import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
+import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -30,9 +32,6 @@ import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-
-import 'account_details.dart';
-import 'transaction_details.dart';
 
 class WalletDetailsArguments {
   final WalletHandler store;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hermez/dependencies_provider.dart';
-import 'package:hermez/screens/info.dart';
-import 'package:hermez/screens/pin.dart';
+import 'package:hermez/src/presentation/home/widgets/info.dart';
 import 'package:hermez/src/presentation/onboarding/onboarding_bloc.dart';
+import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class IntroPage extends StatelessWidget {

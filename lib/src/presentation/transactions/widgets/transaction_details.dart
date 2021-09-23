@@ -4,14 +4,16 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_handler.dart';
+import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/environment.dart';
-import 'package:hermez/model/wallet.dart';
-import 'package:hermez/screens/info.dart';
-import 'package:hermez/screens/pin.dart';
-import 'package:hermez/screens/transaction_amount.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez/service/network/model/price_token.dart';
+import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/home/widgets/info.dart';
+import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/transactions/widgets/move_info.dart';
+import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -25,9 +27,7 @@ import 'package:hermez_sdk/model/token.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../context/transfer/wallet_transfer_provider.dart';
 import 'fee_selector.dart';
-import 'move_info.dart';
 
 class TransactionDetailsArguments {
   final WalletHandler store;
@@ -1566,14 +1566,18 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     //if (needRefresh == true) {
     if (widget.arguments.status == TransactionStatus.DRAFT) {
       ethereumAccount = await getEthereumAccount();
-      ethereumToken = widget.arguments.store.state.tokens.firstWhere((Token token) => token.id == ethereumAccount.tokenId);
-      ethereumPriceToken = widget.arguments.store.state.priceTokens.firstWhere((PriceToken priceToken) => priceToken.id == ethereumAccount.tokenId);
+      ethereumToken = widget.arguments.store.state.tokens
+          .firstWhere((Token token) => token.id == ethereumAccount.tokenId);
+      ethereumPriceToken = widget.arguments.store.state.priceTokens.firstWhere(
+          (PriceToken priceToken) => priceToken.id == ethereumAccount.tokenId);
       gasPriceResponse = await getGasPriceResponse();
     } else if (widget.arguments.transactionLevel == TransactionLevel.LEVEL1 &&
         widget.arguments.transactionType != TransactionType.RECEIVE) {
       ethereumAccount = await getEthereumAccount();
-      ethereumToken = widget.arguments.store.state.tokens.firstWhere((Token token) => token.id == ethereumAccount.tokenId);
-      ethereumPriceToken = widget.arguments.store.state.priceTokens.firstWhere((PriceToken priceToken) => priceToken.id == ethereumAccount.tokenId);
+      ethereumToken = widget.arguments.store.state.tokens
+          .firstWhere((Token token) => token.id == ethereumAccount.tokenId);
+      ethereumPriceToken = widget.arguments.store.state.priceTokens.firstWhere(
+          (PriceToken priceToken) => priceToken.id == ethereumAccount.tokenId);
     }
 
     //needRefresh = false;
