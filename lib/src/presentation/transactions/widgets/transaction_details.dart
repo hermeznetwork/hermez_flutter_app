@@ -12,8 +12,8 @@ import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/home/widgets/info.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
-import 'package:hermez/src/presentation/transactions/widgets/move_info.dart';
-import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transfer/widgets/move_info.dart';
+import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -27,7 +27,7 @@ import 'package:hermez_sdk/model/token.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'fee_selector.dart';
+import '../../transfer/widgets/fee_selector.dart';
 
 class TransactionDetailsArguments {
   final WalletHandler store;
@@ -111,7 +111,6 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.arguments.fee == null &&
         widget.arguments.status == TransactionStatus.DRAFT) {

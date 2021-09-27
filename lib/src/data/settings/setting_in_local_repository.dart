@@ -1,7 +1,7 @@
 import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/domain/settings/setting_repository.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
-import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 
 class SettingInLocalRepository implements SettingRepository {
   final IConfigurationService _configurationService;

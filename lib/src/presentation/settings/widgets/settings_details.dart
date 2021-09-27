@@ -11,7 +11,7 @@ import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
 import 'package:hermez/src/presentation/settings/widgets/remove_account_info.dart';
-import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';

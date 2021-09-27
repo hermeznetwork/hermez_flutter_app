@@ -49,8 +49,10 @@ class SecurityBloc extends Bloc<SecurityState> {
     return _checkBiometricsUseCase
         .execute(biometricType)
         .then((biometricsEnabled) {
+      return biometricsEnabled;
       //changeState(SecurityState.pinConfirmed(PinItemState(pin)));
     }).catchError((error) {
+      return false;
       //changeState(SecurityState.error('A network error has occurred'));
     });
   }

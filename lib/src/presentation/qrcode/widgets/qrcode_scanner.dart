@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,12 +13,12 @@ typedef OnScanned = void Function(String address);
 enum QRCodeScannerType { ALL, HERMEZ_ADDRESS, ETHEREUM_ADDRESS, TRANSFER }
 
 class QRCodeScannerArguments {
-  final WalletHandler store;
+  //final WalletHandler store;
   final QRCodeScannerType type;
   final OnScanned onScanned;
   final bool closeWhenScanned;
   QRCodeScannerArguments(
-      {this.store,
+      {/*this.store,*/
       this.type = QRCodeScannerType.ALL,
       this.onScanned,
       this.closeWhenScanned = true});
@@ -46,7 +45,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   String result;
   QRViewController controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  final picker = ImagePicker();
+  // final picker = ImagePicker();
   var showFlashBtn = false;
   var showSwitchBtn = false;
   var flashStatus = false;

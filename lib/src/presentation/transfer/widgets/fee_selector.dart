@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
@@ -15,14 +14,15 @@ import 'package:hermez_sdk/model/token.dart';
 // title and message.
 
 class FeeSelectorArguments {
-  final WalletHandler store;
+  //final WalletHandler store;
   WalletDefaultFee selectedFee;
   Token ethereumToken;
   BigInt estimatedGas;
   GasPriceResponse gasPriceResponse;
   final void Function(WalletDefaultFee selectedFee) onFeeSelected;
 
-  FeeSelectorArguments(this.store,
+  FeeSelectorArguments(
+      //this.store,
       {this.selectedFee,
       this.ethereumToken,
       this.estimatedGas,

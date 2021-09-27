@@ -15,7 +15,7 @@ import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/data/network/storage_service.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart' as wallet;
-import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/addresses.dart' as addresses;
 import 'package:hermez_sdk/api.dart';

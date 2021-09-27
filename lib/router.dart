@@ -5,11 +5,10 @@ import 'package:hermez/src/presentation/home/widgets/home.dart';
 import 'package:hermez/src/presentation/onboarding/widgets/import.dart';
 import 'package:hermez/src/presentation/onboarding/widgets/intro.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
-import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
+import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 
 import 'context/transfer/wallet_transfer_provider.dart';
-import 'context/wallet/wallet_provider.dart';
 import 'dependencies_provider.dart';
 
 Map<String, WidgetBuilder> getRoutes(context) {
@@ -56,18 +55,17 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/home': (BuildContext context) {
       var configurationService = getIt<IConfigurationService>();
       if (configurationService.didSetupWallet()) {
-        return WalletProvider(builder: (context, store) {
-          final bool showHermezWallet =
-              ModalRoute.of(context).settings.arguments;
-          HomeArguments args;
-          if (showHermezWallet != null) {
-            args = HomeArguments(store, configurationService,
-                showHermezWallet: showHermezWallet);
-          } else {
-            args = HomeArguments(store, configurationService);
-          }
-          return HomePage(arguments: args);
-        });
+        //return WalletProvider(builder: (context, store) {
+        final bool showHermezWallet = ModalRoute.of(context).settings.arguments;
+        HomeArguments args;
+        if (showHermezWallet != null) {
+          args = HomeArguments(configurationService,
+              showHermezWallet: showHermezWallet);
+        } else {
+          args = HomeArguments(configurationService);
+        }
+        return HomePage(arguments: args);
+        //});
       } else {
         //return WalletSetupProvider(builder: (context, store) {
         return IntroPage();

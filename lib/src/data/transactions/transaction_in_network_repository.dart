@@ -10,7 +10,7 @@ import 'package:hermez/src/data/network/hermez_service.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
-import 'package:hermez/src/presentation/transactions/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/api.dart';
 import 'package:hermez_sdk/environment.dart';

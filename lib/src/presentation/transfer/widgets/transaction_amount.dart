@@ -326,19 +326,19 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                           Navigator.of(context).pushNamed(
                                               "/fee_selector",
                                               arguments: FeeSelectorArguments(
-                                                  widget.arguments.store,
+                                                  //widget.arguments.store,
                                                   selectedFee: selectedFeeSpeed,
                                                   ethereumToken: ethereumToken,
                                                   estimatedGas: gasLimit,
                                                   gasPriceResponse:
                                                       gasPriceResponse,
                                                   onFeeSelected: (selectedFee) {
-                                                setState(() {
-                                                  amountController.clear();
-                                                  selectedFeeSpeed =
-                                                      selectedFee;
-                                                });
-                                              }));
+                                                    setState(() {
+                                                      amountController.clear();
+                                                      selectedFeeSpeed =
+                                                          selectedFee;
+                                                    });
+                                                  }));
                                         }
                                       }),
                                 child: Row(
@@ -1038,7 +1038,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               onTap: () {
                                 Navigator.of(context).pushNamed("/scanner",
                                     arguments: QRCodeScannerArguments(
-                                        store: widget.arguments.store,
+                                        //store: widget.arguments.store,
                                         type: widget.arguments.store.state
                                                     .txLevel ==
                                                 TransactionLevel.LEVEL1
@@ -1328,7 +1328,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   ? () {
                       Navigator.of(context).pushNamed("/fee_selector",
                           arguments: FeeSelectorArguments(
-                              widget.arguments.store,
+                              //widget.arguments.store,
                               selectedFee: i == 0
                                   ? selectedFeeSpeed
                                   : selectedWithdrawFeeSpeed,
@@ -1337,16 +1337,16 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   i == 0 ? gasLimit : withdrawGasLimit,
                               gasPriceResponse: gasPriceResponse,
                               onFeeSelected: (selectedFee) {
-                            setState(() {
-                              amountController.clear();
-                              if (i == 0) {
-                                selectedFeeSpeed = selectedFee;
-                              } else {
-                                selectedWithdrawFeeSpeed = selectedFee;
-                              }
-                              needRefresh = true;
-                            });
-                          }));
+                                setState(() {
+                                  amountController.clear();
+                                  if (i == 0) {
+                                    selectedFeeSpeed = selectedFee;
+                                  } else {
+                                    selectedWithdrawFeeSpeed = selectedFee;
+                                  }
+                                  needRefresh = true;
+                                });
+                              }));
                     }
                   : null);
         });
