@@ -10,18 +10,19 @@ import 'package:hermez/src/domain/prices/price_repository.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:http/http.dart' as http2;
 
-class PriceInRemoteRepository extends ApiBaseClient implements PriceRepository {
+class PriceInNetworkRepository extends ApiBaseClient
+    implements PriceRepository {
   final String _baseAddress;
   final String _apiKey;
 
   final String TOKENS_URL = "/v1/tokens";
   final String CURRENCIES_URL = "/v1/currencies";
 
-  PriceInRemoteRepository(this._baseAddress, this._apiKey)
+  PriceInNetworkRepository(this._baseAddress, this._apiKey)
       : super(_baseAddress);
 
   @override
-  Future<List<PriceToken>> getTokensPrices() async {
+  Future<List<PriceToken>> getTokensPrices([List<int> tokenIds]) async {
     final response = await get(TOKENS_URL, null);
     final TokensResponse tokensResponse =
         TokensResponse.fromJson(json.decode(response.body));

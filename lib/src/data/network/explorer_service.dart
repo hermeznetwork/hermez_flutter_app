@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez_sdk/environment.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/crypto.dart';

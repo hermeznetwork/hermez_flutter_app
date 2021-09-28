@@ -7,7 +7,6 @@ abstract class AccountRepository {
       {int fromItem = 0,
       PaginationOrder order = PaginationOrder.ASC,
       int limit = DEFAULT_PAGE_SIZE});
-  Future<Account> getL2AccountByAddress(String hezAddress);
   Future<Account> getL2AccountByAccountIndex(String accountIndex);
   Future<List<Account>> getL1Accounts(String ethereumAddress,
       {bool showZeroBalanceAccounts, List<int> tokenIds});

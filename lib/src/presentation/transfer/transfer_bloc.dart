@@ -1,28 +1,28 @@
 import 'package:hermez/src/common/bloc/bloc.dart';
-import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transactions/usecases/get_transactions_use_case.dart';
 import 'package:hermez/src/presentation/transactions/transactions_state.dart';
+import 'package:hermez/src/presentation/transfer/transfer_state.dart';
+import 'package:hermez_sdk/model/transaction.dart';
 import 'package:intl/intl.dart';
 
-class TransactionsBloc extends Bloc<TransactionsState> {
-  final GetAllTransactionsUseCase _getAllTransactionsUseCase;
+class TransferBloc extends Bloc<TransferState> {
+  final TransferUseCase _transferUseCase;
 
-  TransactionsBloc(this._getAllTransactionsUseCase) {
-    changeState(TransactionsState.loading(searchTerm: ''));
+  TransferBloc(this._transferUseCase) {
+    changeState(TransferState.loading(searchTerm: ''));
   }
 
   void search(String searchTerm) {
-    _getAllTransactionsUseCase.execute().then((transactions) {
-      changeState(TransactionsState.loaded(
-          state.searchTerm, _mapTransactionsToState(transactions)));
+    _transferUseCase.execute().then((products) {
+      changeState(TransferState.loaded(
+          state.searchTerm, _mapTransactionsToState(products)));
     }).catchError((error) {
-      changeState(TransactionsState.error(
+      changeState(TransferState.error(
           state.searchTerm, 'A network error has occurred'));
     });
   }
 
-  List<TransactionItemState> _mapTransactionsToState(
-      List<Transaction> transactions) {
+  List<TransferState> _mapTransactionsToState(List<Transaction> transactions) {
     final formatCurrency = NumberFormat.simpleCurrency(locale: 'es-ES');
 
     /*return transactions

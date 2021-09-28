@@ -7,6 +7,7 @@ import 'package:hermez/constants.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
@@ -292,7 +293,9 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                               arguments: AccountSelectorArguments(
                                   TransactionLevel.LEVEL2,
                                   TransactionType.FORCEEXIT,
-                                  widget.arguments.store))
+                                  "" /*,
+                                  widget.arguments.store*/
+                                  ))
                           .then((selectedAccount) {
                         if (selectedAccount != null) {
                           Token token = widget.arguments.store.state.tokens

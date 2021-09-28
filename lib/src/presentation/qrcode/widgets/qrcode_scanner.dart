@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hermez/dependencies_provider.dart';
+import 'package:hermez/src/presentation/qrcode/qrcode_bloc.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:qr_code_tools/qr_code_tools.dart';
 
 typedef OnScanned = void Function(String address);
 
@@ -49,6 +49,10 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   var showFlashBtn = false;
   var showSwitchBtn = false;
   var flashStatus = false;
+
+  final QrcodeBloc _bloc;
+
+  _QRCodeScannerPageState() : _bloc = getIt<QrcodeBloc>();
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -216,13 +220,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
   }
 
   void _getQrByGallery() async {
-    XFile file = await picker.pickImage(source: ImageSource.gallery);
-    print(file.path);
-    String data = await QrCodeToolsPlugin.decodeFrom(file.path)
-        .onError((error, stackTrace) {
-      return error.toString();
-    });
-    print(data);
+    String data = await _bloc.qrcodeInGallery();
     if (data != null && data.length > 0) {
       if (result == null) {
         List<String> scannedStrings = data.split(":");

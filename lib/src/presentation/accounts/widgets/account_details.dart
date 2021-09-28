@@ -4,10 +4,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
@@ -35,14 +37,14 @@ import 'package:intl/intl.dart';
 // title and message.
 
 class AccountDetailsArguments {
-  final WalletHandler store;
+  //final WalletHandler store;
   Account account;
   Token token;
   PriceToken priceToken;
   BuildContext parentContext;
 
-  AccountDetailsArguments(this.store, this.account, this.token, this.priceToken,
-      this.parentContext);
+  AccountDetailsArguments(/*this.store,*/ this.account, this.token,
+      this.priceToken, this.parentContext);
 }
 
 class AccountDetailsPage extends StatefulWidget {
@@ -75,6 +77,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   final ScrollController _controller = ScrollController();
 
   double balance = 0.0;
+
+  final AccountBloc _bloc;
+  _AccountDetailsPageState() : _bloc = getIt<AccountBloc>() {
+    fetchData();
+  }
 
   Future<void> _onRefresh() {
     fromItem = 0;
@@ -1129,9 +1136,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   Future<void> fetchData() async {
     _stateResponse = await getState();
     if (_needRefresh) {
-      await widget.arguments.store.getAccounts();
+      _bloc.getAccount(tokenId);
+      //await widget.arguments.store.getAccounts();
     }
-    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
+    if (_bloc.state.accountItem.txLevel == TransactionLevel.LEVEL2) {
+      //if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
       pendingTransfers =
           await fetchL2PendingTransfers(widget.arguments.account.accountIndex);
       final List<ForgedTransaction> pendingTransfersTxs =

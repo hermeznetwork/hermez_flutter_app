@@ -12,13 +12,16 @@ import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -64,6 +67,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   List<dynamic> _pendingDeposits = [];
   bool _isLoading = false;
   StateResponse _stateResponse;
+
+  final WalletsBloc _bloc;
+  _WalletDetailsPageState() : _bloc = getIt<WalletsBloc>();
 
   @override
   void initState() {
@@ -1177,14 +1183,14 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
                   ).show(context);
                 } else {
-                  var needRefresh = await Navigator.of(context).pushNamed(
-                      "account_details",
-                      arguments: AccountDetailsArguments(
-                          widget.arguments.store,
-                          account,
-                          token,
-                          priceToken,
-                          widget.arguments.parentContext));
+                  var needRefresh =
+                      await Navigator.of(context).pushNamed("account_details",
+                          arguments: AccountDetailsArguments(
+                              //widget.arguments.store,
+                              account,
+                              token,
+                              priceToken,
+                              widget.arguments.parentContext));
                   if (needRefresh != null && needRefresh == true) {
                     _onRefresh();
                   } else {

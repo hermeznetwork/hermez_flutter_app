@@ -47,12 +47,14 @@ class WalletInNetworkRepository implements WalletRepository {
             tokens.firstWhere((token) => token.id == l2Account.tokenId);
         PriceToken priceToken = priceTokens
             .firstWhere((priceToken) => priceToken.id == l2Account.tokenId);
-        List<dynamic> transactions =
-            await _transactionInNetworkRepository.getTransactions(
-                layerFilter: LayerFilter.L2,
-                address: l2Account.hezEthereumAddress,
-                accountIndex: l2Account.accountIndex,
-                tokenId: token.id);
+        List<dynamic> transactions = await _transactionInNetworkRepository
+            .getTransactions(
+                l2Account.hezEthereumAddress,
+                l2Account.accountIndex,
+                LayerFilter.L2,
+                TransactionStatusFilter.ALL,
+                TransactionTypeFilter.ALL,
+                [token.id]);
         l2Accounts.add(Account(
             l2Account: true,
             address: l2Account.hezEthereumAddress,
@@ -69,11 +71,14 @@ class WalletInNetworkRepository implements WalletRepository {
             tokens.firstWhere((token) => token.id == l1Account.tokenId);
         PriceToken priceToken = priceTokens
             .firstWhere((priceToken) => priceToken.id == l1Account.tokenId);
-        List<dynamic> transactions =
-            await _transactionInNetworkRepository.getTransactions(
-                layerFilter: LayerFilter.L1,
-                address: l1Account.hezEthereumAddress,
-                tokenId: token.id);
+        List<dynamic> transactions = await _transactionInNetworkRepository
+            .getTransactions(
+                l1Account.hezEthereumAddress,
+                "",
+                LayerFilter.L1,
+                TransactionStatusFilter.ALL,
+                TransactionTypeFilter.ALL,
+                [token.id]);
         /*List<dynamic> transactions = await _transactionInNetworkRepository
           .getEthereumTransactionsByAddress(
               ethereumAddress, token.id == 0 ? "" : token.ethereumAddress);*/
@@ -82,7 +87,7 @@ class WalletInNetworkRepository implements WalletRepository {
             address: l1Account.hezEthereumAddress,
             token: token,
             balance: l1Account.balance,
-            //transactions: transactions,
+            transactions: transactions,
             price: priceToken));
       });
     }

@@ -8,10 +8,11 @@ import 'package:hermez/src/data/network/contract_service.dart';
 import 'package:hermez/src/data/network/explorer_service.dart';
 import 'package:hermez/src/data/network/hermez_service.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
-import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/contract_parser.dart';
+import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/api.dart';
 import 'package:hermez_sdk/environment.dart';
 import 'package:hermez_sdk/hermez_compressed_amount.dart';
@@ -23,7 +24,7 @@ import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/token.dart';
-import 'package:hermez_sdk/model/transaction.dart';
+import 'package:hermez_sdk/model/transaction.dart' as hezTransaction;
 import 'package:hermez_sdk/tx_utils.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
@@ -36,43 +37,141 @@ class TransactionInNetworkRepository implements TransactionRepository {
       this._hermezService, this._explorerService, this._contractService);
 
   @override
-  Future<List<dynamic>> getTransactions(
-      {LayerFilter layerFilter = LayerFilter.ALL,
-      String address,
-      String accountIndex,
-      int tokenId = 0,
-      int fromItem = 0}) async {
-    List response = [];
-    switch (layerFilter) {
-      case LayerFilter.ALL:
-        final hermezAddress = await _configurationService.getHermezAddress();
-        final hermezTransactions = await _getHermezTransactionsByAddress(
-            hermezAddress, accountIndex,
-            tokenId: tokenId, fromItem: fromItem);
-        response.addAll(hermezTransactions.transactions);
-        final ethereumAddress =
-            await _configurationService.getEthereumAddress();
-        final ethereumTransactions = await _getEthereumTransactionsByAddress(
-            ethereumAddress,
-            tokenId: tokenId);
-        response.addAll(ethereumTransactions);
-        break;
-      case LayerFilter.L1:
-        final ethereumAddress =
-            await _configurationService.getEthereumAddress();
-        final ethereumTransactions = await _getEthereumTransactionsByAddress(
-            ethereumAddress,
-            tokenId: tokenId);
-        response.addAll(ethereumTransactions);
-        break;
-      case LayerFilter.L2:
-        final hermezAddress = await _configurationService.getHermezAddress();
-        final hermezTransactions = await _getHermezTransactionsByAddress(
-            hermezAddress, accountIndex,
-            tokenId: tokenId, fromItem: fromItem);
-        response.addAll(hermezTransactions.transactions);
-        break;
+  Future<List<Transaction>> getTransactions(String address, String accountIndex,
+      [LayerFilter layerFilter = LayerFilter.ALL,
+      TransactionStatusFilter transactionFilter = TransactionStatusFilter.ALL,
+      TransactionTypeFilter transactionType = TransactionTypeFilter.ALL,
+      List<int> tokenIds,
+      int fromItem = 0]) async {
+    List<Transaction> response = [];
+    if (address == null || address.isEmpty) {
+      address = await _configurationService.getHermezAddress();
     }
+    if (layerFilter == LayerFilter.ALL || layerFilter == LayerFilter.L2) {
+      String hermezAddress = address;
+      bool validAddress = false;
+      validAddress = isHermezEthereumAddress(hermezAddress) ||
+          isHermezBjjAddress(hermezAddress) ||
+          isHermezAccountIndex(accountIndex);
+      if (!validAddress && isEthereumAddress(address)) {
+        hermezAddress = getHermezAddress(address);
+        validAddress = isHermezEthereumAddress(hermezAddress);
+      }
+      if (validAddress) {
+        if (transactionType == TransactionTypeFilter.ALL &&
+            (transactionFilter == TransactionStatusFilter.ALL ||
+                transactionFilter == TransactionStatusFilter.HISTORY)) {
+          final hermezTransactions = await _getHermezTransactionsByAddress(
+              hermezAddress, accountIndex,
+              tokenIds: tokenIds, fromItem: fromItem);
+          response.addAll(hermezTransactions.transactions
+              .map((forgedTransaction) => Transaction(
+                    level: TransactionLevel.LEVEL2,
+                    status: TransactionStatus.CONFIRMED,
+                  )));
+        }
+
+        if (transactionType == TransactionTypeFilter.ALL &&
+                transactionFilter == TransactionStatusFilter.ALL ||
+            transactionFilter == TransactionStatusFilter.PENDING) {
+          bool isAccountIndex = isHermezAccountIndex(accountIndex);
+          if (isAccountIndex) {
+            final hermezPoolTransactions =
+                await getPoolTransactions(accountIndex);
+            response.addAll(
+                hermezPoolTransactions.map((poolTransaction) => Transaction(
+                      level: TransactionLevel.LEVEL2,
+                      status: TransactionStatus.PENDING,
+                    )));
+          }
+        }
+      }
+    }
+
+    if (layerFilter == LayerFilter.ALL || layerFilter == LayerFilter.L1) {
+      String ethereumAddress = address;
+      bool validAddress = false;
+      validAddress = isEthereumAddress(ethereumAddress);
+      if (!validAddress && isHermezEthereumAddress(address)) {
+        ethereumAddress = getEthereumAddress(address);
+        validAddress = isEthereumAddress(ethereumAddress);
+      }
+      if (validAddress) {
+        final ethereumTransactions = await _getEthereumTransactionsByAddress(
+            ethereumAddress,
+            tokenIds: tokenIds);
+        response.addAll(
+            ethereumTransactions.map((ethereumTransaction) => Transaction(
+                  level: TransactionLevel.LEVEL1,
+                  status: TransactionStatus.CONFIRMED,
+                )));
+      }
+
+      if ((transactionType == TransactionTypeFilter.ALL ||
+                  transactionType == TransactionTypeFilter.SEND ||
+                  transactionType == TransactionTypeFilter.RECEIVE) &&
+              transactionFilter == TransactionStatusFilter.ALL ||
+          transactionFilter == TransactionStatusFilter.PENDING) {
+        final pendingTransfers = await getPendingTransfers();
+        response.addAll(pendingTransfers.map((pendingTransfer) => Transaction(
+              level: TransactionLevel.LEVEL1,
+              status: TransactionStatus.PENDING,
+            )));
+      }
+    }
+
+    if (transactionType == TransactionTypeFilter.ALL ||
+        transactionType == TransactionTypeFilter.EXIT) {
+      String hermezAddress = address;
+      bool validAddress = false;
+      validAddress = isHermezEthereumAddress(hermezAddress) ||
+          isHermezBjjAddress(hermezAddress);
+      if (!validAddress && isEthereumAddress(address)) {
+        hermezAddress = getHermezAddress(address);
+        validAddress = isHermezEthereumAddress(hermezAddress);
+      }
+      if (validAddress) {
+        final exits = await getExits(hermezAddress);
+        response.addAll(exits.map((exit) => Transaction(
+              level: TransactionLevel.LEVEL2,
+              status: TransactionStatus.CONFIRMED,
+            )));
+      }
+    }
+
+    if ((transactionType == TransactionTypeFilter.ALL ||
+                transactionType == TransactionTypeFilter.DEPOSIT) &&
+            transactionFilter == TransactionStatusFilter.ALL ||
+        transactionFilter == TransactionStatusFilter.PENDING) {
+      final pendingDeposits = await getPendingDeposits();
+      response.addAll(pendingDeposits.map((pendingDeposit) => Transaction(
+            level: TransactionLevel.LEVEL1,
+            status: TransactionStatus.PENDING,
+          )));
+    }
+
+    if ((transactionType == TransactionTypeFilter.ALL ||
+                transactionType == TransactionTypeFilter.WITHDRAW) &&
+            transactionFilter == TransactionStatusFilter.ALL ||
+        transactionFilter == TransactionStatusFilter.PENDING) {
+      final pendingWithdraws = await getPendingWithdraws();
+      response.addAll(pendingWithdraws.map((pendingWithdraw) => Transaction(
+            level: TransactionLevel.LEVEL1,
+            status: TransactionStatus.PENDING,
+          )));
+    }
+
+    if ((transactionType == TransactionTypeFilter.ALL ||
+                transactionType == TransactionTypeFilter.FORCEEXIT) &&
+            transactionFilter == TransactionStatusFilter.ALL ||
+        transactionFilter == TransactionStatusFilter.PENDING) {
+      final pendingForceExits = await getPendingForceExits();
+      response.addAll(pendingForceExits.map((pendingForceExits) => Transaction(
+            level: TransactionLevel.LEVEL1,
+            status: TransactionStatus.PENDING,
+          )));
+    }
+
     return response;
   }
 
@@ -109,27 +208,35 @@ class TransactionInNetworkRepository implements TransactionRepository {
   }
 
   Future<List<dynamic>> _getEthereumTransactionsByAddress(String address,
-      {int tokenId = 0}) async {
-    if (tokenId == 0) {
-      return _explorerService.getTransactionsByAccountAddress(address);
-    } else {
-      Token token = await getToken(tokenId);
-      List<dynamic> transactions =
-          await _explorerService.getTokenTransferEventsByAccountAddress(
-              address, token.ethereumAddress);
-      return transactions;
-    }
+      {List<int> tokenIds}) async {
+    List response = [];
+    response.addAll(
+      tokenIds.map(
+        (tokenId) async {
+          if (tokenId == 0) {
+            return _explorerService.getTransactionsByAccountAddress(address);
+          } else {
+            Token token = await getToken(tokenId);
+            List<dynamic> transactions =
+                await _explorerService.getTokenTransferEventsByAccountAddress(
+                    address, token.ethereumAddress);
+            return transactions;
+          }
+        },
+      ),
+    );
+    return response;
   }
 
   Future<ForgedTransactionsResponse> _getHermezTransactionsByAddress(
       String address, String accountIndex,
-      {int tokenId = 0, int fromItem = 0}) async {
-    Token token = await getToken(tokenId);
+      {List<int> tokenIds, int fromItem = 0}) async {
+    Token token = await getToken(0);
     ForgedTransactionsRequest request = ForgedTransactionsRequest(
         ethereumAddress: address,
         accountIndex: accountIndex,
         batchNum: token.ethereumBlockNum,
-        tokenId: token.id,
+        tokenIds: tokenIds,
         fromItem: fromItem);
     return _hermezService.getForgedTransactions(request);
   }
@@ -448,7 +555,7 @@ class TransactionInNetworkRepository implements TransactionRepository {
             await _configurationService.getEthereumAddress();
         List<dynamic> transactions = await _getEthereumTransactionsByAddress(
             ethereumAddress,
-            tokenId: Token.fromJson(pendingTransfer['token']).id);
+            tokenIds: [Token.fromJson(pendingTransfer['token']).id]);
         final transactionFound = transactions.firstWhere(
             (transaction) => transaction['txHash'] == transactionHash,
             orElse: () => null);
@@ -553,7 +660,7 @@ class TransactionInNetworkRepository implements TransactionRepository {
   }
 
   @override
-  Future<bool> sendL2Transaction(Transaction transaction) async {
+  Future<bool> sendL2Transaction(hezTransaction.Transaction transaction) async {
     final result = await _hermezService.sendL2Transaction(transaction);
     return result;
   }

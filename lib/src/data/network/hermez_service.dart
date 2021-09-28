@@ -138,6 +138,7 @@ class HermezService implements IHermezService {
       ForgedTransactionsRequest request) async {
     final response = await api.getTransactions(
         accountIndex: request.accountIndex,
+        tokenIds: request.tokenIds,
         fromItem: request.fromItem,
         order: api.PaginationOrder.DESC);
     return response;

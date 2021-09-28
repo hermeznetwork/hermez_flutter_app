@@ -2,6 +2,7 @@ import 'package:hermez/src/data/network/contract_service.dart';
 import 'package:hermez/src/data/network/hermez_service.dart';
 import 'package:hermez/src/data/transactions/transaction_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez_sdk/api.dart' as api;
 import 'package:hermez_sdk/constants.dart';
@@ -63,11 +64,14 @@ class AccountInNetworkRepository implements AccountRepository {
                 tokenId: token.id);
             accounts.add(account);
           } else {
-            List<dynamic> transactions =
+            List<Transaction> transactions =
                 await _transactionInNetworkRepository.getTransactions(
-                    layerFilter: LayerFilter.L1,
-                    address: ethereumAddress,
-                    tokenId: token.id);
+                    ethereumAddress,
+                    "",
+                    LayerFilter.L1,
+                    TransactionStatusFilter.ALL,
+                    TransactionTypeFilter.ALL,
+                    [token.id]);
             if (transactions != null && transactions.isNotEmpty) {
               final account = Account(
                   accountIndex: token.id.toString(),
@@ -104,11 +108,14 @@ class AccountInNetworkRepository implements AccountRepository {
             accounts.add(account);
           } else {
             if (showZeroBalanceAccounts) {
-              List<dynamic> transactions =
-                  await _transactionInNetworkRepository.getTransactions(
-                      layerFilter: LayerFilter.L1,
-                      address: ethereumAddress,
-                      tokenId: token.id);
+              List<dynamic> transactions = await _transactionInNetworkRepository
+                  .getTransactions(
+                      ethereumAddress,
+                      "",
+                      LayerFilter.L1,
+                      TransactionStatusFilter.ALL,
+                      TransactionTypeFilter.ALL,
+                      [token.id]);
               if (transactions != null && transactions.isNotEmpty) {
                 final account = Account(
                     accountIndex: token.id.toString(),

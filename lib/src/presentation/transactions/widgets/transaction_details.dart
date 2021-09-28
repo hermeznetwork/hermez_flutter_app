@@ -9,11 +9,11 @@ import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/environment.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/home/widgets/info.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/src/presentation/transfer/widgets/move_info.dart';
-import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -1137,16 +1137,17 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 GasPriceResponse gasPriceResponse =
                     await widget.arguments.store.getGasPrice();
                 Navigator.of(context).pushNamed("/fee_selector",
-                    arguments: FeeSelectorArguments(widget.arguments.store,
+                    arguments: FeeSelectorArguments(
+                        /*widget.arguments.store,*/
                         selectedFee: widget.arguments.selectedFeeSpeed,
                         ethereumToken: ethereumToken,
                         estimatedGas: BigInt.from(widget.arguments.gasLimit),
                         gasPriceResponse: gasPriceResponse,
                         onFeeSelected: (selectedFee) {
-                      setState(() {
-                        widget.arguments.selectedFeeSpeed = selectedFee;
-                      });
-                    }));
+                          setState(() {
+                            widget.arguments.selectedFeeSpeed = selectedFee;
+                          });
+                        }));
               }
             : null,
       );

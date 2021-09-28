@@ -49,7 +49,6 @@ class _PinPageState extends State<PinPage> {
   bool faceEnabled = false;
 
   final SecurityBloc _bloc;
-
   _PinPageState() : _bloc = getIt<SecurityBloc>();
 
   @override

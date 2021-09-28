@@ -13,9 +13,9 @@ abstract class IPriceUpdaterService {
 }
 
 class PriceUpdaterService implements IPriceUpdaterService {
-  PriceInRemoteRepository _client;
+  PriceInNetworkRepository _client;
   PriceUpdaterService(String base, String apiKey) {
-    _client = new PriceInRemoteRepository(base, apiKey);
+    _client = new PriceInNetworkRepository(base, apiKey);
   }
 
   @override

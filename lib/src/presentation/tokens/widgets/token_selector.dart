@@ -2,61 +2,54 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/dependencies_provider.dart';
-import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
-import 'package:hermez/src/domain/transactions/transaction_repository.dart';
-import 'package:hermez/src/presentation/accounts/accounts_bloc.dart';
 import 'package:hermez/src/presentation/accounts/accounts_state.dart';
-import 'package:hermez/src/presentation/accounts/widgets/account_row.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
+import 'package:hermez/src/presentation/tokens/tokens_bloc.dart';
+import 'package:hermez/src/presentation/tokens/tokens_state.dart';
+import 'package:hermez/src/presentation/tokens/widgets/token_row.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/token.dart' as hezToken;
 
-class AccountSelectorArguments {
+class TokenSelectorArguments {
   final TransactionLevel txLevel;
   final TransactionType transactionType;
   final String address;
   //final WalletHandler store;
 
-  AccountSelectorArguments(this.txLevel, this.transactionType, this.address
+  TokenSelectorArguments(this.txLevel, this.transactionType, this.address
       /*this.store*/
       );
 }
 
-class AccountSelectorPage extends StatefulWidget {
-  AccountSelectorPage({Key key, this.arguments}) : super(key: key);
+class TokenSelectorPage extends StatefulWidget {
+  TokenSelectorPage({Key key, this.arguments}) : super(key: key);
 
-  final AccountSelectorArguments arguments;
+  final TokenSelectorArguments arguments;
 
   @override
-  _AccountSelectorPageState createState() => _AccountSelectorPageState();
+  _TokenSelectorPageState createState() => _TokenSelectorPageState();
 }
 
-class _AccountSelectorPageState extends State<AccountSelectorPage> {
-  List<Account> _accounts;
+class _TokenSelectorPageState extends State<TokenSelectorPage> {
   List<Token> _tokens;
 
-  final AccountsBloc _bloc;
-  _AccountSelectorPageState() : _bloc = getIt<AccountsBloc>() {
+  final TokensBloc _bloc;
+  _TokenSelectorPageState() : _bloc = getIt<TokensBloc>() {
     fetchData();
   }
 
   void fetchData() {
-    if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            widget.arguments.transactionType != TransactionType.FORCEEXIT) ||
-        widget.arguments.transactionType == TransactionType.DEPOSIT) {
-      _bloc.getAccounts(LayerFilter.L1, widget.arguments.address);
-    } else {
-      _bloc.getAccounts(LayerFilter.L2, widget.arguments.address);
-    }
+    _bloc.getTokens();
   }
 
   @override
   Widget build(BuildContext context) {
     //final bloc = BlocProvider.of<CartBloc>(context);
 
-    return StreamBuilder<AccountsState>(
+    return StreamBuilder<TokensState>(
         initialData: _bloc.state,
         stream: _bloc.observableState,
         builder: (context, snapshot) {
@@ -72,17 +65,10 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
         });
   }
 
-  Widget _renderAccountsContent(
-      BuildContext context, LoadedAccountsState state) {
-    if (state.accountsItem.accounts != null &&
-        state.accountsItem.accounts.length > 0) {
-      // data loaded:
-      //if (widget.arguments.transactionType == TransactionType.RECEIVE) {
-      //  _tokens = snapshot.data;
-      //} else {
-      _accounts = state.accountsItem.accounts;
-      buildAccountsList(context);
-      //}
+  Widget _renderAccountsContent(BuildContext context, LoadedTokensState state) {
+    if (state.tokensItem.tokens != null && state.tokensItem.tokens.length > 0) {
+      _tokens = state.tokensItem.tokens;
+      buildTokensList(context);
     } else {
       return Container(
         margin: EdgeInsets.all(20.0),
@@ -377,22 +363,6 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
         ]));
   }
 
-  /*List<Account> getAccounts() {
-    if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
-            widget.arguments.transactionType != TransactionType.FORCEEXIT) ||
-        widget.arguments.transactionType == TransactionType.DEPOSIT) {
-      return _bloc.state.accountItem.accounts;
-      //return widget.arguments.store.state.l1Accounts; //getL1Accounts(false);
-    } else {
-      return _bloc.state.accountItem.accounts;
-      //return widget.arguments.store.state.l2Accounts; //getL2Accounts();
-    }
-  }*/
-
-  /*Future<List<Token>> getTokens() {
-    return widget.arguments.store.getTokens();
-  }*/
-
   Future<void> _onRefresh() async {
     fetchData();
     //setState(() {});
@@ -671,7 +641,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   }*/
 
   //widget that builds the list
-  Widget buildAccountsList(BuildContext parentContext) {
+  Widget buildTokensList(BuildContext parentContext) {
     String operation;
     if (widget.arguments.transactionType == TransactionType.SEND) {
       operation = "send";
@@ -737,10 +707,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                       color: HermezColors.orange,
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: widget.arguments.transactionType ==
-                                TransactionType.RECEIVE
-                            ? _tokens.length
-                            : _accounts.length,
+                        itemCount: _tokens.length,
                         //set the item count so that index won't be out of range
                         padding: const EdgeInsets.all(16.0),
                         //add some padding to make it look good
@@ -751,35 +718,27 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                               .toString()
                               .split('.')
                               .last;*/
-                          final Account account = _accounts[index];
-                          Token token = account.token;
-                          PriceToken priceToken = account.price;
-                          return AccountRow(
-                            account,
-                            token.name,
-                            token.symbol,
-                            /*currency != "USD"
-                                            ? priceToken.USD *
-                                                widget.arguments.store.state
-                                                    .exchangeRatio
-                                            :*/
-                            priceToken.USD,
-                            "USD", //currency,
-                            0,
 
-                            /*BalanceUtils.calculatePendingBalance(
-                                                widget.arguments.txLevel,
-                                                account,
-                                                token.symbol,
-                                                widget.arguments.store) /
-                                            pow(10, token.decimals),*/
-                            false,
-                            true,
-                            false,
-                            (Account account, String tokenId, String amount) {
-                              Navigator.maybePop(parentContext, account);
-                            },
-                          );
+                          final Token token = _tokens[index];
+                          final hezToken.Token hermezToken = token.token;
+                          PriceToken priceToken = token.price;
+                          return TokenRow(
+                              token,
+                              hermezToken.name,
+                              hermezToken.symbol,
+                              /*currency != "USD"
+                                  ? priceToken.USD *
+                                      widget.arguments.store.state.exchangeRatio
+                                  :*/
+                              priceToken.USD,
+                              "USD", //currency,
+                              0,
+                              false,
+                              true,
+                              false, (Token token, String tokenId,
+                                  String amount) async {
+                            Navigator.maybePop(parentContext, token);
+                          });
                         },
                       ),
                       onRefresh: _onRefresh,

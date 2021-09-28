@@ -13,6 +13,7 @@ import 'package:hermez/components/wallet/move_row.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
@@ -33,12 +34,6 @@ import 'package:hermez_sdk/model/token.dart';
 import 'package:web3dart/crypto.dart';
 
 import 'fee_selector.dart';
-
-enum TransactionLevel { LEVEL1, LEVEL2 }
-
-enum TransactionType { DEPOSIT, SEND, RECEIVE, WITHDRAW, EXIT, FORCEEXIT }
-
-enum TransactionStatus { DRAFT, PENDING, CONFIRMED, INVALID }
 
 class TransactionAmountArguments {
   TransactionLevel txLevel;
@@ -526,10 +521,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                             final account = await Navigator.of(parentContext)
                                 .pushNamed("/account_selector",
                                     arguments: AccountSelectorArguments(
-                                      widget.arguments.store.state.txLevel,
-                                      widget.arguments.transactionType,
-                                      widget.arguments.store,
-                                    ));
+                                        widget.arguments.store.state.txLevel,
+                                        widget.arguments.transactionType,
+                                        ""
+                                        //widget.arguments.store,
+                                        ));
                             if (account != null) {
                               setState(() {
                                 amountController.clear();
@@ -568,7 +564,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                       arguments: AccountSelectorArguments(
                                           widget.arguments.store.state.txLevel,
                                           widget.arguments.transactionType,
-                                          widget.arguments.store));
+                                          ""
+                                          /*widget.arguments.store*/));
                               if (account != null) {
                                 setState(() {
                                   amountController.clear();

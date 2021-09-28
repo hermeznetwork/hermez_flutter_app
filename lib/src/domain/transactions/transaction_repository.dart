@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/forged_transaction.dart';
@@ -8,14 +9,31 @@ import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/token.dart';
-import 'package:hermez_sdk/model/transaction.dart';
+import 'package:hermez_sdk/model/transaction.dart' as hezTransaction;
 
 enum LayerFilter { ALL, L1, L2 }
 
+enum TransactionStatusFilter { ALL, PENDING, HISTORY }
+
+enum TransactionTypeFilter {
+  ALL,
+  SEND,
+  RECEIVE,
+  DEPOSIT,
+  WITHDRAW,
+  EXIT,
+  FORCEEXIT
+}
+
 abstract class TransactionRepository {
   // ALL
-  Future<List<dynamic>> getTransactions(
-      {LayerFilter layerFilter = LayerFilter.ALL, int tokenId = 0});
+  Future<List<Transaction>> getTransactions(String address, String accountIndex,
+      [LayerFilter layerFilter = LayerFilter.ALL,
+      TransactionStatusFilter transactionStatusFilter =
+          TransactionStatusFilter.ALL,
+      TransactionTypeFilter transactionTypeFilter = TransactionTypeFilter.ALL,
+      List<int> tokenIds,
+      int fromItem = 0]);
 
   Future<dynamic> getTransactionById(String transactionId,
       {LayerFilter layerFilter = LayerFilter.ALL});
@@ -66,7 +84,7 @@ abstract class TransactionRepository {
 
   Future<bool> transfer(double amount, Account from, Account to, double fee);
 
-  Future<bool> sendL2Transaction(Transaction transaction);
+  Future<bool> sendL2Transaction(hezTransaction.Transaction transaction);
 
   Future<RecommendedFee> fetchFees();
 }

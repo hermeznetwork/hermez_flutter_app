@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
@@ -426,7 +427,9 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   arguments: AccountSelectorArguments(
                                       TransactionLevel.LEVEL1,
                                       TransactionType.DEPOSIT,
-                                      widget.arguments.store));
+                                      ""
+                                      /*widget.arguments.store*/
+                                      ));
                             }
                             if (selectedAccount != null) {
                               Token token = widget.arguments.store.state.tokens
@@ -470,7 +473,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                       arguments: AccountSelectorArguments(
                                           TransactionLevel.LEVEL2,
                                           TransactionType.EXIT,
-                                          widget.arguments.store));
+                                          ""
+                                          /*widget.arguments.store*/));
                             }
                             if (selectedAccount != null) {
                               Token token = widget.arguments.store.state.tokens
@@ -503,7 +507,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                     arguments: AccountSelectorArguments(
                                         TransactionLevel.LEVEL1,
                                         TransactionType.DEPOSIT,
-                                        widget.arguments.store));
+                                        ""
+                                        /*widget.arguments.store*/));
                             if (selectedAccount != null) {
                               Token token = widget.arguments.store.state.tokens
                                   .firstWhere((token) =>
