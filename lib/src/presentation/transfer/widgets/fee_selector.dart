@@ -2,12 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
-import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_sdk/model/token.dart';
 
 // You can pass any object to the arguments parameter.
 // In this example, create a class that contains a customizable
@@ -40,6 +41,7 @@ class FeeSelectorPage extends StatefulWidget {
 }
 
 class _FeeSelectorPageState extends State<FeeSelectorPage> {
+  SettingsBloc _settingsBloc = getIt<SettingsBloc>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,9 +172,10 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                                         widget
                                                             .arguments
                                                             .ethereumToken
+                                                            .token
                                                             .decimals)),
                                                 widget.arguments.ethereumToken
-                                                    .symbol),
+                                                    .token.symbol),
                                             style: TextStyle(
                                                 fontFamily: 'ModernEra',
                                                 color: HermezColors.blackTwo,
@@ -185,40 +188,39 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                   widget.arguments.selectedFee != null
                                       ? Container(
                                           child: Text(
-                                            ((widget.arguments.store.state.priceTokens
-                                                            .firstWhere((PriceToken priceToken) =>
-                                                                priceToken.id ==
-                                                                widget
-                                                                    .arguments
-                                                                    .ethereumToken
-                                                                    .id)
-                                                            .USD) *
-                                                        (widget
-                                                                    .arguments
-                                                                    .store
-                                                                    .state
+                                            (widget
+                                                            .arguments
+                                                            .ethereumToken
+                                                            .price
+                                                            .USD /* *
+                                                        (_settingsBloc.state.settings.
                                                                     .defaultCurrency
                                                                     .toString()
                                                                     .split(".")
                                                                     .last !=
                                                                 "USD"
-                                                            ? widget
-                                                                .arguments
-                                                                .store
-                                                                .state
+                                                            ? _settingsBloc.state.settings
                                                                 .exchangeRatio
-                                                            : 1) *
-                                                        (widget.arguments.estimatedGas.toInt() *
+                                                            : 1)*/
+                                                        *
+                                                        (widget.arguments
+                                                                .estimatedGas
+                                                                .toInt() *
                                                             gasPrice /
                                                             pow(
                                                                 10,
                                                                 widget
                                                                     .arguments
                                                                     .ethereumToken
+                                                                    .token
                                                                     .decimals)))
                                                     .toStringAsFixed(2) +
                                                 " " +
-                                                widget.arguments.store.state.defaultCurrency.toString().split(".").last,
+                                                _settingsBloc.state.settings
+                                                    .defaultCurrency
+                                                    .toString()
+                                                    .split(".")
+                                                    .last,
                                             style: TextStyle(
                                                 fontFamily: 'ModernEra',
                                                 color:
@@ -235,7 +237,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                           ),
                           (widget.arguments.selectedFee != null
                                   ? widget.arguments.selectedFee == element
-                                  : widget.arguments.store.state.defaultFee ==
+                                  : _settingsBloc.state.settings.defaultFee ==
                                       element)
                               ? Radio(
                                   groupValue: null,
@@ -247,8 +249,9 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                           null) {
                                         widget.arguments.selectedFee = element;
                                       } else {
-                                        widget.arguments.store
-                                            .updateDefaultFee(element);
+                                        _settingsBloc.setDefaultFee(element);
+                                        /*widget.arguments.store
+                                            .updateDefaultFee(element);*/
                                       }
                                       if (widget.arguments.onFeeSelected !=
                                           null) {
@@ -270,8 +273,9 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                           null) {
                                         widget.arguments.selectedFee = element;
                                       } else {
-                                        widget.arguments.store
-                                            .updateDefaultFee(element);
+                                        _settingsBloc.setDefaultFee(element);
+                                        /*widget.arguments.store
+                                            .updateDefaultFee(element);*/
                                       }
                                       if (widget.arguments.onFeeSelected !=
                                           null) {
@@ -290,7 +294,8 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                           if (widget.arguments.selectedFee != null) {
                             widget.arguments.selectedFee = element;
                           } else {
-                            widget.arguments.store.updateDefaultFee(element);
+                            _settingsBloc.setDefaultFee(element);
+                            //widget.arguments.store.updateDefaultFee(element);
                           }
                           if (widget.arguments.onFeeSelected != null) {
                             widget.arguments.onFeeSelected(element);

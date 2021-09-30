@@ -87,7 +87,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                       qrCodeType: QRCodeType.HERMEZ,
                       code: getHermezAddress(
                           widget.arguments.store.state.ethereumAddress),
-                      store: widget.arguments.store,
+                      //store: widget.arguments.store,
                     ),
                   );
                 },
@@ -167,7 +167,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                     arguments: QRCodeArguments(
                       qrCodeType: QRCodeType.ETHEREUM,
                       code: widget.arguments.store.state.ethereumAddress,
-                      store: widget.arguments.store,
+                      //store: widget.arguments.store,
                     ),
                   );
                 },

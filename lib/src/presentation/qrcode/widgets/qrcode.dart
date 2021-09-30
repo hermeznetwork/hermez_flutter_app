@@ -6,16 +6,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/dialog/alert.dart';
-import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/constants.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/tokens/widgets/token_row.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/share_utils.dart';
-import 'package:hermez_sdk/model/token.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
@@ -30,7 +31,7 @@ class QRCodeArguments {
   final QRCodeType qrCodeType;
   final String title;
   final String code;
-  final WalletHandler store;
+  //final WalletHandler store;
   final double amount;
   final Token token;
   final bool isReceive;
@@ -38,7 +39,7 @@ class QRCodeArguments {
       {this.qrCodeType,
       this.title,
       this.code,
-      this.store,
+      //this.store,
       this.amount,
       this.token,
       this.isReceive = false});
@@ -56,7 +57,10 @@ class QRCodePage extends StatefulWidget {
 class _QRCodePageState extends State<QRCodePage> {
   static GlobalKey qrCodeKey = GlobalKey();
 
-  List<PriceToken> _priceTokens;
+  //List<PriceToken> _priceTokens;
+
+  SettingsBloc _settingsBloc = getIt<SettingsBloc>();
+
   @override
   Widget build(BuildContext context) {
     String title;
@@ -144,15 +148,14 @@ class _QRCodePageState extends State<QRCodePage> {
                                 size: Size(36, 36),
                               ),
                               data: widget.arguments.code == null
-                                  ? (widget.arguments.store.state.txLevel ==
+                                  ? (_settingsBloc.state.settings.level ==
                                               TransactionLevel.LEVEL2
                                           ? "hez:"
                                           : "") +
-                                      widget
-                                          .arguments.store.state.ethereumAddress
+                                  _settingsBloc.state.settings.ethereumAddress
                                   : widget.arguments.code +
                                       (widget.arguments.token != null
-                                          ? ':' + widget.arguments.token.symbol
+                                          ? ':' + widget.arguments.token.token.symbol
                                           : '') +
                                       (widget.arguments.amount != null &&
                                               widget.arguments.amount > 0
@@ -174,24 +177,19 @@ class _QRCodePageState extends State<QRCodePage> {
                             fit: BoxFit.contain,
                             child: Text(
                               widget.arguments.code == null
-                                  ? ((widget.arguments.store.state.txLevel ==
+                                  ? ((_settingsBloc.state.settings.level ==
                                               TransactionLevel.LEVEL2
                                           ? "hez:"
                                           : "") +
-                                  widget.arguments.store.state
-                                      .ethereumAddress.substring(
+                                  _settingsBloc.state.settings.ethereumAddress.substring(
                                                                 0,
-                                      (widget.arguments.store.state
-                                        .ethereumAddress.length / 2)
+                                      (_settingsBloc.state.settings.ethereumAddress.length / 2)
                                         .floor()) +
                                         "\n" +
-                                  widget.arguments.store.state
-                                      .ethereumAddress.substring(
-                                      (widget.arguments.store.state
-                                          .ethereumAddress.length / 2)
+                                  _settingsBloc.state.settings.ethereumAddress.substring(
+                                      (_settingsBloc.state.settings.ethereumAddress.length / 2)
                                         .floor(),
-                                      widget.arguments.store.state
-                                          .ethereumAddress.length))
+                                      _settingsBloc.state.settings.ethereumAddress.length))
                                   : (widget.arguments.code.substring(
                                           0,
                                           (widget.arguments.code.length / 2)
@@ -204,8 +202,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                   +
                                       (widget.arguments.token != null || (widget.arguments.amount != null && widget.arguments.amount > 0)
                                           ? ("\n" + ':')
-                                          + (widget.arguments.token != null ? widget.arguments.token.symbol : widget.arguments.store.state
-                                              .defaultCurrency
+                                          + (widget.arguments.token != null ? widget.arguments.token.token.symbol : _settingsBloc.state.settings.defaultCurrency
                                               .toString()
                                               .split('.')
                                               .last)
@@ -257,16 +254,15 @@ class _QRCodePageState extends State<QRCodePage> {
                             onPressed: () {
                               Clipboard.setData(ClipboardData(
                                   text: widget.arguments.code == null
-                                      ? (widget.arguments.store.state.txLevel ==
+                                      ? (_settingsBloc.state.settings.level ==
                                                   TransactionLevel.LEVEL2
                                               ? "hez:"
                                               : "") +
-                                          widget.arguments.store.state
-                                              .ethereumAddress
+                                      _settingsBloc.state.settings.ethereumAddress
                                       : widget.arguments.code +
                                           (widget.arguments.token != null
                                               ? ':' +
-                                                  widget.arguments.token.symbol
+                                                  widget.arguments.token.token.symbol
                                               : '') +
                                           (widget.arguments.amount != null &&
                                                   widget.arguments.amount > 0
@@ -348,8 +344,8 @@ class _QRCodePageState extends State<QRCodePage> {
                                 : Navigator.pushReplacementNamed(
                                     context, "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                        widget.arguments.store,
-                                        widget.arguments.store.state.txLevel,
+                                        //widget.arguments.store,
+                                        _settingsBloc.state.settings.level,
                                         TransactionType.RECEIVE,
                                         allowChangeLevel: false));
                           },
@@ -471,7 +467,7 @@ class _QRCodePageState extends State<QRCodePage> {
   }
 
   Future<List<PriceToken>> fetchPriceTokens() async {
-    return widget.arguments.store.getPriceTokens();
+    //return widget.arguments.store.getPriceTokens();
   }
 
   Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
@@ -499,7 +495,7 @@ class _QRCodePageState extends State<QRCodePage> {
             ]));
       } else {
         if (snapshot.hasData && (snapshot.data as List).length > 0) {
-            _priceTokens = snapshot.data;
+            //_priceTokens = snapshot.data;
             return buildTokensList(context);
         }
       }
@@ -539,33 +535,31 @@ class _QRCodePageState extends State<QRCodePage> {
             color: Colors.white,
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: _priceTokens.length,
+                itemCount: _settingsBloc.state.settings.tokens.length,
                 padding: const EdgeInsets.all(16.0),
                 itemBuilder: (context, i) {
                   final index = i;
-                  final String currency = widget
-                      .arguments.store.state.defaultCurrency
+                  final String currency = _settingsBloc.state.settings.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
-                    final PriceToken priceToken = _priceTokens[index];
-                    final Token token = widget.arguments.store.state.tokens
-                        .firstWhere((Token token) => token.id == priceToken.id);
-                    return AccountRow(
-                        null,
+                    //final PriceToken priceToken = _priceTokens[index];
+                    final Token token = _settingsBloc.state.settings.tokens[index];
+                        //.firstWhere((Token token) => token.id == priceToken.id);
+                    return TokenRow(
                         token,
-                        token.name,
-                        token.symbol,
-                        currency != "USD"
-                            ? priceToken.USD *
+                        token.token.name,
+                        token.token.symbol,
+                        /*currency != "USD"
+                            ? token.price.USD *
                             widget.arguments.store.state.exchangeRatio
-                            : priceToken.USD,
+                            :*/ token.price.USD,
                         currency,
                         0,
                         false,
                         true,
                         false,
-                        true, null);
+                        null);
                   },
             ),
           ),),
@@ -583,12 +577,12 @@ class _QRCodePageState extends State<QRCodePage> {
         if (imagePath != null) {
           Share.shareFiles([imagePath],
               text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ?
-              'Hello, scan this ' + (widget.arguments.store.state.txLevel ==
+              'Hello, scan this ' + (_settingsBloc.state.settings.level ==
                   TransactionLevel.LEVEL2 ? 'Hermez' : 'Ethereum') + ' code to send me ' +
                   EthAmountFormatter.removeDecimalZeroFormat(
                       double.parse(
                           widget.arguments.amount.toStringAsFixed(6))) + ' ' +
-                  widget.arguments.token.symbol
+                  widget.arguments.token.token.symbol
                   : 'Hello, here is my ' + (widget.arguments.qrCodeType == QRCodeType.HERMEZ ? 'Hermez' : 'Ethereum') + ' code!',
               subject: (widget.arguments.qrCodeType == QRCodeType.HERMEZ ? 'Hermez' : 'Ethereum') +' QR Code',
               sharePositionOrigin: boundary.localToGlobal(

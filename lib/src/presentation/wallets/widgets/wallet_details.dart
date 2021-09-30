@@ -11,7 +11,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/account_row.dart';
 import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/constants.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
@@ -19,6 +18,7 @@ import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
@@ -37,13 +37,15 @@ import 'package:hermez_sdk/model/token.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class WalletDetailsArguments {
-  final WalletHandler store;
+  //final WalletHandler store;
   final TransactionLevel transactionLevel;
   final BuildContext parentContext;
   final bool needRefresh;
 
   WalletDetailsArguments(
-      this.store, this.transactionLevel, this.parentContext, this.needRefresh);
+      /*this.store,*/ this.transactionLevel,
+      this.parentContext,
+      this.needRefresh);
 }
 
 class WalletDetailsPage extends StatefulWidget {
@@ -70,6 +72,31 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
   final WalletsBloc _bloc;
   _WalletDetailsPageState() : _bloc = getIt<WalletsBloc>();
+  final SettingsBloc _settingsBloc = getIt<SettingsBloc>();
+
+  /*@override
+  Widget build(BuildContext context) {
+    return StreamBuilder<WalletsState>(
+        initialData: _bloc.state,
+        stream: _bloc.observableState,
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+
+          if (state is LoadingWalletsState) {
+            return Container(
+                color: HermezColors.lightOrange,
+                child: Center(
+                  child: CircularProgressIndicator(color: HermezColors.orange),
+                ));
+          } else if (state is ErrorWalletsState) {
+            return Center(child: Text(state.message));
+          } else {
+            return _renderWalletSelector(context, state);
+          }
+        });
+  }
+
+  Widget _renderWalletSelector(BuildContext context, LoadedWalletsState state) {*/
 
   @override
   void initState() {
@@ -451,7 +478,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     var results = await Navigator.pushNamed(
                         widget.arguments.parentContext, "/transaction_amount",
                         arguments: TransactionAmountArguments(
-                          widget.arguments.store,
+                          //widget.arguments.store,
                           widget.arguments.store.state.txLevel,
                           TransactionType.SEND,
                           account: account,
@@ -1147,10 +1174,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       : priceToken.USD,
                   currency,
                   BalanceUtils.calculatePendingBalance(
-                          widget.arguments.transactionLevel,
-                          account,
-                          token.symbol,
-                          widget.arguments.store) /
+                        widget.arguments.transactionLevel,
+                        account,
+                        token.symbol,
+                        /*widget.arguments.store*/
+                      ) /
                       pow(10, token.decimals),
                   false,
                   true,
@@ -1187,6 +1215,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       await Navigator.of(context).pushNamed("account_details",
                           arguments: AccountDetailsArguments(
                               //widget.arguments.store,
+                              widget.arguments.transactionLevel,
                               account,
                               token,
                               priceToken,

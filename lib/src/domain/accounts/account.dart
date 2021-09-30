@@ -1,6 +1,5 @@
-import 'package:hermez/src/domain/prices/price_token.dart';
-import 'package:hermez_sdk/model/token.dart';
-import 'package:hermez_sdk/model/transaction.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 
 class Account {
   final bool l2Account;
@@ -8,9 +7,8 @@ class Account {
   final String bjj;
   final String accountIndex;
   final String balance;
-  final List<dynamic> transactions;
+  final List<Transaction> transactions;
   final Token token;
-  final PriceToken price;
   final num totalBalance;
   final num totalPrice;
 
@@ -21,8 +19,7 @@ class Account {
       this.accountIndex,
       this.balance,
       this.transactions,
-      this.token,
-      this.price})
+      this.token})
       : totalBalance = _calculateTotalBalance(transactions),
         totalPrice = _calculateTotalPrice(transactions);
 
@@ -39,7 +36,6 @@ class Account {
       balance: json['balance'],
       transactions: json['transactions'],
       token: json['token'],
-      price: json['price'],
     );
   }
 
@@ -51,7 +47,6 @@ class Account {
         'balance': balance,
         'transactions': transactions,
         'token': token,
-        'price': price,
       };
 
   static double _calculateTotalPrice(List<Transaction> transactions) {

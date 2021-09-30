@@ -6,11 +6,12 @@ import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/data/transactions/transaction_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
 import 'package:hermez_sdk/model/account.dart' as hezAccount;
-import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/token.dart' as hezToken;
 
 class WalletInNetworkRepository implements WalletRepository {
   final ExplorerService _explorerService;
@@ -32,7 +33,7 @@ class WalletInNetworkRepository implements WalletRepository {
     List<Wallet> wallets = [];
     List<Account> l2Accounts = [];
     List<Account> l1Accounts = [];
-    List<Token> tokens = await _hermezService.getTokens();
+    List<hezToken.Token> tokens = await _hermezService.getTokens();
     List<PriceToken> priceTokens = await _priceUpdaterService.getTokensPrices();
     String ethereumAddress = await _configurationService.getEthereumAddress();
     String hermezAddress = await _configurationService.getHermezAddress();
@@ -43,10 +44,11 @@ class WalletInNetworkRepository implements WalletRepository {
           await _accountInNetworkRepository.getL1Accounts(ethereumAddress);
 
       l2HezAccounts.map((l2Account) async {
-        Token token =
+        hezToken.Token hermezToken =
             tokens.firstWhere((token) => token.id == l2Account.tokenId);
         PriceToken priceToken = priceTokens
             .firstWhere((priceToken) => priceToken.id == l2Account.tokenId);
+        Token token = Token(token: hermezToken, price: priceToken);
         List<dynamic> transactions = await _transactionInNetworkRepository
             .getTransactions(
                 l2Account.hezEthereumAddress,
@@ -54,7 +56,7 @@ class WalletInNetworkRepository implements WalletRepository {
                 LayerFilter.L2,
                 TransactionStatusFilter.ALL,
                 TransactionTypeFilter.ALL,
-                [token.id]);
+                [hermezToken.id]);
         l2Accounts.add(Account(
             l2Account: true,
             address: l2Account.hezEthereumAddress,
@@ -62,15 +64,15 @@ class WalletInNetworkRepository implements WalletRepository {
             accountIndex: l2Account.accountIndex,
             balance: l2Account.balance,
             transactions: transactions,
-            token: token,
-            price: priceToken));
+            token: token));
       });
 
       l1HezAccounts.map((l1Account) async {
-        Token token =
+        hezToken.Token hermezToken =
             tokens.firstWhere((token) => token.id == l1Account.tokenId);
         PriceToken priceToken = priceTokens
             .firstWhere((priceToken) => priceToken.id == l1Account.tokenId);
+        Token token = Token(token: hermezToken, price: priceToken);
         List<dynamic> transactions = await _transactionInNetworkRepository
             .getTransactions(
                 l1Account.hezEthereumAddress,
@@ -78,17 +80,17 @@ class WalletInNetworkRepository implements WalletRepository {
                 LayerFilter.L1,
                 TransactionStatusFilter.ALL,
                 TransactionTypeFilter.ALL,
-                [token.id]);
+                [hermezToken.id]);
         /*List<dynamic> transactions = await _transactionInNetworkRepository
           .getEthereumTransactionsByAddress(
               ethereumAddress, token.id == 0 ? "" : token.ethereumAddress);*/
         l1Accounts.add(Account(
-            l2Account: false,
-            address: l1Account.hezEthereumAddress,
-            token: token,
-            balance: l1Account.balance,
-            transactions: transactions,
-            price: priceToken));
+          l2Account: false,
+          address: l1Account.hezEthereumAddress,
+          token: token,
+          balance: l1Account.balance,
+          transactions: transactions,
+        ));
       });
     }
 

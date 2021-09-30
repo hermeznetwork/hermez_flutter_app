@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
-import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/model/bucket.dart';

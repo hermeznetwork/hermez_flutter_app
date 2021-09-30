@@ -2,11 +2,12 @@ import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
 import 'package:hermez/src/domain/prices/price_repository.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/tokens/token_repository.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/account.dart' as hezAccount;
-import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/token.dart' as hezToken;
 
 class GetAccountUseCase {
   final TokenRepository _tokenRepository;
@@ -28,8 +29,9 @@ class GetAccountUseCase {
       hezAddress = addresses.getHermezAddress(state.ethereumAddress);
     }*/
 
-    Token token = await _tokenRepository.getTokenById(tokenId);
+    hezToken.Token hermezToken = await _tokenRepository.getTokenById(tokenId);
     PriceToken priceToken = await _priceRepository.getTokenPrice(tokenId);
+    Token token = Token(token: hermezToken, price: priceToken);
 
     switch (transactionLevel) {
       case TransactionLevel.LEVEL2:
@@ -41,7 +43,7 @@ class GetAccountUseCase {
 
           bool l2Account =
               hermezAccount.bjj != null && hermezAccount.bjj.length > 0;
-          return Account(l2Account: l2Account, token: token, price: priceToken);
+          return Account(l2Account: l2Account, token: token);
         }
         break;
       case TransactionLevel.LEVEL1:
@@ -59,10 +61,7 @@ class GetAccountUseCase {
           bool l2Account =
               hermezAccount.bjj != null && hermezAccount.bjj.length > 0;
           return Account(
-              l2Account: l2Account,
-              address: ethereumAddress,
-              token: token,
-              price: priceToken);
+              l2Account: l2Account, address: ethereumAddress, token: token);
         }
         break;
     }

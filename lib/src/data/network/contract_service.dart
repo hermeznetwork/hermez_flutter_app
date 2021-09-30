@@ -18,8 +18,8 @@ typedef TransferEvent = void Function(
 
 abstract class IContractService {
   Future<Credentials> getCredentials(String privateKey);
-  Future<bool> transfer(String privateKey, EthereumAddress receiverAddress,
-      BigInt amountInWei, Token token);
+  Future<bool> transfer(String receiverAddress, BigInt amountInWei, Token token,
+      {int gasLimit, int gasPrice});
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName);
   Future<EtherAmount> getEthBalance(EthereumAddress from);
@@ -57,22 +57,23 @@ class ContractService implements IContractService {
   Future<Credentials> getCredentials(String privateKey) =>
       client.credentialsFromPrivateKey(privateKey);
 
-  Future<bool> transfer(String privateKey, EthereumAddress receiverAddress,
-      BigInt amountInWei, Token token,
+  Future<bool> transfer(String receiverAddress, BigInt amountInWei, Token token,
       {int gasLimit, int gasPrice}) async {
+    final privateKey = await _configService.getPrivateKey();
     final credentials = await this.getCredentials(privateKey);
     final from = await credentials.extractAddress();
+    final to = EthereumAddress.fromHex(receiverAddress);
 
     if (token.id == 0) {
       EtherAmount amount =
           EtherAmount.fromUnitAndValue(EtherUnit.wei, amountInWei);
-      final txHash = await _sendTransaction(privateKey, receiverAddress, amount)
-          .then((txHash) {
+      final txHash =
+          await _sendTransaction(privateKey, to, amount).then((txHash) {
         if (txHash != null) {
           _configService.addPendingTransfer({
             'txHash': txHash,
             'from': from.hex,
-            'to': receiverAddress.hex,
+            'to': to.hex,
             'token': token,
             'value': amountInWei.toDouble().toString(),
             'fee': '0',
@@ -114,7 +115,7 @@ class ContractService implements IContractService {
           _configService.addPendingTransfer({
             'txHash': txHash,
             'from': from.hex,
-            'to': receiverAddress.hex,
+            'to': to.hex,
             'token': token,
             'value': amountInWei.toDouble().toString(),
             'fee': '0',

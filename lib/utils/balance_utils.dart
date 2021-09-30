@@ -1,11 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
+import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
-import 'package:hermez_sdk/model/account.dart';
-import 'package:hermez_sdk/model/token.dart';
 import 'package:hermez_sdk/tx_utils.dart';
 import 'package:hermez_sdk/utils.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +13,7 @@ class BalanceUtils {
   static String balanceOfAccounts(
       TransactionLevel txLevel,
       List<Account> _accounts,
-      WalletHandler store,
+      //WalletHandler store,
       String currency,
       double exchangeRatio,
       List<dynamic> pendingWithdraws,
@@ -47,15 +46,13 @@ class BalanceUtils {
     // calculate accounts amount
     if (_accounts != null && _accounts.length > 0) {
       for (Account account in _accounts) {
-        Token token = store.state.tokens
-            .firstWhere((token) => token.id == account.tokenId);
-        PriceToken priceToken = store.state.priceTokens
-            .firstWhere((priceToken) => priceToken.id == account.tokenId);
+        Token token = account.token;
+        PriceToken priceToken = token.price;
         if (priceToken.USD != null) {
           tokens.add(token);
           double value = priceToken.USD *
               double.parse(account.balance) /
-              pow(10, token.decimals);
+              pow(10, token.token.decimals);
           if (currency != "USD") {
             value *= exchangeRatio;
           }
@@ -66,13 +63,12 @@ class BalanceUtils {
 
     // calculate withdraws amount
     tokens.forEach((token) {
-      PriceToken priceToken = store.state.priceTokens
-          .firstWhere((priceToken) => priceToken.id == token.id);
+      PriceToken priceToken = token.price;
       if (txLevel == TransactionLevel.LEVEL2) {
         // Pending transfers and Pending Exits L2
         pendingWithdraws
             .takeWhile(
-                (poolTransaction) => token.id == poolTransaction.token.id)
+                (poolTransaction) => token.token.id == poolTransaction.token.id)
             .forEach((poolTransaction) {
           var amount = (getTokenAmountBigInt(
                   double.parse(poolTransaction.amount),
@@ -82,7 +78,7 @@ class BalanceUtils {
                   poolTransaction.fee, double.parse(poolTransaction.amount))
               .toDouble();
           double value =
-              priceToken.USD * ((amount + fee) / pow(10, token.decimals));
+              priceToken.USD * ((amount + fee) / pow(10, token.token.decimals));
           if (currency != "USD") {
             value *= exchangeRatio;
           }
@@ -111,7 +107,7 @@ class BalanceUtils {
           var amount = double.parse(pendingTransfer['value']);
           var fee = 0;
           double value =
-              priceToken.USD * ((amount + fee) / pow(10, token.decimals));
+              priceToken.USD * ((amount + fee) / pow(10, token.token.decimals));
           if (currency != "USD") {
             value *= exchangeRatio;
           }
@@ -119,7 +115,7 @@ class BalanceUtils {
         });
         pendingDeposits
             .takeWhile((pendingDeposit) =>
-                token.id == Token.fromJson(pendingDeposit['token']).id)
+                token.token.id == Token.fromJson(pendingDeposit['token']).id)
             .forEach((pendingDeposit) {
           /*historyTransactions.firstWhere(
             (forgedTransaction) =>
@@ -173,7 +169,7 @@ class BalanceUtils {
       (input * pow(10, precision)).truncateToDouble() / pow(10, precision);
 
   static double calculatePendingBalance(TransactionLevel txLevel,
-      Account account, String symbol, WalletHandler store,
+      Account account, String symbol, //WalletHandler store,
       {List<dynamic> historyTransactions}) {
     bool isCurrency = false;
     if (symbol == "EUR") {
@@ -191,10 +187,8 @@ class BalanceUtils {
     double balanceAmount = double.parse(account.balance);
     double withdrawsAmount = 0;
     double depositsAmount = 0;
-    Token token =
-        store.state.tokens.firstWhere((token) => token.id == account.tokenId);
-    PriceToken priceToken = store.state.priceTokens
-        .firstWhere((priceToken) => priceToken.id == token.id);
+    Token token = account.token;
+    PriceToken priceToken = token.price;
     if (txLevel == TransactionLevel.LEVEL2) {
       // Pending transfers and Pending Exits L2
       store.state.pendingL2Txs

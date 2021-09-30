@@ -14,8 +14,8 @@ import 'package:hermez/src/data/network/hermez_service.dart';
 import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/data/network/storage_service.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart' as wallet;
-import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/contract_parser.dart';
 import 'package:hermez_sdk/addresses.dart' as addresses;
 import 'package:hermez_sdk/api.dart';
@@ -24,13 +24,10 @@ import 'package:hermez_sdk/hermez_compressed_amount.dart';
 import 'package:hermez_sdk/hermez_wallet.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
-import 'package:hermez_sdk/model/forged_transactions_request.dart';
-import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
-import 'package:hermez_sdk/model/transaction.dart';
 import 'package:hermez_sdk/tx_pool.dart' as tx_pool;
 import 'package:hermez_sdk/tx_utils.dart';
 import 'package:web3dart/crypto.dart';
@@ -933,10 +930,10 @@ class WalletHandler {
         accountIndex, hermezWallet.publicKeyCompressedHex);
   }
 
-  Future<bool> sendL2Transaction(Transaction transaction) async {
+  /*Future<bool> sendL2Transaction(Transaction transaction) async {
     final result = await _hermezService.sendL2Transaction(transaction);
     return result;
-  }
+  }*/
 
   /// Calculates the fee for the transaction.
   /// It takes the appropriate recomended fee in USD from the coordinator
@@ -1043,7 +1040,7 @@ class WalletHandler {
     }
   }
 
-  Future<ForgedTransactionsResponse> getHermezTransactionsByAddress(
+  /*Future<ForgedTransactionsResponse> getHermezTransactionsByAddress(
       String address, Account account, int fromItem) async {
     Token token = await getTokenById(account.tokenId);
     ForgedTransactionsRequest request = ForgedTransactionsRequest(
@@ -1053,7 +1050,7 @@ class WalletHandler {
         tokenId: token.id,
         fromItem: fromItem);
     return _hermezService.getForgedTransactions(request);
-  }
+  }*/
 
   Future<String> getBabyJubJubBase64() async {
     final ethereumPrivateKey = await _configurationService.getPrivateKey();

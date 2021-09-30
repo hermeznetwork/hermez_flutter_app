@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_sdk/model/account.dart';
-import 'package:hermez_sdk/model/token.dart';
 
 class AccountRow extends StatelessWidget {
   AccountRow(
       this.account,
-      this.token,
+      //this.token,
       this.name,
       this.symbol,
       this.price,
@@ -20,7 +19,7 @@ class AccountRow extends StatelessWidget {
       this.onPressed);
 
   final Account account;
-  final Token token;
+  //final Token token;
   final String name;
   final String symbol;
   final double price;
@@ -31,7 +30,8 @@ class AccountRow extends StatelessWidget {
   final bool pendingDeposit;
   final bool isToken;
   final void Function(
-      Account account, Token token, String tokenId, String amount) onPressed;
+          Account account, /*Token token,*/ String tokenId, String amount)
+      onPressed;
 
   Widget build(BuildContext context) {
     String status = "Pending";

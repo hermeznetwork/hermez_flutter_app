@@ -4,24 +4,17 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/constants.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
-import 'package:hermez/src/data/network/configuration_service.dart';
-import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
-import 'package:hermez/src/presentation/settings/widgets/remove_account_info.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
-import 'package:hermez/utils/biometrics_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
-import 'package:hermez_sdk/addresses.dart';
-import 'package:hermez_sdk/environment.dart';
-import 'package:hermez_sdk/model/account.dart';
-import 'package:hermez_sdk/model/token.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 //import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -36,29 +29,71 @@ enum SettingsDetailsType {
 }
 
 class SettingsDetailsArguments {
-  final WalletHandler store;
+  //final WalletHandler store;
   final BuildContext parentContext;
   final SettingsDetailsType type;
+  final String hermezAddress;
 
-  SettingsDetailsArguments(this.store, this.parentContext, this.type);
+  SettingsDetailsArguments(
+      /*this.store,*/ this.parentContext,
+      this.type,
+      this.hermezAddress);
 }
 
 class SettingsDetailsPage extends StatefulWidget {
-  SettingsDetailsPage({Key key, this.arguments, this.configurationService})
-      : super(key: key);
+  SettingsDetailsPage({
+    Key key,
+    this.arguments,
+    /*this.configurationService*/
+  }) : super(key: key);
 
   final SettingsDetailsArguments arguments;
-  final ConfigurationService configurationService;
+  //final ConfigurationService configurationService;
 
   @override
   _SettingsDetailsPageState createState() => _SettingsDetailsPageState();
 }
 
 class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
-  List<BiometricType> availableBiometrics;
+  //List<BiometricType> availableBiometrics;
+
+  final SettingsBloc _bloc;
+  _SettingsDetailsPageState() : _bloc = getIt<SettingsBloc>() {
+    _bloc.getAvailableBiometrics();
+    _bloc.getHermezAddress();
+  }
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<SettingsState>(
+        initialData: _bloc.state,
+        stream: _bloc.observableState,
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+
+          if (state is LoadingSettingsState) {
+            return Container(
+                color: Colors.white,
+                child: Center(
+                  child: CircularProgressIndicator(color: HermezColors.orange),
+                ));
+          } else if (state is ErrorSettingsState) {
+            return Center(child: Text(state.message));
+          } else {
+            return _renderSettingsDetails(context, state);
+          }
+        });
+  }
+
+  Widget _renderSettingsDetails(
+      BuildContext context, LoadedSettingsState state) {
+    return Scaffold(
+        appBar: _renderAppBar(),
+        backgroundColor: Colors.white,
+        body: SafeArea(child: buildSettingsList()));
+  }
+
+  Widget _renderAppBar() {
     String title = "";
     switch (widget.arguments.type) {
       case SettingsDetailsType.GENERAL:
@@ -71,25 +106,17 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
         title = 'Advanced';
         break;
     }
-    return Scaffold(
-        appBar: new AppBar(
-          title: new Text(title,
-              style: TextStyle(
-                  fontFamily: 'ModernEra',
-                  color: HermezColors.blackTwo,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20)),
-          centerTitle: true,
-          elevation: 0.0,
-          backgroundColor: Colors.white,
-        ),
-        backgroundColor: Colors.white,
-        body: FutureBuilder(
-          future: fetchBiometrics(),
-          builder: (context, snapshot) {
-            return SafeArea(child: buildSettingsList());
-          },
-        ));
+    return AppBar(
+      title: new Text(title,
+          style: TextStyle(
+              fontFamily: 'ModernEra',
+              color: HermezColors.blackTwo,
+              fontWeight: FontWeight.w800,
+              fontSize: 20)),
+      centerTitle: true,
+      elevation: 0.0,
+      backgroundColor: Colors.white,
+    );
   }
 
   buildSettingsList() {
@@ -100,7 +127,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
         break;
       case SettingsDetailsType.SECURITY:
         count = 2;
-        if (availableBiometrics != null && availableBiometrics.length > 0) {
+        if (_bloc.state.settings.availableBiometrics != null &&
+            _bloc.state.settings.availableBiometrics.length > 0) {
           count++;
         }
         break;
@@ -172,35 +200,30 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                     String enabledName = "Enable";
                     String biometricName = "biometrics";
                     icon = "assets/settings_fingerprint.svg";
-                    if (availableBiometrics != null &&
-                        availableBiometrics.length > 1) {
+                    if (_bloc.state.settings.availableBiometrics != null &&
+                        _bloc.state.settings.availableBiometrics.length > 1) {
                       biometricName = 'biometrics';
-                      enabledName =
-                          (widget.configurationService.getBiometricsFace() ==
-                                      false &&
-                                  widget.configurationService
-                                          .getBiometricsFingerprint() ==
-                                      false)
-                              ? "Enable"
-                              : "Disable";
-                    } else if (availableBiometrics != null &&
-                        availableBiometrics
+                      enabledName = (_bloc.getBiometricsFace() == false &&
+                              _bloc.getBiometricsFingerprint() == false)
+                          ? "Enable"
+                          : "Disable";
+                    } else if (_bloc.state.settings.availableBiometrics !=
+                            null &&
+                        _bloc.state.settings.availableBiometrics
                             .contains(BiometricType.fingerprint)) {
                       biometricName = 'fingerprint';
-                      enabledName = (widget.configurationService
-                                  .getBiometricsFingerprint() ==
-                              false)
+                      enabledName = (_bloc.getBiometricsFingerprint() == false)
                           ? "Enable"
                           : "Disable";
                       icon = "assets/settings_fingerprint.svg";
-                    } else if (availableBiometrics != null &&
-                        availableBiometrics.contains(BiometricType.face)) {
+                    } else if (_bloc.state.settings.availableBiometrics !=
+                            null &&
+                        _bloc.state.settings.availableBiometrics
+                            .contains(BiometricType.face)) {
                       biometricName = Platform.isIOS ? 'Face ID' : 'face';
-                      enabledName =
-                          (widget.configurationService.getBiometricsFace() ==
-                                  false)
-                              ? "Enable"
-                              : "Disable";
+                      enabledName = (_bloc.getBiometricsFace() == false)
+                          ? "Enable"
+                          : "Disable";
                       icon = "assets/settings_face.svg";
                     }
                     title = enabledName + " " + biometricName;
@@ -269,8 +292,10 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       //  Currency conversion
-                      Navigator.of(context).pushNamed("currency_selector",
-                          arguments: widget.arguments.store);
+                      Navigator.of(context).pushNamed(
+                        "currency_selector",
+                        /*arguments: widget.arguments.store*/
+                      );
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Show recovery phrase
@@ -282,8 +307,10 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                         if (value.toString() == "true") {
                           Navigator.of(widget.arguments.parentContext)
                               .pushNamed("/recovery_phrase",
-                                  arguments: RecoveryPhraseArguments(false,
-                                      store: widget.arguments.store));
+                                  arguments: RecoveryPhraseArguments(
+                                    false,
+                                    /*store: widget.arguments.store*/
+                                  ));
                         }
                       });
                       break;
@@ -298,7 +325,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                                   ))
                           .then((selectedAccount) {
                         if (selectedAccount != null) {
-                          Token token = widget.arguments.store.state.tokens
+                          /*Token token = widget.arguments.store.state.tokens
                               .firstWhere((token) =>
                                   token.id ==
                                   (selectedAccount as Account).tokenId);
@@ -306,17 +333,17 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                               .arguments.store.state.priceTokens
                               .firstWhere((priceToken) =>
                                   priceToken.id ==
-                                  (selectedAccount as Account).tokenId);
+                                  (selectedAccount as Account).tokenId);*/
                           // Force withdrawal
                           Navigator.pushNamed(widget.arguments.parentContext,
                                   "/transaction_amount",
                                   arguments: TransactionAmountArguments(
-                                      widget.arguments.store,
+                                      //widget.arguments.store,
                                       TransactionLevel.LEVEL2,
                                       TransactionType.FORCEEXIT,
                                       account: selectedAccount,
-                                      token: token,
-                                      priceToken: priceToken,
+                                      //token: token,
+                                      //priceToken: priceToken,
                                       allowChangeLevel: false))
                               .then((results) {
                             if (results is PopWithResults) {
@@ -339,7 +366,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       // View in block explorer
-                      viewInExplorer();
+                      _bloc.showInBatchExplorer(
+                          _bloc.state.settings.hermezAddress);
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Change passcode
@@ -391,8 +419,10 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Default fee
-                      Navigator.of(context).pushNamed("fee_selector",
-                          arguments: widget.arguments.store);
+                      Navigator.of(context).pushNamed(
+                        "fee_selector",
+                        /*arguments: widget.arguments.store*/
+                      );
                       break;
                   }
                   break;
@@ -412,9 +442,10 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                     case SettingsDetailsType.ADVANCED:
                       // Remove account
                       Navigator.of(widget.arguments.parentContext).pushNamed(
-                          "/remove_account_info",
-                          arguments: RemoveAccountInfoArguments(
-                              widget.arguments.store));
+                        "/remove_account_info",
+                        /*arguments: RemoveAccountInfoArguments(
+                              widget.arguments.store)*/
+                      );
                       break;
                   }
                   break;
@@ -427,112 +458,82 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
     );
   }
 
-  viewInExplorer() async {
-    var url = getCurrentEnvironment().batchExplorerUrl +
-        '/user-account/' +
-        getHermezAddress(widget.arguments.store.state.ethereumAddress);
-    if (await canLaunch(url))
-      await launch(url);
-    else
-      // can't launch url, there is some error
-      throw "Could not launch $url";
-  }
-
   Future<void> checkBiometrics() async {
     if (widget.arguments.type == SettingsDetailsType.SECURITY) {
-      if (await BiometricsUtils.canCheckBiometrics() &&
-          await BiometricsUtils.isDeviceSupported()) {
-        availableBiometrics = await BiometricsUtils.getAvailableBiometrics();
-        if (availableBiometrics.contains(BiometricType.face)) {
-          // Face ID.
-          bool authenticated =
-              await BiometricsUtils.authenticateWithBiometrics('Scan your face'
-                  ' to authenticate');
-          if (authenticated) {
-            setState(() {
-              widget.configurationService.setBiometricsFace(
-                  !widget.configurationService.getBiometricsFace());
-            });
-            Flushbar(
-              messageText: Text(
-                (Platform.isIOS ? 'Face ID' : 'Face') +
-                    ' has been ' +
-                    (widget.configurationService.getBiometricsFace()
-                        ? 'enabled'
-                        : 'disabled'),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: HermezColors.blackTwo,
-                  fontSize: 16,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w700,
-                ),
+      if (_bloc.state.settings.availableBiometrics
+          .contains(BiometricType.face)) {
+        // Face ID.
+        bool authenticated = await _bloc
+            .authenticateWithBiometrics('Scan your face to authenticate');
+        if (authenticated) {
+          setState(() {
+            _bloc.setBiometricsFace(!_bloc.getBiometricsFace());
+          });
+          Flushbar(
+            messageText: Text(
+              (Platform.isIOS ? 'Face ID' : 'Face') +
+                  ' has been ' +
+                  (_bloc.getBiometricsFace() ? 'enabled' : 'disabled'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: HermezColors.blackTwo,
+                fontSize: 16,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w700,
               ),
-              boxShadows: [
-                BoxShadow(
-                  color: HermezColors.blueyGreyTwo.withAlpha(64),
-                  offset: Offset(0, 4),
-                  blurRadius: 16,
-                  spreadRadius: 0,
-                ),
-              ],
-              borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-              backgroundColor: Colors.white,
-              margin: EdgeInsets.all(16.0),
-              duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
-            ).show(context);
-          }
-        } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
-          // Touch ID.
-          bool authenticated = await BiometricsUtils.authenticateWithBiometrics(
-              'Scan your fingerprint'
-              ' to authenticate');
-          if (authenticated) {
-            setState(() {
-              widget.configurationService.setBiometricsFingerprint(
-                  !widget.configurationService.getBiometricsFingerprint());
-            });
-            Flushbar(
-              messageText: Text(
-                'Fingerprint has been ' +
-                    (widget.configurationService.getBiometricsFingerprint()
-                        ? 'enabled'
-                        : 'disabled'),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: HermezColors.blackTwo,
-                  fontSize: 16,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w700,
-                ),
+            ),
+            boxShadows: [
+              BoxShadow(
+                color: HermezColors.blueyGreyTwo.withAlpha(64),
+                offset: Offset(0, 4),
+                blurRadius: 16,
+                spreadRadius: 0,
               ),
-              boxShadows: [
-                BoxShadow(
-                  color: HermezColors.blueyGreyTwo.withAlpha(64),
-                  offset: Offset(0, 4),
-                  blurRadius: 16,
-                  spreadRadius: 0,
-                ),
-              ],
-              borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-              backgroundColor: Colors.white,
-              margin: EdgeInsets.all(16.0),
-              duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
-            ).show(context);
-          }
+            ],
+            borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            backgroundColor: Colors.white,
+            margin: EdgeInsets.all(16.0),
+            duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+          ).show(context);
+        }
+      } else if (_bloc.state.settings.availableBiometrics
+          .contains(BiometricType.fingerprint)) {
+        // Touch ID.
+        bool authenticated = await _bloc.authenticateWithBiometrics(
+            'Scan your fingerprint to authenticate');
+        if (authenticated) {
+          setState(() {
+            _bloc.setBiometricsFingerprint(!_bloc.getBiometricsFingerprint());
+          });
+          Flushbar(
+            messageText: Text(
+              'Fingerprint has been ' +
+                  (_bloc.getBiometricsFingerprint() ? 'enabled' : 'disabled'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: HermezColors.blackTwo,
+                fontSize: 16,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            boxShadows: [
+              BoxShadow(
+                color: HermezColors.blueyGreyTwo.withAlpha(64),
+                offset: Offset(0, 4),
+                blurRadius: 16,
+                spreadRadius: 0,
+              ),
+            ],
+            borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            backgroundColor: Colors.white,
+            margin: EdgeInsets.all(16.0),
+            duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+          ).show(context);
         }
       }
-    }
-  }
-
-  Future<void> fetchBiometrics() async {
-    availableBiometrics = null;
-    if (widget.arguments.type == SettingsDetailsType.SECURITY &&
-        await BiometricsUtils.canCheckBiometrics() &&
-        await BiometricsUtils.isDeviceSupported()) {
-      availableBiometrics = await BiometricsUtils.getAvailableBiometrics();
     }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:hermez/model/wallet.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart' as wallet;
-import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';

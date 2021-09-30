@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/backup_row.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -15,10 +14,10 @@ import 'package:hermez/utils/pop_result.dart';
 // title and message.
 
 class SettingsPage extends HookWidget {
-  SettingsPage(this.store, this.configurationService, this.parentContext,
+  SettingsPage(/*this.store,*/ this.configurationService, this.parentContext,
       this.onForceExitSuccess);
 
-  WalletHandler store;
+  //WalletHandler store;
   ConfigurationService configurationService;
   BuildContext parentContext;
   Function() onForceExitSuccess;
@@ -124,18 +123,27 @@ class SettingsPage extends HookWidget {
                   case 1:
                     Navigator.of(context).pushNamed("settings_details",
                         arguments: SettingsDetailsArguments(
-                            store, parentContext, SettingsDetailsType.GENERAL));
+                            /*store,*/ parentContext,
+                            SettingsDetailsType.GENERAL,
+                            ""
+                            /*configurationService.getHermezAddress()*/));
                     break;
                   case 2:
                     Navigator.of(context).pushNamed("settings_details",
-                        arguments: SettingsDetailsArguments(store,
-                            parentContext, SettingsDetailsType.SECURITY));
+                        arguments: SettingsDetailsArguments(
+                            /*store,*/
+                            parentContext,
+                            SettingsDetailsType.SECURITY,
+                            ""));
                     break;
                   case 3:
                     Navigator.of(context)
                         .pushNamed("settings_details",
-                            arguments: SettingsDetailsArguments(store,
-                                parentContext, SettingsDetailsType.ADVANCED))
+                            arguments: SettingsDetailsArguments(
+                                /*store,*/
+                                parentContext,
+                                SettingsDetailsType.ADVANCED,
+                                ""))
                         .then((results) {
                       if (results is PopWithResults) {
                         PopWithResults popResult = results;

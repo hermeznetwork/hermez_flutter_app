@@ -4,13 +4,13 @@ import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/tokens/token_repository.dart';
 import 'package:hermez_sdk/model/token.dart' as hezToken;
 
-class GetTokensUseCase {
+class TokensUseCase {
   final TokenRepository _tokenRepository;
   final PriceRepository _priceRepository;
 
-  GetTokensUseCase(this._tokenRepository, this._priceRepository);
+  TokensUseCase(this._tokenRepository, this._priceRepository);
 
-  Future<List<Token>> execute([List<int> tokenIds]) async {
+  Future<List<Token>> getTokens([List<int> tokenIds]) async {
     if (tokenIds == null) {
       tokenIds = [];
     }

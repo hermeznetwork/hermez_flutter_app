@@ -2,11 +2,12 @@ import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
 import 'package:hermez/src/domain/prices/price_repository.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/tokens/token_repository.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/account.dart' as hezAccount;
-import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/token.dart' as hezToken;
 
 class GetAccountsUseCase {
   final TokenRepository _tokenRepository;
@@ -30,7 +31,7 @@ class GetAccountsUseCase {
     if (tokenIds == null) {
       tokenIds = [];
     }
-    List<Token> tokens = await _tokenRepository.getTokens();
+    List<hezToken.Token> tokens = await _tokenRepository.getTokens();
     List<PriceToken> priceTokens = await _priceRepository.getTokensPrices();
 
     List<Account> accounts = [];
@@ -49,11 +50,12 @@ class GetAccountsUseCase {
 
         accounts.addAll(hezAccounts.map((hezAccount) {
           bool l2Account = hezAccount.bjj != null && hezAccount.bjj.length > 0;
-          Token token =
+          hezToken.Token hermezToken =
               tokens.firstWhere((token) => token.id == hezAccount.tokenId);
           PriceToken priceToken = priceTokens
               .firstWhere((priceToken) => priceToken.id == hezAccount.tokenId);
-          return Account(l2Account: l2Account, token: token, price: priceToken);
+          Token token = Token(token: hermezToken, price: priceToken);
+          return Account(l2Account: l2Account, token: token);
         }));
       }
     }
@@ -72,15 +74,13 @@ class GetAccountsUseCase {
 
         accounts.addAll(hezAccounts.map((hezAccount) {
           bool l2Account = hezAccount.bjj != null && hezAccount.bjj.length > 0;
-          Token token =
+          hezToken.Token hermezToken =
               tokens.firstWhere((token) => token.id == hezAccount.tokenId);
           PriceToken priceToken = priceTokens
               .firstWhere((priceToken) => priceToken.id == hezAccount.tokenId);
+          Token token = Token(token: hermezToken, price: priceToken);
           return Account(
-              l2Account: l2Account,
-              address: ethereumAddress,
-              token: token,
-              price: priceToken);
+              l2Account: l2Account, address: ethereumAddress, token: token);
         }));
       }
     }

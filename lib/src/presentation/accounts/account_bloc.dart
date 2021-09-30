@@ -25,8 +25,8 @@ class AccountBloc extends Bloc<AccountState> {
     });
   }
 
-  Future<Account> getAccount(TransactionLevel transactionLevel, String address,
-      String accountIndex, int tokenId) {
+  Future<Account> getAccount(String accountIndex, int tokenId,
+      [TransactionLevel transactionLevel, String address]) {
     return _getAccountUseCase
         .execute(transactionLevel, address, accountIndex, tokenId)
         .then((account) {
