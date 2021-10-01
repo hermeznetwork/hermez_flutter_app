@@ -112,7 +112,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       _isLoading = true;
     });
 
-    await widget.arguments.store.getAccounts();
+    //await widget.arguments.store.getAccounts();
     setState(() {
       _isLoading = false;
     });
@@ -122,7 +122,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     _stateResponse = await getState();
     //await widget.arguments.store.getBlockAvgTime();
     await fetchPendingTransactions();
-    if (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL2) {
+    if (_settingsBloc.state.settings.level == TransactionLevel.LEVEL2) {
       List<Account> accounts =
           List.from(widget.arguments.store.state.l2Accounts);
       _pendingDeposits = fetchPendingDeposits();
@@ -175,15 +175,15 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   List<PoolTransaction> fetchPendingExits() {
-    List<PoolTransaction> poolTxs = widget.arguments.store.state.pendingL2Txs;
+    /*List<PoolTransaction> poolTxs = widget.arguments.store.state.pendingL2Txs;
     poolTxs.removeWhere((transaction) => transaction.type != 'Exit');
-    return poolTxs;
+    return poolTxs;*/
   }
 
   List<dynamic> fetchPendingForceExits(
       List<Exit> exits, List<PoolTransaction> pendingExits) {
-    final accountPendingForceExits =
-        widget.arguments.store.state.pendingForceExits;
+    /*final accountPendingForceExits =
+        widget.arguments.store.state.pendingForceExits;*/
 
     /*exits.forEach((exit) {
       var pendingExit = pendingExits.firstWhere(
@@ -200,23 +200,23 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       }
     });*/
 
-    return accountPendingForceExits;
+    //return accountPendingForceExits;
   }
 
   List<Exit> fetchExits() {
-    return List.from(widget.arguments.store.state.exits);
+    //return List.from(widget.arguments.store.state.exits);
   }
 
   List<dynamic> fetchPendingWithdraws() {
-    return List.from(widget.arguments.store.state.pendingWithdraws);
+    //return List.from(widget.arguments.store.state.pendingWithdraws);
   }
 
   List<dynamic> fetchPendingDeposits() {
-    return List.from(widget.arguments.store.state.pendingDeposits);
+    //return List.from(widget.arguments.store.state.pendingDeposits);
   }
 
   Future<StateResponse> getState() async {
-    return await widget.arguments.store.getState();
+    //return await widget.arguments.store.getState();
   }
 
   @override
@@ -246,7 +246,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         children: <Widget>[
                           Image.asset(
                             'assets/' +
-                                (widget.arguments.store.state.txLevel ==
+                                (_settingsBloc.state.settings.level ==
                                         TransactionLevel.LEVEL1
                                     ? "ethereum_logo"
                                     : "hermez_logo") +
@@ -258,7 +258,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             width: 8,
                           ),
                           new Text(
-                              widget.arguments.store.state.txLevel ==
+                              _settingsBloc.state.settings.level ==
                                       TransactionLevel.LEVEL1
                                   ? "Ethereum Wallet"
                                   : "Hermez Wallet",
@@ -293,14 +293,12 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                       color: HermezColors.mediumOrange)),
                               onPressed: () {
                                 Clipboard.setData(ClipboardData(
-                                    text:
-                                        widget.arguments.store.state.txLevel ==
-                                                TransactionLevel.LEVEL1
-                                            ? widget.arguments.store.state
-                                                .ethereumAddress
-                                            : "hez:" +
-                                                widget.arguments.store.state
-                                                    .ethereumAddress));
+                                    text: _settingsBloc.state.settings.level ==
+                                            TransactionLevel.LEVEL1
+                                        ? _settingsBloc
+                                            .state.settings.ethereumAddress
+                                        : _settingsBloc
+                                            .state.settings.hermezAddress));
                                 Flushbar(
                                   messageText: Text(
                                     'Copied',
@@ -482,8 +480,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                           widget.arguments.store.state.txLevel,
                           TransactionType.SEND,
                           account: account,
-                          token: token,
-                          priceToken: priceToken,
+                          //token: token,
+                          //priceToken: priceToken,
                         ));
                     if (results is PopWithResults) {
                       PopWithResults popResult = results;

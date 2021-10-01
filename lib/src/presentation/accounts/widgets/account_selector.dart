@@ -752,8 +752,8 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                               .split('.')
                               .last;*/
                           final Account account = _accounts[index];
-                          Token token = account.token;
-                          PriceToken priceToken = account.price;
+                          Token token = account.token.token;
+                          PriceToken priceToken = account.token.price;
                           return AccountRow(
                             account,
                             token.name,

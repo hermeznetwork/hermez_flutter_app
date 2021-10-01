@@ -24,13 +24,13 @@ class WalletsBloc extends Bloc<WalletsState> {
       Wallet wallet = wallets[0];
       if (wallet.l1Address != null && wallet.l1Address.isNotEmpty) {
         String formattedBalance = wallet.totalL1Balance.toString();
-        walletItems
-            .add(WalletItemState(false, wallet.l1Address, formattedBalance));
+        walletItems.add(WalletItemState(
+            false, wallet.l1Address, formattedBalance, wallet.l1Accounts));
       }
       if (wallet.l2Address != null && wallet.l2Address.isNotEmpty) {
         String formattedBalance = wallet.totalL2Balance.toString();
-        walletItems
-            .add(WalletItemState(true, wallet.l2Address, formattedBalance));
+        walletItems.add(WalletItemState(
+            true, wallet.l2Address, formattedBalance, wallet.l2Accounts));
       }
     }
     return walletItems;

@@ -12,6 +12,10 @@ import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/data/network/storage_service.dart';
 import 'package:hermez/src/data/onboarding/onboarding_in_network_repository.dart';
 import 'package:hermez/src/data/security/security_in_local_repository.dart';
+import 'package:hermez/src/data/settings/settings_in_local_repository.dart';
+import 'package:hermez/src/data/tokens/tokens_in_network_repository.dart';
+import 'package:hermez/src/data/transactions/transaction_in_network_repository.dart';
+import 'package:hermez/src/data/transfer/transfer_in_network_repository.dart';
 import 'package:hermez/src/data/wallets/wallet_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
 import 'package:hermez/src/domain/accounts/usecases/get_account_use_case.dart';
@@ -26,11 +30,31 @@ import 'package:hermez/src/domain/security/usecases/check_biometrics_use_case.da
 import 'package:hermez/src/domain/security/usecases/check_pin_use_case.dart';
 import 'package:hermez/src/domain/security/usecases/confirm_pin_use_case.dart';
 import 'package:hermez/src/domain/security/usecases/create_pin_use_case.dart';
+import 'package:hermez/src/domain/settings/settings_repository.dart';
+import 'package:hermez/src/domain/settings/usecases/address_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/biometrics_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/default_currency_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/default_fee_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/explorer_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/level_use_case.dart';
+import 'package:hermez/src/domain/tokens/token_repository.dart';
+import 'package:hermez/src/domain/tokens/usecases/tokens_use_case.dart';
+import 'package:hermez/src/domain/transactions/transaction_repository.dart';
+import 'package:hermez/src/domain/transactions/usecases/get_transactions_use_case.dart';
+import 'package:hermez/src/domain/transfer/transfer_repository.dart';
+import 'package:hermez/src/domain/transfer/usecases/deposit_use_case.dart';
+import 'package:hermez/src/domain/transfer/usecases/exit_use_case.dart';
+import 'package:hermez/src/domain/transfer/usecases/force_exit_use_case.dart';
+import 'package:hermez/src/domain/transfer/usecases/transfer_use_case.dart';
+import 'package:hermez/src/domain/transfer/usecases/withdraw_use_case.dart';
 import 'package:hermez/src/domain/wallets/get_wallets_use_case.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
 import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/onboarding/onboarding_bloc.dart';
 import 'package:hermez/src/presentation/security/security_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/tokens/tokens_bloc.dart';
+import 'package:hermez/src/presentation/transactions/transactions_bloc.dart';
 import 'package:hermez/src/presentation/transfer/transfer_bloc.dart';
 import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
 import 'package:hermez_sdk/hermez_sdk.dart';
@@ -45,13 +69,14 @@ final getIt = GetIt.instance;
 
 Future<void> init(EnvParams walletParams) async {
   await registerProviders(walletParams);
-  registerWalletDependencies();
   registerSettingsDependencies();
   registerOnboardingDependencies();
   registerSecurityDependencies();
-  registerTransferDependencies();
+  registerWalletDependencies();
   registerAccountDependencies();
+  registerTokenDependencies();
   registerTransactionDependencies();
+  registerTransferDependencies();
 }
 
 Future<void> registerProviders(walletParams) async {
@@ -80,17 +105,27 @@ Future<void> registerProviders(walletParams) async {
       () => ExplorerService(walletParams.etherscanApiUrl, ETHERSCAN_API_KEY));
 }
 
-void registerWalletDependencies() {
-  getIt.registerFactory(() => WalletsBloc(getIt()));
+void registerSettingsDependencies() {
+  getIt.registerFactory(() => SettingsBloc(
+      getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
 
-  getIt.registerLazySingleton(() => GetWalletsUseCase(getIt()));
+  getIt.registerLazySingleton(() => DefaultCurrencyUseCase(getIt()));
 
-  getIt.registerLazySingleton<WalletRepository>(() =>
-      WalletInNetworkRepository(getIt(), getIt(), getIt(), getIt(), null, null
-          /*getIt(), getIt(), getIt(), getIt(), getIt(), getIt()*/));
+  getIt.registerLazySingleton(() => DefaultFeeUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => LevelUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => BiometricsUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ExplorerUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => AddressUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => TokensUseCase(getIt(), getIt()));
+
+  getIt.registerLazySingleton<SettingsRepository>(
+      () => SettingsInLocalRepository(getIt()));
 }
-
-void registerSettingsDependencies() {}
 
 void registerOnboardingDependencies() {
   getIt.registerFactory(
@@ -128,8 +163,14 @@ void registerSecurityDependencies() {
       () => SecurityInLocalRepository(getIt()));
 }
 
-void registerTransferDependencies() {
-  getIt.registerFactory(() => TransferBloc(getIt()));
+void registerWalletDependencies() {
+  getIt.registerFactory(() => WalletsBloc(getIt()));
+
+  getIt.registerLazySingleton(() => GetWalletsUseCase(getIt()));
+
+  getIt.registerLazySingleton<WalletRepository>(() =>
+      WalletInNetworkRepository(getIt(), getIt(), getIt(), getIt(), null, null
+          /*getIt(), getIt(), getIt(), getIt(), getIt(), getIt()*/));
 }
 
 void registerAccountDependencies() {
@@ -141,14 +182,45 @@ void registerAccountDependencies() {
   getIt.registerLazySingleton(
       () => GetAccountUseCase(getIt(), getIt(), getIt()));
 
-  //getIt.registerLazySingleton<TokenRepository>(
-  //        () => TokenInNetworkRepository(getIt()));
-
-  //getIt.registerLazySingleton<PriceRepository>(
-  //    () => PriceInNetworkRepository(walletParams.priceUpdaterApiUrl, walletParams.priceUpdaterApiKey));
-
   getIt.registerLazySingleton<AccountRepository>(
       () => AccountInNetworkRepository(getIt(), getIt(), getIt()));
 }
 
-void registerTransactionDependencies() {}
+void registerTokenDependencies() {
+  getIt.registerFactory(() => TokensBloc(getIt()));
+
+  getIt.registerLazySingleton(() => TokensUseCase(getIt(), getIt()));
+
+  getIt.registerLazySingleton<TokenRepository>(
+      () => TokensInNetworkRepository());
+
+  //getIt.registerLazySingleton<PriceRepository>(
+  //        () => PriceInNetworkRepository(walletParams.priceUpdaterApiUrl, walletParams.priceUpdaterApiKey));
+}
+
+void registerTransactionDependencies() {
+  getIt.registerFactory(() => TransactionsBloc(getIt()));
+
+  getIt.registerLazySingleton(() => GetAllTransactionsUseCase(getIt()));
+
+  getIt.registerLazySingleton<TransactionRepository>(
+      () => TransactionInNetworkRepository(getIt(), getIt(), getIt(), getIt()));
+}
+
+void registerTransferDependencies() {
+  getIt.registerFactory(
+      () => TransferBloc(getIt(), getIt(), getIt(), getIt(), getIt()));
+
+  getIt.registerLazySingleton(() => TransferUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => DepositUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ExitUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ForceExitUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => WithdrawUseCase(getIt()));
+
+  getIt.registerLazySingleton<TransferRepository>(
+      () => TransferInNetworkRepository(getIt(), getIt()));
+}

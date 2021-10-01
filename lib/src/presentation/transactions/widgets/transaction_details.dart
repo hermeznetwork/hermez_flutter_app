@@ -1470,6 +1470,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             final double amountExit = widget.arguments.amount *
                 pow(10, widget.arguments.account.token.token.decimals);
 
+            _transferBloc.forceExit(amountExit, widget.arguments.account)
+
             return await widget.arguments.store.forceExit(
                 amountExit, widget.arguments.account.token.token,
                 gasLimit: BigInt.from(widget.arguments.gasLimit),
@@ -1479,8 +1481,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         case TransactionType.WITHDRAW:
           {
             final amountWithdraw = widget.arguments.amount *
-                pow(10, widget.arguments.token.decimals);
+                pow(10, widget.arguments.account.token.token.decimals);
 
+            _transferBloc.withdraw(amountWithdraw, widget.arguments.account,
+              widget.arguments.exit)
             return await widget.arguments.store.withdraw(
                 amountWithdraw,
                 widget.arguments.account,

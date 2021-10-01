@@ -49,13 +49,14 @@ abstract class IHermezService {
   Future<Token> getTokenById(int tokenId);
   Future<bool> deposit(double amount, Token token,
       {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice = 0});
-  Future<BigInt> withdrawGasLimit(double amount, Account account, Exit exit,
+  Future<BigInt> withdrawGasLimit(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal);
-  Future<bool> withdraw(double amount, Account account, Exit exit,
+  Future<bool> withdraw(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
       {BigInt gasLimit, int gasPrice = 0});
-  Future<BigInt> forceExitGasLimit(double amount, Account account);
-  Future<bool> forceExit(double amount, Account account,
+  Future<BigInt> forceExitGasLimit(
+      double amount, String accountIndex, Token token);
+  Future<bool> forceExit(double amount, String accountIndex, Token token,
       {BigInt gasLimit, int gasPrice = 0});
   Future<bool> generateAndSendL2Tx(Map transaction, int tokenId);
   Future<bool> sendL2Transaction(Transaction transaction);
@@ -302,15 +303,14 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<BigInt> withdrawGasLimit(double amount, Account account, Exit exit,
+  Future<BigInt> withdrawGasLimit(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
     final hermezPrivateKey = await _configService.getHermezPrivateKey();
     final hermezAddress = await _configService.getHermezAddress();
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final babyJubJub = hermezWallet.publicKeyCompressedHex;
-    Token token =
-        await getTokenById(exit != null ? exit.tokenId : account.tokenId);
+    Token token = await getTokenById(exit.tokenId);
     if (completeDelayedWithdrawal == null ||
         completeDelayedWithdrawal == false) {
       bool isIntant = instantWithdrawal == null ? true : instantWithdrawal;
@@ -330,7 +330,7 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<bool> withdraw(double amount, Account account, Exit exit,
+  Future<bool> withdraw(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
       {BigInt gasLimit, int gasPrice = 0}) async {
     final hermezPrivateKey = await _configService.getHermezPrivateKey();
@@ -427,32 +427,32 @@ class HermezService implements IHermezService {
   }
 
   @override
-  Future<BigInt> forceExitGasLimit(double amount, Account account) async {
-    Token token = await getTokenById(account.tokenId);
+  Future<BigInt> forceExitGasLimit(
+      double amount, String accountIndex, Token token) async {
     final hermezAddress = await _configService.getHermezAddress();
     return await tx.forceExitGasLimit(
         HermezCompressedAmount.compressAmount(amount),
         hermezAddress,
-        account.accountIndex,
+        accountIndex,
         token);
   }
 
   @override
-  Future<bool> forceExit(double amount, Account account,
+  Future<bool> forceExit(double amount, String accountIndex, Token token,
       {BigInt gasLimit, int gasPrice = 0}) async {
     try {
-      Token token = await getTokenById(account.tokenId);
+      //Token token = await getTokenById(tokenId);
       final hermezAddress = await _configService.getHermezAddress();
       String ethereumPrivateKey = await _configService.getPrivateKey();
       final txHash = await tx
           .forceExit(HermezCompressedAmount.compressAmount(amount.toDouble()),
-              account.accountIndex, token, ethereumPrivateKey,
+              accountIndex, token, ethereumPrivateKey,
               gasLimit: gasLimit, gasPrice: gasPrice)
           .then((txHash) async {
         if (txHash != null) {
           _configService.addPendingForceExit({
             'hash': txHash,
-            'accountIndex': account.accountIndex,
+            'accountIndex': accountIndex,
             'fromHezEthereumAddress': hermezAddress,
             'toHezEthereumAddress': hermezAddress,
             'token': token.toJson(),

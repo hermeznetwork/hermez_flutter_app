@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:hermez/src/domain/transactions/transaction.dart';
-import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/token.dart';
@@ -14,21 +13,23 @@ abstract class TransferRepository {
   Future<bool> deposit(double amount, Token token,
       {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice});
 
-  Future<BigInt> withdrawGasLimit(double amount, Account account, Exit exit,
+  Future<BigInt> withdrawGasLimit(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal);
 
-  Future<bool> withdraw(double amount, Account account, Exit exit,
+  Future<bool> withdraw(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
       {BigInt gasLimit, int gasPrice = 0});
 
   Future<bool> isInstantWithdrawalAllowed(double amount, Token token);
 
-  Future<BigInt> forceExitGasLimit(double amount, Account account);
+  Future<BigInt> forceExitGasLimit(
+      double amount, String accountIndex, Token token);
 
-  Future<bool> forceExit(double amount, Account account,
+  Future<bool> forceExit(double amount, String accountIndex, Token token,
       {BigInt gasLimit, int gasPrice = 0});
 
-  Future<bool> exit(double amount, Account account, double fee);
+  Future<bool> exit(
+      double amount, String accountIndex, Token token, double fee);
 
   Future<bool> transfer(TransactionLevel level, String from, String to,
       double amount, Token token,

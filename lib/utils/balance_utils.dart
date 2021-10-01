@@ -98,7 +98,7 @@ class BalanceUtils {
       } else {
         pendingWithdraws
             .takeWhile(
-                (poolTransaction) => token.id == poolTransaction.token.id)
+                (poolTransaction) => token.token.id == poolTransaction.token.id)
             .forEach((pendingTransfer) {
           //if (token.id == 0) {
           //rest fees
@@ -115,7 +115,8 @@ class BalanceUtils {
         });
         pendingDeposits
             .takeWhile((pendingDeposit) =>
-                token.token.id == Token.fromJson(pendingDeposit['token']).id)
+                token.token.id ==
+                Token.fromJson(pendingDeposit['token']).token.id)
             .forEach((pendingDeposit) {
           /*historyTransactions.firstWhere(
             (forgedTransaction) =>
@@ -123,7 +124,8 @@ class BalanceUtils {
             orElse: () {*/
           if (pendingDeposit['id'] == null) {
             var amount = double.parse(pendingDeposit['value']);
-            double value = priceToken.USD * (amount / pow(10, token.decimals));
+            double value =
+                priceToken.USD * (amount / pow(10, token.token.decimals));
             if (currency != "USD") {
               value *= exchangeRatio;
             }
@@ -191,9 +193,9 @@ class BalanceUtils {
     PriceToken priceToken = token.price;
     if (txLevel == TransactionLevel.LEVEL2) {
       // Pending transfers and Pending Exits L2
-      store.state.pendingL2Txs
+      /*store.state.pendingL2Txs
           .takeWhile(
-              (poolTransaction) => account.tokenId == poolTransaction.token.id)
+              (poolTransaction) => account.token.token.id == poolTransaction.token.id)
           .forEach((poolTransaction) {
         var amount = double.parse(poolTransaction.amount);
         var fee = getFeeValue(
@@ -201,6 +203,15 @@ class BalanceUtils {
             .toDouble();
         withdrawsAmount += amount + fee;
       });
+      store.state.pendingForceExits
+          .takeWhile((pendingForceExit) =>
+      account.accountIndex == pendingForceExit['accountIndex'])
+          .forEach((pendingForceExit) {
+        var amount = pendingForceExit['amount'];
+        withdrawsAmount += amount;
+      });*/
+
+      // NOT INCLUDED
       /*exits
           .takeWhile((exit) => accountIndex == exit.accountIndex)
           .forEach((exit) {
@@ -214,15 +225,9 @@ class BalanceUtils {
         var amount = pendingWithdraw['amount'];
         withdrawsAmount += amount;
       });*/
-      store.state.pendingForceExits
-          .takeWhile((pendingForceExit) =>
-              account.accountIndex == pendingForceExit['accountIndex'])
-          .forEach((pendingForceExit) {
-        var amount = pendingForceExit['amount'];
-        withdrawsAmount += amount;
-      });
+
     } else {
-      store.state.pendingL1Transfers
+      /*store.state.pendingL1Transfers
           .takeWhile((pendingDeposit) =>
               Token.fromJson(pendingDeposit['token']).symbol == token.symbol)
           .forEach((pendingTransfer) {
@@ -269,7 +274,7 @@ class BalanceUtils {
             withdrawsAmount += amount;
           }
         }
-      });
+      });*/
     }
 
     debugPrint("balance amount:" + balanceAmount.toString());
@@ -284,7 +289,7 @@ class BalanceUtils {
     if (isCurrency && priceToken.USD != null) {
       resultAmount = priceToken.USD * resultAmount;
       if (symbol != "USD") {
-        resultAmount *= store.state.exchangeRatio;
+        //resultAmount *= store.state.exchangeRatio;
       }
     }
 

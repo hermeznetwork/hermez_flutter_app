@@ -9,6 +9,7 @@ import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode_scanner.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_currency.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
@@ -50,6 +51,8 @@ class _HomePageState extends State<HomePage> {
   bool showHermezWallet = false;
   GlobalKey _scaffoldKey;
 
+  SettingsBloc _settingsBloc = getIt<SettingsBloc>();
+
   @override
   void initState() {
     //widget.arguments.store.initialise();
@@ -73,14 +76,15 @@ class _HomePageState extends State<HomePage> {
             var configurationService =
                 Provider.of<ConfigurationService>(context, listen: false);
             page = SettingsDetailsPage(
-                key: _scaffoldKey,
-                arguments: settings.arguments,
-                configurationService: configurationService);
+              key: _scaffoldKey,
+              arguments: settings.arguments,
+              /*configurationService: configurationService*/
+            );
           } else if (settings.name == 'account_selector') {
             final AccountSelectorArguments args = settings.arguments;
             page = AccountSelectorPage(/*key: _scaffoldKey,*/ arguments: args);
           } else if (settings.name == 'currency_selector') {
-            page = SettingsCurrencyPage(store: widget.arguments.store);
+            page = SettingsCurrencyPage(/*store: widget.arguments.store*/);
           } else if (settings.name == 'fee_selector') {
             page = FeeSelectorPage(
                 /*key: _scaffoldKey,*/
@@ -125,7 +129,7 @@ class _HomePageState extends State<HomePage> {
     /*return FutureBuilder(
         future: initialize(),
         builder: (context, snapshot) {*/
-    if (widget.arguments.store.state.ethereumAddress == null) {
+    if (_settingsBloc.state.settings.ethereumAddress == null) {
       return Container(
           color: HermezColors.lightOrange,
           child: Center(
@@ -172,13 +176,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initialize() async {
-    if (widget.arguments.store.state.walletInitialized == false &&
+    /*if (widget.arguments.store.state.walletInitialized == false &&
         widget.arguments.store.state.loading == false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Add Your Code here.
         widget.arguments.store.initialise();
+        _settingsBloc.init();
       });
-    }
+    }*/
     return;
   }
 
@@ -304,8 +309,7 @@ class _HomePageState extends State<HomePage> {
                   Widget page;
                   if (index == 0) {
                     page = WalletSelectorPage(
-                        arguments: WalletSelectorArguments(
-                            widget.arguments.store, context,
+                        arguments: WalletSelectorArguments(context,
                             showHermezWallet: showHermezWallet,
                             hermezWalletShown: () {
                       showHermezWallet = false;
@@ -325,18 +329,14 @@ class _HomePageState extends State<HomePage> {
                             listen: false);
                     _scaffoldKey = GlobalKey<ScaffoldState>();
                     page = SettingsDetailsPage(
-                        key: _scaffoldKey,
-                        arguments: settings.arguments,
-                        configurationService: configurationService);
+                        key: _scaffoldKey, arguments: settings.arguments);
                   } else if (settings.name == 'account_selector') {
                     final AccountSelectorArguments args = settings.arguments;
                     page = AccountSelectorPage(arguments: args);
                   } else if (settings.name == 'currency_selector') {
-                    page = SettingsCurrencyPage(store: widget.arguments.store);
+                    page = SettingsCurrencyPage();
                   } else if (settings.name == 'fee_selector') {
-                    page = FeeSelectorPage(
-                        arguments:
-                            FeeSelectorArguments(widget.arguments.store));
+                    page = FeeSelectorPage(arguments: FeeSelectorArguments());
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
                     page = AccountDetailsPage(arguments: args);
@@ -358,8 +358,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget settingsPage(dynamic context) {
     var configurationService = getIt<IConfigurationService>();
-    return SettingsPage(widget.arguments.store, configurationService, context,
-        () {
+    return SettingsPage(configurationService, context, () {
       this.showHermezWallet = true;
       onTabTapped(0, context);
     });
@@ -369,7 +368,7 @@ class _HomePageState extends State<HomePage> {
     items = [
       TabNavigationItem(
         page: WalletSelectorPage(
-            arguments: WalletSelectorArguments(widget.arguments.store, context,
+            arguments: WalletSelectorArguments(context,
                 showHermezWallet: showHermezWallet, hermezWalletShown: () {
           showHermezWallet = false;
         })),

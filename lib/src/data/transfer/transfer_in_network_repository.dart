@@ -10,7 +10,6 @@ import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transfer/transfer_repository.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez_sdk/hermez_compressed_amount.dart';
-import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/recommended_fee.dart';
 import 'package:hermez_sdk/model/token.dart';
@@ -40,18 +39,18 @@ class TransferInNetworkRepository implements TransferRepository {
   }
 
   @override
-  Future<BigInt> withdrawGasLimit(double amount, Account account, Exit exit,
+  Future<BigInt> withdrawGasLimit(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal) async {
     return _hermezService.withdrawGasLimit(
-        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal);
+        amount, exit, completeDelayedWithdrawal, instantWithdrawal);
   }
 
   @override
-  Future<bool> withdraw(double amount, Account account, Exit exit,
+  Future<bool> withdraw(double amount, Exit exit,
       bool completeDelayedWithdrawal, bool instantWithdrawal,
       {BigInt gasLimit, int gasPrice = 0}) async {
     final success = await _hermezService.withdraw(
-        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal,
+        amount, exit, completeDelayedWithdrawal, instantWithdrawal,
         gasLimit: gasLimit, gasPrice: gasPrice);
     return success;
   }
@@ -64,27 +63,28 @@ class TransferInNetworkRepository implements TransferRepository {
   }
 
   @override
-  Future<BigInt> forceExitGasLimit(double amount, Account account) async {
-    return _hermezService.forceExitGasLimit(amount, account);
+  Future<BigInt> forceExitGasLimit(
+      double amount, String accountIndex, Token token) async {
+    return _hermezService.forceExitGasLimit(amount, accountIndex, token);
   }
 
   @override
-  Future<bool> forceExit(double amount, Account account,
+  Future<bool> forceExit(double amount, String accountIndex, Token token,
       {BigInt gasLimit, int gasPrice = 0}) async {
-    return _hermezService.forceExit(amount, account,
+    return _hermezService.forceExit(amount, accountIndex, token,
         gasLimit: gasLimit, gasPrice: gasPrice);
   }
 
   @override
-  Future<bool> exit(double amount, Account account, double fee) async {
+  Future<bool> exit(
+      double amount, String accountIndex, Token token, double fee) async {
     final exitTx = {
-      'from': account.accountIndex,
+      'from': accountIndex,
       'type': 'Exit',
       'amount': HermezCompressedAmount.compressAmount(amount),
       'fee': fee,
     };
-    final success =
-        await _hermezService.generateAndSendL2Tx(exitTx, account.tokenId);
+    final success = await _hermezService.generateAndSendL2Tx(exitTx, token.id);
     return success;
   }
 
