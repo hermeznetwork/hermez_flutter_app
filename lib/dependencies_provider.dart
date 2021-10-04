@@ -174,7 +174,7 @@ void registerWalletDependencies() {
 }
 
 void registerAccountDependencies() {
-  getIt.registerFactory(() => AccountBloc(getIt(), getIt()));
+  getIt.registerFactory(() => AccountBloc(getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(
       () => GetAccountsUseCase(getIt(), getIt(), getIt()));
@@ -209,7 +209,7 @@ void registerTransactionDependencies() {
 
 void registerTransferDependencies() {
   getIt.registerFactory(
-      () => TransferBloc(getIt(), getIt(), getIt(), getIt(), getIt()));
+      () => TransferBloc(getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(() => TransferUseCase(getIt()));
 

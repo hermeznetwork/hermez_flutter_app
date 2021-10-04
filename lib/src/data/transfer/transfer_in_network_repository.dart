@@ -154,7 +154,7 @@ class TransferInNetworkRepository implements TransferRepository {
   /// Fetches the recommended fees from the Coordinator
   /// @returns {RecommendedFee}
   @override
-  Future<RecommendedFee> fetchFees() {
+  Future<RecommendedFee> getHermezFees() {
     return _hermezService.getRecommendedFee();
   }
 
@@ -179,11 +179,13 @@ class TransferInNetworkRepository implements TransferRepository {
     return double.parse((fee / token.USD).toStringAsFixed(6));
   }
 
+  @override
   Future<GasPriceResponse> getGasPrice() async {
     GasPriceResponse gasPrice = await _contractService.getGasPrice();
     return gasPrice;
   }
 
+  @override
   Future<BigInt> getGasLimit(String from, String to, BigInt amount, Token token,
       {Uint8List data}) async {
     web3.EthereumAddress fromAddress;

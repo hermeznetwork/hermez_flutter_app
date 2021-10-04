@@ -57,8 +57,7 @@ class WalletTransferHandler {
       {int gasLimit, int gasPrice}) async {
     _store.dispatch(WalletTransferStarted());
     return await _contractService.transfer(
-      privateKey,
-      EthereumAddress.fromHex(to),
+      to,
       BigInt.from(double.parse(amount) * pow(10, token.decimals)),
       token,
       gasLimit: gasLimit,

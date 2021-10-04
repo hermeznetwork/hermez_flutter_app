@@ -51,7 +51,6 @@ class AccountRow extends StatelessWidget {
               ? () {
                   this.onPressed(
                     account,
-                    token,
                     symbol,
                     amount.toString(),
                   );

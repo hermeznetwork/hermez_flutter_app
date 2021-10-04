@@ -821,7 +821,7 @@ class WalletHandler {
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     return _hermezService.withdrawGasLimit(
-        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal);
+        amount, exit, completeDelayedWithdrawal, instantWithdrawal);
   }
 
   Future<bool> withdraw(double amount, Account account, Exit exit,
@@ -834,7 +834,7 @@ class WalletHandler {
     final hermezWallet =
         HermezWallet(hexToBytes(hermezPrivateKey), hermezAddress);
     final success = await _hermezService.withdraw(
-        amount, account, exit, completeDelayedWithdrawal, instantWithdrawal,
+        amount, exit, completeDelayedWithdrawal, instantWithdrawal,
         gasLimit: gasLimit, gasPrice: gasPrice);
 
     return success;
@@ -852,8 +852,8 @@ class WalletHandler {
 
   Future<BigInt> forceExitGasLimit(double amount, Account account) async {
     //_store.dispatch(TransactionStarted());
-    final hermezAddress = await _configurationService.getHermezAddress();
-    return _hermezService.forceExitGasLimit(amount, account);
+    //final hermezAddress = await _configurationService.getHermezAddress();
+    //return _hermezService.forceExitGasLimit(amount, account);
   }
 
   Future<bool> forceExit(double amount, Account account,
@@ -861,8 +861,8 @@ class WalletHandler {
     _store.dispatch(TransactionStarted());
     final hermezAddress = await _configurationService.getHermezAddress();
 
-    return _hermezService.forceExit(amount, account,
-        gasLimit: gasLimit, gasPrice: gasPrice);
+    //return _hermezService.forceExit(amount, account.accountIndex,
+    //    gasLimit: gasLimit, gasPrice: gasPrice);
   }
 
   Future<bool> exit(double amount, Account account, double fee) async {

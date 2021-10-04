@@ -6,7 +6,14 @@ class ForceExitUseCase {
 
   ForceExitUseCase(this._transferRepository);
 
-  Future<bool> execute(double amount, String accountIndex, Token token) {
-    return _transferRepository.forceExit(amount, accountIndex, token);
+  Future<bool> forceExit(double amount, String accountIndex, Token token,
+      {BigInt gasLimit, int gasPrice = 0}) {
+    return _transferRepository.forceExit(amount, accountIndex, token,
+        gasLimit: gasLimit, gasPrice: gasPrice);
+  }
+
+  Future<BigInt> forceExitGasLimit(
+      double amount, String accountIndex, Token token) {
+    return _transferRepository.forceExitGasLimit(amount, accountIndex, token);
   }
 }

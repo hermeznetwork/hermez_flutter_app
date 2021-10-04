@@ -13,23 +13,24 @@ import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/constants.dart';
 import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
+import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/tokens/widgets/token_row.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
+import 'package:hermez/src/presentation/transfer/transfer_bloc.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
 import 'package:hermez/utils/address_utils.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
-import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/constants.dart';
 import 'package:hermez_sdk/environment.dart';
-import 'package:hermez_sdk/model/account.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/state_response.dart';
@@ -73,6 +74,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   final WalletsBloc _bloc;
   _WalletDetailsPageState() : _bloc = getIt<WalletsBloc>();
   final SettingsBloc _settingsBloc = getIt<SettingsBloc>();
+  final TransferBloc _transferBloc = getIt<TransferBloc>();
 
   /*@override
   Widget build(BuildContext context) {
@@ -123,24 +125,24 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     //await widget.arguments.store.getBlockAvgTime();
     await fetchPendingTransactions();
     if (_settingsBloc.state.settings.level == TransactionLevel.LEVEL2) {
-      List<Account> accounts =
-          List.from(widget.arguments.store.state.l2Accounts);
+      List<Account> accounts = null;
+      //List.from(widget.arguments.store.state.l2Accounts);
       _pendingDeposits = fetchPendingDeposits();
       _pendingDeposits.forEach((pendingDeposit) {
         Account existingAccount = accounts.firstWhere(
-            (account) => (account.tokenId == pendingDeposit['token']['id']),
+            (account) =>
+                (account.token.token.id == pendingDeposit['token']['id']),
             orElse: () => null);
         if (existingAccount == null) {
           Account pendingAccount = Account(
-              balance: pendingDeposit['value'],
-              tokenId: pendingDeposit['token']['id']);
+              balance: pendingDeposit['value'], token: pendingDeposit['token']);
           accounts.add(pendingAccount);
         }
       });
       return accounts;
     } else {
-      List<Account> accounts =
-          List.from(widget.arguments.store.state.l1Accounts);
+      List<Account> accounts;
+      //List.from(widget.arguments.store.state.l1Accounts);
       return accounts;
     }
   }
@@ -166,10 +168,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     _allowedInstantWithdraws = [];
     for (int i = 0; i < _filteredExits.length; i++) {
       Exit exit = _filteredExits[i];
-      final Token token = widget.arguments.store.state.tokens
-          .firstWhere((token) => token.id == exit.tokenId);
-      bool isAllowed = await widget.arguments.store
-          .isInstantWithdrawalAllowed(double.parse(exit.balance), token);
+      final Token token = null;
+      /*widget.arguments.store.state.tokens
+          .firstWhere((token) => token.id == exit.tokenId);*/
+      bool isAllowed = await _transferBloc.isInstantWithdrawalAllowed(
+          double.parse(exit.balance), token);
       _allowedInstantWithdraws.add(isAllowed);
     }
   }
@@ -340,33 +343,35 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    widget != null && widget.arguments != null && widget.arguments.store.state.ethereumAddress != null
-                                        ? (widget.arguments.store.state.txLevel == TransactionLevel.LEVEL1
+                                    widget != null && widget.arguments != null && _settingsBloc.state.settings.ethereumAddress != null
+                                        ? (_settingsBloc.state.settings.level == TransactionLevel.LEVEL1
                                             ? "0x" +
-                                                    AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
+                                                    AddressUtils.strip0x(_settingsBloc.state.settings.ethereumAddress.substring(0, 6))
                                                         .toUpperCase() +
                                                     " ･･･ " +
-                                                    widget.arguments.store.state
-                                                        .ethereumAddress
+                                                    _settingsBloc.state.settings.ethereumAddress
                                                         .substring(
-                                                            widget.arguments.store.state.ethereumAddress.length -
+                                                            _settingsBloc
+                                                                    .state
+                                                                    .settings
+                                                                    .ethereumAddress
+                                                                    .length -
                                                                 4,
-                                                            widget
-                                                                .arguments
-                                                                .store
+                                                            _settingsBloc
                                                                 .state
+                                                                .settings
                                                                 .ethereumAddress
                                                                 .length)
                                                         .toUpperCase() ??
                                                 ""
                                             : "hez:" +
                                                     "0x" +
-                                                    AddressUtils.strip0x(widget.arguments.store.state.ethereumAddress.substring(0, 6))
+                                                    AddressUtils.strip0x(_settingsBloc.state.settings.ethereumAddress.substring(0, 6))
                                                         .toUpperCase() +
                                                     " ･･･ " +
-                                                    widget.arguments.store.state
+                                                    _settingsBloc.state.settings
                                                         .ethereumAddress
-                                                        .substring(widget.arguments.store.state.ethereumAddress.length - 4, widget.arguments.store.state.ethereumAddress.length)
+                                                        .substring(_settingsBloc.state.settings.ethereumAddress.length - 4, _settingsBloc.state.settings.ethereumAddress.length)
                                                         .toUpperCase() ??
                                                 "")
                                         : "",
@@ -391,7 +396,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                         top: 4,
                                         bottom: 4),
                                     child: Text(
-                                      widget.arguments.store.state.txLevel ==
+                                      _settingsBloc.state.settings.level ==
                                               TransactionLevel.LEVEL1
                                           ? "L1"
                                           : "L2",
@@ -467,17 +472,19 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     PriceToken priceToken;
                     if (accounts.length == 1) {
                       account = accounts[0];
-                      token = widget.arguments.store.state.tokens
-                          .firstWhere((token) => token.id == account.tokenId);
-                      priceToken = widget.arguments.store.state.priceTokens
+                      token = account.token.token;
+                      /*widget.arguments.store.state.tokens
+                          .firstWhere((token) => token.id == account.tokenId);*/
+                      priceToken = account.token.price;
+                      /*widget.arguments.store.state.priceTokens
                           .firstWhere(
-                              (priceToken) => priceToken.id == account.tokenId);
+                              (priceToken) => priceToken.id == account.tokenId);*/
                     }
                     var results = await Navigator.pushNamed(
                         widget.arguments.parentContext, "/transaction_amount",
                         arguments: TransactionAmountArguments(
                           //widget.arguments.store,
-                          widget.arguments.store.state.txLevel,
+                          _settingsBloc.state.settings.level,
                           TransactionType.SEND,
                           account: account,
                           //token: token,
@@ -526,14 +533,14 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 onPressed: () {
-                  if (widget.arguments.store.state.txLevel ==
+                  if (_settingsBloc.state.settings.level ==
                       TransactionLevel.LEVEL1) {
                     Navigator.of(widget.arguments.parentContext).pushNamed(
                       "/qrcode",
                       arguments: QRCodeArguments(
                           qrCodeType: QRCodeType.ETHEREUM,
-                          code: widget.arguments.store.state.ethereumAddress,
-                          store: widget.arguments.store,
+                          code: _settingsBloc.state.settings.ethereumAddress,
+                          //store: widget.arguments.store,
                           isReceive: true),
                     );
                   } else {
@@ -541,9 +548,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       "/qrcode",
                       arguments: QRCodeArguments(
                           qrCodeType: QRCodeType.HERMEZ,
-                          code: getHermezAddress(
-                              widget.arguments.store.state.ethereumAddress),
-                          store: widget.arguments.store,
+                          code: _settingsBloc.state.settings.hermezAddress,
+                          //store: widget.arguments.store,
                           isReceive: true),
                     );
                   }
@@ -667,8 +673,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               padding: const EdgeInsets.all(34.0),
               child: Column(children: [
                 Text(
-                  widget.arguments.store.state.txLevel ==
-                          TransactionLevel.LEVEL1
+                  _settingsBloc.state.settings.level == TransactionLevel.LEVEL1
                       ? 'Transfer tokens to your \n\n Ethereum wallet.'
                       : 'Transfer tokens to your \n\n Hermez wallet.',
                   textAlign: TextAlign.center,
@@ -726,7 +731,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   }
 
   Future<List<Token>> fetchTokens() async {
-    return widget.arguments.store.getTokens();
+    //return widget.arguments.store.getTokens();
   }
 
   Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
@@ -797,30 +802,29 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               padding: const EdgeInsets.all(16.0),
               itemBuilder: (context, i) {
                 final index = i;
-                final String currency = widget
-                    .arguments.store.state.defaultCurrency
+                final String currency = _settingsBloc
+                    .state.settings.defaultCurrency
                     .toString()
                     .split('.')
                     .last;
                 final Token token = _tokens[index];
-                final PriceToken priceToken = widget
+                /*final PriceToken priceToken = widget
                     .arguments.store.state.priceTokens
-                    .firstWhere((priceToken) => priceToken.id == token.id);
-                return AccountRow(
-                    null,
-                    token,
+                    .firstWhere((priceToken) => priceToken.id == token.id);*/
+                return TokenRow(
+                    null, //token,
                     token.name,
                     token.symbol,
-                    currency != "USD"
+                    /*currency != "USD"
                         ? priceToken.USD *
                             widget.arguments.store.state.exchangeRatio
-                        : priceToken.USD,
+                        : priceToken.USD,*/
+                    1,
                     currency,
                     0,
                     false,
                     true,
                     false,
-                    true,
                     null);
               },
             ),
@@ -864,28 +868,30 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 exit = Exit.fromTransaction(transaction);
               }
 
-              final String currency = widget
-                  .arguments.store.state.defaultCurrency
+              final String currency = _settingsBloc
+                  .state.settings.defaultCurrency
                   .toString()
                   .split('.')
                   .last;
 
-              final Token token = widget.arguments.store.state.tokens
+              /*final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
               final PriceToken priceToken = widget
                   .arguments.store.state.priceTokens
-                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);
+                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);*/
 
               return WithdrawalRow(
                   exit,
-                  token,
-                  priceToken,
+                  null,
+                  null,
+                  /*token,
+                  priceToken,*/
                   1,
                   currency,
-                  widget.arguments.store.state.exchangeRatio,
+                  1, //widget.arguments.store.state.exchangeRatio,
                   (bool completeDelayedWithdraw,
                       bool isInstantWithdraw) async {},
-                  widget.arguments.store.state.txLevel,
+                  _settingsBloc.state.settings.level,
                   _stateResponse);
             } else if (_filteredExits.length > 0 &&
                 i <
@@ -897,31 +903,32 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               final Exit exit = _filteredExits[index];
               final bool isAllowed = _allowedInstantWithdraws[index];
 
-              final String currency = widget
-                  .arguments.store.state.defaultCurrency
+              final String currency = _settingsBloc
+                  .state.settings.defaultCurrency
                   .toString()
                   .split('.')
                   .last;
 
-              final Token token = widget.arguments.store.state.tokens
+              /*final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
               final PriceToken priceToken = widget
                   .arguments.store.state.priceTokens
-                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);
+                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);*/
 
               return WithdrawalRow(
                 exit,
-                token,
-                priceToken,
+                null, null,
+                /*token,
+                priceToken,*/
                 2,
                 currency,
-                widget.arguments.store.state.exchangeRatio,
+                1, //widget.arguments.store.state.exchangeRatio,
                 (bool completeDelayedWithdraw,
                     bool instantWithdrawAllowed) async {
                   BigInt gasPrice = BigInt.one;
                   GasPriceResponse gasPriceResponse =
-                      await widget.arguments.store.getGasPrice();
-                  switch (widget.arguments.store.state.defaultFee) {
+                      await _transferBloc.getGasPrice();
+                  switch (_settingsBloc.state.settings.defaultFee) {
                     case WalletDefaultFee.SLOW:
                       int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
                       gasPrice = BigInt.from(gasPriceFloor);
@@ -939,23 +946,24 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   String addressTo =
                       getCurrentEnvironment().contracts[ContractName.hermez];
                   final amountWithdraw = double.parse(exit.balance);
-                  BigInt gasLimit = await widget.arguments.store
-                      .withdrawGasLimit(amountWithdraw, null, exit,
-                          completeDelayedWithdraw, instantWithdrawAllowed);
+                  BigInt gasLimit = await _transferBloc.withdrawGasLimit(
+                      amountWithdraw, exit,
+                      completeDelayedWithdrawal: completeDelayedWithdraw,
+                      instantWithdrawal: instantWithdrawAllowed);
 
                   var results =
                       await Navigator.of(widget.arguments.parentContext)
                           .pushNamed("/transaction_details",
                               arguments: TransactionDetailsArguments(
-                                  store: widget.arguments.store,
+                                  //store: widget.arguments.store,
                                   transactionType: TransactionType.WITHDRAW,
                                   transactionLevel: TransactionLevel.LEVEL1,
                                   status: TransactionStatus.DRAFT,
-                                  token: token,
-                                  priceToken: priceToken,
+                                  //token: token,
+                                  //priceToken: priceToken,
                                   exit: exit,
                                   amount: amountWithdraw.toDouble() /
-                                      pow(10, token.decimals),
+                                      pow(10, 18), //token.decimals),
                                   addressFrom: addressFrom,
                                   addressTo: addressTo,
                                   gasLimit: gasLimit.toInt(),
@@ -973,7 +981,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     }
                   }
                 },
-                widget.arguments.store.state.txLevel,
+                _settingsBloc.state.settings.level,
                 _stateResponse,
                 instantWithdrawAllowed: isAllowed,
                 completeDelayedWithdraw: false,
@@ -1015,8 +1023,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     pendingWithdraw['amount'].toString().replaceAll('.0', '');
               }
 
-              final String currency = widget
-                  .arguments.store.state.defaultCurrency
+              final String currency = _settingsBloc
+                  .state.settings.defaultCurrency
                   .toString()
                   .split('.')
                   .last;
@@ -1031,26 +1039,27 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 step = 2;
               }
 
-              final Token token = widget.arguments.store.state.tokens
+              /*final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
               final PriceToken priceToken = widget
                   .arguments.store.state.priceTokens
-                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);
+                  .firstWhere((priceToken) => priceToken.id == exit.tokenId);*/
 
               return WithdrawalRow(
                 exit,
-                token,
-                priceToken,
+                null, null,
+                /*token,
+                priceToken,*/
                 step,
                 currency,
-                widget.arguments.store.state.exchangeRatio,
+                1, //widget.arguments.store.state.exchangeRatio,
                 step == 2
                     ? (bool completeDelayedWithdraw,
                         bool instantWithdrawAllowed) async {
                         BigInt gasPrice = BigInt.one;
                         GasPriceResponse gasPriceResponse =
-                            await widget.arguments.store.getGasPrice();
-                        switch (widget.arguments.store.state.defaultFee) {
+                            await _transferBloc.getGasPrice();
+                        switch (_settingsBloc.state.settings.defaultFee) {
                           case WalletDefaultFee.SLOW:
                             int gasPriceFloor =
                                 gasPriceResponse.safeLow * pow(10, 8);
@@ -1075,13 +1084,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         BigInt gasLimit = BigInt.from(GAS_LIMIT_HIGH);
                         final amountWithdraw = double.parse(exit.balance);
                         try {
-                          gasLimit = await widget.arguments.store
-                              .withdrawGasLimit(
-                                  amountWithdraw,
-                                  null,
-                                  exit,
+                          gasLimit = await _transferBloc.withdrawGasLimit(
+                              amountWithdraw, exit,
+                              completeDelayedWithdrawal:
                                   completeDelayedWithdraw,
-                                  instantWithdrawAllowed);
+                              instantWithdrawal: instantWithdrawAllowed);
                         } catch (e) {
                           // default withdraw gas: 230K + STANDARD ERC20 TRANSFER + (siblings.length * 31K)
                           gasLimit = BigInt.from(GAS_LIMIT_WITHDRAW_DEFAULT);
@@ -1098,15 +1105,15 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                 widget.arguments.parentContext)
                             .pushNamed("/transaction_details",
                                 arguments: TransactionDetailsArguments(
-                                    store: widget.arguments.store,
+                                    //store: widget.arguments.store,
                                     transactionType: TransactionType.WITHDRAW,
                                     transactionLevel: TransactionLevel.LEVEL1,
                                     status: TransactionStatus.DRAFT,
-                                    token: token,
-                                    priceToken: priceToken,
+                                    //token: token,
+                                    //priceToken: priceToken,
                                     exit: exit,
                                     amount: amountWithdraw.toDouble() /
-                                        pow(10, token.decimals),
+                                        pow(10, 18), //token.decimals),
                                     addressFrom: addressFrom,
                                     addressTo: addressTo,
                                     gasLimit: gasLimit.toInt(),
@@ -1125,7 +1132,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       }
                     : (bool completeDelayedWithdraw,
                         bool instantWithdrawAllowed) {},
-                widget.arguments.store.state.txLevel,
+                _settingsBloc.state.settings.level,
                 _stateResponse,
                 retry: pendingWithdraw['status'] == 'fail',
                 instantWithdrawAllowed: isAllowed == true,
@@ -1139,14 +1146,16 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   _filteredExits.length -
                   _pendingWithdraws.length;
               final Account account = _accounts[index];
-              final Token token = widget.arguments.store.state.tokens
-                  .firstWhere((token) => token.id == account.tokenId);
-              final PriceToken priceToken = widget
+              final Token token = account.token.token;
+              /*widget.arguments.store.state.tokens
+                  .firstWhere((token) => token.id == account.tokenId);*/
+              final PriceToken priceToken = account.token.price;
+              /* widget
                   .arguments.store.state.priceTokens
-                  .firstWhere((priceToken) => priceToken.id == account.tokenId);
+                  .firstWhere((priceToken) => priceToken.id == account.tokenId);*/
 
-              final String currency = widget
-                  .arguments.store.state.defaultCurrency
+              final String currency = _settingsBloc
+                  .state.settings.defaultCurrency
                   .toString()
                   .split('.')
                   .last;
@@ -1156,20 +1165,21 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 isPendingDeposit = true;
               }
               _pendingDeposits.forEach((pendingDeposit) {
-                if (account.tokenId == (pendingDeposit['token'])['id']) {
+                if (account.token.token.id == (pendingDeposit['token'])['id']) {
                   isPendingDeposit = true;
                 }
               });
 
               return AccountRow(
                   account,
-                  token,
+                  //token,
                   token.name,
                   token.symbol,
-                  currency != "USD"
+                  /*currency != "USD"
                       ? priceToken.USD *
                           widget.arguments.store.state.exchangeRatio
-                      : priceToken.USD,
+                      :*/
+                  priceToken.USD,
                   currency,
                   BalanceUtils.calculatePendingBalance(
                         widget.arguments.transactionLevel,
@@ -1181,7 +1191,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   false,
                   true,
                   isPendingDeposit,
-                  false, (Account account, Token token, tokenId, amount) async {
+                  false, (Account account, tokenId, amount) async {
                 if (account.accountIndex == null) {
                   Flushbar(
                     messageText: Text(
@@ -1215,8 +1225,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               //widget.arguments.store,
                               widget.arguments.transactionLevel,
                               account,
-                              token,
-                              priceToken,
+                              //token,
+                              //priceToken,
                               widget.arguments.parentContext));
                   if (needRefresh != null && needRefresh == true) {
                     _onRefresh();
@@ -1244,7 +1254,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     String locale = "";
     String symbol = "";
     final String currency =
-        widget.arguments.store.state.defaultCurrency.toString().split('.').last;
+        _settingsBloc.state.settings.defaultCurrency.toString().split('.').last;
     if (currency == "EUR") {
       locale = 'eu';
       symbol = '€';
@@ -1265,11 +1275,11 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     result = BalanceUtils.balanceOfAccounts(
         txLevel,
         _accounts,
-        widget.arguments.store,
+        //widget.arguments.store,
         currency,
-        widget.arguments.store.state.exchangeRatio,
+        1, //widget.arguments.store.state.exchangeRatio,
         [], // pendingWithdraws
-        widget.arguments.store.state.pendingDeposits);
+        []); //widget.arguments.store.state.pendingDeposits);
     /*if (_accounts != null && _accounts.length > 0) {
       for (Account account in _accounts) {
         if (account.token.USD != null) {

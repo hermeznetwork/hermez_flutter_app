@@ -11,4 +11,6 @@ abstract class AccountRepository {
   Future<List<Account>> getL1Accounts(String ethereumAddress,
       {bool showZeroBalanceAccounts, List<int> tokenIds});
   Future<Account> getL1Account(String ethereumAddress, int tokenId);
+  Future<bool> getCreateAccountAuthorization(String hermezAddress);
+  Future<bool> authorizeAccountCreation(String hermezAddress);
 }
