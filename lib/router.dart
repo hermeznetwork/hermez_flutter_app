@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/home/widgets/home.dart';
+import 'package:hermez/src/presentation/home/widgets/info.dart';
+import 'package:hermez/src/presentation/onboarding/widgets/first_deposit.dart';
 import 'package:hermez/src/presentation/onboarding/widgets/import.dart';
 import 'package:hermez/src/presentation/onboarding/widgets/intro.dart';
+import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
+import 'package:hermez/src/presentation/qrcode/widgets/qrcode_scanner.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/settings/widgets/remove_account_info.dart';
+import 'package:hermez/src/presentation/settings/widgets/settings.dart';
+import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 
@@ -17,60 +24,69 @@ Map<String, WidgetBuilder> getRoutes(context) {
       var configurationService = getIt<IConfigurationService>();
       if (configurationService.didSetupWallet()) {
         return PinPage(
-            arguments:
-                PinArguments("Enter passcode", false, false, onSuccess: () {
+          arguments: PinArguments(
+            "Enter passcode",
+            false,
+            false,
+            onSuccess: () {
               Navigator.pushReplacementNamed(context, '/home');
-            }),
-            configurationService: configurationService);
+            },
+          ),
+        );
       } else {
-        //return WalletSetupProvider(builder: (context, store) {
         return IntroPage();
-        //});
       }
-      return IntroPage(); //BlocProvider(
-      //bloc: getIt<WalletsBloc>(), child: IntroPage());
-      /*var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet()) {
-        return PinPage(
-            arguments:
-                PinArguments("Enter passcode", false, false, onSuccess: () {
-              Navigator.pushReplacementNamed(context, '/home');
-            }),
-            configurationService: configurationService);
-      } else {
-        return WalletSetupProvider(builder: (context, store) {
-          return IntroPage();
-        });
-      }*/
     },
+
+    // ONBOARDING
+    '/info': (BuildContext context) {
+      return InfoPage(arguments: ModalRoute.of(context).settings.arguments);
+    },
+    '/first_deposit': (BuildContext context) {
+      bool showHermezWallet = ModalRoute.of(context).settings.arguments;
+      return FirstDepositPage(
+          arguments: FirstDepositArguments(showHermezWallet));
+    },
+    '/qrcode': (BuildContext context) =>
+        QRCodePage(arguments: ModalRoute.of(context).settings.arguments),
+
+    // HOME
+    '/settings': (BuildContext context) {
+      return SettingsPage(context, null);
+    },
+    '/settings_details': (BuildContext context) {
+      return SettingsDetailsPage(
+        arguments: ModalRoute.of(context).settings.arguments,
+      );
+    },
+    '/remove_account_info': (BuildContext context) {
+      return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);
+    },
+
     '/import': (BuildContext context) {
       return ImportWalletPage();
     },
     '/pin': (BuildContext context) {
-      var configurationService = getIt<IConfigurationService>();
-      return PinPage(
-          arguments: ModalRoute.of(context).settings.arguments,
-          configurationService: configurationService);
+      return PinPage(arguments: ModalRoute.of(context).settings.arguments);
     },
     '/home': (BuildContext context) {
       var configurationService = getIt<IConfigurationService>();
       if (configurationService.didSetupWallet()) {
-        //return WalletProvider(builder: (context, store) {
         final bool showHermezWallet = ModalRoute.of(context).settings.arguments;
         HomeArguments args;
         if (showHermezWallet != null) {
-          args = HomeArguments(configurationService,
-              showHermezWallet: showHermezWallet);
+          args = HomeArguments(showHermezWallet: showHermezWallet);
         } else {
-          args = HomeArguments(configurationService);
+          args = HomeArguments();
         }
         return HomePage(arguments: args);
-        //});
       } else {
-        //return WalletSetupProvider(builder: (context, store) {
         return IntroPage();
-        //});
       }
+    },
+    '/scanner': (BuildContext context) {
+      return QRCodeScannerPage(
+          arguments: ModalRoute.of(context).settings.arguments);
     },
     /*'/pin': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
@@ -101,18 +117,10 @@ Map<String, WidgetBuilder> getRoutes(context) {
       return RecoveryPhraseConfirmPage(
           configurationService: configurationService);
     },
-    '/settings_details': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
-      return SettingsDetailsPage(
-          arguments: ModalRoute.of(context).settings.arguments,
-          configurationService: configurationService);
-    },
+
     '/fee_selector': (BuildContext context) {
       return FeeSelectorPage(
           arguments: ModalRoute.of(context).settings.arguments);
-    },
-    '/remove_account_info': (BuildContext context) {
-      return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);
     },
     '/move_info': (BuildContext context) {
       return MoveInfoPage(arguments: ModalRoute.of(context).settings.arguments);
@@ -138,20 +146,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
         QRCodePage(arguments: ModalRoute.of(context).settings.arguments),
     //'/currency_selector': (BuildContext context) =>
     //    SettingsCurrencyPage(store: ModalRoute.of(context).settings.arguments),
-    '/first_deposit': (BuildContext context) {
-      var configurationService = Provider.of<ConfigurationService>(context);
-      if (configurationService.didSetupWallet()) {
-        return WalletProvider(builder: (context, store) {
-          bool showHermezWallet = ModalRoute.of(context).settings.arguments;
-          return FirstDepositPage(
-              arguments: FirstDepositArguments(store,
-                  showHermezWallet: showHermezWallet));
-        });
-      }
-      return WalletSetupProvider(builder: (context, store) {
-        return IntroPage();
-      });
-    },*/
+    */
 
     //(BuildContext context) {
     /*var configurationService = Provider.of<ConfigurationService>(context);

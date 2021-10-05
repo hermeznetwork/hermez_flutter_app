@@ -12,7 +12,11 @@ class WalletsBloc extends Bloc<WalletsState> {
 
   void fetchData() {
     _getWalletsUseCase.execute().then((wallets) {
-      changeState(WalletsState.loaded(_mapWalletsToState(wallets)));
+      if (wallets.isNotEmpty) {
+        changeState(WalletsState.loaded(_mapWalletsToState(wallets)));
+      } else {
+        changeState(WalletsState.error('Wallet is not initialized'));
+      }
     }).catchError((error) {
       changeState(WalletsState.error('A network error has occurred'));
     });
@@ -24,13 +28,13 @@ class WalletsBloc extends Bloc<WalletsState> {
       Wallet wallet = wallets[0];
       if (wallet.l1Address != null && wallet.l1Address.isNotEmpty) {
         String formattedBalance = wallet.totalL1Balance.toString();
-        walletItems.add(WalletItemState(
-            false, wallet.l1Address, formattedBalance, wallet.l1Accounts));
+        walletItems.add(WalletItemState(false, wallet.l1Address,
+            formattedBalance, wallet.l1Accounts, wallet.isBackedUp));
       }
       if (wallet.l2Address != null && wallet.l2Address.isNotEmpty) {
         String formattedBalance = wallet.totalL2Balance.toString();
-        walletItems.add(WalletItemState(
-            true, wallet.l2Address, formattedBalance, wallet.l2Accounts));
+        walletItems.add(WalletItemState(true, wallet.l2Address,
+            formattedBalance, wallet.l2Accounts, wallet.isBackedUp));
       }
     }
     return walletItems;

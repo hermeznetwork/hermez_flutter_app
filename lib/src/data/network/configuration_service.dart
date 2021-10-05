@@ -18,9 +18,9 @@ abstract class IConfigurationService {
   Future<void> setHermezAddress(String value);
   Future<void> setDefaultCurrency(WalletDefaultCurrency defaultCurrency);
   Future<void> setDefaultFee(WalletDefaultFee defaultFee);
-  Future<void> setPasscode(String value);
-  Future<void> setBiometricsFingerprint(bool value);
-  Future<void> setBiometricsFace(bool value);
+  Future<bool> setPasscode(String value);
+  Future<bool> setBiometricsFingerprint(bool value);
+  Future<bool> setBiometricsFace(bool value);
   Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value);
   Future<void> setLevelSelected(TransactionLevel value);
   Future<void> setupDone(bool value);
@@ -126,18 +126,19 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  Future<void> setPasscode(String value) async {
+  Future<bool> setPasscode(String value) async {
     await _secureStorage.write(key: 'passcode', value: value);
+    return true;
   }
 
   @override
-  Future<void> setBiometricsFingerprint(bool value) async {
-    await _preferences.setBool('biometrics_fingerprint', value);
+  Future<bool> setBiometricsFingerprint(bool value) async {
+    return await _preferences.setBool('biometrics_fingerprint', value);
   }
 
   @override
-  Future<void> setBiometricsFace(bool value) async {
-    await _preferences.setBool('biometrics_face', value);
+  Future<bool> setBiometricsFace(bool value) async {
+    return await _preferences.setBool('biometrics_face', value);
   }
 
   @override

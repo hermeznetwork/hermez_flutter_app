@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/backup_row.dart';
-import 'package:hermez/src/data/network/configuration_service.dart';
+import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
+import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
+import 'package:hermez/src/presentation/wallets/wallets_state.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
 
@@ -13,18 +14,36 @@ import 'package:hermez/utils/pop_result.dart';
 // In this example, create a class that contains a customizable
 // title and message.
 
-class SettingsPage extends HookWidget {
-  SettingsPage(/*this.store,*/ this.configurationService, this.parentContext,
-      this.onForceExitSuccess);
-
-  //WalletHandler store;
-  ConfigurationService configurationService;
+class SettingsPage extends StatelessWidget {
+  WalletsBloc _walletsBloc;
   BuildContext parentContext;
   Function() onForceExitSuccess;
 
+  SettingsPage(this.parentContext, this.onForceExitSuccess)
+      : _walletsBloc = getIt<WalletsBloc>() {
+    _walletsBloc.fetchData();
+  }
+
+  /*WalletsBloc _walletsBloc = getIt<WalletsBloc>() {};
+
+  //final AccountsBloc _bloc;
+  _AccountSelectorPageState() : _walletsBloc = getIt<WalletsBloc>() {
+    fetchData();
+  }*/
+
+  /*void fetchData() {
+    if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
+        widget.arguments.transactionType != TransactionType.FORCEEXIT) ||
+        widget.arguments.transactionType == TransactionType.DEPOSIT) {
+      _bloc.getAccounts(LayerFilter.L1, widget.arguments.address);
+    } else {
+      _bloc.getAccounts(LayerFilter.L2, widget.arguments.address);
+    }
+  }*/
+
   @override
   Widget build(BuildContext context) {
-    //final _scaffoldKey = GlobalKey<ScaffoldState>();
+    //final bloc = BlocProvider.of<CartBloc>(context);
 
     return Scaffold(
       //key: _scaffoldKey,
@@ -45,7 +64,20 @@ class SettingsPage extends HookWidget {
             Expanded(
               child: Container(
                 color: Colors.white,
-                child: buildSettingsList(),
+                child: StreamBuilder<WalletsState>(
+                    initialData: _walletsBloc.state,
+                    stream: _walletsBloc.observableState,
+                    builder: (context, snapshot) {
+                      final state = snapshot.data;
+
+                      if (state is LoadingWalletsState) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is ErrorWalletsState) {
+                        return _renderErrorContent();
+                      } else {
+                        return _renderSettingsContent(context, state);
+                      }
+                    }),
               ),
             ),
           ],
@@ -54,14 +86,15 @@ class SettingsPage extends HookWidget {
     );
   }
 
-  buildSettingsList() {
+  Widget _renderSettingsContent(
+      BuildContext context, LoadedWalletsState state) {
     return Container(
       color: Colors.white,
       child: ListView.separated(
         shrinkWrap: true,
-        itemCount: configurationService.didBackupWallet() ? 3 : 4,
+        itemCount: state.wallets[0].isBackedUp ? 3 : 4,
         separatorBuilder: (BuildContext context, int index) {
-          if (index == 0 && !configurationService.didBackupWallet()) {
+          if (index == 0 && !state.wallets[0].isBackedUp) {
             return Container();
           } else {
             return Container(
@@ -78,14 +111,14 @@ class SettingsPage extends HookWidget {
 
           // final index = i ~/ 2; //get the actual index excluding dividers.
 
-          if (!configurationService.didBackupWallet() && i == 0) {
+          if (!state.wallets[0].isBackedUp && i == 0) {
             return BackupRow(() {
               Navigator.of(parentContext).pushNamed("/backup_info");
             });
           } else {
             String title = "";
 
-            final index = i + (configurationService.didBackupWallet() ? 1 : 0);
+            final index = i + (state.wallets[0].isBackedUp ? 1 : 0);
             switch (index) {
               case 1:
                 title = "General";
@@ -123,27 +156,26 @@ class SettingsPage extends HookWidget {
                   case 1:
                     Navigator.of(context).pushNamed("settings_details",
                         arguments: SettingsDetailsArguments(
-                            /*store,*/ parentContext,
-                            SettingsDetailsType.GENERAL,
-                            ""
-                            /*configurationService.getHermezAddress()*/));
+                            parentContext, SettingsDetailsType.GENERAL));
                     break;
                   case 2:
-                    Navigator.of(context).pushNamed("settings_details",
-                        arguments: SettingsDetailsArguments(
-                            /*store,*/
-                            parentContext,
-                            SettingsDetailsType.SECURITY,
-                            ""));
+                    Navigator.of(context).pushNamed(
+                      "settings_details",
+                      arguments: SettingsDetailsArguments(
+                        parentContext,
+                        SettingsDetailsType.SECURITY,
+                      ),
+                    );
                     break;
                   case 3:
                     Navigator.of(context)
-                        .pushNamed("settings_details",
-                            arguments: SettingsDetailsArguments(
-                                /*store,*/
-                                parentContext,
-                                SettingsDetailsType.ADVANCED,
-                                ""))
+                        .pushNamed(
+                      "settings_details",
+                      arguments: SettingsDetailsArguments(
+                        parentContext,
+                        SettingsDetailsType.ADVANCED,
+                      ),
+                    )
                         .then((results) {
                       if (results is PopWithResults) {
                         PopWithResults popResult = results;
@@ -161,6 +193,27 @@ class SettingsPage extends HookWidget {
             //return _buildRow(context, element, color); //build the row widget
           }
         },
+      ),
+    );
+  }
+
+  Widget _renderErrorContent() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(34.0),
+      child: Column(
+        children: [
+          Text(
+            'There was an error loading \n\n this page.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: HermezColors.blueyGrey,
+              fontSize: 16,
+              fontFamily: 'ModernEra',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

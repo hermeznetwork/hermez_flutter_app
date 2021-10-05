@@ -3,9 +3,9 @@ import 'package:hermez/src/domain/qrcode/qrcode_repository.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qr_code_tools/qr_code_tools.dart';
 
-class SecurityInLocalRepository implements QrcodeRepository {
+class QrcodeInLocalRepository implements QrcodeRepository {
   final IConfigurationService _configurationService;
-  SecurityInLocalRepository(this._configurationService);
+  QrcodeInLocalRepository(this._configurationService);
 
   @override
   Future<String> getQrByGallery() async {

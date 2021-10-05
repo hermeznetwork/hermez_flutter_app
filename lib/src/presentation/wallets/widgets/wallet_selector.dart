@@ -71,7 +71,6 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
       });
       Navigator.pushNamed(context, 'wallet_details',
           arguments: WalletDetailsArguments(
-            //widget.arguments.store,
             TransactionLevel.LEVEL2,
             widget.arguments.parentContext,
             true,
@@ -335,30 +334,21 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   child: Text(
                                     "hez:" +
                                         "0x" +
-                                        (_settingsBloc.state.settings
-                                                    .ethereumAddress !=
-                                                null
-                                            ? AddressUtils.strip0x(
-                                                    _settingsBloc.state.settings
-                                                        .ethereumAddress
-                                                        .substring(0, 6))
+                                        (state.wallets[0].address != null
+                                            ? AddressUtils.strip0x(state
+                                                    .wallets[0].address
+                                                    .substring(0, 6))
                                                 .toUpperCase()
                                             : "") +
                                         " ･･･ " +
-                                        (_settingsBloc.state.settings
-                                                    .ethereumAddress !=
-                                                null
-                                            ? _settingsBloc
-                                                .state.settings.ethereumAddress
+                                        (state.wallets[0].address != null
+                                            ? state.wallets[0].address
                                                 .substring(
-                                                    _settingsBloc
-                                                            .state
-                                                            .settings
-                                                            .ethereumAddress
+                                                    state.wallets[0].address
                                                             .length -
                                                         4,
-                                                    _settingsBloc.state.settings
-                                                        .ethereumAddress.length)
+                                                    state.wallets[0].address
+                                                        .length)
                                                 .toUpperCase()
                                             : ""),
                                     style: TextStyle(
@@ -381,10 +371,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         "/qrcode",
                                         arguments: QRCodeArguments(
                                             qrCodeType: QRCodeType.HERMEZ,
-                                            code: getHermezAddress(_settingsBloc
-                                                .state
-                                                .settings
-                                                .ethereumAddress),
+                                            code: getHermezAddress(
+                                                state.wallets[0].address),
                                             //store: widget.arguments.store,
                                             isReceive: true),
                                       );
@@ -677,30 +665,21 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                 Expanded(
                                   child: Text(
                                     "0x" +
-                                        (_settingsBloc.state.settings
-                                                    .ethereumAddress !=
-                                                null
-                                            ? AddressUtils.strip0x(
-                                                    _settingsBloc.state.settings
-                                                        .ethereumAddress
-                                                        .substring(0, 6))
+                                        (state.wallets[0].address != null
+                                            ? AddressUtils.strip0x(state
+                                                    .wallets[0].address
+                                                    .substring(0, 6))
                                                 .toUpperCase()
                                             : "") +
                                         " ･･･ " +
-                                        (_settingsBloc.state.settings
-                                                    .ethereumAddress !=
-                                                null
-                                            ? _settingsBloc
-                                                .state.settings.ethereumAddress
+                                        (state.wallets[0].address != null
+                                            ? state.wallets[0].address
                                                 .substring(
-                                                    _settingsBloc
-                                                            .state
-                                                            .settings
-                                                            .ethereumAddress
+                                                    state.wallets[0].address
                                                             .length -
                                                         4,
-                                                    _settingsBloc.state.settings
-                                                        .ethereumAddress.length)
+                                                    state.wallets[0].address
+                                                        .length)
                                                 .toUpperCase()
                                             : ""),
                                     style: TextStyle(
@@ -722,8 +701,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                       "/qrcode",
                                       arguments: QRCodeArguments(
                                           qrCodeType: QRCodeType.ETHEREUM,
-                                          code: _settingsBloc
-                                              .state.settings.ethereumAddress,
+                                          code: state.wallets[0].address,
                                           //store: widget.arguments.store,
                                           isReceive: true),
                                     );

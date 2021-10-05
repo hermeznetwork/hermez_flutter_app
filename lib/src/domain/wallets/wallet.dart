@@ -9,6 +9,7 @@ class Wallet {
   final String l2Address;
   final List<Account> l1Accounts;
   final List<Account> l2Accounts;
+  final bool isBackedUp;
   final List<dynamic> pendingTransactions;
   final num totalL1Balance;
   final num totalL2Balance;
@@ -18,6 +19,7 @@ class Wallet {
       this.l2Address,
       this.l1Accounts,
       this.l2Accounts,
+      this.isBackedUp,
       this.pendingTransactions})
       : totalL1Balance =
             _calculateTotalBalance(false, l1Accounts, pendingTransactions),
@@ -30,6 +32,7 @@ class Wallet {
       l2Address: json['l2Address'],
       l1Accounts: json['l1Accounts'],
       l2Accounts: json['l2Accounts'],
+      isBackedUp: json['isBackedUp'],
       pendingTransactions: json['pendingTransactions'],
     );
   }
@@ -39,6 +42,7 @@ class Wallet {
         'l2Address': l2Address,
         'l1Accounts': l1Accounts,
         'l2Accounts': l2Accounts,
+        'isBackedUp': isBackedUp,
         'pendingTransactions': pendingTransactions,
       };
 

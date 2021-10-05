@@ -32,12 +32,12 @@ class SettingsDetailsArguments {
   //final WalletHandler store;
   final BuildContext parentContext;
   final SettingsDetailsType type;
-  final String hermezAddress;
+  //final String hermezAddress;
 
   SettingsDetailsArguments(
-      /*this.store,*/ this.parentContext,
-      this.type,
-      this.hermezAddress);
+    this.parentContext,
+    this.type,
+  );
 }
 
 class SettingsDetailsPage extends StatefulWidget {
@@ -59,67 +59,42 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
 
   final SettingsBloc _bloc;
   _SettingsDetailsPageState() : _bloc = getIt<SettingsBloc>() {
-    _bloc.getAvailableBiometrics();
-    _bloc.getHermezAddress();
+    if (_bloc.state is LoadingSettingsState) {
+      _bloc.init();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<SettingsState>(
-        initialData: _bloc.state,
-        stream: _bloc.observableState,
-        builder: (context, snapshot) {
-          final state = snapshot.data;
-
-          if (state is LoadingSettingsState) {
-            return Container(
-                color: Colors.white,
-                child: Center(
-                  child: CircularProgressIndicator(color: HermezColors.orange),
-                ));
-          } else if (state is ErrorSettingsState) {
-            return Center(child: Text(state.message));
-          } else {
-            return _renderSettingsDetails(context, state);
-          }
-        });
+    return Scaffold(
+      appBar: _renderAppBar(),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: StreamBuilder<SettingsState>(
+          initialData: _bloc.state,
+          stream: _bloc.observableState,
+          builder: (context, snapshot) {
+            final state = snapshot.data;
+            if (state is LoadingSettingsState) {
+              return Container(
+                  color: Colors.white,
+                  child: Center(
+                    child:
+                        CircularProgressIndicator(color: HermezColors.orange),
+                  ));
+            } else if (state is ErrorSettingsState) {
+              return Center(child: Text(state.message));
+            } else {
+              return _renderSettingsDetails(context, state);
+            }
+          },
+        ),
+      ),
+    );
   }
 
   Widget _renderSettingsDetails(
       BuildContext context, LoadedSettingsState state) {
-    return Scaffold(
-        appBar: _renderAppBar(),
-        backgroundColor: Colors.white,
-        body: SafeArea(child: buildSettingsList()));
-  }
-
-  Widget _renderAppBar() {
-    String title = "";
-    switch (widget.arguments.type) {
-      case SettingsDetailsType.GENERAL:
-        title = 'General';
-        break;
-      case SettingsDetailsType.SECURITY:
-        title = 'Security';
-        break;
-      case SettingsDetailsType.ADVANCED:
-        title = 'Advanced';
-        break;
-    }
-    return AppBar(
-      title: new Text(title,
-          style: TextStyle(
-              fontFamily: 'ModernEra',
-              color: HermezColors.blackTwo,
-              fontWeight: FontWeight.w800,
-              fontSize: 20)),
-      centerTitle: true,
-      elevation: 0.0,
-      backgroundColor: Colors.white,
-    );
-  }
-
-  buildSettingsList() {
     int count = 0;
     switch (widget.arguments.type) {
       case SettingsDetailsType.GENERAL:
@@ -127,8 +102,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
         break;
       case SettingsDetailsType.SECURITY:
         count = 2;
-        if (_bloc.state.settings.availableBiometrics != null &&
-            _bloc.state.settings.availableBiometrics.length > 0) {
+        if (state.settings.availableBiometrics != null &&
+            state.settings.availableBiometrics.length > 0) {
           count++;
         }
         break;
@@ -136,6 +111,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
         count = 3;
         break;
     }
+
     return Container(
       color: Colors.white,
       child: ListView.builder(
@@ -200,25 +176,23 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                     String enabledName = "Enable";
                     String biometricName = "biometrics";
                     icon = "assets/settings_fingerprint.svg";
-                    if (_bloc.state.settings.availableBiometrics != null &&
-                        _bloc.state.settings.availableBiometrics.length > 1) {
+                    if (state.settings.availableBiometrics != null &&
+                        state.settings.availableBiometrics.length > 1) {
                       biometricName = 'biometrics';
                       enabledName = (_bloc.getBiometricsFace() == false &&
                               _bloc.getBiometricsFingerprint() == false)
                           ? "Enable"
                           : "Disable";
-                    } else if (_bloc.state.settings.availableBiometrics !=
-                            null &&
-                        _bloc.state.settings.availableBiometrics
+                    } else if (state.settings.availableBiometrics != null &&
+                        state.settings.availableBiometrics
                             .contains(BiometricType.fingerprint)) {
                       biometricName = 'fingerprint';
                       enabledName = (_bloc.getBiometricsFingerprint() == false)
                           ? "Enable"
                           : "Disable";
                       icon = "assets/settings_fingerprint.svg";
-                    } else if (_bloc.state.settings.availableBiometrics !=
-                            null &&
-                        _bloc.state.settings.availableBiometrics
+                    } else if (state.settings.availableBiometrics != null &&
+                        state.settings.availableBiometrics
                             .contains(BiometricType.face)) {
                       biometricName = Platform.isIOS ? 'Face ID' : 'face';
                       enabledName = (_bloc.getBiometricsFace() == false)
@@ -366,8 +340,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       // View in block explorer
-                      _bloc.showInBatchExplorer(
-                          _bloc.state.settings.hermezAddress);
+                      _bloc.showInBatchExplorer(state.settings.hermezAddress);
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Change passcode
@@ -455,6 +428,32 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
           //return _buildRow(context, element, color); //build the row widget
         },
       ),
+    );
+  }
+
+  Widget _renderAppBar() {
+    String title = "";
+    switch (widget.arguments.type) {
+      case SettingsDetailsType.GENERAL:
+        title = 'General';
+        break;
+      case SettingsDetailsType.SECURITY:
+        title = 'Security';
+        break;
+      case SettingsDetailsType.ADVANCED:
+        title = 'Advanced';
+        break;
+    }
+    return AppBar(
+      title: new Text(title,
+          style: TextStyle(
+              fontFamily: 'ModernEra',
+              color: HermezColors.blackTwo,
+              fontWeight: FontWeight.w800,
+              fontSize: 20)),
+      centerTitle: true,
+      elevation: 0.0,
+      backgroundColor: Colors.white,
     );
   }
 

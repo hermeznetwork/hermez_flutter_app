@@ -1,48 +1,33 @@
 import 'package:hermez/src/common/bloc/bloc.dart';
 import 'package:hermez/src/domain/security/usecases/authenticate_biometrics_use_case.dart';
 import 'package:hermez/src/domain/security/usecases/check_biometrics_use_case.dart';
-import 'package:hermez/src/domain/security/usecases/check_pin_use_case.dart';
-import 'package:hermez/src/domain/security/usecases/confirm_pin_use_case.dart';
-import 'package:hermez/src/domain/security/usecases/create_pin_use_case.dart';
+import 'package:hermez/src/domain/security/usecases/pin_use_case.dart';
 import 'package:hermez/src/presentation/security/security_state.dart';
 import 'package:local_auth/local_auth.dart';
 
 class SecurityBloc extends Bloc<SecurityState> {
-  final CreatePinUseCase _createPinUseCase;
-  final ConfirmPinUseCase _confirmPinUseCase;
-  final CheckPinUseCase _checkPinUseCase;
+  final PinUseCase _pinUseCase;
   //final SetupBiometricsUseCase _setupBiometricsUseCase;
   final CheckBiometricsUseCase _checkBiometricsUseCase;
   final AuthenticateBiometricsUseCase _authenticateBiometricsUseCase;
 
   SecurityBloc(
-      this._createPinUseCase,
-      this._confirmPinUseCase,
-      this._checkPinUseCase,
+      this._pinUseCase,
       /*this._setupBiometricsUseCase,*/ this._checkBiometricsUseCase,
       this._authenticateBiometricsUseCase) {
     changeState(SecurityState.init());
   }
 
   Future<String> createPin(String pin) {
-    return _createPinUseCase.execute(pin).then((pin) {
+    return _pinUseCase.setPin(pin).then((valid) {
       changeState(SecurityState.pinCreated(PinItemState(pin)));
     }).catchError((error) {
       changeState(SecurityState.error('A network error has occurred'));
     });
   }
 
-  Future<bool> confirmPin(String pin) async {
-    if (this.state.pinItem.pin == pin) {
-      return await _confirmPinUseCase.execute(pin).then((confirmed) {
-        changeState(SecurityState.pinConfirmed(PinItemState(pin)));
-      }).catchError((error) {
-        changeState(SecurityState.error('A network error has occurred'));
-      });
-    } else {
-      changeState(SecurityState.error('Wrong pin'));
-      return false;
-    }
+  Future<String> getPin() async {
+    return await _pinUseCase.getPin();
   }
 
   Future<bool> checkBiometrics(BiometricType biometricType) {

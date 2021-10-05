@@ -5,27 +5,28 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hermez/context/transfer/wallet_transfer_provider.dart';
 import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/model/tab_navigation_item.dart';
-import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode_scanner.dart';
-import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_currency.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/fee_selector.dart';
+import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
+import 'package:hermez/src/presentation/wallets/wallets_state.dart';
 import 'package:hermez/src/presentation/wallets/widgets/wallet_details.dart';
 import 'package:hermez/src/presentation/wallets/widgets/wallet_selector.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:provider/provider.dart';
 
 class HomeArguments {
   bool showHermezWallet;
   //final WalletHandler store;
-  final ConfigurationService configurationService;
+  //final ConfigurationService configurationService;
 
-  HomeArguments(/*this.store,*/ this.configurationService,
+  HomeArguments(
+      /*this.store,*/ /*this.configurationService,*/
       {this.showHermezWallet = false});
 }
 
@@ -47,19 +48,24 @@ class _HomePageState extends State<HomePage> {
   //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<TabNavigationItem> items;
-
   bool showHermezWallet = false;
+
   GlobalKey _scaffoldKey;
 
-  SettingsBloc _settingsBloc = getIt<SettingsBloc>();
+  final WalletsBloc _bloc;
+  _HomePageState() : _bloc = getIt<WalletsBloc>() {
+    if (_bloc.state is LoadingWalletsState) {
+      _bloc.fetchData();
+    }
+  }
 
   @override
   void initState() {
     //widget.arguments.store.initialise();
-    initialize();
-    showHermezWallet = widget.arguments.showHermezWallet;
+    //initialize();
     _currentIndex = ValueNotifier(0);
-    updateItems();
+    showHermezWallet = widget.arguments.showHermezWallet;
+    /*updateItems();
     children = [
       for (final tabItem in items)
         Navigator(onGenerateRoute: (settings) {
@@ -73,8 +79,8 @@ class _HomePageState extends State<HomePage> {
             );
           } else if (settings.name == 'settings_details') {
             _scaffoldKey = GlobalKey<ScaffoldState>();
-            var configurationService =
-                Provider.of<ConfigurationService>(context, listen: false);
+            /*var configurationService =
+                Provider.of<ConfigurationService>(context, listen: false);*/
             page = SettingsDetailsPage(
               key: _scaffoldKey,
               arguments: settings.arguments,
@@ -103,33 +109,36 @@ class _HomePageState extends State<HomePage> {
 
           return MaterialPageRoute(builder: (_) => page);
         }),
-    ];
+    ];*/
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    updateItems();
+    return StreamBuilder<WalletsState>(
+      initialData: _bloc.state,
+      stream: _bloc.observableState,
+      builder: (context, snapshot) {
+        final state = snapshot.data;
+        if (state is LoadingSettingsState) {
+          return Container(
+              color: HermezColors.lightOrange,
+              child: Center(
+                child: CircularProgressIndicator(color: HermezColors.orange),
+              ));
+        } else if (state is ErrorSettingsState) {
+          return _renderErrorContent();
+          //return Center(child: Text(state.message));
+        } else {
+          return _renderHomeContent(context, state);
+        }
+      },
+    );
 
-    /*return StreamBuilder<WalletsState>(
-        initialData: _bloc.state,
-        stream: _bloc.observableState,
-        builder: (context, snapshot) {
-          final state = snapshot.data;
-
-          if (state is LoadingWalletsState) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is ErrorWalletsState) {
-            return Center(child: Text(state.message));
-          } else {
-            return Container(); /*_renderIntroContent(context, state);*/
-          }
-        });
-  }*/
     /*return FutureBuilder(
         future: initialize(),
         builder: (context, snapshot) {*/
-    if (_settingsBloc.state.settings.ethereumAddress == null) {
+    /*if (_settingsBloc.state.settings.ethereumAddress == null) {
       return Container(
           color: HermezColors.lightOrange,
           child: Center(
@@ -171,11 +180,94 @@ class _HomePageState extends State<HomePage> {
               return true;
             }
           });
-    }
+    }*/
     //});
   }
 
-  Future<void> initialize() async {
+  Widget _renderHomeContent(BuildContext context, LoadedWalletsState state) {
+    updateItems(state);
+    children = [
+      for (final tabItem in items)
+        Navigator(onGenerateRoute: (settings) {
+          _context = context;
+          Widget page = tabItem.page;
+          if (settings.name == 'wallet_details') {
+            _scaffoldKey = GlobalKey<ScaffoldState>();
+            page = WalletDetailsPage(
+              key: _scaffoldKey,
+              arguments: settings.arguments,
+            );
+          } else if (settings.name == 'settings_details') {
+            _scaffoldKey = GlobalKey<ScaffoldState>();
+            /*var configurationService =
+                Provider.of<ConfigurationService>(context, listen: false);*/
+            page = SettingsDetailsPage(
+              key: _scaffoldKey,
+              arguments: settings.arguments,
+              /*configurationService: configurationService*/
+            );
+          } else if (settings.name == 'account_selector') {
+            final AccountSelectorArguments args = settings.arguments;
+            page = AccountSelectorPage(/*key: _scaffoldKey,*/ arguments: args);
+          } else if (settings.name == 'currency_selector') {
+            page = SettingsCurrencyPage(/*store: widget.arguments.store*/);
+          } else if (settings.name == 'fee_selector') {
+            page = FeeSelectorPage(
+                /*key: _scaffoldKey,*/
+                arguments: FeeSelectorArguments(/*widget.arguments.store*/));
+          } else if (settings.name == 'account_details') {
+            final AccountDetailsArguments args = settings.arguments;
+            page = AccountDetailsPage(/*key: _scaffoldKey,*/ arguments: args);
+          } else if (settings.name == 'transaction_details') {
+            page = WalletTransferProvider(
+              builder: (context, store) {
+                return TransactionDetailsPage(
+                    /*key: _scaffoldKey,*/ arguments: settings.arguments);
+              },
+            );
+          }
+
+          return MaterialPageRoute(builder: (_) => page);
+        }),
+    ];
+    return WillPopScope(
+        child: Scaffold(
+          body: IndexedStack(
+            index: _currentIndex.value,
+            children: children,
+          ),
+          extendBody: true,
+          bottomNavigationBar: BottomNavigationBar(
+              elevation: 0,
+              selectedItemColor: HermezColors.blackTwo,
+              unselectedItemColor: HermezColors.blueyGreyTwo,
+              backgroundColor: Colors.transparent, // transparent
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              currentIndex: _currentIndex.value,
+              onTap: (int index) => onTabTapped(index, context),
+              items: [
+                for (final tabItem in items)
+                  BottomNavigationBarItem(
+                      icon: tabItem.icon, label: tabItem.title)
+              ]),
+        ),
+        onWillPop: () async {
+          try {
+            if (Navigator.of(_scaffoldKey.currentContext).canPop()) {
+              Navigator.of(_scaffoldKey.currentContext).pop();
+              return false;
+            } else {
+              return true;
+            }
+          } catch (e) {
+            print(e.toString());
+            return true;
+          }
+        });
+  }
+
+  /*Future<void> initialize() async {
     /*if (widget.arguments.store.state.walletInitialized == false &&
         widget.arguments.store.state.loading == false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -185,7 +277,7 @@ class _HomePageState extends State<HomePage> {
       });
     }*/
     return;
-  }
+  }*/
 
   void onTabTapped(int index, BuildContext context) {
     if (index == 1) {
@@ -324,9 +416,9 @@ class _HomePageState extends State<HomePage> {
                       arguments: settings.arguments,
                     );
                   } else if (settings.name == 'settings_details') {
-                    var configurationService =
+                    /*var configurationService =
                         Provider.of<ConfigurationService>(context,
-                            listen: false);
+                            listen: false);*/
                     _scaffoldKey = GlobalKey<ScaffoldState>();
                     page = SettingsDetailsPage(
                         key: _scaffoldKey, arguments: settings.arguments);
@@ -357,14 +449,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget settingsPage(dynamic context) {
-    var configurationService = getIt<IConfigurationService>();
-    return SettingsPage(configurationService, context, () {
+    //var configurationService = getIt<IConfigurationService>();
+    return SettingsPage(/*configurationService,*/ context, () {
       this.showHermezWallet = true;
       onTabTapped(0, context);
     });
   }
 
-  updateItems() {
+  updateItems([LoadedWalletsState state]) {
     items = [
       TabNavigationItem(
         page: WalletSelectorPage(
@@ -398,7 +490,7 @@ class _HomePageState extends State<HomePage> {
               right: -1,
               child: Stack(
                 children: [
-                  widget.arguments.configurationService.didBackupWallet()
+                  state != null && state.wallets[0].isBackedUp
                       ? Container()
                       : Icon(Icons.brightness_1,
                           size: 8.0, color: HermezColors.darkOrange)
@@ -408,5 +500,26 @@ class _HomePageState extends State<HomePage> {
         title: "Settings",
       ),
     ];
+  }
+
+  Widget _renderErrorContent() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(34.0),
+      child: Column(
+        children: [
+          Text(
+            'There was an error loading \n\n this page.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: HermezColors.blueyGrey,
+              fontSize: 16,
+              fontFamily: 'ModernEra',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

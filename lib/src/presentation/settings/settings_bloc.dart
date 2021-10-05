@@ -94,13 +94,12 @@ class SettingsBloc extends Bloc<SettingsState> {
   }
 
   Future<List<BiometricType>> getAvailableBiometrics() {
-    return _biometricsUseCase
-        .getAvailableBiometrics()
-        .then((availableBiometrics) {
-      state.settings.availableBiometrics = availableBiometrics;
-      changeState(SettingsState.loaded(state.settings));
+    return _biometricsUseCase.getAvailableBiometrics();
+    /*.then((availableBiometrics) {
+      //state.settings.availableBiometrics = availableBiometrics;
+      //changeState(SettingsState.loaded(state.settings));
       return availableBiometrics;
-    });
+    });*/
   }
 
   bool getBiometricsFace() {
@@ -128,19 +127,21 @@ class SettingsBloc extends Bloc<SettingsState> {
   // Address
 
   Future<String> getHermezAddress() async {
-    return _addressUseCase.getHermezAddress().then((hermezAddress) {
-      state.settings.hermezAddress = hermezAddress;
+    return _addressUseCase.getHermezAddress();
+    /*.then((hermezAddress) {
+      //state.settings.hermezAddress = hermezAddress;
       changeState(SettingsState.loaded(state.settings));
       return hermezAddress;
-    });
+    });*/
   }
 
   Future<String> getEthereumAddress() async {
-    return _addressUseCase.getEthereumAddress().then((ethereumAddress) {
+    return _addressUseCase.getEthereumAddress();
+    /*.then((ethereumAddress) {
       state.settings.ethereumAddress = ethereumAddress;
       changeState(SettingsState.loaded(state.settings));
       return ethereumAddress;
-    });
+    });*/
   }
 
   // Tokens

@@ -37,6 +37,7 @@ class WalletInNetworkRepository implements WalletRepository {
     List<PriceToken> priceTokens = await _priceUpdaterService.getTokensPrices();
     String ethereumAddress = await _configurationService.getEthereumAddress();
     String hermezAddress = await _configurationService.getHermezAddress();
+    bool isBackedUp = _configurationService.didBackupWallet();
     if (_accountInNetworkRepository != null) {
       List<hezAccount.Account> l2HezAccounts =
           await _accountInNetworkRepository.getL2Accounts(hermezAddress, []);
@@ -106,11 +107,14 @@ class WalletInNetworkRepository implements WalletRepository {
     List<dynamic> pendingDeposits = await getPendingDeposits();
     List<dynamic> pendingWithdraws = await getPendingWithdraws();
     List<dynamic> pendingForceExits = await getPendingForceExits();*/
-    wallets.add(Wallet(
-        l1Address: ethereumAddress,
-        l2Address: hermezAddress,
-        l1Accounts: l1Accounts,
-        l2Accounts: l2Accounts));
+    if (ethereumAddress != null && hermezAddress != null) {
+      wallets.add(Wallet(
+          l1Address: ethereumAddress,
+          l2Address: hermezAddress,
+          l1Accounts: l1Accounts,
+          l2Accounts: l2Accounts,
+          isBackedUp: isBackedUp));
+    }
     return wallets;
   }
 }

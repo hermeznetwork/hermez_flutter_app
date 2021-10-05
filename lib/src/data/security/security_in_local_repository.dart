@@ -8,6 +8,22 @@ class SecurityInLocalRepository implements SecurityRepository {
   SecurityInLocalRepository(this._configurationService);
 
   @override
+  Future<String> getPasscode() async {
+    return await _configurationService.getPasscode();
+  }
+
+  @override
+  Future<bool> isValidPasscode(String passcode) async {
+    String pinSaved = await _configurationService.getPasscode();
+    return pinSaved == passcode;
+  }
+
+  @override
+  Future<bool> setPasscode(String passcode) {
+    return _configurationService.setPasscode(passcode);
+  }
+
+  @override
   Future<String> createPin(String pin) {
     // TODO: implement createPin
     throw UnimplementedError();
@@ -15,15 +31,11 @@ class SecurityInLocalRepository implements SecurityRepository {
 
   @override
   Future<bool> confirmPin(String pin) {
-    // TODO: implement confirmPin
-    throw UnimplementedError();
+    _configurationService.setPasscode(pin);
   }
 
   @override
-  Future<bool> isValidPin(String pin) async {
-    String pinSaved = await _configurationService.getPasscode();
-    return pinSaved == pin;
-  }
+  Future<bool> isValidPin(String pin) async {}
 
   @override
   Future<bool> checkBiometrics(BiometricType biometricType) async {

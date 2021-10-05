@@ -11,6 +11,8 @@ import 'package:hermez/src/data/network/hermez_service.dart';
 import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/data/network/storage_service.dart';
 import 'package:hermez/src/data/onboarding/onboarding_in_network_repository.dart';
+import 'package:hermez/src/data/prices/price_in_network_repository.dart';
+import 'package:hermez/src/data/qrcode/qrcode_in_local_repository.dart';
 import 'package:hermez/src/data/security/security_in_local_repository.dart';
 import 'package:hermez/src/data/settings/settings_in_local_repository.dart';
 import 'package:hermez/src/data/tokens/tokens_in_network_repository.dart';
@@ -24,12 +26,13 @@ import 'package:hermez/src/domain/onboarding/onboarding_repository.dart';
 import 'package:hermez/src/domain/onboarding/usecases/confirm_mnemonic_use_case.dart';
 import 'package:hermez/src/domain/onboarding/usecases/create_mnemonic_use_case.dart';
 import 'package:hermez/src/domain/onboarding/usecases/import_private_key_use_case.dart';
+import 'package:hermez/src/domain/prices/price_repository.dart';
+import 'package:hermez/src/domain/qrcode/qrcode_repository.dart';
+import 'package:hermez/src/domain/qrcode/usecases/qrcode_in_gallery_use_case.dart';
 import 'package:hermez/src/domain/security/security_repository.dart';
 import 'package:hermez/src/domain/security/usecases/authenticate_biometrics_use_case.dart';
 import 'package:hermez/src/domain/security/usecases/check_biometrics_use_case.dart';
-import 'package:hermez/src/domain/security/usecases/check_pin_use_case.dart';
-import 'package:hermez/src/domain/security/usecases/confirm_pin_use_case.dart';
-import 'package:hermez/src/domain/security/usecases/create_pin_use_case.dart';
+import 'package:hermez/src/domain/security/usecases/pin_use_case.dart';
 import 'package:hermez/src/domain/settings/settings_repository.dart';
 import 'package:hermez/src/domain/settings/usecases/address_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/biometrics_use_case.dart';
@@ -51,6 +54,7 @@ import 'package:hermez/src/domain/wallets/get_wallets_use_case.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
 import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/onboarding/onboarding_bloc.dart';
+import 'package:hermez/src/presentation/qrcode/qrcode_bloc.dart';
 import 'package:hermez/src/presentation/security/security_bloc.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/tokens/tokens_bloc.dart';
@@ -69,9 +73,10 @@ final getIt = GetIt.instance;
 
 Future<void> init(EnvParams walletParams) async {
   await registerProviders(walletParams);
-  registerSettingsDependencies();
   registerOnboardingDependencies();
+  registerSettingsDependencies();
   registerSecurityDependencies();
+  registerQRCodeDependencies();
   registerWalletDependencies();
   registerAccountDependencies();
   registerTokenDependencies();
@@ -103,28 +108,18 @@ Future<void> registerProviders(walletParams) async {
 
   getIt.registerLazySingleton(
       () => ExplorerService(walletParams.etherscanApiUrl, ETHERSCAN_API_KEY));
+
+  getIt.registerLazySingleton<PriceRepository>(() => PriceInNetworkRepository(
+      walletParams.priceUpdaterApiUrl, walletParams.priceUpdaterApiKey));
 }
 
-void registerSettingsDependencies() {
-  getIt.registerFactory(() => SettingsBloc(
-      getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
+void registerQRCodeDependencies() {
+  getIt.registerFactory(() => QrcodeBloc(getIt()));
 
-  getIt.registerLazySingleton(() => DefaultCurrencyUseCase(getIt()));
+  getIt.registerLazySingleton(() => QrcodeInGalleryUseCase(getIt()));
 
-  getIt.registerLazySingleton(() => DefaultFeeUseCase(getIt()));
-
-  getIt.registerLazySingleton(() => LevelUseCase(getIt()));
-
-  getIt.registerLazySingleton(() => BiometricsUseCase(getIt()));
-
-  getIt.registerLazySingleton(() => ExplorerUseCase(getIt()));
-
-  getIt.registerLazySingleton(() => AddressUseCase(getIt()));
-
-  getIt.registerLazySingleton(() => TokensUseCase(getIt(), getIt()));
-
-  getIt.registerLazySingleton<SettingsRepository>(
-      () => SettingsInLocalRepository(getIt()));
+  getIt.registerLazySingleton<QrcodeRepository>(
+      () => QrcodeInLocalRepository(getIt()));
 }
 
 void registerOnboardingDependencies() {
@@ -145,15 +140,32 @@ void registerOnboardingDependencies() {
       () => OnboardingInNetworkRepository(getIt(), getIt()));
 }
 
+void registerSettingsDependencies() {
+  getIt.registerFactory(() => SettingsBloc(
+      getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
+
+  getIt.registerLazySingleton(() => DefaultCurrencyUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => DefaultFeeUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => LevelUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => BiometricsUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ExplorerUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => AddressUseCase(getIt()));
+
+  //getIt.registerLazySingleton(() => TokensUseCase(getIt(), getIt()));
+
+  getIt.registerLazySingleton<SettingsRepository>(
+      () => SettingsInLocalRepository(getIt()));
+}
+
 void registerSecurityDependencies() {
-  getIt.registerFactory(
-      () => SecurityBloc(getIt(), getIt(), getIt(), getIt(), getIt()));
+  getIt.registerFactory(() => SecurityBloc(getIt(), getIt(), getIt()));
 
-  getIt.registerLazySingleton(() => CreatePinUseCase(getIt()));
-
-  getIt.registerLazySingleton(() => ConfirmPinUseCase(getIt()));
-
-  getIt.registerLazySingleton(() => CheckPinUseCase(getIt()));
+  getIt.registerLazySingleton(() => PinUseCase(getIt()));
 
   getIt.registerLazySingleton(() => CheckBiometricsUseCase(getIt()));
 
@@ -193,9 +205,6 @@ void registerTokenDependencies() {
 
   getIt.registerLazySingleton<TokenRepository>(
       () => TokensInNetworkRepository());
-
-  //getIt.registerLazySingleton<PriceRepository>(
-  //        () => PriceInNetworkRepository(walletParams.priceUpdaterApiUrl, walletParams.priceUpdaterApiKey));
 }
 
 void registerTransactionDependencies() {

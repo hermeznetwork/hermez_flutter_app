@@ -34,7 +34,8 @@ class WalletItemState {
   final String address;
   final String totalBalance;
   final List<Account> accounts;
+  final bool isBackedUp;
 
-  WalletItemState(
-      this.l2Wallet, this.address, this.totalBalance, this.accounts);
+  WalletItemState(this.l2Wallet, this.address, this.totalBalance, this.accounts,
+      this.isBackedUp);
 }

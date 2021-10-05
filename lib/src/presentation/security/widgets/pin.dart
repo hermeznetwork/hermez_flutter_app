@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/dependencies_provider.dart';
-import 'package:hermez/src/data/network/configuration_service.dart';
 import 'package:hermez/src/presentation/home/widgets/info.dart';
 import 'package:hermez/src/presentation/security/security_bloc.dart';
 import 'package:hermez/utils/hermez_colors.dart';
@@ -18,11 +17,9 @@ class PinArguments {
 }
 
 class PinPage extends StatefulWidget {
-  PinPage({Key key, this.arguments, this.configurationService})
-      : super(key: key);
+  PinPage({Key key, this.arguments}) : super(key: key);
 
   final PinArguments arguments;
-  final ConfigurationService configurationService;
 
   @override
   _PinPageState createState() => _PinPageState();
@@ -580,7 +577,8 @@ class _PinPageState extends State<PinPage> {
             clearAllSelected();
           } else {
             if (pinString == confirmPinString) {
-              await widget.configurationService.setPasscode(pinString);
+              await _bloc.createPin(pinString);
+              //await widget.configurationService.setPasscode(pinString);
               if (widget.arguments.onSuccess != null) {
                 widget.arguments.onSuccess();
               } else if (Navigator.canPop(context)) {
@@ -594,7 +592,7 @@ class _PinPageState extends State<PinPage> {
             }
           }
         } else {
-          if (pinString == await widget.configurationService.getPasscode()) {
+          if (pinString == await _bloc.getPin()) {
             if (widget.arguments.onSuccess != null) {
               widget.arguments.onSuccess();
             } else if (Navigator.canPop(context)) {
