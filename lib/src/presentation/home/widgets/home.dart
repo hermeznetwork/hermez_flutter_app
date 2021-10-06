@@ -8,7 +8,6 @@ import 'package:hermez/model/tab_navigation_item.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode_scanner.dart';
-import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_currency.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
@@ -120,13 +119,13 @@ class _HomePageState extends State<HomePage> {
       stream: _bloc.observableState,
       builder: (context, snapshot) {
         final state = snapshot.data;
-        if (state is LoadingSettingsState) {
+        if (state is LoadingWalletsState) {
           return Container(
               color: HermezColors.lightOrange,
               child: Center(
                 child: CircularProgressIndicator(color: HermezColors.orange),
               ));
-        } else if (state is ErrorSettingsState) {
+        } else if (state is ErrorWalletsState) {
           return _renderErrorContent();
           //return Center(child: Text(state.message));
         } else {

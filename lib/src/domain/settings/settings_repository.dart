@@ -24,5 +24,5 @@ abstract class SettingsRepository {
   Future<String> getHermezAddress();
   Future<String> getEthereumAddress();
 
-  Future<void> resetDefault();
+  Future<bool> resetDefault();
 }

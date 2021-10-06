@@ -101,23 +101,28 @@ class SettingsInLocalRepository implements SettingsRepository {
   }
 
   @override
-  Future<void> resetDefault() async {
-    await _configurationService.setMnemonic("");
-    await _configurationService.setPrivateKey("");
-    await _configurationService.setHermezPrivateKey("");
-    await _configurationService.setBabyJubJubHex("");
-    await _configurationService.setBabyJubJubBase64("");
-    await _configurationService.setEthereumAddress("");
-    await _configurationService.setHermezAddress("");
-    await _configurationService.setPasscode("");
-    await _configurationService.setBiometricsFingerprint(false);
-    await _configurationService.setBiometricsFace(false);
+  Future<bool> resetDefault() async {
+    try {
+      await _configurationService.setMnemonic("");
+      await _configurationService.setPrivateKey("");
+      await _configurationService.setHermezPrivateKey("");
+      await _configurationService.setBabyJubJubHex("");
+      await _configurationService.setBabyJubJubBase64("");
+      await _configurationService.setEthereumAddress("");
+      await _configurationService.setHermezAddress("");
+      await _configurationService.setPasscode("");
+      await _configurationService.setBiometricsFingerprint(false);
+      await _configurationService.setBiometricsFace(false);
 
-    await _configurationService.setDefaultCurrency(WalletDefaultCurrency.USD);
-    await _configurationService.setDefaultFee(WalletDefaultFee.AVERAGE);
-    await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
-    await _configurationService.setupDone(false);
-    await _configurationService.backupDone(false);
+      await _configurationService.setDefaultCurrency(WalletDefaultCurrency.USD);
+      await _configurationService.setDefaultFee(WalletDefaultFee.AVERAGE);
+      await _configurationService.setLevelSelected(TransactionLevel.LEVEL1);
+      await _configurationService.setupDone(false);
+      await _configurationService.backupDone(false);
+    } catch (e) {
+      return false;
+    }
+    return true;
   }
 
   @override

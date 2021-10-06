@@ -40,6 +40,7 @@ import 'package:hermez/src/domain/settings/usecases/default_currency_use_case.da
 import 'package:hermez/src/domain/settings/usecases/default_fee_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/explorer_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/level_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/reset_default_use_case.dart';
 import 'package:hermez/src/domain/tokens/token_repository.dart';
 import 'package:hermez/src/domain/tokens/usecases/tokens_use_case.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
@@ -142,7 +143,7 @@ void registerOnboardingDependencies() {
 
 void registerSettingsDependencies() {
   getIt.registerFactory(() => SettingsBloc(
-      getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
+      getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(() => DefaultCurrencyUseCase(getIt()));
 
@@ -155,6 +156,8 @@ void registerSettingsDependencies() {
   getIt.registerLazySingleton(() => ExplorerUseCase(getIt()));
 
   getIt.registerLazySingleton(() => AddressUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => ResetDefaultUseCase(getIt()));
 
   //getIt.registerLazySingleton(() => TokensUseCase(getIt(), getIt()));
 

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/context/wallet/wallet_handler.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class RemoveAccountInfoArguments {
-  final WalletHandler store;
+  final SettingsBloc settingsBloc;
 
-  RemoveAccountInfoArguments(this.store);
+  RemoveAccountInfoArguments(this.settingsBloc);
 }
 
 class RemoveAccountInfoPage extends HookWidget {
@@ -95,9 +95,12 @@ class RemoveAccountInfoPage extends HookWidget {
                           arguments:
                               PinArguments("Remove account", false, false));
                       if (success != null && success == true) {
-                        await arguments.store.resetWallet();
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, "/", (Route<dynamic> route) => false);
+                        bool resetSuccess =
+                            await arguments.settingsBloc.resetDefault();
+                        if (resetSuccess) {
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, "/", (Route<dynamic> route) => false);
+                        }
                       }
                     },
                     padding: EdgeInsets.only(

@@ -31,6 +31,9 @@ dependencies:
   hermez_sdk: # ^1.0.0+2
     path: ../hermez_sdk/
 
+  #rxdart: ^0.27.2
+  get_it: ^7.2.0
+
   cupertino_icons: ^1.0.2
   bip32: ^2.0.0
   flutter_secure_storage: ^4.2.0

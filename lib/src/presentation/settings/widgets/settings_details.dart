@@ -11,6 +11,7 @@ import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
+import 'package:hermez/src/presentation/settings/widgets/remove_account_info.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
@@ -415,10 +416,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                     case SettingsDetailsType.ADVANCED:
                       // Remove account
                       Navigator.of(widget.arguments.parentContext).pushNamed(
-                        "/remove_account_info",
-                        /*arguments: RemoveAccountInfoArguments(
-                              widget.arguments.store)*/
-                      );
+                          "/remove_account_info",
+                          arguments: RemoveAccountInfoArguments(_bloc));
                       break;
                   }
                   break;

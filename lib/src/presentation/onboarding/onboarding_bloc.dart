@@ -48,16 +48,24 @@ class OnboardingBloc extends Bloc<OnboardingState> {
   Future<bool> importMnemonic(String mnemonic) async {
     return await _importMnemonicUseCase.execute(mnemonic).then((confirmed) {
       changeState(OnboardingState.mnemonicConfirmed());
+      return true;
     }).catchError((error) {
       changeState(OnboardingState.error('A network error has occurred'));
+      return false;
     });
   }
 
   Future<bool> importPrivateKey(String privateKey) async {
     return await _importPrivateKeyUseCase.execute(privateKey).then((confirmed) {
-      changeState(OnboardingState.mnemonicConfirmed());
+      if (confirmed) {
+        changeState(OnboardingState.mnemonicConfirmed());
+      } else {
+        changeState(OnboardingState.error('There was an error importing'));
+      }
+      return confirmed;
     }).catchError((error) {
       changeState(OnboardingState.error('A network error has occurred'));
+      return false;
     });
   }
 }

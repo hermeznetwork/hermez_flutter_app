@@ -5,6 +5,7 @@ import 'package:hermez/src/domain/settings/usecases/default_currency_use_case.da
 import 'package:hermez/src/domain/settings/usecases/default_fee_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/explorer_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/level_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/reset_default_use_case.dart';
 import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/tokens/usecases/tokens_use_case.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
@@ -20,6 +21,7 @@ class SettingsBloc extends Bloc<SettingsState> {
   final ExplorerUseCase _explorerUseCase;
   final AddressUseCase _addressUseCase;
   final TokensUseCase _tokensUseCase;
+  final ResetDefaultUseCase _resetDefaultUseCase;
 
   SettingsBloc(
       this._defaultCurrencyUseCase,
@@ -28,7 +30,8 @@ class SettingsBloc extends Bloc<SettingsState> {
       this._biometricsUseCase,
       this._explorerUseCase,
       this._addressUseCase,
-      this._tokensUseCase) {
+      this._tokensUseCase,
+      this._resetDefaultUseCase) {
     changeState(SettingsState.init());
   }
 
@@ -148,5 +151,9 @@ class SettingsBloc extends Bloc<SettingsState> {
 
   Future<List<Token>> getTokens() async {
     return _tokensUseCase.getTokens();
+  }
+
+  Future<bool> resetDefault() async {
+    return _resetDefaultUseCase.resetDefault();
   }
 }
