@@ -30,38 +30,36 @@ enum SettingsDetailsType {
 }
 
 class SettingsDetailsArguments {
-  //final WalletHandler store;
   final BuildContext parentContext;
   final SettingsDetailsType type;
+  final SettingsBloc settingsBloc;
   //final String hermezAddress;
 
-  SettingsDetailsArguments(
-    this.parentContext,
-    this.type,
-  );
+  SettingsDetailsArguments(this.parentContext, this.type, this.settingsBloc);
 }
 
 class SettingsDetailsPage extends StatefulWidget {
   SettingsDetailsPage({
     Key key,
     this.arguments,
-    /*this.configurationService*/
   }) : super(key: key);
 
   final SettingsDetailsArguments arguments;
-  //final ConfigurationService configurationService;
 
   @override
-  _SettingsDetailsPageState createState() => _SettingsDetailsPageState();
+  _SettingsDetailsPageState createState() =>
+      _SettingsDetailsPageState(arguments.settingsBloc);
 }
 
 class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
   //List<BiometricType> availableBiometrics;
 
-  final SettingsBloc _bloc;
-  _SettingsDetailsPageState() : _bloc = getIt<SettingsBloc>() {
-    if (_bloc.state is LoadingSettingsState) {
-      _bloc.init();
+  final SettingsBloc _settingsBloc;
+  _SettingsDetailsPageState(SettingsBloc settingsBloc)
+      : _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>() {
+    if (!(_settingsBloc.state is LoadedSettingsState)) {
+      _settingsBloc.init();
     }
   }
 
@@ -72,8 +70,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: StreamBuilder<SettingsState>(
-          initialData: _bloc.state,
-          stream: _bloc.observableState,
+          initialData: _settingsBloc.state,
+          stream: _settingsBloc.observableState,
           builder: (context, snapshot) {
             final state = snapshot.data;
             if (state is LoadingSettingsState) {
@@ -180,23 +178,25 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                     if (state.settings.availableBiometrics != null &&
                         state.settings.availableBiometrics.length > 1) {
                       biometricName = 'biometrics';
-                      enabledName = (_bloc.getBiometricsFace() == false &&
-                              _bloc.getBiometricsFingerprint() == false)
+                      enabledName = (_settingsBloc.getBiometricsFace() ==
+                                  false &&
+                              _settingsBloc.getBiometricsFingerprint() == false)
                           ? "Enable"
                           : "Disable";
                     } else if (state.settings.availableBiometrics != null &&
                         state.settings.availableBiometrics
                             .contains(BiometricType.fingerprint)) {
                       biometricName = 'fingerprint';
-                      enabledName = (_bloc.getBiometricsFingerprint() == false)
-                          ? "Enable"
-                          : "Disable";
+                      enabledName =
+                          (_settingsBloc.getBiometricsFingerprint() == false)
+                              ? "Enable"
+                              : "Disable";
                       icon = "assets/settings_fingerprint.svg";
                     } else if (state.settings.availableBiometrics != null &&
                         state.settings.availableBiometrics
                             .contains(BiometricType.face)) {
                       biometricName = Platform.isIOS ? 'Face ID' : 'face';
-                      enabledName = (_bloc.getBiometricsFace() == false)
+                      enabledName = (_settingsBloc.getBiometricsFace() == false)
                           ? "Enable"
                           : "Disable";
                       icon = "assets/settings_face.svg";
@@ -267,10 +267,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       //  Currency conversion
-                      Navigator.of(context).pushNamed(
-                        "currency_selector",
-                        /*arguments: widget.arguments.store*/
-                      );
+                      Navigator.of(context).pushNamed("currency_selector",
+                          arguments: _settingsBloc);
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Show recovery phrase
@@ -283,9 +281,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                           Navigator.of(widget.arguments.parentContext)
                               .pushNamed("/recovery_phrase",
                                   arguments: RecoveryPhraseArguments(
-                                    false,
-                                    /*store: widget.arguments.store*/
-                                  ));
+                                      false, _settingsBloc));
                         }
                       });
                       break;
@@ -341,7 +337,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                   switch (widget.arguments.type) {
                     case SettingsDetailsType.GENERAL:
                       // View in block explorer
-                      _bloc.showInBatchExplorer(state.settings.hermezAddress);
+                      _settingsBloc
+                          .showInBatchExplorer(state.settings.hermezAddress);
                       break;
                     case SettingsDetailsType.SECURITY:
                       // Change passcode
@@ -417,7 +414,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       // Remove account
                       Navigator.of(widget.arguments.parentContext).pushNamed(
                           "/remove_account_info",
-                          arguments: RemoveAccountInfoArguments(_bloc));
+                          arguments: RemoveAccountInfoArguments(_settingsBloc));
                       break;
                   }
                   break;
@@ -458,20 +455,22 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
 
   Future<void> checkBiometrics() async {
     if (widget.arguments.type == SettingsDetailsType.SECURITY) {
-      if (_bloc.state.settings.availableBiometrics
+      if ((_settingsBloc.state as LoadedSettingsState)
+          .settings
+          .availableBiometrics
           .contains(BiometricType.face)) {
         // Face ID.
-        bool authenticated = await _bloc
+        bool authenticated = await _settingsBloc
             .authenticateWithBiometrics('Scan your face to authenticate');
         if (authenticated) {
           setState(() {
-            _bloc.setBiometricsFace(!_bloc.getBiometricsFace());
+            _settingsBloc.setBiometricsFace(!_settingsBloc.getBiometricsFace());
           });
           Flushbar(
             messageText: Text(
               (Platform.isIOS ? 'Face ID' : 'Face') +
                   ' has been ' +
-                  (_bloc.getBiometricsFace() ? 'enabled' : 'disabled'),
+                  (_settingsBloc.getBiometricsFace() ? 'enabled' : 'disabled'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: HermezColors.blackTwo,
@@ -495,19 +494,24 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
             duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
           ).show(context);
         }
-      } else if (_bloc.state.settings.availableBiometrics
+      } else if ((_settingsBloc.state as LoadedSettingsState)
+          .settings
+          .availableBiometrics
           .contains(BiometricType.fingerprint)) {
         // Touch ID.
-        bool authenticated = await _bloc.authenticateWithBiometrics(
+        bool authenticated = await _settingsBloc.authenticateWithBiometrics(
             'Scan your fingerprint to authenticate');
         if (authenticated) {
           setState(() {
-            _bloc.setBiometricsFingerprint(!_bloc.getBiometricsFingerprint());
+            _settingsBloc.setBiometricsFingerprint(
+                !_settingsBloc.getBiometricsFingerprint());
           });
           Flushbar(
             messageText: Text(
               'Fingerprint has been ' +
-                  (_bloc.getBiometricsFingerprint() ? 'enabled' : 'disabled'),
+                  (_settingsBloc.getBiometricsFingerprint()
+                      ? 'enabled'
+                      : 'disabled'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: HermezColors.blackTwo,

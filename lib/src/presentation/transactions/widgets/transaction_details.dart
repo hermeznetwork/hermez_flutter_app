@@ -16,6 +16,7 @@ import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/home/widgets/info.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/transfer/transfer_bloc.dart';
 import 'package:hermez/src/presentation/transfer/widgets/move_info.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -32,7 +33,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../transfer/widgets/fee_selector.dart';
 
 class TransactionDetailsArguments {
-  //final WalletHandler store;
+  final SettingsBloc settingsBloc;
   final TransactionType transactionType;
   final TransactionLevel transactionLevel;
   final TransactionStatus status;
@@ -65,7 +66,7 @@ class TransactionDetailsArguments {
   final bool completeDelayedWithdrawal;
 
   TransactionDetailsArguments({
-    //this.store,
+    this.settingsBloc,
     this.transactionType,
     this.transactionLevel,
     this.status,
@@ -100,7 +101,8 @@ class TransactionDetailsPage extends StatefulWidget {
   final TransactionDetailsArguments arguments;
 
   @override
-  _TransactionDetailsPageState createState() => _TransactionDetailsPageState();
+  _TransactionDetailsPageState createState() =>
+      _TransactionDetailsPageState(arguments.settingsBloc);
 }
 
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
@@ -111,11 +113,19 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   //WalletTransferHandler transferStore;
   bool isLoading = false;
 
-  SettingsBloc _settingsBloc = getIt<SettingsBloc>();
+  SettingsBloc _settingsBloc;
   TransferBloc _transferBloc = getIt<TransferBloc>();
   AccountBloc _accountBloc = getIt<AccountBloc>();
 
-  @override
+  _TransactionDetailsPageState(SettingsBloc settingsBloc)
+      : _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>() {
+    if (!(_settingsBloc.state is LoadedSettingsState)) {
+      _settingsBloc.init();
+    }
+  }
+
+  /*@override
   void initState() {
     super.initState();
     if (widget.arguments.fee == null &&
@@ -132,11 +142,32 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           _settingsBloc.state.settings.defaultFee;
     }
     isLoading = false;
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
-    //transferStore = useWalletTransfer(context);
+    return StreamBuilder<SettingsState>(
+        initialData: _settingsBloc.state,
+        stream: _settingsBloc.observableState,
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+
+          if (state is LoadingSettingsState) {
+            return Container(
+                color: HermezColors.lightOrange,
+                child: Center(
+                  child: CircularProgressIndicator(color: HermezColors.orange),
+                ));
+          } else if (state is ErrorSettingsState) {
+            return Center(child: Text(state.message));
+          } else {
+            return _renderTransactionDetailsContent(context, state);
+          }
+        });
+  }
+
+  Widget _renderTransactionDetailsContent(
+      BuildContext context, LoadedSettingsState state) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: new AppBar(
@@ -169,7 +200,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               bool enoughFee = isFeeEnough();
               return Column(
                 children: [
-                  _buildAmountRow(),
+                  _buildAmountRow(state),
                   Expanded(
                       child: Container(
                           padding: EdgeInsets.all(16),
@@ -181,10 +212,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                       tiles: [
                                 _buildExitInfoRow(context),
                                 _buildStatusRow(),
-                                _buildFromRow(),
-                                _buildToRow(),
-                                _buildFeeRow(context),
-                                _buildWithdrawFeeRow(context),
+                                _buildFromRow(state),
+                                _buildToRow(state),
+                                _buildFeeRow(context, state),
+                                _buildWithdrawFeeRow(context, state),
                                 _buildDateRow(),
                                 _buildViewExplorerRow()
                               ]).toList())))),
@@ -371,7 +402,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               // We can show the loading view until the data comes back.
               //debugPrint('Step 1, build loading widget');
               return Column(children: [
-                _buildAmountRow(),
+                _buildAmountRow(state),
                 Expanded(
                   child: Center(
                     child: new CircularProgressIndicator(
@@ -434,9 +465,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     }
   }
 
-  Widget _buildAmountRow() {
+  Widget _buildAmountRow(LoadedSettingsState state) {
     final String currency =
-        _settingsBloc.state.settings.defaultCurrency.toString().split('.').last;
+        state.settings.defaultCurrency.toString().split('.').last;
 
     String symbol = "";
     if (currency == "EUR") {
@@ -610,7 +641,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           );
   }
 
-  Widget _buildFromRow() {
+  Widget _buildFromRow(LoadedSettingsState state) {
     return ListTile(
       contentPadding: EdgeInsets.only(top: 20, bottom: 20),
       title: Column(
@@ -626,11 +657,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     fontWeight: FontWeight.w500,
                   )),
               (widget.arguments.addressFrom.toLowerCase() ==
-                          _settingsBloc.state.settings.ethereumAddress
-                              .toLowerCase() ||
+                          state.settings.ethereumAddress.toLowerCase() ||
                       widget.arguments.addressFrom.toLowerCase() ==
-                          getHermezAddress(
-                                  _settingsBloc.state.settings.ethereumAddress)
+                          getHermezAddress(state.settings.ethereumAddress)
                               .toLowerCase() ||
                       widget.arguments.addressFrom.toLowerCase() ==
                           HermezSDK.getCurrentEnvironment()
@@ -643,7 +672,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                       TransactionType.DEPOSIT ||
                                   (widget.arguments.transactionType ==
                                           TransactionType.SEND &&
-                                      _settingsBloc.state.settings.level ==
+                                      widget.arguments.transactionLevel ==
                                           TransactionLevel.LEVEL1)
                               ? 'My Ethereum address'
                               : 'My Hermez address',
@@ -657,7 +686,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                   : Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        (_settingsBloc.state.settings.level ==
+                        (widget.arguments.transactionLevel ==
                                     TransactionLevel.LEVEL1
                                 ? "0x" +
                                     AddressUtils.strip0x(widget.arguments.addressFrom
@@ -691,40 +720,29 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             ],
           ),
           SizedBox(height: 7),
-          (widget.arguments.addressFrom ==
-                      _settingsBloc.state.settings.ethereumAddress ||
+          (widget.arguments.addressFrom == state.settings.ethereumAddress ||
                   widget.arguments.addressFrom.toLowerCase() ==
-                      getHermezAddress(
-                              _settingsBloc.state.settings.ethereumAddress)
+                      getHermezAddress(state.settings.ethereumAddress)
                           .toLowerCase())
               ? Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    (widget
-                                        .arguments.transactionType ==
+                    (widget.arguments.transactionType ==
                                     TransactionType.DEPOSIT ||
-                                (widget
-                                            .arguments.transactionType ==
+                                (widget.arguments.transactionType ==
                                         TransactionType.SEND &&
-                                    _settingsBloc
-                                            .state.settings.level ==
+                                    widget.arguments.transactionLevel ==
                                         TransactionLevel.LEVEL1)
                             ? "0x"
                             : "hez:0x") +
-                        AddressUtils
-                                .strip0x(_settingsBloc
-                                    .state.settings.ethereumAddress
-                                    .substring(0, 6))
+                        AddressUtils.strip0x(
+                                state.settings.ethereumAddress.substring(0, 6))
                             .toUpperCase() +
                         " ･･･ " +
-                        _settingsBloc
-                            .state.settings.ethereumAddress
+                        state.settings.ethereumAddress
                             .substring(
-                                _settingsBloc
-                                        .state.settings.ethereumAddress.length -
-                                    4,
-                                _settingsBloc
-                                    .state.settings.ethereumAddress.length)
+                                state.settings.ethereumAddress.length - 4,
+                                state.settings.ethereumAddress.length)
                             .toUpperCase(),
                     style: TextStyle(
                       color: HermezColors.blueyGreyTwo,
@@ -735,8 +753,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                   ),
                 )
               : widget.arguments.addressFrom.toLowerCase() ==
-                          _settingsBloc.state.settings.ethereumAddress
-                              .toLowerCase() ||
+                          state.settings.ethereumAddress.toLowerCase() ||
                       widget.arguments.addressFrom.toLowerCase() ==
                           HermezSDK.getCurrentEnvironment()
                               .contracts['Hermez']
@@ -768,7 +785,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     );
   }
 
-  Widget _buildToRow() {
+  Widget _buildToRow(LoadedSettingsState state) {
     return ListTile(
       contentPadding: EdgeInsets.only(top: 20, bottom: 20),
       title: Column(
@@ -784,11 +801,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     fontWeight: FontWeight.w500,
                   )),
               (widget.arguments.addressTo.toLowerCase() ==
-                          _settingsBloc.state.settings.ethereumAddress
-                              .toLowerCase() ||
+                          state.settings.ethereumAddress.toLowerCase() ||
                       widget.arguments.addressTo.toLowerCase() ==
-                          getHermezAddress(
-                                  _settingsBloc.state.settings.ethereumAddress)
+                          getHermezAddress(state.settings.ethereumAddress)
                               .toLowerCase() ||
                       widget.arguments.addressTo.toLowerCase() ==
                           HermezSDK.getCurrentEnvironment()
@@ -801,7 +816,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                       TransactionType.DEPOSIT ||
                                   (widget.arguments.transactionType ==
                                           TransactionType.RECEIVE &&
-                                      _settingsBloc.state.settings.level ==
+                                      widget.arguments.transactionLevel ==
                                           TransactionLevel.LEVEL2)
                               ? 'My Hermez address'
                               : 'My Ethereum address',
@@ -815,7 +830,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                   : Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        (_settingsBloc.state.settings.level ==
+                        (widget.arguments.transactionLevel ==
                                     TransactionLevel.LEVEL1
                                 ? "0x" +
                                     AddressUtils.strip0x(widget.arguments.addressTo
@@ -850,11 +865,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           ),
           SizedBox(height: 7),
           (widget.arguments.addressTo.toLowerCase() ==
-                      _settingsBloc.state.settings.ethereumAddress
-                          .toLowerCase() ||
+                      state.settings.ethereumAddress.toLowerCase() ||
                   widget.arguments.addressTo.toLowerCase() ==
-                      getHermezAddress(
-                              _settingsBloc.state.settings.ethereumAddress)
+                      getHermezAddress(state.settings.ethereumAddress)
                           .toLowerCase() ||
                   widget.arguments.addressTo.toLowerCase() ==
                       HermezSDK.getCurrentEnvironment()
@@ -863,31 +876,22 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               ? Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    (widget
-                                        .arguments.transactionType ==
+                    (widget.arguments.transactionType ==
                                     TransactionType.DEPOSIT ||
-                                (widget
-                                            .arguments.transactionType ==
+                                (widget.arguments.transactionType ==
                                         TransactionType.RECEIVE &&
-                                    _settingsBloc
-                                            .state.settings.level ==
+                                    widget.arguments.transactionLevel ==
                                         TransactionLevel.LEVEL2)
                             ? "hez:0x"
                             : "0x") +
-                        AddressUtils
-                                .strip0x(_settingsBloc
-                                    .state.settings.ethereumAddress
-                                    .substring(0, 6))
+                        AddressUtils.strip0x(
+                                state.settings.ethereumAddress.substring(0, 6))
                             .toUpperCase() +
                         " ･･･ " +
-                        _settingsBloc
-                            .state.settings.ethereumAddress
+                        state.settings.ethereumAddress
                             .substring(
-                                _settingsBloc
-                                        .state.settings.ethereumAddress.length -
-                                    4,
-                                _settingsBloc
-                                    .state.settings.ethereumAddress.length)
+                                state.settings.ethereumAddress.length - 4,
+                                state.settings.ethereumAddress.length)
                             .toUpperCase(),
                     style: TextStyle(
                       color: HermezColors.blueyGreyTwo,
@@ -903,17 +907,15 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     );
   }
 
-  Widget _buildFeeRow(BuildContext context) {
+  Widget _buildFeeRow(BuildContext context, LoadedSettingsState state) {
     if (widget.arguments.status == TransactionStatus.DRAFT ||
         (widget.arguments.status != TransactionStatus.DRAFT &&
             widget.arguments.transactionType != TransactionType.DEPOSIT &&
             widget.arguments.transactionType != TransactionType.RECEIVE &&
             widget.arguments.transactionType != TransactionType.FORCEEXIT)) {
       bool enoughFee = isFeeEnough();
-      final String currency = _settingsBloc.state.settings.defaultCurrency
-          .toString()
-          .split('.')
-          .last;
+      final String currency =
+          state.settings.defaultCurrency.toString().split('.').last;
       String title = "";
       String subtitle = "";
       String currencyFee = "";
@@ -1170,15 +1172,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     }
   }
 
-  Widget _buildWithdrawFeeRow(BuildContext context) {
+  Widget _buildWithdrawFeeRow(BuildContext context, LoadedSettingsState state) {
     if ((widget.arguments.transactionType == TransactionType.EXIT ||
             widget.arguments.transactionType == TransactionType.FORCEEXIT) &&
         widget.arguments.transactionDate == null) {
       bool enoughFee = isFeeEnough();
-      final String currency = _settingsBloc.state.settings.defaultCurrency
-          .toString()
-          .split('.')
-          .last;
+      final String currency =
+          state.settings.defaultCurrency.toString().split('.').last;
 
       String title = "Ethereum fee\n(estimated)";
 
@@ -1435,10 +1435,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   /// Bubbles up an event to send the transaction accordingly
   /// @returns {void}
   Future<bool> handleFormSubmit() async {
-    if (_settingsBloc.state.settings.level == TransactionLevel.LEVEL1 &&
+    if (widget.arguments.transactionLevel == TransactionLevel.LEVEL1 &&
         widget.arguments.transactionType == TransactionType.SEND) {
       _transferBloc.transfer(
-          _settingsBloc.state.settings.level,
+          widget.arguments.transactionLevel,
           "",
           widget.arguments.addressTo,
           widget.arguments.amount,
@@ -1571,7 +1571,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 pow(10, widget.arguments.account.token.token.decimals);
 
             _transferBloc.transfer(
-                _settingsBloc.state.settings.level,
+                widget.arguments.transactionLevel,
                 widget.arguments.account.accountIndex,
                 receiverAccount.accountIndex,
                 amountTransfer,

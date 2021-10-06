@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:hermez/src/domain/accounts/account.dart';
 
 enum WalletDefaultCurrency { USD, EUR, CNY, JPY, GBP }
@@ -22,9 +24,9 @@ class Wallet {
       this.isBackedUp,
       this.pendingTransactions})
       : totalL1Balance =
-            _calculateTotalBalance(false, l1Accounts, pendingTransactions),
+            _calculateTotalBalance(l1Accounts, pendingTransactions),
         totalL2Balance =
-            _calculateTotalBalance(true, l2Accounts, pendingTransactions);
+            _calculateTotalBalance(l2Accounts, pendingTransactions);
 
   factory Wallet.fromJson(Map<String, dynamic> json) {
     return Wallet(
@@ -47,9 +49,16 @@ class Wallet {
       };
 
   static double _calculateTotalBalance(
-      bool layer2, List<Account> accounts, List<dynamic> pendingTransactions) {
-    // TODO:
-    return 0;
+      List<Account> accounts, List<dynamic> pendingTransactions) {
+    double totalBalance = 0.0;
+    if (accounts.isNotEmpty) {
+      for (Account account in accounts) {
+        totalBalance += (double.parse(account.balance) /
+                pow(10, account.token.token.decimals)) *
+            account.token.price.USD;
+      }
+    }
+    return totalBalance;
     /*final double price = items.fold(
         0, (accumulator, item) => accumulator + (item.quantity * item.price));
 

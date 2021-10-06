@@ -7,6 +7,7 @@ import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
@@ -15,7 +16,6 @@ import 'package:hermez/utils/hermez_colors.dart';
 // title and message.
 
 class FeeSelectorArguments {
-  //final WalletHandler store;
   WalletDefaultFee selectedFee;
   Token ethereumToken;
   BigInt estimatedGas;
@@ -23,7 +23,6 @@ class FeeSelectorArguments {
   final void Function(WalletDefaultFee selectedFee) onFeeSelected;
 
   FeeSelectorArguments(
-      //this.store,
       {this.selectedFee,
       this.ethereumToken,
       this.estimatedGas,
@@ -216,7 +215,9 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                                                     .decimals)))
                                                     .toStringAsFixed(2) +
                                                 " " +
-                                                _settingsBloc.state.settings
+                                                (_settingsBloc.state
+                                                        as LoadedSettingsState)
+                                                    .settings
                                                     .defaultCurrency
                                                     .toString()
                                                     .split(".")
@@ -237,7 +238,9 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                           ),
                           (widget.arguments.selectedFee != null
                                   ? widget.arguments.selectedFee == element
-                                  : _settingsBloc.state.settings.defaultFee ==
+                                  : (_settingsBloc.state as LoadedSettingsState)
+                                          .settings
+                                          .defaultFee ==
                                       element)
                               ? Radio(
                                   groupValue: null,

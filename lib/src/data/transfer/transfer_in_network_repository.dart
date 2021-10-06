@@ -17,7 +17,7 @@ import 'package:hermez_sdk/model/transaction.dart' as hezTransaction;
 import 'package:web3dart/web3dart.dart' as web3;
 
 class TransferInNetworkRepository implements TransferRepository {
-  final HermezService _hermezService;
+  final IHermezService _hermezService;
   final ContractService _contractService;
   TransferInNetworkRepository(this._hermezService, this._contractService);
 

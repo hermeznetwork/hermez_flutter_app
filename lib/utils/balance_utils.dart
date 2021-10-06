@@ -10,6 +10,38 @@ import 'package:hermez_sdk/utils.dart';
 import 'package:intl/intl.dart';
 
 class BalanceUtils {
+  static String amountInCurrency(
+      double amount, String currency, double exchangeRatio) {
+    String result = "";
+    String locale = "";
+    String symbol = "";
+
+    if (currency == "EUR") {
+      locale = 'eu';
+      symbol = '€';
+    } else if (currency == "CNY") {
+      locale = 'en';
+      symbol = '\¥';
+    } else if (currency == "JPY") {
+      locale = 'en';
+      symbol = "\¥";
+    } else if (currency == "GBP") {
+      locale = 'en';
+      symbol = "\£";
+    } else {
+      locale = 'en';
+      symbol = '\$';
+    }
+
+    if (currency != "USD") {
+      amount *= exchangeRatio;
+    }
+
+    result = NumberFormat.currency(locale: locale, symbol: symbol)
+        .format(getDoubleWithPrecision(amount));
+    return result;
+  }
+
   static String balanceOfAccounts(
       TransactionLevel txLevel,
       List<Account> _accounts,

@@ -40,6 +40,7 @@ import 'package:hermez/src/domain/settings/usecases/default_currency_use_case.da
 import 'package:hermez/src/domain/settings/usecases/default_fee_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/explorer_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/level_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/private_settings_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/reset_default_use_case.dart';
 import 'package:hermez/src/domain/tokens/token_repository.dart';
 import 'package:hermez/src/domain/tokens/usecases/tokens_use_case.dart';
@@ -48,12 +49,14 @@ import 'package:hermez/src/domain/transactions/usecases/get_transactions_use_cas
 import 'package:hermez/src/domain/transfer/transfer_repository.dart';
 import 'package:hermez/src/domain/transfer/usecases/deposit_use_case.dart';
 import 'package:hermez/src/domain/transfer/usecases/exit_use_case.dart';
+import 'package:hermez/src/domain/transfer/usecases/fee_use_case.dart';
 import 'package:hermez/src/domain/transfer/usecases/force_exit_use_case.dart';
 import 'package:hermez/src/domain/transfer/usecases/transfer_use_case.dart';
 import 'package:hermez/src/domain/transfer/usecases/withdraw_use_case.dart';
 import 'package:hermez/src/domain/wallets/get_wallets_use_case.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
 import 'package:hermez/src/presentation/accounts/account_bloc.dart';
+import 'package:hermez/src/presentation/accounts/accounts_bloc.dart';
 import 'package:hermez/src/presentation/onboarding/onboarding_bloc.dart';
 import 'package:hermez/src/presentation/qrcode/qrcode_bloc.dart';
 import 'package:hermez/src/presentation/security/security_bloc.dart';
@@ -78,10 +81,10 @@ Future<void> init(EnvParams walletParams) async {
   registerSettingsDependencies();
   registerSecurityDependencies();
   registerQRCodeDependencies();
-  registerWalletDependencies();
-  registerAccountDependencies();
   registerTokenDependencies();
   registerTransactionDependencies();
+  registerAccountDependencies();
+  registerWalletDependencies();
   registerTransferDependencies();
 }
 
@@ -142,8 +145,8 @@ void registerOnboardingDependencies() {
 }
 
 void registerSettingsDependencies() {
-  getIt.registerFactory(() => SettingsBloc(
-      getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
+  getIt.registerFactory(() => SettingsBloc(getIt(), getIt(), getIt(), getIt(),
+      getIt(), getIt(), getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(() => DefaultCurrencyUseCase(getIt()));
 
@@ -158,6 +161,8 @@ void registerSettingsDependencies() {
   getIt.registerLazySingleton(() => AddressUseCase(getIt()));
 
   getIt.registerLazySingleton(() => ResetDefaultUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => PrivateSettingsUseCase(getIt()));
 
   //getIt.registerLazySingleton(() => TokensUseCase(getIt(), getIt()));
 
@@ -183,12 +188,13 @@ void registerWalletDependencies() {
 
   getIt.registerLazySingleton(() => GetWalletsUseCase(getIt()));
 
-  getIt.registerLazySingleton<WalletRepository>(() =>
-      WalletInNetworkRepository(getIt(), getIt(), getIt(), getIt(), null, null
-          /*getIt(), getIt(), getIt(), getIt(), getIt(), getIt()*/));
+  getIt.registerLazySingleton<WalletRepository>(() => WalletInNetworkRepository(
+      getIt(), getIt(), getIt(), getIt(), getIt(), getIt()));
 }
 
 void registerAccountDependencies() {
+  getIt.registerFactory(() => AccountsBloc(getIt()));
+
   getIt.registerFactory(() => AccountBloc(getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(
@@ -232,6 +238,8 @@ void registerTransferDependencies() {
   getIt.registerLazySingleton(() => ForceExitUseCase(getIt()));
 
   getIt.registerLazySingleton(() => WithdrawUseCase(getIt()));
+
+  getIt.registerLazySingleton(() => FeeUseCase(getIt()));
 
   getIt.registerLazySingleton<TransferRepository>(
       () => TransferInNetworkRepository(getIt(), getIt()));

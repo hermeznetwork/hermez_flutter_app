@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/components/wallet/backup_row.dart';
 import 'package:hermez/dependencies_provider.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
 import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
 import 'package:hermez/src/presentation/wallets/wallets_state.dart';
@@ -16,13 +18,28 @@ import 'package:hermez/utils/pop_result.dart';
 
 class SettingsPage extends StatelessWidget {
   WalletsBloc _walletsBloc;
+  SettingsBloc _settingsBloc;
   BuildContext parentContext;
   Function() onForceExitSuccess;
 
-  SettingsPage(this.parentContext, this.onForceExitSuccess)
+  SettingsPage(WalletsBloc walletsBloc, SettingsBloc settingsBloc,
+      this.parentContext, this.onForceExitSuccess)
+      : _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>(),
+        _walletsBloc =
+            walletsBloc != null ? walletsBloc : getIt<WalletsBloc>() {
+    if (!(_walletsBloc.state is LoadedWalletsState)) {
+      _walletsBloc.fetchData();
+    }
+    if (_settingsBloc.state is InitSettingsState) {
+      _settingsBloc.init();
+    }
+  }
+
+  /*SettingsPage(this.parentContext, this.onForceExitSuccess)
       : _walletsBloc = getIt<WalletsBloc>() {
     _walletsBloc.fetchData();
-  }
+  }*/
 
   /*WalletsBloc _walletsBloc = getIt<WalletsBloc>() {};
 
@@ -155,26 +172,22 @@ class SettingsPage extends StatelessWidget {
                 switch (index) {
                   case 1:
                     Navigator.of(context).pushNamed("settings_details",
-                        arguments: SettingsDetailsArguments(
-                            parentContext, SettingsDetailsType.GENERAL));
+                        arguments: SettingsDetailsArguments(parentContext,
+                            SettingsDetailsType.GENERAL, _settingsBloc));
                     break;
                   case 2:
                     Navigator.of(context).pushNamed(
                       "settings_details",
-                      arguments: SettingsDetailsArguments(
-                        parentContext,
-                        SettingsDetailsType.SECURITY,
-                      ),
+                      arguments: SettingsDetailsArguments(parentContext,
+                          SettingsDetailsType.SECURITY, _settingsBloc),
                     );
                     break;
                   case 3:
                     Navigator.of(context)
                         .pushNamed(
                       "settings_details",
-                      arguments: SettingsDetailsArguments(
-                        parentContext,
-                        SettingsDetailsType.ADVANCED,
-                      ),
+                      arguments: SettingsDetailsArguments(parentContext,
+                          SettingsDetailsType.ADVANCED, _settingsBloc),
                     )
                         .then((results) {
                       if (results is PopWithResults) {

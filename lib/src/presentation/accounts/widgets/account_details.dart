@@ -10,6 +10,7 @@ import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/balance_utils.dart';
@@ -240,8 +241,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           ? BlinkingTextAnimation(
                               arguments: BlinkingTextAnimationArguments(
                                   HermezColors.steel,
-                                  calculateBalance(_settingsBloc
-                                      .state.settings.defaultCurrency
+                                  calculateBalance((_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                                       .toString()
                                       .split('.')
                                       .last),
@@ -249,8 +249,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                   FontWeight.w500),
                             )
                           : Text(
-                              calculateBalance(_settingsBloc
-                                  .state.settings.defaultCurrency
+                              calculateBalance((_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                                   .toString()
                                   .split('.')
                                   .last),
@@ -328,13 +327,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
               borderRadius: BorderRadius.circular(10.0),
             ),
             onPressed: () {
-              _settingsBloc.state.settings.level == TransactionLevel.LEVEL1
+              (_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL1
                   ? Navigator.of(widget.arguments.parentContext)
                       .pushNamed(
                         "/qrcode",
                         arguments: QRCodeArguments(
                             qrCodeType: QRCodeType.ETHEREUM,
-                            code: _settingsBloc.state.settings.ethereumAddress,
+                            code: (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress,
                             //store: widget.arguments.store,
                             isReceive: true),
                       )
@@ -344,7 +343,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         "/qrcode",
                         arguments: QRCodeArguments(
                             qrCodeType: QRCodeType.HERMEZ,
-                            code: _settingsBloc.state.settings.hermezAddress,
+                            code: (_settingsBloc.state as LoadedSettingsState).settings.hermezAddress,
                             //store: widget.arguments.store,
                             isReceive: true),
                       )
@@ -383,8 +382,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     "/transaction_amount",
                     arguments: TransactionAmountArguments(
                         //widget.arguments.store,
-                        _settingsBloc.state.settings.level,
-                        _settingsBloc.state.settings.level ==
+                        (_settingsBloc.state as LoadedSettingsState).settings.level,
+                        (_settingsBloc.state as LoadedSettingsState).settings.level ==
                                 TransactionLevel.LEVEL1
                             ? TransactionType.DEPOSIT
                             : TransactionType.EXIT,
@@ -426,7 +425,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
 
   String calculateBalance(String symbol) {
     double resultAmount = BalanceUtils.calculatePendingBalance(
-            _settingsBloc.state.settings.level,
+        (_settingsBloc.state as LoadedSettingsState).settings.level,
             widget.arguments.account,
             symbol,
             // widget.arguments.store,
@@ -498,8 +497,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     exit = Exit.fromTransaction(transaction);
                   }
 
-                  final String currency = _settingsBloc
-                      .state.settings.defaultCurrency
+                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
@@ -513,7 +511,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       1, //widget.arguments.store.state.exchangeRatio,
                       (bool completeDelayedWithdraw,
                           bool isInstantWithdraw) async {},
-                      _settingsBloc.state.settings.level,
+                      (_settingsBloc.state as LoadedSettingsState).settings.level,
                       _stateResponse);
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
                 else if (filteredExits.length > 0 &&
@@ -526,8 +524,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   final Exit exit = filteredExits[index];
                   final bool isAllowed = allowedInstantWithdraws[index];
 
-                  final String currency = _settingsBloc
-                      .state.settings.defaultCurrency
+                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
@@ -606,7 +603,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         Navigator.of(context).pop(results);
                       }
                     }
-                  }, _settingsBloc.state.settings.level, _stateResponse,
+                  }, (_settingsBloc.state as LoadedSettingsState).settings.level, _stateResponse,
                       instantWithdrawAllowed: isAllowed,
                       completeDelayedWithdraw: false);
                 } else if (pendingWithdraws.length > 0 &&
@@ -647,8 +644,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         .replaceAll('.0', '');
                   }
 
-                  final String currency = _settingsBloc
-                      .state.settings.defaultCurrency
+                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
@@ -763,7 +759,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           }
                         : (bool completeDelayedWithdraw,
                             bool instantWithdrawAllowed) {},
-                    _settingsBloc.state.settings.level,
+                    (_settingsBloc.state as LoadedSettingsState).settings.level,
                     _stateResponse,
                     retry: pendingWithdraw['status'] == 'fail',
                     instantWithdrawAllowed: isAllowed == true,
@@ -868,7 +864,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           (transaction.fromHezEthereumAddress != null &&
                               transaction.fromHezEthereumAddress
                                       .toLowerCase() ==
-                                  _settingsBloc.state.settings.ethereumAddress
+                                  (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
                                       .toLowerCase())) {
                         type = "SEND";
                         if (transaction.batchNum != null) {
@@ -892,7 +888,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                   widget.arguments.account.accountIndex) ||
                           (transaction.toHezEthereumAddress != null &&
                               transaction.toHezEthereumAddress.toLowerCase() ==
-                                  _settingsBloc.state.settings.ethereumAddress
+                                  (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
                                       .toLowerCase())) {
                         type = "RECEIVE";
                         if (transaction.timestamp.isNotEmpty) {
@@ -934,8 +930,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     fee = double.parse(feeValue);
                   }
 
-                  final String currency = _settingsBloc
-                      .state.settings.defaultCurrency
+                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
@@ -976,28 +971,28 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       txType = TransactionType.EXIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = _settingsBloc.state.settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
                           TransactionLevel.LEVEL2;
                       break;
                     case 'FORCEEXIT':
                       txType = TransactionType.FORCEEXIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = _settingsBloc.state.settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
                           TransactionLevel.LEVEL2;
                       break;
                     case "WITHDRAW":
                       txType = TransactionType.WITHDRAW;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = _settingsBloc.state.settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
                           TransactionLevel.LEVEL2;
                       break;
                     case "DEPOSIT":
                       txType = TransactionType.DEPOSIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = _settingsBloc.state.settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
                           TransactionLevel.LEVEL1;
                       break;
                   }
@@ -1120,7 +1115,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 //store: widget.arguments.store,
                                 transactionType: txType,
                                 transactionLevel:
-                                    _settingsBloc.state.settings.level,
+                                (_settingsBloc.state as LoadedSettingsState).settings.level,
                                 status: txStatus,
                                 account: widget.arguments.account,
                                 //token: widget.arguments.token,

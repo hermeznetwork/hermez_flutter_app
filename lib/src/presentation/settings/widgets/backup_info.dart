@@ -76,8 +76,9 @@ class BackupInfoPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(100.0),
                     ),
                     onPressed: () {
+                      // TODO: pass settingsBloc
                       Navigator.of(context).pushNamed("/recovery_phrase",
-                          arguments: RecoveryPhraseArguments(true));
+                          arguments: RecoveryPhraseArguments(true, null));
                     },
                     padding: EdgeInsets.only(
                         top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),

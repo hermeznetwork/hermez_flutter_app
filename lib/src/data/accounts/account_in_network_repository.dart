@@ -1,6 +1,5 @@
 import 'package:hermez/src/data/network/contract_service.dart';
 import 'package:hermez/src/data/network/hermez_service.dart';
-import 'package:hermez/src/data/transactions/transaction_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
@@ -12,11 +11,11 @@ import 'package:web3dart/web3dart.dart' as web3;
 
 class AccountInNetworkRepository implements AccountRepository {
   final ContractService _contractService;
-  final HermezService _hermezService;
-  final TransactionInNetworkRepository _transactionInNetworkRepository;
+  final IHermezService _hermezService;
+  final TransactionRepository _transactionRepository;
 
-  AccountInNetworkRepository(this._contractService, this._hermezService,
-      this._transactionInNetworkRepository);
+  AccountInNetworkRepository(
+      this._contractService, this._hermezService, this._transactionRepository);
 
   @override
   Future<List<Account>> getL2Accounts(String hezAddress, List<int> tokenIds,
@@ -42,7 +41,7 @@ class AccountInNetworkRepository implements AccountRepository {
   }
 
   Future<List<Account>> getL1Accounts(String ethereumAddress,
-      {bool showZeroBalanceAccounts, List<int> tokenIds}) async {
+      {bool showZeroBalanceAccounts = false, List<int> tokenIds}) async {
     List<Account> accounts = [];
     if (ethereumAddress != null) {
       final supportedTokens =
@@ -64,8 +63,8 @@ class AccountInNetworkRepository implements AccountRepository {
                 tokenId: token.id);
             accounts.add(account);
           } else {
-            List<Transaction> transactions =
-                await _transactionInNetworkRepository.getTransactions(
+            List<Transaction> transactions = await _transactionRepository
+                .getTransactions(
                     ethereumAddress,
                     "",
                     LayerFilter.L1,
@@ -108,7 +107,7 @@ class AccountInNetworkRepository implements AccountRepository {
             accounts.add(account);
           } else {
             if (showZeroBalanceAccounts) {
-              List<dynamic> transactions = await _transactionInNetworkRepository
+              List<dynamic> transactions = await _transactionRepository
                   .getTransactions(
                       ethereumAddress,
                       "",

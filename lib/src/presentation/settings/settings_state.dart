@@ -5,35 +5,33 @@ import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:local_auth/local_auth.dart';
 
 abstract class SettingsState {
-  final SettingsItemState settings;
+  SettingsState();
 
-  SettingsState(this.settings);
+  factory SettingsState.init() => InitSettingsState();
 
-  factory SettingsState.init() => LoadingSettingsState();
+  factory SettingsState.loading() => LoadingSettingsState();
 
   factory SettingsState.loaded(SettingsItemState settings) =>
       LoadedSettingsState(settings: settings);
 
-  factory SettingsState.error(SettingsItemState settings, String message) =>
-      ErrorSettingsState(settings: settings, message: message);
+  factory SettingsState.error(String message) =>
+      ErrorSettingsState(message: message);
 }
 
-//class UpdatingWallet extends SettingsState {}
+class InitSettingsState extends SettingsState {}
 
-class LoadingSettingsState extends SettingsState {
-  LoadingSettingsState({SettingsItemState settings}) : super(settings);
-}
+class LoadingSettingsState extends SettingsState {}
 
 class LoadedSettingsState extends SettingsState {
-  LoadedSettingsState({SettingsItemState settings}) : super(settings);
+  final SettingsItemState settings;
+
+  LoadedSettingsState({@required this.settings});
 }
 
 class ErrorSettingsState<T> extends SettingsState {
   final String message;
 
-  ErrorSettingsState(
-      {@required SettingsItemState settings, @required this.message})
-      : super(settings);
+  ErrorSettingsState({@required this.message});
 }
 
 class SettingsItemState {

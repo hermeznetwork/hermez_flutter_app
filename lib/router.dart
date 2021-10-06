@@ -9,6 +9,8 @@ import 'package:hermez/src/presentation/onboarding/widgets/intro.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode_scanner.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
+import 'package:hermez/src/presentation/settings/widgets/recovery_phrase_confirm.dart';
 import 'package:hermez/src/presentation/settings/widgets/remove_account_info.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings.dart';
 import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
@@ -52,7 +54,7 @@ Map<String, WidgetBuilder> getRoutes(context) {
 
     // HOME
     '/settings': (BuildContext context) {
-      return SettingsPage(context, null);
+      return SettingsPage(null, null, context, null);
     },
     '/settings_details': (BuildContext context) {
       return SettingsDetailsPage(
@@ -87,6 +89,16 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/scanner': (BuildContext context) {
       return QRCodeScannerPage(
           arguments: ModalRoute.of(context).settings.arguments);
+    },
+
+    // SETTINGS
+    '/recovery_phrase': (BuildContext context) {
+      return RecoveryPhrasePage(
+        arguments: ModalRoute.of(context).settings.arguments,
+      );
+    },
+    '/recovery_phrase_confirm': (BuildContext context) {
+      return RecoveryPhraseConfirmPage();
     },
     /*'/pin': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);

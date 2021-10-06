@@ -45,8 +45,10 @@ abstract class IHermezService {
   Future<ForgedTransaction> getTransactionById(String transactionId);
   Future<List<PoolTransaction>> getPoolTransactions([String accountIndex]);
   Future<PoolTransaction> getPoolTransactionById(String transactionId);
-  Future<List<Token>> getTokens();
+  Future<List<Token>> getTokens({List<int> tokenIds});
   Future<Token> getTokenById(int tokenId);
+  Future<LinkedHashMap<String, BigInt>> depositGasLimit(
+      double amount, Token token);
   Future<bool> deposit(double amount, Token token,
       {BigInt approveGasLimit, BigInt depositGasLimit, int gasPrice = 0});
   Future<BigInt> withdrawGasLimit(double amount, Exit exit,
@@ -61,6 +63,7 @@ abstract class IHermezService {
   Future<bool> generateAndSendL2Tx(Map transaction, int tokenId);
   Future<bool> sendL2Transaction(Transaction transaction);
   Future<RecommendedFee> getRecommendedFee();
+  Future<bool> isInstantWithdrawalAllowed(double amount, Token token);
 }
 
 class HermezService implements IHermezService {
@@ -287,6 +290,7 @@ class HermezService implements IHermezService {
     return txHash;
   }
 
+  @override
   Future<LinkedHashMap<String, BigInt>> depositGasLimit(
       double amount, Token token) async {
     final hermezPrivateKey = await _configService.getHermezPrivateKey();
@@ -422,6 +426,7 @@ class HermezService implements IHermezService {
     }
   }
 
+  @override
   Future<bool> isInstantWithdrawalAllowed(double amount, Token token) async {
     return await tx.isInstantWithdrawalAllowed(amount, token);
   }

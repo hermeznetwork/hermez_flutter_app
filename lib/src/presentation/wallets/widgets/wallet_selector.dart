@@ -10,9 +10,9 @@ import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/src/presentation/wallets/widgets/wallet_details.dart';
 import 'package:hermez/utils/address_utils.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 
 import '../wallets_bloc.dart';
@@ -25,10 +25,9 @@ import '../wallets_state.dart';
 class WalletSelectorArguments {
   bool showHermezWallet;
   Function hermezWalletShown;
-  //WalletHandler store;
   BuildContext parentContext;
 
-  WalletSelectorArguments(/*this.store,*/ this.parentContext,
+  WalletSelectorArguments(this.parentContext,
       {this.showHermezWallet = false, this.hermezWalletShown});
 }
 
@@ -70,11 +69,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
         //widget.arguments.store.updateLevel(TransactionLevel.LEVEL2);
       });
       Navigator.pushNamed(context, 'wallet_details',
-          arguments: WalletDetailsArguments(
-            TransactionLevel.LEVEL2,
-            widget.arguments.parentContext,
-            true,
-          ));
+          arguments: WalletDetailsArguments(TransactionLevel.LEVEL2, "",
+              widget.arguments.parentContext, true, _bloc, _settingsBloc));
       widget.arguments.showHermezWallet = false;
       if (widget.arguments.hermezWalletShown != null) {
         widget.arguments.hermezWalletShown();
@@ -223,10 +219,12 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                           Future.delayed(const Duration(milliseconds: 100), () {
                             Navigator.pushNamed(context, 'wallet_details',
                                 arguments: WalletDetailsArguments(
-                                  //widget.arguments.store,
                                   TransactionLevel.LEVEL2,
+                                  l2Wallet.address,
                                   widget.arguments.parentContext,
                                   false,
+                                  _bloc,
+                                  _settingsBloc,
                                 )).then((refresh) {
                               if (refresh != null && refresh == true) {
                                 needRefresh = refresh;
@@ -290,9 +288,15 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   isLoading == false
                                       ? Flexible(
                                           child: Text(
-                                            (_bloc.state as LoadedWalletsState)
-                                                .wallets[1]
-                                                .totalBalance
+                                            BalanceUtils.amountInCurrency(
+                                                double.parse(
+                                                    l2Wallet.totalBalance),
+                                                _settingsBloc
+                                                    .getDefaultCurrency()
+                                                    .toString()
+                                                    .split(".")
+                                                    .last,
+                                                0.8)
                                             /*totalBalance(
                                                 TransactionLevel.LEVEL2,
                                                 )*/
@@ -310,10 +314,16 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               arguments:
                                                   BlinkingTextAnimationArguments(
                                                       Colors.white,
-                                                      (_bloc.state
-                                                              as LoadedWalletsState)
-                                                          .wallets[0]
-                                                          .totalBalance
+                                                      BalanceUtils.amountInCurrency(
+                                                          double.parse(l2Wallet
+                                                              .totalBalance),
+                                                          _settingsBloc
+                                                              .getDefaultCurrency()
+                                                              .toString()
+                                                              .split(".")
+                                                              .last,
+                                                          0.8)
+
                                                       /*totalBalance(
                                                           TransactionLevel
                                                               .LEVEL2,
@@ -334,21 +344,18 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   child: Text(
                                     "hez:" +
                                         "0x" +
-                                        (state.wallets[0].address != null
-                                            ? AddressUtils.strip0x(state
-                                                    .wallets[0].address
+                                        (l1Wallet.address != null
+                                            ? AddressUtils.strip0x(l1Wallet
+                                                    .address
                                                     .substring(0, 6))
                                                 .toUpperCase()
                                             : "") +
                                         " ･･･ " +
-                                        (state.wallets[0].address != null
-                                            ? state.wallets[0].address
+                                        (l1Wallet.address != null
+                                            ? l1Wallet.address
                                                 .substring(
-                                                    state.wallets[0].address
-                                                            .length -
-                                                        4,
-                                                    state.wallets[0].address
-                                                        .length)
+                                                    l1Wallet.address.length - 4,
+                                                    l1Wallet.address.length)
                                                 .toUpperCase()
                                             : ""),
                                     style: TextStyle(
@@ -371,8 +378,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         "/qrcode",
                                         arguments: QRCodeArguments(
                                             qrCodeType: QRCodeType.HERMEZ,
-                                            code: getHermezAddress(
-                                                state.wallets[0].address),
+                                            code: l2Wallet.address,
                                             //store: widget.arguments.store,
                                             isReceive: true),
                                       );
@@ -567,8 +573,11 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                 arguments: WalletDetailsArguments(
                                   //widget.arguments.store,
                                   TransactionLevel.LEVEL1,
+                                  l1Wallet.address,
                                   widget.arguments.parentContext,
                                   false,
+                                  _bloc,
+                                  _settingsBloc,
                                 )).then((value) {
                               setState(() {});
                             });
@@ -627,7 +636,16 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   isLoading == false
                                       ? Flexible(
                                           child: Text(
-                                              l1Wallet.totalBalance
+                                              BalanceUtils.amountInCurrency(
+                                                  double.parse(
+                                                      l1Wallet.totalBalance),
+                                                  _settingsBloc
+                                                      .getDefaultCurrency()
+                                                      .toString()
+                                                      .split(".")
+                                                      .last,
+                                                  0.8)
+                                              //l1Wallet.totalBalance
                                               /*totalBalance(
                                                   TransactionLevel.LEVEL1,
                                                   widget.arguments.store.state
@@ -644,7 +662,16 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               arguments:
                                                   BlinkingTextAnimationArguments(
                                                       Colors.white,
-                                                      l1Wallet.totalBalance
+                                                      BalanceUtils.amountInCurrency(
+                                                          double.parse(l1Wallet
+                                                              .totalBalance),
+                                                          _settingsBloc
+                                                              .getDefaultCurrency()
+                                                              .toString()
+                                                              .split(".")
+                                                              .last,
+                                                          0.8)
+
                                                       /*totalBalance(
                                                           TransactionLevel
                                                               .LEVEL1,
@@ -665,21 +692,18 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                 Expanded(
                                   child: Text(
                                     "0x" +
-                                        (state.wallets[0].address != null
-                                            ? AddressUtils.strip0x(state
-                                                    .wallets[0].address
+                                        (l1Wallet.address != null
+                                            ? AddressUtils.strip0x(l1Wallet
+                                                    .address
                                                     .substring(0, 6))
                                                 .toUpperCase()
                                             : "") +
                                         " ･･･ " +
-                                        (state.wallets[0].address != null
-                                            ? state.wallets[0].address
+                                        (l1Wallet.address != null
+                                            ? l1Wallet.address
                                                 .substring(
-                                                    state.wallets[0].address
-                                                            .length -
-                                                        4,
-                                                    state.wallets[0].address
-                                                        .length)
+                                                    l1Wallet.address.length - 4,
+                                                    l1Wallet.address.length)
                                                 .toUpperCase()
                                             : ""),
                                     style: TextStyle(
@@ -701,7 +725,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                       "/qrcode",
                                       arguments: QRCodeArguments(
                                           qrCodeType: QRCodeType.ETHEREUM,
-                                          code: state.wallets[0].address,
+                                          code: l1Wallet.address,
                                           //store: widget.arguments.store,
                                           isReceive: true),
                                     );

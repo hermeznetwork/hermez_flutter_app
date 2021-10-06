@@ -12,6 +12,7 @@ import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/tokens/widgets/token_row.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
@@ -148,11 +149,11 @@ class _QRCodePageState extends State<QRCodePage> {
                                 size: Size(36, 36),
                               ),
                               data: widget.arguments.code == null
-                                  ? (_settingsBloc.state.settings.level ==
+                                  ? ((_settingsBloc.state as LoadedSettingsState).settings.level ==
                                               TransactionLevel.LEVEL2
                                           ? "hez:"
                                           : "") +
-                                  _settingsBloc.state.settings.ethereumAddress
+                                  (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
                                   : widget.arguments.code +
                                       (widget.arguments.token != null
                                           ? ':' + widget.arguments.token.token.symbol
@@ -177,19 +178,19 @@ class _QRCodePageState extends State<QRCodePage> {
                             fit: BoxFit.contain,
                             child: Text(
                               widget.arguments.code == null
-                                  ? ((_settingsBloc.state.settings.level ==
+                                  ? (((_settingsBloc.state as LoadedSettingsState).settings.level ==
                                               TransactionLevel.LEVEL2
                                           ? "hez:"
                                           : "") +
-                                  _settingsBloc.state.settings.ethereumAddress.substring(
+                                  (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress.substring(
                                                                 0,
-                                      (_settingsBloc.state.settings.ethereumAddress.length / 2)
+                                      ((_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress.length / 2)
                                         .floor()) +
                                         "\n" +
-                                  _settingsBloc.state.settings.ethereumAddress.substring(
-                                      (_settingsBloc.state.settings.ethereumAddress.length / 2)
+                                  (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress.substring(
+                                      ((_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress.length / 2)
                                         .floor(),
-                                      _settingsBloc.state.settings.ethereumAddress.length))
+                                      (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress.length))
                                   : (widget.arguments.code.substring(
                                           0,
                                           (widget.arguments.code.length / 2)
@@ -202,7 +203,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                   +
                                       (widget.arguments.token != null || (widget.arguments.amount != null && widget.arguments.amount > 0)
                                           ? ("\n" + ':')
-                                          + (widget.arguments.token != null ? widget.arguments.token.token.symbol : _settingsBloc.state.settings.defaultCurrency
+                                          + (widget.arguments.token != null ? widget.arguments.token.token.symbol : (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                                               .toString()
                                               .split('.')
                                               .last)
@@ -254,11 +255,11 @@ class _QRCodePageState extends State<QRCodePage> {
                             onPressed: () {
                               Clipboard.setData(ClipboardData(
                                   text: widget.arguments.code == null
-                                      ? (_settingsBloc.state.settings.level ==
+                                      ? ((_settingsBloc.state as LoadedSettingsState).settings.level ==
                                                   TransactionLevel.LEVEL2
                                               ? "hez:"
                                               : "") +
-                                      _settingsBloc.state.settings.ethereumAddress
+                                      (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
                                       : widget.arguments.code +
                                           (widget.arguments.token != null
                                               ? ':' +
@@ -344,8 +345,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                 : Navigator.pushReplacementNamed(
                                     context, "/transaction_amount",
                                     arguments: TransactionAmountArguments(
-                                        //widget.arguments.store,
-                                        _settingsBloc.state.settings.level,
+                                        (_settingsBloc.state as LoadedSettingsState).settings.level,
                                         TransactionType.RECEIVE,
                                         allowChangeLevel: false));
                           },
@@ -535,16 +535,16 @@ class _QRCodePageState extends State<QRCodePage> {
             color: Colors.white,
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: _settingsBloc.state.settings.tokens.length,
+                itemCount:(_settingsBloc.state as LoadedSettingsState).settings.tokens.length,
                 padding: const EdgeInsets.all(16.0),
                 itemBuilder: (context, i) {
                   final index = i;
-                  final String currency = _settingsBloc.state.settings.defaultCurrency
+                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
                       .toString()
                       .split('.')
                       .last;
                     //final PriceToken priceToken = _priceTokens[index];
-                    final Token token = _settingsBloc.state.settings.tokens[index];
+                    final Token token =(_settingsBloc.state as LoadedSettingsState).settings.tokens[index];
                         //.firstWhere((Token token) => token.id == priceToken.id);
                     return TokenRow(
                         token,
@@ -577,7 +577,7 @@ class _QRCodePageState extends State<QRCodePage> {
         if (imagePath != null) {
           Share.shareFiles([imagePath],
               text: widget.arguments.qrCodeType == QRCodeType.REQUEST_PAYMENT ?
-              'Hello, scan this ' + (_settingsBloc.state.settings.level ==
+              'Hello, scan this ' + ((_settingsBloc.state as LoadedSettingsState).settings.level ==
                   TransactionLevel.LEVEL2 ? 'Hermez' : 'Ethereum') + ' code to send me ' +
                   EthAmountFormatter.removeDecimalZeroFormat(
                       double.parse(

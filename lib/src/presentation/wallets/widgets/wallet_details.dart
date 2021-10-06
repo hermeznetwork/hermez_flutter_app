@@ -17,10 +17,11 @@ import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
+import 'package:hermez/src/presentation/accounts/accounts_bloc.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
-import 'package:hermez/src/presentation/tokens/widgets/token_row.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/transfer_bloc.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
@@ -35,18 +36,24 @@ import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/state_response.dart';
 import 'package:hermez_sdk/model/token.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+import '../wallets_state.dart';
 
 class WalletDetailsArguments {
-  //final WalletHandler store;
   final TransactionLevel transactionLevel;
+  final String address;
   final BuildContext parentContext;
   final bool needRefresh;
+  final WalletsBloc walletsBloc;
+  final SettingsBloc settingsBloc;
 
   WalletDetailsArguments(
-      /*this.store,*/ this.transactionLevel,
+      this.transactionLevel,
+      this.address,
       this.parentContext,
-      this.needRefresh);
+      this.needRefresh,
+      this.walletsBloc,
+      this.settingsBloc);
 }
 
 class WalletDetailsPage extends StatefulWidget {
@@ -55,7 +62,8 @@ class WalletDetailsPage extends StatefulWidget {
   final WalletDetailsArguments arguments;
 
   @override
-  _WalletDetailsPageState createState() => _WalletDetailsPageState();
+  _WalletDetailsPageState createState() =>
+      _WalletDetailsPageState(arguments.walletsBloc, arguments.settingsBloc);
 }
 
 class _WalletDetailsPageState extends State<WalletDetailsPage> {
@@ -71,36 +79,400 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   bool _isLoading = false;
   StateResponse _stateResponse;
 
-  final WalletsBloc _bloc;
-  _WalletDetailsPageState() : _bloc = getIt<WalletsBloc>();
-  final SettingsBloc _settingsBloc = getIt<SettingsBloc>();
-  final TransferBloc _transferBloc = getIt<TransferBloc>();
+  WalletsBloc _walletsBloc;
+  SettingsBloc _settingsBloc;
 
-  /*@override
+  _WalletDetailsPageState(WalletsBloc walletsBloc, SettingsBloc settingsBloc)
+      : _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>(),
+        _walletsBloc =
+            walletsBloc != null ? walletsBloc : getIt<WalletsBloc>() {
+    if (!(_walletsBloc.state is LoadedWalletsState)) {
+      _walletsBloc.fetchData();
+    }
+    if (_settingsBloc.state is InitSettingsState) {
+      _settingsBloc.init();
+    }
+  }
+
+  final TransferBloc _transferBloc = getIt<TransferBloc>();
+  final AccountsBloc _accountsBloc = getIt<AccountsBloc>();
+
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<WalletsState>(
-        initialData: _bloc.state,
-        stream: _bloc.observableState,
+        initialData: _walletsBloc.state,
+        stream: _walletsBloc.observableState,
         builder: (context, snapshot) {
-          final state = snapshot.data;
-
-          if (state is LoadingWalletsState) {
-            return Container(
-                color: HermezColors.lightOrange,
-                child: Center(
-                  child: CircularProgressIndicator(color: HermezColors.orange),
-                ));
-          } else if (state is ErrorWalletsState) {
-            return Center(child: Text(state.message));
-          } else {
-            return _renderWalletSelector(context, state);
-          }
+          return Scaffold(
+            body: NestedScrollView(
+              body: handleAccountsList(context, snapshot),
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) {
+                return _renderHeaderContent(context, snapshot);
+              },
+            ),
+          );
         });
   }
 
-  Widget _renderWalletSelector(BuildContext context, LoadedWalletsState state) {*/
+  List<Widget> _renderHeaderContent(
+      BuildContext context, AsyncSnapshot snapshot) {
+    return <Widget>[
+      SliverAppBar(
+        floating: true,
+        pinned: true,
+        snap: false,
+        collapsedHeight: kToolbarHeight,
+        expandedHeight: 340.0,
+        title: Container(
+          padding: EdgeInsets.all(20),
+          color: HermezColors.lightOrange,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.asset(
+                'assets/' +
+                    (this.widget.arguments.transactionLevel ==
+                            TransactionLevel.LEVEL1
+                        ? "ethereum_logo"
+                        : "hermez_logo") +
+                    '.png',
+                width: 30,
+                height: 30,
+              ),
+              SizedBox(
+                width: 8,
+              ),
+              new Text(
+                  this.widget.arguments.transactionLevel ==
+                          TransactionLevel.LEVEL1
+                      ? "Ethereum Wallet"
+                      : "Hermez Wallet",
+                  style: TextStyle(
+                      fontFamily: 'ModernEra',
+                      color: HermezColors.blackTwo,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20)),
+              SizedBox(
+                width: 60,
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0.0,
+        flexibleSpace: FlexibleSpaceBar(
+          // here the desired height*/
+          background: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                  height:
+                      MediaQuery.of(context).padding.top + kToolbarHeight + 20),
+              Container(
+                margin: EdgeInsets.only(left: 40, right: 40),
+                child: FlatButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(56.0),
+                      side: BorderSide(color: HermezColors.mediumOrange)),
+                  onPressed: () {
+                    Clipboard.setData(
+                        ClipboardData(text: this.widget.arguments.address));
+                    Flushbar(
+                      messageText: Text(
+                        'Copied',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: HermezColors.blackTwo,
+                          fontSize: 16,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      boxShadows: [
+                        BoxShadow(
+                          color: HermezColors.blueyGreyTwo.withAlpha(64),
+                          offset: Offset(0, 4),
+                          blurRadius: 16,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                      borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      backgroundColor: Colors.white,
+                      margin: EdgeInsets.all(16.0),
+                      duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
+                    ).show(context);
+                  },
+                  padding: EdgeInsets.only(
+                      left: 20.0, right: 10.0, top: 10.0, bottom: 10.0),
+                  color: HermezColors.mediumOrange,
+                  textColor: HermezColors.steel,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget != null &&
+                                widget.arguments != null &&
+                                widget.arguments.address != null
+                            ? (this
+                                        .widget
+                                        .arguments
+                                        .transactionLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? "0x" +
+                                        AddressUtils.strip0x(widget.arguments.address.substring(0, 6))
+                                            .toUpperCase() +
+                                        " ･･･ " +
+                                        widget.arguments.address
+                                            .substring(
+                                                widget.arguments.address.length -
+                                                    4,
+                                                widget.arguments.address.length)
+                                            .toUpperCase() ??
+                                    ""
+                                : "hez:" +
+                                        "0x" +
+                                        AddressUtils.strip0x(widget
+                                                .arguments.address
+                                                .substring(0, 6))
+                                            .toUpperCase() +
+                                        " ･･･ " +
+                                        widget.arguments.address
+                                            .substring(
+                                                widget.arguments.address.length -
+                                                    4,
+                                                widget.arguments.address.length)
+                                            .toUpperCase() ??
+                                    "")
+                            : "",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: HermezColors.steel,
+                          fontSize: 16,
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16.0),
+                            color: HermezColors.steel),
+                        padding: EdgeInsets.only(
+                            left: 12.0, right: 12.0, top: 4, bottom: 4),
+                        child: Text(
+                          widget.arguments.transactionLevel ==
+                                  TransactionLevel.LEVEL1
+                              ? "L1"
+                              : "L2",
+                          style: TextStyle(
+                            color: HermezColors.mediumOrange,
+                            fontSize: 15,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+              SizedBox(
+                  width: double.infinity,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                            "TODO"
+                            /*totalBalance(
+                                            widget.arguments.transactionLevel,
+                                            snapshot)*/
+                            ,
+                            style: TextStyle(
+                              color: HermezColors.black,
+                              fontSize: 32,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w800,
+                            )),
+                      ])),
+              SizedBox(height: 16),
+              buildButtonsRow(context, snapshot),
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+        backgroundColor: HermezColors.lightOrange,
+      ),
+    ];
+  }
 
-  @override
+  Widget handleAccountsList(BuildContext context, AsyncSnapshot snapshot) {
+    final state = snapshot.data;
+
+    if (state is LoadingWalletsState) {
+      return Container(
+        color: Colors.white,
+        child: Center(
+          child: CircularProgressIndicator(color: HermezColors.orange),
+        ),
+      );
+    } else if (state is ErrorWalletsState) {
+      return _renderErrorContent();
+    } else {
+      return _renderWalletDetails(context, state);
+    }
+  }
+
+  Widget _renderWalletDetails(BuildContext context, LoadedWalletsState state) {
+    if (state.wallets != null && state.wallets.length > 0) {
+      // data loaded:
+      if (widget.arguments.transactionLevel == TransactionLevel.LEVEL1) {
+        _accounts = state.wallets[0].accounts;
+      } else {
+        _accounts = state.wallets[1].accounts;
+      }
+      return Container(
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: buildAccountsList(context, _settingsBloc.state),
+            ),
+            SafeArea(
+              top: false,
+              bottom: true,
+              child: Container(
+                //height: kBottomNavigationBarHeight,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(34.0),
+          child: Column(children: [
+            Text(
+              widget.arguments.transactionLevel == TransactionLevel.LEVEL1
+                  ? 'Transfer tokens to your \n\n Ethereum wallet.'
+                  : 'Transfer tokens to your \n\n Hermez wallet.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: HermezColors.blueyGrey,
+                fontSize: 16,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 24),
+            Center(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  padding:
+                      EdgeInsets.only(left: 23, right: 23, bottom: 16, top: 16),
+                  backgroundColor: Color(0xfff3f3f8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+                onPressed: () {
+                  /*showBarModalBottomSheet(
+                    context: widget.arguments.parentContext,
+                    builder: (context) => Scaffold(
+                      body: FutureBuilder(
+                          future: fetchTokens(),
+                          builder: (buildContext, snapshot) {
+                            return handleTokensList(
+                                snapshot, widget.arguments.parentContext);
+                          }),
+                    ),
+                  );*/
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'See supported tokens',
+                      style: TextStyle(
+                        color: HermezColors.blueyGreyTwo,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ]));
+    }
+  }
+
+  Widget _renderErrorContent() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(34.0),
+      child: Column(
+        children: [
+          Text(
+            'There was an error loading \n\n this page.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: HermezColors.blueyGrey,
+              fontSize: 16,
+              fontFamily: 'ModernEra',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 24),
+          Center(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                padding:
+                    EdgeInsets.only(left: 23, right: 23, bottom: 16, top: 16),
+                backgroundColor: Color(0xfff3f3f8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+              ),
+              onPressed: () {
+                //_onRefresh();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset('assets/reload.svg',
+                      color: HermezColors.blueyGreyTwo,
+                      semanticsLabel: 'reload'),
+                  SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    'Reload',
+                    style: TextStyle(
+                      color: HermezColors.blueyGreyTwo,
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  /*@override
   void initState() {
     //fetchAccounts();
     super.initState();
@@ -118,9 +490,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     setState(() {
       _isLoading = false;
     });
-  }
+  }*/
 
-  Future<List<Account>> fetchAccounts() async {
+  /*Future<List<Account>> fetchAccounts() async {
     _stateResponse = await getState();
     //await widget.arguments.store.getBlockAvgTime();
     await fetchPendingTransactions();
@@ -220,9 +592,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
   Future<StateResponse> getState() async {
     //return await widget.arguments.store.getState();
-  }
+  }*/
 
-  @override
+  /*@override
   Widget build(BuildContext context) {
     return Container(
       color: HermezColors.lightOrange,
@@ -279,7 +651,6 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     centerTitle: true,
                     elevation: 0.0,
                     flexibleSpace: FlexibleSpaceBar(
-                      // here the desired height*/
                       background: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -444,297 +815,149 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         },
       ),
     );
-  }
+  }*/
 
   buildButtonsRow(BuildContext context, AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
       _accounts = snapshot.data;
     }
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <
-        Widget>[
-      _accounts != null && _accounts.length > 0
-          ? SizedBox(width: 20.0)
-          : Container(),
-      _accounts != null && _accounts.length > 0
-          ? Expanded(
-              child: FlatButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  onPressed: () async {
-                    List<Account> accounts = _accounts
-                        .takeWhile(
-                            (account) => double.parse(account.balance) > 0)
-                        .toList();
-                    Account account;
-                    Token token;
-                    PriceToken priceToken;
-                    if (accounts.length == 1) {
-                      account = accounts[0];
-                      token = account.token.token;
-                      /*widget.arguments.store.state.tokens
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          _accounts != null && _accounts.length > 0
+              ? SizedBox(width: 20.0)
+              : Container(),
+          _accounts != null && _accounts.length > 0
+              ? Expanded(
+                  child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      onPressed: () async {
+                        List<Account> accounts = _accounts
+                            .takeWhile(
+                                (account) => double.parse(account.balance) > 0)
+                            .toList();
+                        Account account;
+                        Token token;
+                        PriceToken priceToken;
+                        if (accounts.length == 1) {
+                          account = accounts[0];
+                          token = account.token.token;
+                          /*widget.arguments.store.state.tokens
                           .firstWhere((token) => token.id == account.tokenId);*/
-                      priceToken = account.token.price;
-                      /*widget.arguments.store.state.priceTokens
+                          priceToken = account.token.price;
+                          /*widget.arguments.store.state.priceTokens
                           .firstWhere(
                               (priceToken) => priceToken.id == account.tokenId);*/
-                    }
-                    var results = await Navigator.pushNamed(
-                        widget.arguments.parentContext, "/transaction_amount",
-                        arguments: TransactionAmountArguments(
-                          //widget.arguments.store,
-                          _settingsBloc.state.settings.level,
-                          TransactionType.SEND,
-                          account: account,
-                          //token: token,
-                          //priceToken: priceToken,
-                        ));
-                    if (results is PopWithResults) {
-                      PopWithResults popResult = results;
-                      if (popResult.toPage == "/home") {
-                        _onRefresh();
-                      } else {
-                        Navigator.of(context).pop(results);
-                      }
-                    }
-                  },
-                  padding: EdgeInsets.all(10.0),
-                  color: Colors.transparent,
-                  textColor: HermezColors.blackTwo,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        width: 80,
-                        height: 80,
-                        child: SvgPicture.asset(
-                          "assets/bt_send.svg",
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Text(
-                        'Send',
-                        style: TextStyle(
-                          color: HermezColors.blackTwo,
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  )),
-            )
-          : Container(),
-      SizedBox(width: 20.0),
-      Expanded(
-        child:
-            // takes in an object and color and returns a circle avatar with first letter and required color
-            FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                onPressed: () {
-                  if (_settingsBloc.state.settings.level ==
-                      TransactionLevel.LEVEL1) {
-                    Navigator.of(widget.arguments.parentContext).pushNamed(
-                      "/qrcode",
-                      arguments: QRCodeArguments(
-                          qrCodeType: QRCodeType.ETHEREUM,
-                          code: _settingsBloc.state.settings.ethereumAddress,
-                          //store: widget.arguments.store,
-                          isReceive: true),
-                    );
-                  } else {
-                    Navigator.of(widget.arguments.parentContext).pushNamed(
-                      "/qrcode",
-                      arguments: QRCodeArguments(
-                          qrCodeType: QRCodeType.HERMEZ,
-                          code: _settingsBloc.state.settings.hermezAddress,
-                          //store: widget.arguments.store,
-                          isReceive: true),
-                    );
-                  }
-                },
-                padding: EdgeInsets.all(10.0),
-                color: Colors.transparent,
-                textColor: HermezColors.blackTwo,
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      width: 80,
-                      height: 80,
-                      child: SvgPicture.asset(
-                        "assets/bt_receive.svg",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Text(
-                      'Receive',
-                      style: TextStyle(
-                        color: HermezColors.blackTwo,
-                        fontFamily: 'ModernEra',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                )),
-      ),
-      SizedBox(width: 20.0),
-    ]);
-  }
-
-  Widget handleAccountsList(AsyncSnapshot snapshot) {
-    if (snapshot.connectionState != ConnectionState.done || _isLoading) {
-      return Container(
-        color: Colors.white,
-        child: Center(
-          child: CircularProgressIndicator(color: HermezColors.orange),
-        ),
-      );
-    } else {
-      if (snapshot.hasError) {
-        // while data is loading:
-        return Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(34.0),
-            child: Column(children: [
-              Text(
-                'There was an error loading \n\n this page.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: HermezColors.blueyGrey,
-                  fontSize: 16,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 24),
-              Center(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    primary: Colors.white,
-                    padding: EdgeInsets.only(
-                        left: 23, right: 23, bottom: 16, top: 16),
-                    backgroundColor: Color(0xfff3f3f8),
+                        }
+                        var results = await Navigator.pushNamed(
+                            widget.arguments.parentContext,
+                            "/transaction_amount",
+                            arguments: TransactionAmountArguments(
+                              //widget.arguments.store,
+                              widget.arguments.transactionLevel,
+                              TransactionType.SEND,
+                              account: account,
+                              //token: token,
+                              //priceToken: priceToken,
+                            ));
+                        if (results is PopWithResults) {
+                          PopWithResults popResult = results;
+                          if (popResult.toPage == "/home") {
+                            //_onRefresh();
+                          } else {
+                            Navigator.of(context).pop(results);
+                          }
+                        }
+                      },
+                      padding: EdgeInsets.all(10.0),
+                      color: Colors.transparent,
+                      textColor: HermezColors.blackTwo,
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            width: 80,
+                            height: 80,
+                            child: SvgPicture.asset(
+                              "assets/bt_send.svg",
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Text(
+                            'Send',
+                            style: TextStyle(
+                              color: HermezColors.blackTwo,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      )),
+                )
+              : Container(),
+          SizedBox(width: 20.0),
+          Expanded(
+            child:
+                // takes in an object and color and returns a circle avatar with first letter and required color
+                FlatButton(
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                  ),
-                  onPressed: () {
-                    _onRefresh();
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SvgPicture.asset('assets/reload.svg',
-                          color: HermezColors.blueyGreyTwo,
-                          semanticsLabel: 'reload'),
-                      SizedBox(
-                        width: 8,
-                      ),
-                      Text(
-                        'Reload',
-                        style: TextStyle(
-                          color: HermezColors.blueyGreyTwo,
-                          fontSize: 16,
-                          fontFamily: 'ModernEra',
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ]));
-      } else {
-        if (snapshot.hasData && (snapshot.data as List).length > 0) {
-          // data loaded:
-          _accounts = snapshot.data;
-          return Container(
-            color: Colors.white,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: buildAccountsList(),
-                ),
-                SafeArea(
-                  top: false,
-                  bottom: true,
-                  child: Container(
-                    //height: kBottomNavigationBarHeight,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          );
-        } else {
-          return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(34.0),
-              child: Column(children: [
-                Text(
-                  _settingsBloc.state.settings.level == TransactionLevel.LEVEL1
-                      ? 'Transfer tokens to your \n\n Ethereum wallet.'
-                      : 'Transfer tokens to your \n\n Hermez wallet.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: HermezColors.blueyGrey,
-                    fontSize: 16,
-                    fontFamily: 'ModernEra',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 24),
-                Center(
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      primary: Colors.white,
-                      padding: EdgeInsets.only(
-                          left: 23, right: 23, bottom: 16, top: 16),
-                      backgroundColor: Color(0xfff3f3f8),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                     onPressed: () {
-                      showBarModalBottomSheet(
-                        context: widget.arguments.parentContext,
-                        builder: (context) => Scaffold(
-                          body: FutureBuilder(
-                              future: fetchTokens(),
-                              builder: (buildContext, snapshot) {
-                                return handleTokensList(
-                                    snapshot, widget.arguments.parentContext);
-                              }),
-                        ),
-                      );
+                      if (widget.arguments.transactionLevel ==
+                          TransactionLevel.LEVEL1) {
+                        Navigator.of(widget.arguments.parentContext).pushNamed(
+                          "/qrcode",
+                          arguments: QRCodeArguments(
+                              qrCodeType: QRCodeType.ETHEREUM,
+                              code: widget.arguments.address,
+                              isReceive: true),
+                        );
+                      } else {
+                        Navigator.of(widget.arguments.parentContext).pushNamed(
+                          "/qrcode",
+                          arguments: QRCodeArguments(
+                              qrCodeType: QRCodeType.HERMEZ,
+                              code: widget.arguments.address,
+                              isReceive: true),
+                        );
+                      }
                     },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                    padding: EdgeInsets.all(10.0),
+                    color: Colors.transparent,
+                    textColor: HermezColors.blackTwo,
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          width: 80,
+                          height: 80,
+                          child: SvgPicture.asset(
+                            "assets/bt_receive.svg",
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                         Text(
-                          'See supported tokens',
+                          'Receive',
                           style: TextStyle(
-                            color: HermezColors.blueyGreyTwo,
-                            fontSize: 16,
+                            color: HermezColors.blackTwo,
                             fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                )
-              ]));
-        }
-      }
-    }
+                    )),
+          ),
+          SizedBox(width: 20.0),
+        ]);
   }
 
   Future<List<Token>> fetchTokens() async {
     //return widget.arguments.store.getTokens();
   }
 
-  Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
+  /*Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return Center(
         child: CircularProgressIndicator(color: HermezColors.orange),
@@ -764,10 +987,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         }
       }
     }
-  }
+  }*/
 
   //widget that builds the list
-  Widget buildTokensList(BuildContext parentContext) {
+  /*Widget buildTokensList(BuildContext parentContext) {
     return Column(
       children: [
         SizedBox(
@@ -832,10 +1055,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         ),
       ],
     );
-  }
+  }*/
 
   //widget that builds the list
-  Widget buildAccountsList() {
+  Widget buildAccountsList(BuildContext context, LoadedSettingsState state) {
     return Container(
       color: Colors.white,
       child: RefreshIndicator(
@@ -868,11 +1091,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                 exit = Exit.fromTransaction(transaction);
               }
 
-              final String currency = _settingsBloc
-                  .state.settings.defaultCurrency
-                  .toString()
-                  .split('.')
-                  .last;
+              final String currency =
+                  state.settings.defaultCurrency.toString().split('.').last;
 
               /*final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
@@ -891,7 +1111,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   1, //widget.arguments.store.state.exchangeRatio,
                   (bool completeDelayedWithdraw,
                       bool isInstantWithdraw) async {},
-                  _settingsBloc.state.settings.level,
+                  widget.arguments.transactionLevel,
                   _stateResponse);
             } else if (_filteredExits.length > 0 &&
                 i <
@@ -903,11 +1123,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               final Exit exit = _filteredExits[index];
               final bool isAllowed = _allowedInstantWithdraws[index];
 
-              final String currency = _settingsBloc
-                  .state.settings.defaultCurrency
-                  .toString()
-                  .split('.')
-                  .last;
+              final String currency =
+                  state.settings.defaultCurrency.toString().split('.').last;
 
               /*final Token token = widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == exit.tokenId);
@@ -928,7 +1145,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   BigInt gasPrice = BigInt.one;
                   GasPriceResponse gasPriceResponse =
                       await _transferBloc.getGasPrice();
-                  switch (_settingsBloc.state.settings.defaultFee) {
+                  switch (state.settings.defaultFee) {
                     case WalletDefaultFee.SLOW:
                       int gasPriceFloor = gasPriceResponse.safeLow * pow(10, 8);
                       gasPrice = BigInt.from(gasPriceFloor);
@@ -975,13 +1192,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     PopWithResults popResult = results;
                     if (popResult.toPage == "/home") {
                       // TODO do stuff
-                      _onRefresh();
+                      //_onRefresh();
                     } else {
                       Navigator.of(context).pop(results);
                     }
                   }
                 },
-                _settingsBloc.state.settings.level,
+                widget.arguments.transactionLevel,
                 _stateResponse,
                 instantWithdrawAllowed: isAllowed,
                 completeDelayedWithdraw: false,
@@ -1023,11 +1240,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     pendingWithdraw['amount'].toString().replaceAll('.0', '');
               }
 
-              final String currency = _settingsBloc
-                  .state.settings.defaultCurrency
-                  .toString()
-                  .split('.')
-                  .last;
+              final String currency =
+                  state.settings.defaultCurrency.toString().split('.').last;
 
               int step = 2;
               if ((isAllowed == true &&
@@ -1059,7 +1273,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         BigInt gasPrice = BigInt.one;
                         GasPriceResponse gasPriceResponse =
                             await _transferBloc.getGasPrice();
-                        switch (_settingsBloc.state.settings.defaultFee) {
+                        switch (state.settings.defaultFee) {
                           case WalletDefaultFee.SLOW:
                             int gasPriceFloor =
                                 gasPriceResponse.safeLow * pow(10, 8);
@@ -1124,7 +1338,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         if (results is PopWithResults) {
                           PopWithResults popResult = results;
                           if (popResult.toPage == "/home") {
-                            _onRefresh();
+                            //_onRefresh();
                           } else {
                             Navigator.of(context).pop(results);
                           }
@@ -1132,7 +1346,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       }
                     : (bool completeDelayedWithdraw,
                         bool instantWithdrawAllowed) {},
-                _settingsBloc.state.settings.level,
+                widget.arguments.transactionLevel,
                 _stateResponse,
                 retry: pendingWithdraw['status'] == 'fail',
                 instantWithdrawAllowed: isAllowed == true,
@@ -1154,11 +1368,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   .arguments.store.state.priceTokens
                   .firstWhere((priceToken) => priceToken.id == account.tokenId);*/
 
-              final String currency = _settingsBloc
-                  .state.settings.defaultCurrency
-                  .toString()
-                  .split('.')
-                  .last;
+              final String currency =
+                  state.settings.defaultCurrency.toString().split('.').last;
 
               var isPendingDeposit = false;
               if (account.accountIndex == null) {
@@ -1229,7 +1440,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               //priceToken,
                               widget.arguments.parentContext));
                   if (needRefresh != null && needRefresh == true) {
-                    _onRefresh();
+                    //_onRefresh();
                   } else {
                     setState(() {});
                   }
@@ -1238,13 +1449,13 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
             }
           },
         ),
-        onRefresh: _onRefresh,
+        //onRefresh: _onRefresh,
       ),
       /*),*/
     );
   }
 
-  String totalBalance(TransactionLevel txLevel, AsyncSnapshot snapshot) {
+  /*String totalBalance(TransactionLevel txLevel, AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       // data loaded:
       _accounts = snapshot.data;
@@ -1295,5 +1506,5 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     result = NumberFormat.currency(locale: locale, symbol: symbol)
         .format(resultValue / pow(10, 18));*/
     return result;
-  }
+  }*/
 }

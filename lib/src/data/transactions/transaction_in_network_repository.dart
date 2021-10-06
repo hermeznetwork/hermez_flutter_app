@@ -19,7 +19,7 @@ import 'package:web3dart/web3dart.dart' as web3;
 
 class TransactionInNetworkRepository implements TransactionRepository {
   final IConfigurationService _configurationService;
-  final HermezService _hermezService;
+  final IHermezService _hermezService;
   final ExplorerService _explorerService;
   final ContractService _contractService;
   TransactionInNetworkRepository(this._configurationService,
@@ -205,11 +205,16 @@ class TransactionInNetworkRepository implements TransactionRepository {
           if (tokenId == 0) {
             return _explorerService.getTransactionsByAccountAddress(address);
           } else {
-            Token token = await getToken(tokenId);
-            List<dynamic> transactions =
-                await _explorerService.getTokenTransferEventsByAccountAddress(
-                    address, token.ethereumAddress);
-            return transactions;
+            Token token;
+            try {
+              token = await getToken(tokenId);
+            } catch (e) {}
+            if (token != null) {
+              List<dynamic> transactions =
+                  await _explorerService.getTokenTransferEventsByAccountAddress(
+                      address, token.ethereumAddress);
+              return transactions;
+            }
           }
         },
       ),

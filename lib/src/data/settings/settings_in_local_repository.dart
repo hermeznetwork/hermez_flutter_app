@@ -134,4 +134,9 @@ class SettingsInLocalRepository implements SettingsRepository {
   Future<String> getEthereumAddress() {
     return _configurationService.getEthereumAddress();
   }
+
+  @override
+  Future<String> getRecoveryPhrase() {
+    return _configurationService.getMnemonic();
+  }
 }

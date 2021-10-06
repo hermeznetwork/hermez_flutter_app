@@ -21,8 +21,12 @@ abstract class SettingsRepository {
   // Explorer
   Future<bool> showInBatchExplorer(String hermezAddress);
 
+  // Address
   Future<String> getHermezAddress();
   Future<String> getEthereumAddress();
+
+  // Private
+  Future<String> getRecoveryPhrase();
 
   Future<bool> resetDefault();
 }

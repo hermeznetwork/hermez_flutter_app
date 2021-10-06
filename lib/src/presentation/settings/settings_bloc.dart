@@ -5,6 +5,7 @@ import 'package:hermez/src/domain/settings/usecases/default_currency_use_case.da
 import 'package:hermez/src/domain/settings/usecases/default_fee_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/explorer_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/level_use_case.dart';
+import 'package:hermez/src/domain/settings/usecases/private_settings_use_case.dart';
 import 'package:hermez/src/domain/settings/usecases/reset_default_use_case.dart';
 import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/tokens/usecases/tokens_use_case.dart';
@@ -22,6 +23,9 @@ class SettingsBloc extends Bloc<SettingsState> {
   final AddressUseCase _addressUseCase;
   final TokensUseCase _tokensUseCase;
   final ResetDefaultUseCase _resetDefaultUseCase;
+  final PrivateSettingsUseCase _privateSettingsUseCase;
+
+  SettingsItemState _itemState;
 
   SettingsBloc(
       this._defaultCurrencyUseCase,
@@ -31,11 +35,13 @@ class SettingsBloc extends Bloc<SettingsState> {
       this._explorerUseCase,
       this._addressUseCase,
       this._tokensUseCase,
-      this._resetDefaultUseCase) {
+      this._resetDefaultUseCase,
+      this._privateSettingsUseCase) {
     changeState(SettingsState.init());
   }
 
   init() async {
+    changeState(SettingsState.loading());
     WalletDefaultCurrency defaultCurrency = await getDefaultCurrency();
     WalletDefaultFee defaultFee = await getDefaultFee();
     TransactionLevel level = await getLevel();
@@ -43,7 +49,7 @@ class SettingsBloc extends Bloc<SettingsState> {
     String hermezAddress = await getHermezAddress();
     String ethereumAddress = await getEthereumAddress();
     List<Token> tokens = await getTokens();
-    SettingsItemState settings = SettingsItemState(
+    _itemState = SettingsItemState(
         hermezAddress,
         ethereumAddress,
         defaultCurrency,
@@ -51,7 +57,7 @@ class SettingsBloc extends Bloc<SettingsState> {
         /*exchangeRatio,*/ level,
         availableBiometrics,
         tokens);
-    changeState(SettingsState.loaded(settings));
+    changeState(SettingsState.loaded(_itemState));
   }
 
   Future<WalletDefaultCurrency> getDefaultCurrency() async {
@@ -59,9 +65,10 @@ class SettingsBloc extends Bloc<SettingsState> {
   }
 
   void setDefaultCurrency(WalletDefaultCurrency defaultCurrency) {
+    changeState(SettingsState.loading());
     _defaultCurrencyUseCase.setDefaultCurrency(defaultCurrency).then((value) {
-      state.settings.defaultCurrency = defaultCurrency;
-      changeState(SettingsState.loaded(state.settings));
+      _itemState.defaultCurrency = defaultCurrency;
+      changeState(SettingsState.loaded(_itemState));
     });
   }
 
@@ -70,9 +77,10 @@ class SettingsBloc extends Bloc<SettingsState> {
   }
 
   void setDefaultFee(WalletDefaultFee defaultFee) {
+    changeState(SettingsState.loading());
     _defaultFeeUseCase.setDefaultFee(defaultFee).then((value) {
-      state.settings.defaultFee = defaultFee;
-      changeState(SettingsState.loaded(state.settings));
+      _itemState.defaultFee = defaultFee;
+      changeState(SettingsState.loaded(_itemState));
     });
   }
 
@@ -82,11 +90,10 @@ class SettingsBloc extends Bloc<SettingsState> {
 
   void setLevel(TransactionLevel level) {
     _levelUseCase.setLevel(level).then((value) {
-      state.settings.level = level;
-      changeState(SettingsState.loaded(state.settings));
+      _itemState.level = level;
+      changeState(SettingsState.loaded(_itemState));
     }).catchError((error) {
-      changeState(
-          SettingsState.error(state.settings, 'A network error has occurred'));
+      changeState(SettingsState.error('A network error has occurred'));
     });
   }
 
@@ -98,11 +105,6 @@ class SettingsBloc extends Bloc<SettingsState> {
 
   Future<List<BiometricType>> getAvailableBiometrics() {
     return _biometricsUseCase.getAvailableBiometrics();
-    /*.then((availableBiometrics) {
-      //state.settings.availableBiometrics = availableBiometrics;
-      //changeState(SettingsState.loaded(state.settings));
-      return availableBiometrics;
-    });*/
   }
 
   bool getBiometricsFace() {
@@ -151,6 +153,12 @@ class SettingsBloc extends Bloc<SettingsState> {
 
   Future<List<Token>> getTokens() async {
     return _tokensUseCase.getTokens();
+  }
+
+  // Private
+
+  Future<String> getRecoveryPhase() {
+    return _privateSettingsUseCase.getRecoveryPhrase();
   }
 
   Future<bool> resetDefault() async {
