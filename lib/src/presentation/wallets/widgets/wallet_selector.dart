@@ -7,6 +7,7 @@ import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_selector.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/src/presentation/wallets/widgets/wallet_details.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -23,11 +24,14 @@ import '../wallets_state.dart';
 // title and message.
 
 class WalletSelectorArguments {
+  WalletsBloc walletsBloc;
+  SettingsBloc settingsBloc;
   bool showHermezWallet;
   Function hermezWalletShown;
   BuildContext parentContext;
 
-  WalletSelectorArguments(this.parentContext,
+  WalletSelectorArguments(
+      this.walletsBloc, this.settingsBloc, this.parentContext,
       {this.showHermezWallet = false, this.hermezWalletShown});
 }
 
@@ -37,16 +41,27 @@ class WalletSelectorPage extends StatefulWidget {
   WalletSelectorArguments arguments;
 
   @override
-  _WalletSelectorPageState createState() => _WalletSelectorPageState();
+  _WalletSelectorPageState createState() =>
+      _WalletSelectorPageState(arguments.walletsBloc, arguments.settingsBloc);
 }
 
 class _WalletSelectorPageState extends State<WalletSelectorPage>
     with AfterLayoutMixin<WalletSelectorPage> {
-  final WalletsBloc _bloc;
-  _WalletSelectorPageState() : _bloc = getIt<WalletsBloc>() {
-    _bloc.fetchData();
+  final WalletsBloc _walletsBloc;
+  final SettingsBloc _settingsBloc;
+
+  _WalletSelectorPageState(WalletsBloc walletsBloc, SettingsBloc settingsBloc)
+      : _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>(),
+        _walletsBloc =
+            walletsBloc != null ? walletsBloc : getIt<WalletsBloc>() {
+    if (!(_walletsBloc.state is LoadedWalletsState)) {
+      _walletsBloc.fetchData();
+    }
+    if (_settingsBloc.state is InitSettingsState) {
+      _settingsBloc.init();
+    }
   }
-  SettingsBloc _settingsBloc = getIt<SettingsBloc>();
 
   //List<Account> l1Accounts;
   //List<Account> l2Accounts;
@@ -69,8 +84,13 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
         //widget.arguments.store.updateLevel(TransactionLevel.LEVEL2);
       });
       Navigator.pushNamed(context, 'wallet_details',
-          arguments: WalletDetailsArguments(TransactionLevel.LEVEL2, "",
-              widget.arguments.parentContext, true, _bloc, _settingsBloc));
+          arguments: WalletDetailsArguments(
+              TransactionLevel.LEVEL2,
+              "",
+              widget.arguments.parentContext,
+              true,
+              _walletsBloc,
+              _settingsBloc));
       widget.arguments.showHermezWallet = false;
       if (widget.arguments.hermezWalletShown != null) {
         widget.arguments.hermezWalletShown();
@@ -166,8 +186,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<WalletsState>(
-        initialData: _bloc.state,
-        stream: _bloc.observableState,
+        initialData: _walletsBloc.state,
+        stream: _walletsBloc.observableState,
         builder: (context, snapshot) {
           final state = snapshot.data;
 
@@ -223,7 +243,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   l2Wallet.address,
                                   widget.arguments.parentContext,
                                   false,
-                                  _bloc,
+                                  _walletsBloc,
                                   _settingsBloc,
                                 )).then((refresh) {
                               if (refresh != null && refresh == true) {
@@ -291,16 +311,17 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                             BalanceUtils.amountInCurrency(
                                                 double.parse(
                                                     l2Wallet.totalBalance),
-                                                _settingsBloc
-                                                    .getDefaultCurrency()
+                                                (_settingsBloc.state
+                                                        as LoadedSettingsState)
+                                                    .settings
+                                                    .defaultCurrency
                                                     .toString()
                                                     .split(".")
                                                     .last,
-                                                0.8)
-                                            /*totalBalance(
-                                                TransactionLevel.LEVEL2,
-                                                )*/
-                                            ,
+                                                (_settingsBloc.state
+                                                        as LoadedSettingsState)
+                                                    .settings
+                                                    .exchangeRatio),
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 32,
@@ -317,12 +338,17 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                                       BalanceUtils.amountInCurrency(
                                                           double.parse(l2Wallet
                                                               .totalBalance),
-                                                          _settingsBloc
-                                                              .getDefaultCurrency()
+                                                          (_settingsBloc.state
+                                                                  as LoadedSettingsState)
+                                                              .settings
+                                                              .defaultCurrency
                                                               .toString()
                                                               .split(".")
                                                               .last,
-                                                          0.8)
+                                                          (_settingsBloc.state
+                                                                  as LoadedSettingsState)
+                                                              .settings
+                                                              .exchangeRatio)
 
                                                       /*totalBalance(
                                                           TransactionLevel
@@ -576,7 +602,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   l1Wallet.address,
                                   widget.arguments.parentContext,
                                   false,
-                                  _bloc,
+                                  _walletsBloc,
                                   _settingsBloc,
                                 )).then((value) {
                               setState(() {});
@@ -639,18 +665,17 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                               BalanceUtils.amountInCurrency(
                                                   double.parse(
                                                       l1Wallet.totalBalance),
-                                                  _settingsBloc
-                                                      .getDefaultCurrency()
+                                                  (_settingsBloc.state
+                                                          as LoadedSettingsState)
+                                                      .settings
+                                                      .defaultCurrency
                                                       .toString()
                                                       .split(".")
                                                       .last,
-                                                  0.8)
-                                              //l1Wallet.totalBalance
-                                              /*totalBalance(
-                                                  TransactionLevel.LEVEL1,
-                                                  widget.arguments.store.state
-                                                      .l1Accounts)*/
-                                              ,
+                                                  (_settingsBloc.state
+                                                          as LoadedSettingsState)
+                                                      .settings
+                                                      .exchangeRatio),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 32,
@@ -665,12 +690,17 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                                       BalanceUtils.amountInCurrency(
                                                           double.parse(l1Wallet
                                                               .totalBalance),
-                                                          _settingsBloc
-                                                              .getDefaultCurrency()
+                                                          (_settingsBloc.state
+                                                                  as LoadedSettingsState)
+                                                              .settings
+                                                              .defaultCurrency
                                                               .toString()
                                                               .split(".")
                                                               .last,
-                                                          0.8)
+                                                          (_settingsBloc.state
+                                                                  as LoadedSettingsState)
+                                                              .settings
+                                                              .exchangeRatio)
 
                                                       /*totalBalance(
                                                           TransactionLevel

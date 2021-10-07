@@ -1,5 +1,5 @@
 import 'package:hermez/src/common/bloc/bloc.dart';
-import 'package:hermez/src/domain/wallets/get_wallets_use_case.dart';
+import 'package:hermez/src/domain/wallets/usecases/get_wallets_use_case.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/wallets/wallets_state.dart';
 

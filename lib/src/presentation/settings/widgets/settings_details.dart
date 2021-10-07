@@ -390,10 +390,8 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       break;
                     case SettingsDetailsType.ADVANCED:
                       // Default fee
-                      Navigator.of(context).pushNamed(
-                        "fee_selector",
-                        /*arguments: widget.arguments.store*/
-                      );
+                      Navigator.of(context)
+                          .pushNamed("fee_selector", arguments: _settingsBloc);
                       break;
                   }
                   break;

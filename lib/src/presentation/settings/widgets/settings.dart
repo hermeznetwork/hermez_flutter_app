@@ -63,7 +63,6 @@ class SettingsPage extends StatelessWidget {
     //final bloc = BlocProvider.of<CartBloc>(context);
 
     return Scaffold(
-      //key: _scaffoldKey,
       appBar: new AppBar(
         title: new Text("Settings",
             style: TextStyle(
@@ -92,7 +91,22 @@ class SettingsPage extends StatelessWidget {
                       } else if (state is ErrorWalletsState) {
                         return _renderErrorContent();
                       } else {
-                        return _renderSettingsContent(context, state);
+                        return StreamBuilder<SettingsState>(
+                            initialData: _settingsBloc.state,
+                            stream: _settingsBloc.observableState,
+                            builder: (context, snapshot) {
+                              final settingsState = snapshot.data;
+
+                              if (settingsState is LoadingSettingsState) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else if (settingsState is ErrorSettingsState) {
+                                return _renderErrorContent();
+                              } else {
+                                return _renderSettingsContent(
+                                    context, state, settingsState);
+                              }
+                            });
                       }
                     }),
               ),
@@ -103,8 +117,8 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _renderSettingsContent(
-      BuildContext context, LoadedWalletsState state) {
+  Widget _renderSettingsContent(BuildContext context, LoadedWalletsState state,
+      LoadedSettingsState settingsState) {
     return Container(
       color: Colors.white,
       child: ListView.separated(

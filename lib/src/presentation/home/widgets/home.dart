@@ -23,12 +23,8 @@ import 'package:hermez/utils/hermez_colors.dart';
 
 class HomeArguments {
   bool showHermezWallet;
-  //final WalletHandler store;
-  //final ConfigurationService configurationService;
 
-  HomeArguments(
-      /*this.store,*/ /*this.configurationService,*/
-      {this.showHermezWallet = false});
+  HomeArguments({this.showHermezWallet = false});
 }
 
 class HomePage extends StatefulWidget {
@@ -44,9 +40,6 @@ class _HomePageState extends State<HomePage> {
   ValueNotifier _currentIndex;
   List<Widget> children;
   Navigator navigator;
-  BuildContext _context;
-
-  //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<TabNavigationItem> items;
   bool showHermezWallet = false;
@@ -61,22 +54,19 @@ class _HomePageState extends State<HomePage> {
     if (_bloc.state is LoadingWalletsState) {
       _bloc.fetchData();
     }
-    if (_settingsBloc.state is LoadingSettingsState) {
+    if (_settingsBloc.state is InitSettingsState) {
       _settingsBloc.init();
     }
   }
 
   @override
   void initState() {
-    //widget.arguments.store.initialise();
-    //initialize();
     _currentIndex = ValueNotifier(0);
     showHermezWallet = widget.arguments.showHermezWallet;
-    /*updateItems();
+    updateItems();
     children = [
       for (final tabItem in items)
         Navigator(onGenerateRoute: (settings) {
-          _context = context;
           Widget page = tabItem.page;
           if (settings.name == 'wallet_details') {
             _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -86,37 +76,36 @@ class _HomePageState extends State<HomePage> {
             );
           } else if (settings.name == 'settings_details') {
             _scaffoldKey = GlobalKey<ScaffoldState>();
-            /*var configurationService =
-                Provider.of<ConfigurationService>(context, listen: false);*/
             page = SettingsDetailsPage(
               key: _scaffoldKey,
               arguments: settings.arguments,
-              /*configurationService: configurationService*/
             );
           } else if (settings.name == 'account_selector') {
             final AccountSelectorArguments args = settings.arguments;
-            page = AccountSelectorPage(/*key: _scaffoldKey,*/ arguments: args);
+            page = AccountSelectorPage(arguments: args);
           } else if (settings.name == 'currency_selector') {
-            page = SettingsCurrencyPage(/*store: widget.arguments.store*/);
+            final SettingsBloc settingsBloc = settings.arguments;
+            page = SettingsCurrencyPage(
+              settingsBloc: settingsBloc,
+            );
           } else if (settings.name == 'fee_selector') {
+            final SettingsBloc settingsBloc = settings.arguments;
             page = FeeSelectorPage(
-                /*key: _scaffoldKey,*/
-                arguments: FeeSelectorArguments(/*widget.arguments.store*/));
+                arguments: FeeSelectorArguments(settingsBloc: settingsBloc));
           } else if (settings.name == 'account_details') {
             final AccountDetailsArguments args = settings.arguments;
-            page = AccountDetailsPage(/*key: _scaffoldKey,*/ arguments: args);
+            page = AccountDetailsPage(arguments: args);
           } else if (settings.name == 'transaction_details') {
             page = WalletTransferProvider(
               builder: (context, store) {
-                return TransactionDetailsPage(
-                    /*key: _scaffoldKey,*/ arguments: settings.arguments);
+                return TransactionDetailsPage(arguments: settings.arguments);
               },
             );
           }
 
           return MaterialPageRoute(builder: (_) => page);
         }),
-    ];*/
+    ];
     super.initState();
   }
 
@@ -135,111 +124,16 @@ class _HomePageState extends State<HomePage> {
               ));
         } else if (state is ErrorWalletsState) {
           return _renderErrorContent();
-          //return Center(child: Text(state.message));
         } else {
           return _renderHomeContent(context, state);
         }
       },
     );
-
-    /*return FutureBuilder(
-        future: initialize(),
-        builder: (context, snapshot) {*/
-    /*if (_settingsBloc.state.settings.ethereumAddress == null) {
-      return Container(
-          color: HermezColors.lightOrange,
-          child: Center(
-            child: CircularProgressIndicator(color: HermezColors.orange),
-          ));
-    } else {
-      return WillPopScope(
-          child: Scaffold(
-            body: IndexedStack(
-              index: _currentIndex.value,
-              children: children,
-            ),
-            extendBody: true,
-            bottomNavigationBar: BottomNavigationBar(
-                elevation: 0,
-                selectedItemColor: HermezColors.blackTwo,
-                unselectedItemColor: HermezColors.blueyGreyTwo,
-                backgroundColor: Colors.transparent, // transparent
-                showSelectedLabels: false,
-                showUnselectedLabels: false,
-                currentIndex: _currentIndex.value,
-                onTap: (int index) => onTabTapped(index, context),
-                items: [
-                  for (final tabItem in items)
-                    BottomNavigationBarItem(
-                        icon: tabItem.icon, label: tabItem.title)
-                ]),
-          ),
-          onWillPop: () async {
-            try {
-              if (Navigator.of(_scaffoldKey.currentContext).canPop()) {
-                Navigator.of(_scaffoldKey.currentContext).pop();
-                return false;
-              } else {
-                return true;
-              }
-            } catch (e) {
-              print(e.toString());
-              return true;
-            }
-          });
-    }*/
-    //});
   }
 
   Widget _renderHomeContent(BuildContext context, LoadedWalletsState state) {
     updateItems(state);
-    children = [
-      for (final tabItem in items)
-        Navigator(onGenerateRoute: (settings) {
-          _context = context;
-          Widget page = tabItem.page;
-          if (settings.name == 'wallet_details') {
-            _scaffoldKey = GlobalKey<ScaffoldState>();
-            page = WalletDetailsPage(
-              key: _scaffoldKey,
-              arguments: settings.arguments,
-            );
-          } else if (settings.name == 'settings_details') {
-            _scaffoldKey = GlobalKey<ScaffoldState>();
-            /*var configurationService =
-                Provider.of<ConfigurationService>(context, listen: false);*/
-            page = SettingsDetailsPage(
-              key: _scaffoldKey,
-              arguments: settings.arguments,
-              /*configurationService: configurationService*/
-            );
-          } else if (settings.name == 'account_selector') {
-            final AccountSelectorArguments args = settings.arguments;
-            page = AccountSelectorPage(/*key: _scaffoldKey,*/ arguments: args);
-          } else if (settings.name == 'currency_selector') {
-            final SettingsBloc settingsBloc = settings.arguments;
-            page = SettingsCurrencyPage(
-              settingsBloc: settingsBloc,
-            );
-          } else if (settings.name == 'fee_selector') {
-            page = FeeSelectorPage(
-                /*key: _scaffoldKey,*/
-                arguments: FeeSelectorArguments(/*widget.arguments.store*/));
-          } else if (settings.name == 'account_details') {
-            final AccountDetailsArguments args = settings.arguments;
-            page = AccountDetailsPage(/*key: _scaffoldKey,*/ arguments: args);
-          } else if (settings.name == 'transaction_details') {
-            page = WalletTransferProvider(
-              builder: (context, store) {
-                return TransactionDetailsPage(
-                    /*key: _scaffoldKey,*/ arguments: settings.arguments);
-              },
-            );
-          }
 
-          return MaterialPageRoute(builder: (_) => page);
-        }),
-    ];
     return WillPopScope(
         child: Scaffold(
           body: IndexedStack(
@@ -276,18 +170,6 @@ class _HomePageState extends State<HomePage> {
           }
         });
   }
-
-  /*Future<void> initialize() async {
-    /*if (widget.arguments.store.state.walletInitialized == false &&
-        widget.arguments.store.state.loading == false) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Add Your Code here.
-        widget.arguments.store.initialise();
-        _settingsBloc.init();
-      });
-    }*/
-    return;
-  }*/
 
   void onTabTapped(int index, BuildContext context) {
     if (index == 1) {
@@ -407,11 +289,11 @@ class _HomePageState extends State<HomePage> {
             Navigator(
                 key: GlobalKey(),
                 onGenerateRoute: (settings) {
-                  _context = context;
                   Widget page;
                   if (index == 0) {
                     page = WalletSelectorPage(
-                        arguments: WalletSelectorArguments(context,
+                        arguments: WalletSelectorArguments(
+                            _bloc, _settingsBloc, context,
                             showHermezWallet: showHermezWallet,
                             hermezWalletShown: () {
                       showHermezWallet = false;
@@ -426,9 +308,6 @@ class _HomePageState extends State<HomePage> {
                       arguments: settings.arguments,
                     );
                   } else if (settings.name == 'settings_details') {
-                    /*var configurationService =
-                        Provider.of<ConfigurationService>(context,
-                            listen: false);*/
                     _scaffoldKey = GlobalKey<ScaffoldState>();
                     page = SettingsDetailsPage(
                         key: _scaffoldKey, arguments: settings.arguments);
@@ -441,7 +320,10 @@ class _HomePageState extends State<HomePage> {
                       settingsBloc: settingsBloc,
                     );
                   } else if (settings.name == 'fee_selector') {
-                    page = FeeSelectorPage(arguments: FeeSelectorArguments());
+                    final SettingsBloc settingsBloc = settings.arguments;
+                    page = FeeSelectorPage(
+                        arguments:
+                            FeeSelectorArguments(settingsBloc: settingsBloc));
                   } else if (settings.name == 'account_details') {
                     final AccountDetailsArguments args = settings.arguments;
                     page = AccountDetailsPage(arguments: args);
@@ -449,8 +331,7 @@ class _HomePageState extends State<HomePage> {
                     page = WalletTransferProvider(
                       builder: (context, store) {
                         return TransactionDetailsPage(
-                            /*key: _scaffoldKey,*/ arguments:
-                                settings.arguments);
+                            arguments: settings.arguments);
                       },
                     );
                   }
@@ -472,7 +353,7 @@ class _HomePageState extends State<HomePage> {
     items = [
       TabNavigationItem(
         page: WalletSelectorPage(
-            arguments: WalletSelectorArguments(context,
+            arguments: WalletSelectorArguments(_bloc, _settingsBloc, context,
                 showHermezWallet: showHermezWallet, hermezWalletShown: () {
           showHermezWallet = false;
         })),

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:local_auth/local_auth.dart';
@@ -5,6 +7,8 @@ import 'package:local_auth/local_auth.dart';
 abstract class SettingsRepository {
   Future<WalletDefaultCurrency> getDefaultCurrency();
   Future<void> updateDefaultCurrency(WalletDefaultCurrency defaultCurrency);
+  Future<double> getExchangeRatio(WalletDefaultCurrency defaultCurrency);
+  Future<bool> updateExchangeRatios(LinkedHashMap<String, dynamic> ratios);
   Future<WalletDefaultFee> getDefaultFee();
   Future<void> updateDefaultFee(WalletDefaultFee defaultFee);
   Future<TransactionLevel> getLevel();

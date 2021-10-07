@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:hermez/src/data/network/configuration_service.dart';
+import 'package:hermez/src/data/network/price_updater_service.dart';
 import 'package:hermez/src/domain/settings/settings_repository.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
@@ -9,8 +12,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SettingsInLocalRepository implements SettingsRepository {
   final IConfigurationService _configurationService;
-  SettingsInLocalRepository(this._configurationService);
+  final PriceUpdaterService _priceUpdaterService;
+  SettingsInLocalRepository(
+      this._configurationService, this._priceUpdaterService);
 
+  // CURRENCY
   @override
   Future<WalletDefaultCurrency> getDefaultCurrency() {
     return _configurationService.getDefaultCurrency();
@@ -23,13 +29,46 @@ class SettingsInLocalRepository implements SettingsRepository {
   }
 
   @override
+  Future<double> getExchangeRatio(WalletDefaultCurrency defaultCurrency) async {
+    double result = 0;
+    if (_configurationService
+            .getExchangeRatio(defaultCurrency.toString().split(".").last) ==
+        0) {
+      try {
+        final currenciesPrices =
+            await _priceUpdaterService.getCurrenciesPrices();
+        await updateExchangeRatios(currenciesPrices);
+      } catch (e) {
+        LinkedHashMap<String, double> exchangeRatio = LinkedHashMap.from({
+          "EUR": 0.837775,
+          "CNY": 6.446304,
+          "JPY": 110.253954,
+          "GBP": 0.716945
+        });
+        await updateExchangeRatios(exchangeRatio);
+      }
+    }
+
+    result = _configurationService
+        .getExchangeRatio(defaultCurrency.toString().split(".").last);
+
+    return result;
+  }
+
+  @override
+  Future<bool> updateExchangeRatios(LinkedHashMap<String, dynamic> ratios) {
+    return _configurationService.setExchangeRatio(ratios);
+  }
+
+  // FEE
+  @override
   Future<WalletDefaultFee> getDefaultFee() {
     return _configurationService.getDefaultFee();
   }
 
   @override
-  Future<void> updateDefaultFee(WalletDefaultFee defaultFee) async {
-    _configurationService.setDefaultFee(defaultFee);
+  Future<bool> updateDefaultFee(WalletDefaultFee defaultFee) async {
+    return _configurationService.setDefaultFee(defaultFee);
   }
 
   @override

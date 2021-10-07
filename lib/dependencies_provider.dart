@@ -53,7 +53,7 @@ import 'package:hermez/src/domain/transfer/usecases/fee_use_case.dart';
 import 'package:hermez/src/domain/transfer/usecases/force_exit_use_case.dart';
 import 'package:hermez/src/domain/transfer/usecases/transfer_use_case.dart';
 import 'package:hermez/src/domain/transfer/usecases/withdraw_use_case.dart';
-import 'package:hermez/src/domain/wallets/get_wallets_use_case.dart';
+import 'package:hermez/src/domain/wallets/usecases/get_wallets_use_case.dart';
 import 'package:hermez/src/domain/wallets/wallet_repository.dart';
 import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/accounts/accounts_bloc.dart';
@@ -167,7 +167,7 @@ void registerSettingsDependencies() {
   //getIt.registerLazySingleton(() => TokensUseCase(getIt(), getIt()));
 
   getIt.registerLazySingleton<SettingsRepository>(
-      () => SettingsInLocalRepository(getIt()));
+      () => SettingsInLocalRepository(getIt(), getIt()));
 }
 
 void registerSecurityDependencies() {

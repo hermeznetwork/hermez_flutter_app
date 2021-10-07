@@ -43,6 +43,7 @@ class SettingsBloc extends Bloc<SettingsState> {
   init() async {
     changeState(SettingsState.loading());
     WalletDefaultCurrency defaultCurrency = await getDefaultCurrency();
+    double exchangeRatio = await getExchangeRatio(defaultCurrency);
     WalletDefaultFee defaultFee = await getDefaultFee();
     TransactionLevel level = await getLevel();
     List<BiometricType> availableBiometrics = await getAvailableBiometrics();
@@ -54,7 +55,8 @@ class SettingsBloc extends Bloc<SettingsState> {
         ethereumAddress,
         defaultCurrency,
         defaultFee,
-        /*exchangeRatio,*/ level,
+        exchangeRatio,
+        level,
         availableBiometrics,
         tokens);
     changeState(SettingsState.loaded(_itemState));
@@ -64,10 +66,22 @@ class SettingsBloc extends Bloc<SettingsState> {
     return await _defaultCurrencyUseCase.getDefaultCurrency();
   }
 
+  Future<double> getExchangeRatio(WalletDefaultCurrency defaultCurrency) async {
+    return await _defaultCurrencyUseCase.getExchangeRatio(defaultCurrency);
+  }
+
   void setDefaultCurrency(WalletDefaultCurrency defaultCurrency) {
     changeState(SettingsState.loading());
-    _defaultCurrencyUseCase.setDefaultCurrency(defaultCurrency).then((value) {
+    _defaultCurrencyUseCase
+        .setDefaultCurrency(defaultCurrency)
+        .then((value) async {
       _itemState.defaultCurrency = defaultCurrency;
+      if (defaultCurrency != WalletDefaultCurrency.USD) {
+        _itemState.exchangeRatio =
+            await _defaultCurrencyUseCase.getExchangeRatio(defaultCurrency);
+      } else {
+        _itemState.exchangeRatio = 1;
+      }
       changeState(SettingsState.loaded(_itemState));
     });
   }

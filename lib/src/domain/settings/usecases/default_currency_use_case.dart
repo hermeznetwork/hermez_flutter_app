@@ -13,4 +13,8 @@ class DefaultCurrencyUseCase {
   Future<void> setDefaultCurrency(WalletDefaultCurrency defaultCurrency) async {
     _settingsRepository.updateDefaultCurrency(defaultCurrency);
   }
+
+  Future<double> getExchangeRatio(WalletDefaultCurrency defaultCurrency) async {
+    return _settingsRepository.getExchangeRatio(defaultCurrency);
+  }
 }

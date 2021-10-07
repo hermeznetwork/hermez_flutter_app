@@ -28,6 +28,10 @@ class LoadedSettingsState extends SettingsState {
   LoadedSettingsState({@required this.settings});
 }
 
+class DefaultCurrencyUpdated extends SettingsState {
+  DefaultCurrencyUpdated();
+}
+
 class ErrorSettingsState<T> extends SettingsState {
   final String message;
 
@@ -39,7 +43,7 @@ class SettingsItemState {
   String ethereumAddress;
   WalletDefaultCurrency defaultCurrency;
   WalletDefaultFee defaultFee;
-  //double exchangeRatio;
+  double exchangeRatio;
   TransactionLevel level;
   List<BiometricType> availableBiometrics;
 
@@ -50,7 +54,8 @@ class SettingsItemState {
       this.ethereumAddress,
       this.defaultCurrency,
       this.defaultFee,
-      /*this.exchangeRatio,*/ this.level,
+      this.exchangeRatio,
+      this.level,
       this.availableBiometrics,
       this.tokens);
 }

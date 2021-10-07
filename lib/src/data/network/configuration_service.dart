@@ -17,11 +17,11 @@ abstract class IConfigurationService {
   Future<void> setEthereumAddress(String value);
   Future<void> setHermezAddress(String value);
   Future<void> setDefaultCurrency(WalletDefaultCurrency defaultCurrency);
-  Future<void> setDefaultFee(WalletDefaultFee defaultFee);
+  Future<bool> setDefaultFee(WalletDefaultFee defaultFee);
   Future<bool> setPasscode(String value);
   Future<bool> setBiometricsFingerprint(bool value);
   Future<bool> setBiometricsFace(bool value);
-  Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value);
+  Future<bool> setExchangeRatio(LinkedHashMap<String, dynamic> value);
   Future<void> setLevelSelected(TransactionLevel value);
   Future<void> setupDone(bool value);
   Future<void> backupDone(bool value);
@@ -120,9 +120,14 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  Future<void> setDefaultFee(WalletDefaultFee value) async {
-    await _secureStorage.write(
-        key: "defaultFee", value: value.toString().split(".").last);
+  Future<bool> setDefaultFee(WalletDefaultFee value) async {
+    try {
+      await _secureStorage.write(
+          key: "defaultFee", value: value.toString().split(".").last);
+    } catch (e) {
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -142,11 +147,11 @@ class ConfigurationService implements IConfigurationService {
   }
 
   @override
-  Future<void> setExchangeRatio(LinkedHashMap<String, dynamic> value) async {
+  Future<bool> setExchangeRatio(LinkedHashMap<String, dynamic> value) async {
     List<String> exchangeRatios = List.empty(growable: true);
     value.forEach(
         (key, value) => exchangeRatios.add(key + "," + value.toString()));
-    await _preferences.setStringList("exchangeRatio", exchangeRatios);
+    return await _preferences.setStringList("exchangeRatio", exchangeRatios);
   }
 
   @override
@@ -248,9 +253,11 @@ class ConfigurationService implements IConfigurationService {
   @override
   double getExchangeRatio(String currency) {
     List<String> currencyRatios = _preferences.getStringList("exchangeRatio");
-    for (int i = 0; i < currencyRatios.length; i++) {
-      if (currencyRatios[i].split(",")[0] == currency) {
-        return double.parse(currencyRatios[i].split(",")[1]);
+    if (currencyRatios != null) {
+      for (int i = 0; i < currencyRatios.length; i++) {
+        if (currencyRatios[i].split(",")[0] == currency) {
+          return double.parse(currencyRatios[i].split(",")[1]);
+        }
       }
     }
     return 0.0;
