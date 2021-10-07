@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,18 +12,21 @@ import 'package:hermez/src/presentation/accounts/accounts_bloc.dart';
 import 'package:hermez/src/presentation/accounts/accounts_state.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_row.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
+import 'package:hermez/src/presentation/settings/settings_bloc.dart';
+import 'package:hermez/src/presentation/settings/settings_state.dart';
+import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez_sdk/model/token.dart';
 
 class AccountSelectorArguments {
+  List<Account> accounts;
+  SettingsBloc settingsBloc;
   final TransactionLevel txLevel;
   final TransactionType transactionType;
   final String address;
-  //final WalletHandler store;
 
-  AccountSelectorArguments(this.txLevel, this.transactionType, this.address
-      /*this.store*/
-      );
+  AccountSelectorArguments(this.accounts, this.settingsBloc, this.txLevel,
+      this.transactionType, this.address);
 }
 
 class AccountSelectorPage extends StatefulWidget {
@@ -30,16 +35,20 @@ class AccountSelectorPage extends StatefulWidget {
   final AccountSelectorArguments arguments;
 
   @override
-  _AccountSelectorPageState createState() => _AccountSelectorPageState();
+  _AccountSelectorPageState createState() =>
+      _AccountSelectorPageState(arguments.accounts);
 }
 
 class _AccountSelectorPageState extends State<AccountSelectorPage> {
-  List<Account> _accounts;
-  List<Token> _tokens;
+  //List<Account> _accounts;
+  //List<Token> _tokens;
 
   final AccountsBloc _bloc;
-  _AccountSelectorPageState() : _bloc = getIt<AccountsBloc>() {
-    fetchData();
+  _AccountSelectorPageState(List<Account> accounts)
+      : _bloc = getIt<AccountsBloc>() {
+    if (accounts == null) {
+      fetchData();
+    }
   }
 
   void fetchData() {
@@ -54,153 +63,41 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
 
   @override
   Widget build(BuildContext context) {
-    //final bloc = BlocProvider.of<CartBloc>(context);
+    return Scaffold(appBar: _renderAppBar(), body: _renderAccountSelector());
+  }
 
-    return StreamBuilder<AccountsState>(
+  Widget _renderAccountSelector() {
+    if (widget.arguments.accounts != null) {
+      return _renderAccountsContent(context, widget.arguments.accounts);
+    } else {
+      return StreamBuilder<AccountsState>(
         initialData: _bloc.state,
         stream: _bloc.observableState,
         builder: (context, snapshot) {
           final state = snapshot.data;
 
           if (state is LoadingAccountsState) {
-            return const Center(child: CircularProgressIndicator());
+            return Container(
+                color: Colors.white,
+                child: Center(
+                  child: CircularProgressIndicator(color: HermezColors.orange),
+                ));
           } else if (state is ErrorAccountsState) {
             return _renderErrorContent();
           } else {
-            return _renderAccountsContent(context, state);
+            return _renderAccountsContent(context, state.accountsItem.accounts);
           }
-        });
+        },
+      );
+    }
   }
 
-  Widget _renderAccountsContent(
-      BuildContext context, LoadedAccountsState state) {
-    if (state.accountsItem.accounts != null &&
-        state.accountsItem.accounts.length > 0) {
-      // data loaded:
-      //if (widget.arguments.transactionType == TransactionType.RECEIVE) {
-      //  _tokens = snapshot.data;
-      //} else {
-      _accounts = state.accountsItem.accounts;
-      buildAccountsList(context);
-      //}
+  Widget _renderAccountsContent(BuildContext context, List<Account> accounts) {
+    if (accounts != null && accounts.length > 0) {
+      widget.arguments.accounts = accounts;
+      return buildAccountsList(context);
     } else {
-      return Container(
-        margin: EdgeInsets.all(20.0),
-        child: Column(children: [
-          Text(
-            'Make a deposit first in your ' +
-                (widget.arguments.txLevel == TransactionLevel.LEVEL1
-                    ? 'Ethereum wallet'
-                    : 'Hermez wallet') +
-                ' to ' +
-                (widget.arguments.transactionType == TransactionType.SEND
-                    ? 'send tokens.'
-                    : 'move your funds.'),
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              color: HermezColors.blackTwo,
-              fontSize: 18,
-              height: 1.5,
-              fontFamily: 'ModernEra',
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          new GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed(
-                "/qrcode",
-                arguments: QRCodeArguments(
-                  qrCodeType:
-                      widget.arguments.txLevel == TransactionLevel.LEVEL1
-                          ? QRCodeType.ETHEREUM
-                          : QRCodeType.HERMEZ,
-                  code: widget.arguments.address,
-                  //store: widget.arguments.store,
-                ),
-              );
-            },
-            child: Container(
-              height: 200,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.0),
-                  color: widget.arguments.txLevel == TransactionLevel.LEVEL1
-                      ? HermezColors.blueyGreyTwo
-                      : HermezColors.darkOrange),
-              padding: EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.arguments.txLevel == TransactionLevel.LEVEL1
-                              ? 'Ethereum wallet'
-                              : 'Hermez wallet',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16.0),
-                            color: widget.arguments.txLevel ==
-                                    TransactionLevel.LEVEL1
-                                ? Colors.white
-                                : HermezColors.orange),
-                        padding: EdgeInsets.only(
-                            left: 12.0, right: 12.0, top: 6, bottom: 6),
-                        child: Text(
-                          widget.arguments.txLevel == TransactionLevel.LEVEL1
-                              ? 'L1'
-                              : 'L2',
-                          style: TextStyle(
-                            color: HermezColors.blackTwo,
-                            fontSize: 15,
-                            fontFamily: 'ModernEra',
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.asset(
-                          'assets/deposit3.png',
-                          width: 75,
-                          height: 75,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Image.asset(
-                        widget.arguments.txLevel == TransactionLevel.LEVEL1
-                            ? 'assets/ethereum_logo.png'
-                            : 'assets/hermez_logo_white.png',
-                        width: 30,
-                        height: 30,
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ]),
-      );
+      return _renderEmptyViewContent();
     }
   }
 
@@ -737,42 +634,40 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                       color: HermezColors.orange,
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: widget.arguments.transactionType ==
-                                TransactionType.RECEIVE
-                            ? _tokens.length
-                            : _accounts.length,
+                        itemCount: widget.arguments.accounts.length,
                         //set the item count so that index won't be out of range
                         padding: const EdgeInsets.all(16.0),
                         //add some padding to make it look good
                         itemBuilder: (context, i) {
                           final index = i;
-                          /*final String currency = widget
-                              .arguments.store.state.defaultCurrency
+                          final String currency = (widget.arguments.settingsBloc
+                                  .state as LoadedSettingsState)
+                              .settings
+                              .defaultCurrency
                               .toString()
                               .split('.')
-                              .last;*/
-                          final Account account = _accounts[index];
+                              .last;
+                          final Account account =
+                              widget.arguments.accounts[index];
                           Token token = account.token.token;
                           PriceToken priceToken = account.token.price;
                           return AccountRow(
                             account,
                             token.name,
                             token.symbol,
-                            /*currency != "USD"
-                                            ? priceToken.USD *
-                                                widget.arguments.store.state
-                                                    .exchangeRatio
-                                            :*/
-                            priceToken.USD,
-                            "USD", //currency,
-                            0,
-
-                            /*BalanceUtils.calculatePendingBalance(
-                                                widget.arguments.txLevel,
-                                                account,
-                                                token.symbol,
-                                                widget.arguments.store) /
-                                            pow(10, token.decimals),*/
+                            priceToken.USD *
+                                (currency != "USD"
+                                    ? (widget.arguments.settingsBloc.state
+                                            as LoadedSettingsState)
+                                        .settings
+                                        .exchangeRatio
+                                    : 1),
+                            currency,
+                            BalanceUtils.calculatePendingBalance(
+                                    widget.arguments.txLevel,
+                                    account,
+                                    token.symbol) /
+                                pow(10, token.decimals),
                             false,
                             true,
                             false,

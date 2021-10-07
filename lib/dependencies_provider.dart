@@ -20,6 +20,7 @@ import 'package:hermez/src/data/transactions/transaction_in_network_repository.d
 import 'package:hermez/src/data/transfer/transfer_in_network_repository.dart';
 import 'package:hermez/src/data/wallets/wallet_in_network_repository.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
+import 'package:hermez/src/domain/accounts/usecases/create_account_auth_use_case.dart';
 import 'package:hermez/src/domain/accounts/usecases/get_account_use_case.dart';
 import 'package:hermez/src/domain/accounts/usecases/get_accounts_use_case.dart';
 import 'package:hermez/src/domain/onboarding/onboarding_repository.dart';
@@ -184,7 +185,7 @@ void registerSecurityDependencies() {
 }
 
 void registerWalletDependencies() {
-  getIt.registerFactory(() => WalletsBloc(getIt()));
+  getIt.registerFactory(() => WalletsBloc(getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(() => GetWalletsUseCase(getIt()));
 
@@ -202,6 +203,8 @@ void registerAccountDependencies() {
 
   getIt.registerLazySingleton(
       () => GetAccountUseCase(getIt(), getIt(), getIt()));
+
+  getIt.registerLazySingleton(() => CreateAccountAuthUseCase(getIt()));
 
   getIt.registerLazySingleton<AccountRepository>(
       () => AccountInNetworkRepository(getIt(), getIt(), getIt()));

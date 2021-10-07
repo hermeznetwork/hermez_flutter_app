@@ -286,15 +286,16 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                       });
                       break;
                     case SettingsDetailsType.ADVANCED:
-                      Navigator.pushNamed(widget.arguments.parentContext,
-                              "/account_selector",
-                              arguments: AccountSelectorArguments(
-                                  TransactionLevel.LEVEL2,
-                                  TransactionType.FORCEEXIT,
-                                  "" /*,
-                                  widget.arguments.store*/
-                                  ))
-                          .then((selectedAccount) {
+                      Navigator.pushNamed(
+                        widget.arguments.parentContext,
+                        "/account_selector",
+                        arguments: AccountSelectorArguments(
+                            null,
+                            _settingsBloc,
+                            TransactionLevel.LEVEL2,
+                            TransactionType.FORCEEXIT,
+                            ""),
+                      ).then((selectedAccount) {
                         if (selectedAccount != null) {
                           /*Token token = widget.arguments.store.state.tokens
                               .firstWhere((token) =>

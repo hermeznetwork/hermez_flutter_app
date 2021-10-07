@@ -110,8 +110,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     }
     needRefresh = true;
     showEstimatedFees = false;
-    selectedFeeSpeed = (_settingsBloc.state as LoadedSettingsState).settings.defaultFee;
-    selectedWithdrawFeeSpeed = (_settingsBloc.state as LoadedSettingsState).settings.defaultFee;
+    selectedFeeSpeed =
+        (_settingsBloc.state as LoadedSettingsState).settings.defaultFee;
+    selectedWithdrawFeeSpeed =
+        (_settingsBloc.state as LoadedSettingsState).settings.defaultFee;
     selectedAccount = widget.arguments.account;
     selectedToken = widget.arguments.token;
     selectedPriceToken = widget.arguments.priceToken;
@@ -175,7 +177,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                     padding: EdgeInsets.only(
                         left: 12.0, right: 12.0, top: 4, bottom: 4),
                     child: Text(
-                      (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                      (_settingsBloc.state as LoadedSettingsState)
+                                  .settings
+                                  .level ==
                               TransactionLevel.LEVEL1
                           ? "L1"
                           : "L2",
@@ -215,7 +219,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         if (snapshot.hasData) {
           String feeText = getFeeText(snapshot.connectionState);
           BigInt estimatedFee = getEstimatedFee(); //snapshot.data;
-          final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
+          final String currency = (_settingsBloc.state as LoadedSettingsState)
+              .settings
+              .defaultCurrency
               .toString()
               .split('.')
               .last;
@@ -264,7 +270,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                               ? selectedToken
                                               : widget.arguments.token,
                                           estimatedFee.toDouble(),
-                                          (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                                          (_settingsBloc.state
+                                                          as LoadedSettingsState)
+                                                      .settings
+                                                      .level ==
                                                   TransactionLevel.LEVEL1
                                               ? ethereumToken
                                               : selectedToken != null
@@ -305,7 +314,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               alignment: Alignment.center,
                               margin: EdgeInsets.only(top: 24.0),
                               child: TextButton(
-                                onPressed: (((_settingsBloc.state as LoadedSettingsState).settings.level ==
+                                onPressed: (((_settingsBloc.state
+                                                        as LoadedSettingsState)
+                                                    .settings
+                                                    .level ==
                                                 TransactionLevel.LEVEL2 &&
                                             widget.arguments.transactionType ==
                                                 TransactionType.SEND) ||
@@ -347,7 +359,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                     Text(
                                       feeText,
                                       style: TextStyle(
-                                        color: (((_settingsBloc.state as LoadedSettingsState).settings
+                                        color: (((_settingsBloc.state
+                                                                as LoadedSettingsState)
+                                                            .settings
                                                             .level ==
                                                         TransactionLevel
                                                             .LEVEL2 &&
@@ -361,8 +375,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                             : HermezColors.blackTwo,
                                         fontSize: 16,
                                         fontFamily: 'ModernEra',
-                                        fontWeight: ((_settingsBloc.state as LoadedSettingsState)
-                                                            .settings.level ==
+                                        fontWeight: ((_settingsBloc.state
+                                                                as LoadedSettingsState)
+                                                            .settings
+                                                            .level ==
                                                         TransactionLevel
                                                             .LEVEL2 &&
                                                     widget.arguments
@@ -375,7 +391,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                                    ((_settingsBloc.state as LoadedSettingsState).settings.level ==
+                                    ((_settingsBloc.state as LoadedSettingsState)
+                                                    .settings
+                                                    .level ==
                                                 TransactionLevel.LEVEL2 &&
                                             widget.arguments.transactionType ==
                                                 TransactionType.SEND)
@@ -395,10 +413,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                         showEstimatedFees
                                                             ? 'assets/arrow_up.svg'
                                                             : 'assets/arrow_down.svg',
-                                                        color: HermezColors
-                                                            .blackTwo,
-                                                        semanticsLabel:
-                                                            'fee_selector'))
+                                                        color: HermezColors.blackTwo,
+                                                        semanticsLabel: 'fee_selector'))
                                                 : Container(
                                                     alignment: Alignment.center,
                                                     margin: EdgeInsets.only(
@@ -443,7 +459,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           widget.arguments.transactionType ==
                               TransactionType.DEPOSIT
                       ? MoveRow(
-                    (_settingsBloc.state as LoadedSettingsState).settings.level,
+                          (_settingsBloc.state as LoadedSettingsState)
+                              .settings
+                              .level,
                           widget.arguments.allowChangeLevel &&
                                   needRefresh == false
                               ? () async {
@@ -517,7 +535,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           currency,
                           selectedAccount != null
                               ? BalanceUtils.calculatePendingBalance(
-                            (_settingsBloc.state as LoadedSettingsState).settings.level,
+                                    (_settingsBloc.state as LoadedSettingsState)
+                                        .settings
+                                        .level,
                                     selectedAccount,
                                     selectedToken.token.symbol,
                                     /*widget.arguments.store*/
@@ -531,7 +551,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                             final account = await Navigator.of(parentContext)
                                 .pushNamed("/account_selector",
                                     arguments: AccountSelectorArguments(
-                                        (_settingsBloc.state as LoadedSettingsState).settings.level,
+                                        null,
+                                        _settingsBloc,
+                                        (_settingsBloc.state
+                                                as LoadedSettingsState)
+                                            .settings
+                                            .level,
                                         widget.arguments.transactionType,
                                         ""
                                         //widget.arguments.store,
@@ -563,7 +588,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                               final account = await Navigator.of(parentContext)
                                   .pushNamed("/account_selector",
                                       arguments: AccountSelectorArguments(
-                                          (_settingsBloc.state as LoadedSettingsState).settings.level,
+                                          null,
+                                          _settingsBloc,
+                                          (_settingsBloc.state
+                                                  as LoadedSettingsState)
+                                              .settings
+                                              .level,
                                           widget.arguments.transactionType,
                                           ""
                                           /*widget.arguments.store*/));
@@ -640,8 +670,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   Widget _buildNoGasRow() {
-    final String currency =
-        (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency.toString().split('.').last;
+    final String currency = (_settingsBloc.state as LoadedSettingsState)
+        .settings
+        .defaultCurrency
+        .toString()
+        .split('.')
+        .last;
     double currencyExchange = (ethereumPriceToken.USD *
         /*(currency != "USD" ? widget.arguments.store.state.exchangeRatio :*/ 1);
     double exitFee = 0;
@@ -649,7 +683,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     if (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
         widget.arguments.transactionType == TransactionType.DEPOSIT ||
         widget.arguments.transactionType == TransactionType.WITHDRAW ||
-        ((_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL1 &&
+        ((_settingsBloc.state as LoadedSettingsState).settings.level ==
+                TransactionLevel.LEVEL1 &&
             widget.arguments.transactionType == TransactionType.SEND)) {
       // fee l1
       BigInt gasPrice = getGasPrice(selectedFeeSpeed);
@@ -711,8 +746,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   Widget _buildAmountRow(BuildContext context, dynamic element,
       dynamic amountController, BigInt estimatedFee) {
-    final String currency =
-        (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency.toString().split('.').last;
+    final String currency = (_settingsBloc.state as LoadedSettingsState)
+        .settings
+        .defaultCurrency
+        .toString()
+        .split('.')
+        .last;
     // returns a row with the desired properties
     return Column(
       children: <Widget>[
@@ -974,7 +1013,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                 Expanded(
                   child: AddressInput(
                     controller: addressController,
-                    layerOne: (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                    layerOne: (_settingsBloc.state as LoadedSettingsState)
+                            .settings
+                            .level ==
                         TransactionLevel.LEVEL1,
                     onChanged: (value) async {
                       bool valid = await isAddressValid(value);
@@ -1029,7 +1070,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                 Navigator.of(context).pushNamed("/scanner",
                                     arguments: QRCodeScannerArguments(
                                         //store: widget.arguments.store,
-                                        type: (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                                        type: (_settingsBloc.state
+                                                        as LoadedSettingsState)
+                                                    .settings
+                                                    .level ==
                                                 TransactionLevel.LEVEL1
                                             ? QRCodeScannerType.ETHEREUM_ADDRESS
                                             : QRCodeScannerType.HERMEZ_ADDRESS,
@@ -1127,8 +1171,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   //widget that builds the list
   Widget buildFeesList() {
-    final String currency =
-        (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency.toString().split('.').last;
+    final String currency = (_settingsBloc.state as LoadedSettingsState)
+        .settings
+        .defaultCurrency
+        .toString()
+        .split('.')
+        .last;
 
     return ListView.separated(
         shrinkWrap: true,
@@ -1357,9 +1405,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           arguments: QRCodeArguments(
               qrCodeType: QRCodeType.REQUEST_PAYMENT,
               code:
-              (_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL1
-                      ? (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
-                      : (_settingsBloc.state as LoadedSettingsState).settings.hermezAddress,
+                  (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                          TransactionLevel.LEVEL1
+                      ? (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .ethereumAddress
+                      : (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .hermezAddress,
               //store: widget.arguments.store,
               amount: amount,
               token: token,
@@ -1383,7 +1436,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
               arguments: TransactionDetailsArguments(
                   //store: widget.arguments.store,
                   transactionType: widget.arguments.transactionType,
-                  transactionLevel: (_settingsBloc.state as LoadedSettingsState).settings.level,
+                  transactionLevel: (_settingsBloc.state as LoadedSettingsState)
+                      .settings
+                      .level,
                   status: TransactionStatus.DRAFT,
                   account: selectedAccount,
                   //token: selectedToken,
@@ -1514,7 +1569,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           }
         }
 
-        String from = (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress;
+        String from = (_settingsBloc.state as LoadedSettingsState)
+            .settings
+            .ethereumAddress;
         String to = getCurrentEnvironment().contracts['Hermez'];
         if (isEthereumAddress(addressController.value.text)) {
           to = addressController.value.text;
@@ -1674,13 +1731,17 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     return address.isEmpty ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
             AddressUtils.isValidEthereumAddress(address) &&
-            strip0x((_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
+            strip0x((_settingsBloc.state as LoadedSettingsState)
+                    .settings
+                    .ethereumAddress
                     .toLowerCase()) !=
                 strip0x(address.toLowerCase())) ||
         (widget.arguments.txLevel == TransactionLevel.LEVEL2 &&
             (isHermezEthereumAddress(address) &&
                     getHermezAddress(
-                        (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress)
+                                (_settingsBloc.state as LoadedSettingsState)
+                                    .settings
+                                    .ethereumAddress)
                             .toLowerCase() !=
                         address.toLowerCase() ||
                 isHermezBjjAddress(address) &&
@@ -1715,7 +1776,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         estimatedFee = getEstimatedFee();
       }
       //}
-      final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
+      final String currency = (_settingsBloc.state as LoadedSettingsState)
+          .settings
+          .defaultCurrency
           .toString()
           .split('.')
           .last;
@@ -1751,16 +1814,22 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     if (widget.arguments.transactionType == TransactionType.DEPOSIT &&
             selectedAccount.token.token.id == 0 ||
         (widget.arguments.transactionType != TransactionType.DEPOSIT &&
-            (_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL1 &&
+            (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                TransactionLevel.LEVEL1 &&
             selectedAccount.token.token.id == 0) ||
         widget.arguments.transactionType == TransactionType.EXIT ||
         (widget.arguments.transactionType == TransactionType.SEND &&
-            (_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL2)) {
+            (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                TransactionLevel.LEVEL2)) {
       estimatedFee = getEstimatedFee();
     }
 
-    final String currency =
-        (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency.toString().split('.').last;
+    final String currency = (_settingsBloc.state as LoadedSettingsState)
+        .settings
+        .defaultCurrency
+        .toString()
+        .split('.')
+        .last;
     if (selectedPriceToken != null) {
       double currencyValue = defaultCurrencySelected
           ? selectedPriceToken.USD *
@@ -1788,7 +1857,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   Future<bool> isEnoughGas(BigInt gasFee) async {
-    if (((_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL1 &&
+    if (((_settingsBloc.state as LoadedSettingsState).settings.level ==
+                TransactionLevel.LEVEL1 &&
             widget.arguments.transactionType != TransactionType.RECEIVE) ||
         widget.arguments.transactionType == TransactionType.EXIT ||
         widget.arguments.transactionType == TransactionType.FORCEEXIT) {
@@ -1855,8 +1925,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   }
 
   String getFee(ConnectionState connectionState) {
-    final String currency =
-        (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency.toString().split('.').last;
+    final String currency = (_settingsBloc.state as LoadedSettingsState)
+        .settings
+        .defaultCurrency
+        .toString()
+        .split('.')
+        .last;
     BigInt estimatedFee = BigInt.zero;
     BigInt gasPrice = getGasPrice(selectedFeeSpeed);
 
@@ -1925,7 +1999,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     } else if (widget.arguments.transactionType == TransactionType.SEND) {
       Token token;
       PriceToken priceToken;
-      if ((_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL1) {
+      if ((_settingsBloc.state as LoadedSettingsState).settings.level ==
+          TransactionLevel.LEVEL1) {
         token = ethereumToken;
         priceToken = ethereumPriceToken;
       } else {

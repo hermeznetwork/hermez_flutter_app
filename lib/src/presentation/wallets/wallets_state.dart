@@ -32,8 +32,8 @@ class ErrorWalletsState<T> extends WalletsState {
 class WalletItemState {
   final bool l2Wallet;
   final String address;
-  final String totalBalance;
-  final List<Account> accounts;
+  String totalBalance;
+  List<Account> accounts;
   final bool isBackedUp;
 
   WalletItemState(this.l2Wallet, this.address, this.totalBalance, this.accounts,

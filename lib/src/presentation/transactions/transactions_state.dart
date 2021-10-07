@@ -1,38 +1,31 @@
 import 'package:flutter/widgets.dart';
 
 abstract class TransactionsState {
-  final String searchTerm;
+  TransactionsState();
 
-  TransactionsState(this.searchTerm);
+  factory TransactionsState.loading() => LoadingTransactionsState();
 
-  factory TransactionsState.loading({String searchTerm}) =>
-      LoadingTransactionsState(searchTerm: searchTerm);
+  factory TransactionsState.loaded(List<TransactionItemState> transactions) =>
+      LoadedTransactionsState(transactions: transactions);
 
-  factory TransactionsState.loaded(
-          String searchTerm, List<TransactionItemState> transactions) =>
-      LoadedTransactionsState(
-          searchTerm: searchTerm, transactions: transactions);
-
-  factory TransactionsState.error(String searchTerm, String message) =>
-      ErrorTransactionsState(searchTerm: searchTerm, message: message);
+  factory TransactionsState.error(String message) =>
+      ErrorTransactionsState(message: message);
 }
 
 class LoadingTransactionsState extends TransactionsState {
-  LoadingTransactionsState({String searchTerm}) : super(searchTerm);
+  LoadingTransactionsState();
 }
 
 class LoadedTransactionsState extends TransactionsState {
   final List<TransactionItemState> transactions;
 
-  LoadedTransactionsState({String searchTerm, @required this.transactions})
-      : super(searchTerm);
+  LoadedTransactionsState({@required this.transactions});
 }
 
 class ErrorTransactionsState<T> extends TransactionsState {
   final String message;
 
-  ErrorTransactionsState({@required String searchTerm, @required this.message})
-      : super(searchTerm);
+  ErrorTransactionsState({@required this.message});
 }
 
 class TransactionItemState {

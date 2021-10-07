@@ -6,7 +6,6 @@ import 'package:hermez/utils/hermez_colors.dart';
 class AccountRow extends StatelessWidget {
   AccountRow(
       this.account,
-      //this.token,
       this.name,
       this.symbol,
       this.price,
@@ -15,11 +14,9 @@ class AccountRow extends StatelessWidget {
       this.simplified,
       this.currencyFirst,
       this.pendingDeposit,
-      this.isToken,
       this.onPressed);
 
   final Account account;
-  //final Token token;
   final String name;
   final String symbol;
   final double price;
@@ -28,10 +25,7 @@ class AccountRow extends StatelessWidget {
   final bool simplified;
   final bool currencyFirst;
   final bool pendingDeposit;
-  final bool isToken;
-  final void Function(
-          Account account, /*Token token,*/ String tokenId, String amount)
-      onPressed;
+  final void Function(Account account, String tokenId, String amount) onPressed;
 
   Widget build(BuildContext context) {
     String status = "Pending";
@@ -114,55 +108,51 @@ class AccountRow extends StatelessWidget {
                   ],
                 ),
               ),
-              isToken == false
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                          Container(
+              Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Container(
+                      child: Text(
+                        simplified
+                            ? EthAmountFormatter.formatAmount(
+                                currencyFirst
+                                    ? (this.price * this.amount)
+                                    : this.amount,
+                                currencyFirst ? defaultCurrency : this.symbol)
+                            : EthAmountFormatter.formatAmount(
+                                currencyFirst ? this.amount : this.price,
+                                this.symbol),
+                        style: TextStyle(
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w600,
+                            color: pendingDeposit
+                                ? Colors.white
+                                : HermezColors.blackTwo,
+                            fontSize: 16),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    simplified
+                        ? Container()
+                        : Container(
+                            padding: EdgeInsets.only(top: 15.0),
                             child: Text(
-                              simplified
-                                  ? EthAmountFormatter.formatAmount(
-                                      currencyFirst
-                                          ? (this.price * this.amount)
-                                          : this.amount,
-                                      currencyFirst
-                                          ? defaultCurrency
-                                          : this.symbol)
-                                  : EthAmountFormatter.formatAmount(
-                                      currencyFirst ? this.amount : this.price,
-                                      this.symbol),
+                              EthAmountFormatter.formatAmount(
+                                  currencyFirst
+                                      ? (this.price * this.amount)
+                                      : this.amount,
+                                  currencyFirst
+                                      ? defaultCurrency
+                                      : this.symbol),
                               style: TextStyle(
-                                  fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w600,
-                                  color: pendingDeposit
-                                      ? Colors.white
-                                      : HermezColors.blackTwo,
-                                  fontSize: 16),
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w500,
+                                color: HermezColors.blueyGreyTwo,
+                              ),
                               textAlign: TextAlign.right,
                             ),
                           ),
-                          simplified
-                              ? Container()
-                              : Container(
-                                  padding: EdgeInsets.only(top: 15.0),
-                                  child: Text(
-                                    EthAmountFormatter.formatAmount(
-                                        currencyFirst
-                                            ? (this.price * this.amount)
-                                            : this.amount,
-                                        currencyFirst
-                                            ? defaultCurrency
-                                            : this.symbol),
-                                    style: TextStyle(
-                                      fontFamily: 'ModernEra',
-                                      fontWeight: FontWeight.w500,
-                                      color: HermezColors.blueyGreyTwo,
-                                    ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                        ])
-                  : Container(),
+                  ]),
             ],
           ), //title to be name of the crypto
         ));

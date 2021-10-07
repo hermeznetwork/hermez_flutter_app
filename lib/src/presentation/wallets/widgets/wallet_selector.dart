@@ -85,6 +85,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
       });
       Navigator.pushNamed(context, 'wallet_details',
           arguments: WalletDetailsArguments(
+              null,
+              null,
               TransactionLevel.LEVEL2,
               "",
               widget.arguments.parentContext,
@@ -239,6 +241,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                           Future.delayed(const Duration(milliseconds: 100), () {
                             Navigator.pushNamed(context, 'wallet_details',
                                 arguments: WalletDetailsArguments(
+                                  l2Wallet.accounts,
+                                  double.parse(l2Wallet.totalBalance),
                                   TransactionLevel.LEVEL2,
                                   l2Wallet.address,
                                   widget.arguments.parentContext,
@@ -452,6 +456,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   widget.arguments.parentContext,
                                   "/account_selector",
                                   arguments: AccountSelectorArguments(
+                                      l1Wallet.accounts,
+                                      _settingsBloc,
                                       TransactionLevel.LEVEL1,
                                       TransactionType.DEPOSIT,
                                       ""
@@ -494,10 +500,11 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                       widget.arguments.parentContext)
                                   .pushNamed("/account_selector",
                                       arguments: AccountSelectorArguments(
+                                          l2Wallet.accounts,
+                                          _settingsBloc,
                                           TransactionLevel.LEVEL2,
                                           TransactionType.EXIT,
-                                          ""
-                                          /*widget.arguments.store*/));
+                                          ""));
                             }
                             if (selectedAccount != null) {
                               /*Token token = widget.arguments.store.state.tokens
@@ -529,10 +536,11 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                             final selectedAccount = await Navigator.of(context)
                                 .pushNamed("/account_selector",
                                     arguments: AccountSelectorArguments(
+                                        l1Wallet.accounts,
+                                        _settingsBloc,
                                         TransactionLevel.LEVEL1,
                                         TransactionType.DEPOSIT,
-                                        ""
-                                        /*widget.arguments.store*/));
+                                        ""));
                             if (selectedAccount != null) {
                               /*Token token = widget.arguments.store.state.tokens
                                   .firstWhere((token) =>
@@ -597,7 +605,8 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                           Future.delayed(const Duration(milliseconds: 100), () {
                             Navigator.pushNamed(context, 'wallet_details',
                                 arguments: WalletDetailsArguments(
-                                  //widget.arguments.store,
+                                  l1Wallet.accounts,
+                                  double.parse(l1Wallet.totalBalance),
                                   TransactionLevel.LEVEL1,
                                   l1Wallet.address,
                                   widget.arguments.parentContext,

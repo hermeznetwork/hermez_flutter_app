@@ -7,7 +7,10 @@ class GetAllTransactionsUseCase {
   GetAllTransactionsUseCase(this._transactionRepository);
 
   Future<List<Transaction>> execute(
-      [String address, String accountIndex, List<int> tokenIds]) {
+      [LayerFilter layerFilter = LayerFilter.ALL,
+      String address,
+      String accountIndex,
+      List<int> tokenIds]) {
     if (tokenIds == null) {
       tokenIds = [];
     }
@@ -15,7 +18,7 @@ class GetAllTransactionsUseCase {
     return _transactionRepository.getTransactions(
         address,
         accountIndex,
-        LayerFilter.ALL,
+        layerFilter,
         TransactionStatusFilter.ALL,
         TransactionTypeFilter.ALL,
         tokenIds);

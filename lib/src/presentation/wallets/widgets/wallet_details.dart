@@ -15,13 +15,18 @@ import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
 import 'package:hermez/src/presentation/accounts/accounts_bloc.dart';
+import 'package:hermez/src/presentation/accounts/accounts_state.dart';
 import 'package:hermez/src/presentation/accounts/widgets/account_details.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/settings/settings_state.dart';
+import 'package:hermez/src/presentation/tokens/tokens_bloc.dart';
+import 'package:hermez/src/presentation/tokens/tokens_state.dart';
+import 'package:hermez/src/presentation/tokens/widgets/token_row.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/transfer_bloc.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
@@ -35,11 +40,14 @@ import 'package:hermez_sdk/environment.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/state_response.dart';
-import 'package:hermez_sdk/model/token.dart';
+import 'package:hermez_sdk/model/token.dart' as hezToken;
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../wallets_state.dart';
 
 class WalletDetailsArguments {
+  final List<Account> accounts;
+  final double totalBalance;
   final TransactionLevel transactionLevel;
   final String address;
   final BuildContext parentContext;
@@ -48,6 +56,8 @@ class WalletDetailsArguments {
   final SettingsBloc settingsBloc;
 
   WalletDetailsArguments(
+      this.accounts,
+      this.totalBalance,
       this.transactionLevel,
       this.address,
       this.parentContext,
@@ -81,17 +91,21 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
   WalletsBloc _walletsBloc;
   SettingsBloc _settingsBloc;
+  TokensBloc _tokensBloc;
 
   _WalletDetailsPageState(WalletsBloc walletsBloc, SettingsBloc settingsBloc)
       : _settingsBloc =
             settingsBloc != null ? settingsBloc : getIt<SettingsBloc>(),
-        _walletsBloc =
-            walletsBloc != null ? walletsBloc : getIt<WalletsBloc>() {
+        _walletsBloc = walletsBloc != null ? walletsBloc : getIt<WalletsBloc>(),
+        _tokensBloc = getIt<TokensBloc>() {
     if (!(_walletsBloc.state is LoadedWalletsState)) {
       _walletsBloc.fetchData();
     }
     if (_settingsBloc.state is InitSettingsState) {
       _settingsBloc.init();
+    }
+    if (_tokensBloc.state is LoadingTokensState) {
+      _tokensBloc.getTokens();
     }
   }
 
@@ -100,24 +114,52 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<WalletsState>(
-        initialData: _walletsBloc.state,
-        stream: _walletsBloc.observableState,
-        builder: (context, snapshot) {
-          return Scaffold(
-            body: NestedScrollView(
-              body: handleAccountsList(context, snapshot),
-              headerSliverBuilder:
-                  (BuildContext context, bool innerBoxIsScrolled) {
-                return _renderHeaderContent(context, snapshot);
-              },
-            ),
-          );
-        });
+    if (widget.arguments.accounts != null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return _renderHeaderContent(context, widget.arguments.accounts);
+          },
+          body: _renderWalletDetails(context, widget.arguments.accounts),
+        ),
+      );
+    } else {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: StreamBuilder<AccountsState>(
+          initialData: _accountsBloc.state,
+          stream: _accountsBloc.observableState,
+          builder: (context, snapshot) {
+            final state = snapshot.data;
+            if (state is LoadingAccountsState) {
+              return Container(
+                  color: HermezColors.lightOrange,
+                  child: Center(
+                    child:
+                        CircularProgressIndicator(color: HermezColors.orange),
+                  ));
+            } else if (state is ErrorAccountsState) {
+              return Center(child: Text(state.message));
+            } else {
+              return NestedScrollView(
+                headerSliverBuilder:
+                    (BuildContext context, bool innerBoxIsScrolled) {
+                  return _renderHeaderContent(
+                      context, state.accountsItem.accounts);
+                },
+                body:
+                    _renderWalletDetails(context, state.accountsItem.accounts),
+              );
+            }
+          },
+        ),
+      );
+    }
   }
 
   List<Widget> _renderHeaderContent(
-      BuildContext context, AsyncSnapshot snapshot) {
+      BuildContext context, List<Account> accounts) {
     return <Widget>[
       SliverAppBar(
         floating: true,
@@ -287,11 +329,17 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                            "TODO"
-                            /*totalBalance(
-                                            widget.arguments.transactionLevel,
-                                            snapshot)*/
-                            ,
+                            BalanceUtils.amountInCurrency(
+                                widget.arguments.totalBalance,
+                                (_settingsBloc.state as LoadedSettingsState)
+                                    .settings
+                                    .defaultCurrency
+                                    .toString()
+                                    .split(".")
+                                    .last,
+                                (_settingsBloc.state as LoadedSettingsState)
+                                    .settings
+                                    .exchangeRatio),
                             style: TextStyle(
                               color: HermezColors.black,
                               fontSize: 32,
@@ -300,7 +348,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             )),
                       ])),
               SizedBox(height: 16),
-              buildButtonsRow(context, snapshot),
+              buildButtonsRow(context, accounts),
               SizedBox(height: 20),
             ],
           ),
@@ -310,31 +358,10 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     ];
   }
 
-  Widget handleAccountsList(BuildContext context, AsyncSnapshot snapshot) {
-    final state = snapshot.data;
+  Widget _renderWalletDetails(BuildContext context, List<Account> accounts) {
+    if (accounts != null && accounts.length > 0) {
+      _accounts = accounts;
 
-    if (state is LoadingWalletsState) {
-      return Container(
-        color: Colors.white,
-        child: Center(
-          child: CircularProgressIndicator(color: HermezColors.orange),
-        ),
-      );
-    } else if (state is ErrorWalletsState) {
-      return _renderErrorContent();
-    } else {
-      return _renderWalletDetails(context, state);
-    }
-  }
-
-  Widget _renderWalletDetails(BuildContext context, LoadedWalletsState state) {
-    if (state.wallets != null && state.wallets.length > 0) {
-      // data loaded:
-      if (widget.arguments.transactionLevel == TransactionLevel.LEVEL1) {
-        _accounts = state.wallets[0].accounts;
-      } else {
-        _accounts = state.wallets[1].accounts;
-      }
       return Container(
         color: Colors.white,
         child: Column(
@@ -383,17 +410,48 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       borderRadius: BorderRadius.circular(30)),
                 ),
                 onPressed: () {
-                  /*showBarModalBottomSheet(
+                  showBarModalBottomSheet(
                     context: widget.arguments.parentContext,
                     builder: (context) => Scaffold(
-                      body: FutureBuilder(
-                          future: fetchTokens(),
-                          builder: (buildContext, snapshot) {
-                            return handleTokensList(
-                                snapshot, widget.arguments.parentContext);
-                          }),
+                      body: StreamBuilder<TokensState>(
+                        initialData: _tokensBloc.state,
+                        stream: _tokensBloc.observableState,
+                        builder: (context, snapshot) {
+                          final state = snapshot.data;
+                          if (state is LoadingTokensState) {
+                            return Container(
+                                color: Colors.white,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                      color: HermezColors.orange),
+                                ));
+                          } else if (state is ErrorTokensState) {
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(34.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'There was an error loading \n\n this page.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGrey,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            _tokens = state.tokensItem.tokens;
+                            return buildTokensList(context);
+                          }
+                        },
+                      ),
                     ),
-                  );*/
+                  );
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -479,7 +537,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     if (widget.arguments.needRefresh) {
       _onRefresh();
     }
-  }
+  }*/
 
   Future<void> _onRefresh() async {
     setState(() {
@@ -490,7 +548,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     setState(() {
       _isLoading = false;
     });
-  }*/
+  }
 
   /*Future<List<Account>> fetchAccounts() async {
     _stateResponse = await getState();
@@ -817,11 +875,9 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     );
   }*/
 
-  buildButtonsRow(BuildContext context, AsyncSnapshot snapshot) {
-    if (snapshot.hasData) {
-      // data loaded:
-      _accounts = snapshot.data;
-    }
+  buildButtonsRow(BuildContext context, List<Account> accounts) {
+    _accounts = accounts;
+
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -840,7 +896,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                 (account) => double.parse(account.balance) > 0)
                             .toList();
                         Account account;
-                        Token token;
+                        hezToken.Token token;
                         PriceToken priceToken;
                         if (accounts.length == 1) {
                           account = accounts[0];
@@ -856,7 +912,6 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             widget.arguments.parentContext,
                             "/transaction_amount",
                             arguments: TransactionAmountArguments(
-                              //widget.arguments.store,
                               widget.arguments.transactionLevel,
                               TransactionType.SEND,
                               account: account,
@@ -957,40 +1012,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
     //return widget.arguments.store.getTokens();
   }
 
-  /*Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return Center(
-        child: CircularProgressIndicator(color: HermezColors.orange),
-      );
-    } else {
-      if (snapshot.hasError) {
-        // while data is loading:
-        return Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(34.0),
-            child: Column(children: [
-              Text(
-                'There was an error loading \n\n this page.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: HermezColors.blueyGrey,
-                  fontSize: 16,
-                  fontFamily: 'ModernEra',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ]));
-      } else {
-        if (snapshot.hasData && (snapshot.data as List).length > 0) {
-          _tokens = snapshot.data;
-          return buildTokensList(context);
-        }
-      }
-    }
-  }*/
-
   //widget that builds the list
-  /*Widget buildTokensList(BuildContext parentContext) {
+  Widget buildTokensList(BuildContext parentContext) {
     return Column(
       children: [
         SizedBox(
@@ -1025,19 +1048,21 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
               padding: const EdgeInsets.all(16.0),
               itemBuilder: (context, i) {
                 final index = i;
-                final String currency = _settingsBloc
-                    .state.settings.defaultCurrency
-                    .toString()
-                    .split('.')
-                    .last;
+                final String currency =
+                    (_settingsBloc.state as LoadedSettingsState)
+                        .settings
+                        .defaultCurrency
+                        .toString()
+                        .split('.')
+                        .last;
                 final Token token = _tokens[index];
                 /*final PriceToken priceToken = widget
                     .arguments.store.state.priceTokens
                     .firstWhere((priceToken) => priceToken.id == token.id);*/
                 return TokenRow(
-                    null, //token,
-                    token.name,
-                    token.symbol,
+                    token, //token,
+                    token.token.name,
+                    token.token.symbol,
                     /*currency != "USD"
                         ? priceToken.USD *
                             widget.arguments.store.state.exchangeRatio
@@ -1055,7 +1080,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
         ),
       ],
     );
-  }*/
+  }
 
   //widget that builds the list
   Widget buildAccountsList(BuildContext context, LoadedSettingsState state) {
@@ -1360,7 +1385,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   _filteredExits.length -
                   _pendingWithdraws.length;
               final Account account = _accounts[index];
-              final Token token = account.token.token;
+              final Token token = account.token;
               /*widget.arguments.store.state.tokens
                   .firstWhere((token) => token.id == account.tokenId);*/
               final PriceToken priceToken = account.token.price;
@@ -1372,7 +1397,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   state.settings.defaultCurrency.toString().split('.').last;
 
               var isPendingDeposit = false;
-              if (account.accountIndex == null) {
+              if (account.accountIndex == null && account.l2Account == true) {
                 isPendingDeposit = true;
               }
               _pendingDeposits.forEach((pendingDeposit) {
@@ -1383,27 +1408,23 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
 
               return AccountRow(
                   account,
-                  //token,
-                  token.name,
-                  token.symbol,
-                  /*currency != "USD"
-                      ? priceToken.USD *
-                          widget.arguments.store.state.exchangeRatio
-                      :*/
-                  priceToken.USD,
+                  token.token.name,
+                  token.token.symbol,
+                  priceToken.USD *
+                      (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .exchangeRatio,
                   currency,
                   BalanceUtils.calculatePendingBalance(
                         widget.arguments.transactionLevel,
                         account,
-                        token.symbol,
-                        /*widget.arguments.store*/
+                        token.token.symbol,
                       ) /
-                      pow(10, token.decimals),
+                      pow(10, token.token.decimals),
                   false,
                   true,
-                  isPendingDeposit,
-                  false, (Account account, tokenId, amount) async {
-                if (account.accountIndex == null) {
+                  isPendingDeposit, (Account account, tokenId, amount) async {
+                if (account.accountIndex == null && account.l2Account == true) {
                   Flushbar(
                     messageText: Text(
                       'This account is being created',
@@ -1433,7 +1454,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                   var needRefresh =
                       await Navigator.of(context).pushNamed("account_details",
                           arguments: AccountDetailsArguments(
-                              //widget.arguments.store,
+                              _settingsBloc,
                               widget.arguments.transactionLevel,
                               account,
                               //token,
@@ -1449,7 +1470,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
             }
           },
         ),
-        //onRefresh: _onRefresh,
+        onRefresh: _onRefresh,
       ),
       /*),*/
     );

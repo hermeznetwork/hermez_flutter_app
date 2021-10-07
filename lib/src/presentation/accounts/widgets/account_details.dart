@@ -11,6 +11,8 @@ import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/settings/settings_state.dart';
+import 'package:hermez/src/presentation/transactions/transactions_bloc.dart';
+import 'package:hermez/src/presentation/transactions/transactions_state.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 import 'package:hermez/utils/balance_utils.dart';
@@ -32,7 +34,7 @@ import 'package:intl/intl.dart';
 // title and message.
 
 class AccountDetailsArguments {
-  //final WalletHandler store;
+  final SettingsBloc settingsBloc;
   TransactionLevel level;
   Account account;
   //Token token;
@@ -40,8 +42,9 @@ class AccountDetailsArguments {
   BuildContext parentContext;
 
   AccountDetailsArguments(
+      this.settingsBloc,
       this.level,
-      /*this.store,*/ this.account, //this.token,
+      this.account, //this.token,
       //this.priceToken,
       this.parentContext);
 }
@@ -52,7 +55,8 @@ class AccountDetailsPage extends StatefulWidget {
   final AccountDetailsArguments arguments;
 
   @override
-  _AccountDetailsPageState createState() => _AccountDetailsPageState();
+  _AccountDetailsPageState createState() =>
+      _AccountDetailsPageState(arguments.settingsBloc);
 }
 
 class _AccountDetailsPageState extends State<AccountDetailsPage> {
@@ -78,11 +82,21 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   double balance = 0.0;
 
   final AccountBloc _bloc;
-  _AccountDetailsPageState() : _bloc = getIt<AccountBloc>() {
-    fetchData();
+  final SettingsBloc _settingsBloc;
+  final TransactionsBloc _transactionsBloc;
+  _AccountDetailsPageState(SettingsBloc settingsBloc)
+      : _bloc = getIt<AccountBloc>(),
+        _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>(),
+        _transactionsBloc = getIt<TransactionsBloc>() {
+    //fetchData();
+    if (_settingsBloc.state is InitSettingsState) {
+      _settingsBloc.init();
+    }
+    if (_transactionsBloc.state is LoadingTransactionsState) {
+      _transactionsBloc.getAllTransactions();
+    }
   }
-
-  final SettingsBloc _settingsBloc = getIt<SettingsBloc>();
 
   Future<void> _onRefresh() {
     fromItem = 0;
@@ -241,7 +255,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           ? BlinkingTextAnimation(
                               arguments: BlinkingTextAnimationArguments(
                                   HermezColors.steel,
-                                  calculateBalance((_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
+                                  calculateBalance((_settingsBloc.state
+                                          as LoadedSettingsState)
+                                      .settings
+                                      .defaultCurrency
                                       .toString()
                                       .split('.')
                                       .last),
@@ -249,10 +266,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                   FontWeight.w500),
                             )
                           : Text(
-                              calculateBalance((_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
-                                  .toString()
-                                  .split('.')
-                                  .last),
+                              calculateBalance(
+                                  (_settingsBloc.state as LoadedSettingsState)
+                                      .settings
+                                      .defaultCurrency
+                                      .toString()
+                                      .split('.')
+                                      .last),
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w500,
@@ -273,106 +293,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   }
 
   buildButtonsRow(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <
-        Widget>[
-      SizedBox(width: 20.0),
-      Expanded(
-        child: FlatButton(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            onPressed: () async {
-              var results = await Navigator.pushNamed(
-                widget.arguments.parentContext,
-                "/transaction_amount",
-                arguments: TransactionAmountArguments(
-                    //widget.arguments.store,
-                    widget.arguments.level,
-                    TransactionType.SEND,
-                    account: widget.arguments.account,
-                    //token: widget.arguments.token,
-                    //priceToken: widget.arguments.priceToken,
-                    allowChangeLevel: false),
-              );
-              if (results is PopWithResults) {
-                PopWithResults popResult = results;
-                if (popResult.toPage == "/home") {
-                  // TODO do stuff
-                  _onRefresh();
-                } else {
-                  Navigator.of(context).pop(results);
-                }
-              }
-            },
-            padding: EdgeInsets.all(10.0),
-            color: Colors.transparent,
-            textColor: HermezColors.blackTwo,
-            child: Column(
-              children: <Widget>[
-                SvgPicture.asset("assets/bt_send.svg"),
-                Text(
-                  'Send',
-                  style: TextStyle(
-                    color: HermezColors.blackTwo,
-                    fontFamily: 'ModernEra',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            )),
-      ),
-      Expanded(
-        child: FlatButton(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            onPressed: () {
-              (_settingsBloc.state as LoadedSettingsState).settings.level == TransactionLevel.LEVEL1
-                  ? Navigator.of(widget.arguments.parentContext)
-                      .pushNamed(
-                        "/qrcode",
-                        arguments: QRCodeArguments(
-                            qrCodeType: QRCodeType.ETHEREUM,
-                            code: (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress,
-                            //store: widget.arguments.store,
-                            isReceive: true),
-                      )
-                      .then((value) => _onRefresh())
-                  : Navigator.of(widget.arguments.parentContext)
-                      .pushNamed(
-                        "/qrcode",
-                        arguments: QRCodeArguments(
-                            qrCodeType: QRCodeType.HERMEZ,
-                            code: (_settingsBloc.state as LoadedSettingsState).settings.hermezAddress,
-                            //store: widget.arguments.store,
-                            isReceive: true),
-                      )
-                      .then((value) => _onRefresh());
-            },
-            padding: EdgeInsets.all(10.0),
-            color: Colors.transparent,
-            textColor: HermezColors.blackTwo,
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  height: 5,
-                ),
-                SvgPicture.asset("assets/bt_receive.svg"),
-                Text(
-                  'Receive',
-                  style: TextStyle(
-                    color: HermezColors.blackTwo,
-                    fontFamily: 'ModernEra',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            )),
-      ),
-      Expanded(
-        child:
-            // takes in an object and color and returns a circle avatar with first letter and required color
-            FlatButton(
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          SizedBox(width: 20.0),
+          Expanded(
+            child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
@@ -382,11 +308,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     "/transaction_amount",
                     arguments: TransactionAmountArguments(
                         //widget.arguments.store,
-                        (_settingsBloc.state as LoadedSettingsState).settings.level,
-                        (_settingsBloc.state as LoadedSettingsState).settings.level ==
-                                TransactionLevel.LEVEL1
-                            ? TransactionType.DEPOSIT
-                            : TransactionType.EXIT,
+                        widget.arguments.level,
+                        TransactionType.SEND,
                         account: widget.arguments.account,
                         //token: widget.arguments.token,
                         //priceToken: widget.arguments.priceToken,
@@ -407,9 +330,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 textColor: HermezColors.blackTwo,
                 child: Column(
                   children: <Widget>[
-                    SvgPicture.asset("assets/bt_move.svg"),
+                    SvgPicture.asset("assets/bt_send.svg"),
                     Text(
-                      'Move',
+                      'Send',
                       style: TextStyle(
                         color: HermezColors.blackTwo,
                         fontFamily: 'ModernEra',
@@ -418,14 +341,123 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     ),
                   ],
                 )),
-      ),
-      SizedBox(width: 20.0),
-    ]);
+          ),
+          Expanded(
+            child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                onPressed: () {
+                  (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                          TransactionLevel.LEVEL1
+                      ? Navigator.of(widget.arguments.parentContext)
+                          .pushNamed(
+                            "/qrcode",
+                            arguments: QRCodeArguments(
+                                qrCodeType: QRCodeType.ETHEREUM,
+                                code:
+                                    (_settingsBloc.state as LoadedSettingsState)
+                                        .settings
+                                        .ethereumAddress,
+                                //store: widget.arguments.store,
+                                isReceive: true),
+                          )
+                          .then((value) => _onRefresh())
+                      : Navigator.of(widget.arguments.parentContext)
+                          .pushNamed(
+                            "/qrcode",
+                            arguments: QRCodeArguments(
+                                qrCodeType: QRCodeType.HERMEZ,
+                                code:
+                                    (_settingsBloc.state as LoadedSettingsState)
+                                        .settings
+                                        .hermezAddress,
+                                //store: widget.arguments.store,
+                                isReceive: true),
+                          )
+                          .then((value) => _onRefresh());
+                },
+                padding: EdgeInsets.all(10.0),
+                color: Colors.transparent,
+                textColor: HermezColors.blackTwo,
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 5,
+                    ),
+                    SvgPicture.asset("assets/bt_receive.svg"),
+                    Text(
+                      'Receive',
+                      style: TextStyle(
+                        color: HermezColors.blackTwo,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                )),
+          ),
+          Expanded(
+            child:
+                // takes in an object and color and returns a circle avatar with first letter and required color
+                FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    onPressed: () async {
+                      var results = await Navigator.pushNamed(
+                        widget.arguments.parentContext,
+                        "/transaction_amount",
+                        arguments: TransactionAmountArguments(
+                            //widget.arguments.store,
+                            (_settingsBloc.state as LoadedSettingsState)
+                                .settings
+                                .level,
+                            (_settingsBloc.state as LoadedSettingsState)
+                                        .settings
+                                        .level ==
+                                    TransactionLevel.LEVEL1
+                                ? TransactionType.DEPOSIT
+                                : TransactionType.EXIT,
+                            account: widget.arguments.account,
+                            //token: widget.arguments.token,
+                            //priceToken: widget.arguments.priceToken,
+                            allowChangeLevel: false),
+                      );
+                      if (results is PopWithResults) {
+                        PopWithResults popResult = results;
+                        if (popResult.toPage == "/home") {
+                          // TODO do stuff
+                          _onRefresh();
+                        } else {
+                          Navigator.of(context).pop(results);
+                        }
+                      }
+                    },
+                    padding: EdgeInsets.all(10.0),
+                    color: Colors.transparent,
+                    textColor: HermezColors.blackTwo,
+                    child: Column(
+                      children: <Widget>[
+                        SvgPicture.asset("assets/bt_move.svg"),
+                        Text(
+                          'Move',
+                          style: TextStyle(
+                            color: HermezColors.blackTwo,
+                            fontFamily: 'ModernEra',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    )),
+          ),
+          SizedBox(width: 20.0),
+        ]);
   }
 
   String calculateBalance(String symbol) {
     double resultAmount = BalanceUtils.calculatePendingBalance(
-        (_settingsBloc.state as LoadedSettingsState).settings.level,
+            (_settingsBloc.state as LoadedSettingsState).settings.level,
             widget.arguments.account,
             symbol,
             // widget.arguments.store,
@@ -497,10 +529,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     exit = Exit.fromTransaction(transaction);
                   }
 
-                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
-                      .toString()
-                      .split('.')
-                      .last;
+                  final String currency =
+                      (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .defaultCurrency
+                          .toString()
+                          .split('.')
+                          .last;
 
                   return WithdrawalRow(
                       exit,
@@ -511,7 +546,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       1, //widget.arguments.store.state.exchangeRatio,
                       (bool completeDelayedWithdraw,
                           bool isInstantWithdraw) async {},
-                      (_settingsBloc.state as LoadedSettingsState).settings.level,
+                      (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .level,
                       _stateResponse);
                 } // final index = i ~/ 2; //get the actual index excluding dividers.
                 else if (filteredExits.length > 0 &&
@@ -524,10 +561,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   final Exit exit = filteredExits[index];
                   final bool isAllowed = allowedInstantWithdraws[index];
 
-                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
-                      .toString()
-                      .split('.')
-                      .last;
+                  final String currency =
+                      (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .defaultCurrency
+                          .toString()
+                          .split('.')
+                          .last;
 
                   return WithdrawalRow(
                       exit,
@@ -603,7 +643,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         Navigator.of(context).pop(results);
                       }
                     }
-                  }, (_settingsBloc.state as LoadedSettingsState).settings.level, _stateResponse,
+                  },
+                      (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .level,
+                      _stateResponse,
                       instantWithdrawAllowed: isAllowed,
                       completeDelayedWithdraw: false);
                 } else if (pendingWithdraws.length > 0 &&
@@ -644,10 +688,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         .replaceAll('.0', '');
                   }
 
-                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
-                      .toString()
-                      .split('.')
-                      .last;
+                  final String currency =
+                      (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .defaultCurrency
+                          .toString()
+                          .split('.')
+                          .last;
 
                   int step = 2;
                   if ((isAllowed == true &&
@@ -864,7 +911,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           (transaction.fromHezEthereumAddress != null &&
                               transaction.fromHezEthereumAddress
                                       .toLowerCase() ==
-                                  (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
+                                  (_settingsBloc.state as LoadedSettingsState)
+                                      .settings
+                                      .ethereumAddress
                                       .toLowerCase())) {
                         type = "SEND";
                         if (transaction.batchNum != null) {
@@ -888,7 +937,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                   widget.arguments.account.accountIndex) ||
                           (transaction.toHezEthereumAddress != null &&
                               transaction.toHezEthereumAddress.toLowerCase() ==
-                                  (_settingsBloc.state as LoadedSettingsState).settings.ethereumAddress
+                                  (_settingsBloc.state as LoadedSettingsState)
+                                      .settings
+                                      .ethereumAddress
                                       .toLowerCase())) {
                         type = "RECEIVE";
                         if (transaction.timestamp.isNotEmpty) {
@@ -930,10 +981,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     fee = double.parse(feeValue);
                   }
 
-                  final String currency = (_settingsBloc.state as LoadedSettingsState).settings.defaultCurrency
-                      .toString()
-                      .split('.')
-                      .last;
+                  final String currency =
+                      (_settingsBloc.state as LoadedSettingsState)
+                          .settings
+                          .defaultCurrency
+                          .toString()
+                          .split('.')
+                          .last;
 
                   String symbol = "";
                   if (currency == "EUR") {
@@ -971,28 +1025,36 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       txType = TransactionType.EXIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState)
+                              .settings
+                              .level ==
                           TransactionLevel.LEVEL2;
                       break;
                     case 'FORCEEXIT':
                       txType = TransactionType.FORCEEXIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState)
+                              .settings
+                              .level ==
                           TransactionLevel.LEVEL2;
                       break;
                     case "WITHDRAW":
                       txType = TransactionType.WITHDRAW;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState)
+                              .settings
+                              .level ==
                           TransactionLevel.LEVEL2;
                       break;
                     case "DEPOSIT":
                       txType = TransactionType.DEPOSIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
-                      isNegative = (_settingsBloc.state as LoadedSettingsState).settings.level ==
+                      isNegative = (_settingsBloc.state as LoadedSettingsState)
+                              .settings
+                              .level ==
                           TransactionLevel.LEVEL1;
                       break;
                   }
@@ -1115,7 +1177,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 //store: widget.arguments.store,
                                 transactionType: txType,
                                 transactionLevel:
-                                (_settingsBloc.state as LoadedSettingsState).settings.level,
+                                    (_settingsBloc.state as LoadedSettingsState)
+                                        .settings
+                                        .level,
                                 status: txStatus,
                                 account: widget.arguments.account,
                                 //token: widget.arguments.token,

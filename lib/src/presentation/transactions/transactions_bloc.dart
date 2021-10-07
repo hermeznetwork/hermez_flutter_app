@@ -8,16 +8,15 @@ class TransactionsBloc extends Bloc<TransactionsState> {
   final GetAllTransactionsUseCase _getAllTransactionsUseCase;
 
   TransactionsBloc(this._getAllTransactionsUseCase) {
-    changeState(TransactionsState.loading(searchTerm: ''));
+    changeState(TransactionsState.loading());
   }
 
-  void search(String searchTerm) {
+  void getAllTransactions() {
     _getAllTransactionsUseCase.execute().then((transactions) {
-      changeState(TransactionsState.loaded(
-          state.searchTerm, _mapTransactionsToState(transactions)));
+      changeState(
+          TransactionsState.loaded(_mapTransactionsToState(transactions)));
     }).catchError((error) {
-      changeState(TransactionsState.error(
-          state.searchTerm, 'A network error has occurred'));
+      changeState(TransactionsState.error('A network error has occurred'));
     });
   }
 

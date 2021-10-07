@@ -7,7 +7,7 @@ class Account {
   final String bjj;
   final String accountIndex;
   final String balance;
-  final List<Transaction> transactions;
+  List<Transaction> transactions;
   final Token token;
   final num totalBalance;
   final num totalPrice;
