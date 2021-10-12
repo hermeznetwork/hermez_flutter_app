@@ -28,18 +28,12 @@ class AccountInNetworkRepository implements AccountRepository {
   }
 
   @override
-  Future<Account> getL2AccountByAddress(String hezAddress) async {
-    // TODO: implement
-    //final response = await api.getAccount(accountIndex);
-    //return response;
-  }
-
-  @override
   Future<Account> getL2AccountByAccountIndex(String accountIndex) async {
     final response = await api.getAccount(accountIndex);
     return response;
   }
 
+  @override
   Future<List<Account>> getL1Accounts(String ethereumAddress,
       {bool showZeroBalanceAccounts = false, List<int> tokenIds}) async {
     List<Account> accounts = [];
@@ -63,14 +57,15 @@ class AccountInNetworkRepository implements AccountRepository {
                 tokenId: token.id);
             accounts.add(account);
           } else {
-            List<Transaction> transactions = await _transactionRepository
-                .getTransactions(
-                    ethereumAddress,
-                    "",
-                    LayerFilter.L1,
-                    TransactionStatusFilter.ALL,
-                    TransactionTypeFilter.ALL,
-                    [token.id]);
+            List<Transaction> transactions =
+                await _transactionRepository.getTransactions(
+              ethereumAddress,
+              "",
+              layerFilter: LayerFilter.L1,
+              transactionStatusFilter: TransactionStatusFilter.ALL,
+              transactionTypeFilter: TransactionTypeFilter.ALL,
+              tokenIds: [token.id],
+            );
             if (transactions != null && transactions.isNotEmpty) {
               final account = Account(
                   accountIndex: token.id.toString(),
@@ -108,13 +103,11 @@ class AccountInNetworkRepository implements AccountRepository {
           } else {
             if (showZeroBalanceAccounts) {
               List<dynamic> transactions = await _transactionRepository
-                  .getTransactions(
-                      ethereumAddress,
-                      "",
-                      LayerFilter.L1,
-                      TransactionStatusFilter.ALL,
-                      TransactionTypeFilter.ALL,
-                      [token.id]);
+                  .getTransactions(ethereumAddress, "",
+                      layerFilter: LayerFilter.L1,
+                      transactionStatusFilter: TransactionStatusFilter.ALL,
+                      transactionTypeFilter: TransactionTypeFilter.ALL,
+                      tokenIds: [token.id]);
               if (transactions != null && transactions.isNotEmpty) {
                 final account = Account(
                     accountIndex: token.id.toString(),

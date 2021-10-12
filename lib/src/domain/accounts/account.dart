@@ -6,7 +6,7 @@ class Account {
   final String address;
   final String bjj;
   final String accountIndex;
-  final String balance;
+  final num balance;
   List<Transaction> transactions;
   final Token token;
   final num totalBalance;
@@ -20,7 +20,9 @@ class Account {
       this.balance,
       this.transactions,
       this.token})
-      : totalBalance = _calculateTotalBalance(transactions),
+      : totalBalance = balance != null
+            ? balance
+            : _calculateTotalBalance(l2Account, transactions),
         totalPrice = _calculateTotalPrice(transactions);
 
   factory Account.createEmpty() {
@@ -58,8 +60,28 @@ class Account {
     return double.parse(price.toStringAsFixed(2));*/
   }
 
-  static int _calculateTotalBalance(List<Transaction> transactions) {
+  static num _calculateTotalBalance(
+      bool l2Account, List<Transaction> transactions) {
     // TODO:
+    return transactions.fold(0.0, (accumulator, transaction) {
+      if (l2Account == true) {
+        if (transaction.type == TransactionType.DEPOSIT) {
+          return accumulator + transaction.amount;
+        } else if (transaction.type == TransactionType.RECEIVE) {
+          return accumulator + transaction.amount;
+        } else {
+          return accumulator;
+        }
+      } else {
+        if (transaction.type == TransactionType.DEPOSIT) {
+          return accumulator - (transaction.amount + transaction.fee);
+        } else if (transaction.type == TransactionType.RECEIVE) {
+          return accumulator + transaction.amount;
+        } else {
+          return accumulator;
+        }
+      }
+    });
     return 0;
     //items.fold(0, (accumulator, item) => accumulator + item.quantity);
   }

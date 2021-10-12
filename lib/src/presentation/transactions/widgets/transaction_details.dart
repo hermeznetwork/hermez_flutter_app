@@ -7,8 +7,6 @@ import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/environment.dart';
 import 'package:hermez/service/network/model/gas_price_response.dart';
 import 'package:hermez/src/domain/accounts/account.dart';
-import 'package:hermez/src/domain/prices/price_token.dart';
-import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez/src/domain/wallets/wallet.dart';
@@ -17,6 +15,8 @@ import 'package:hermez/src/presentation/home/widgets/info.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/settings/settings_state.dart';
+import 'package:hermez/src/presentation/tokens/tokens_bloc.dart';
+import 'package:hermez/src/presentation/tokens/tokens_state.dart';
 import 'package:hermez/src/presentation/transfer/transfer_bloc.dart';
 import 'package:hermez/src/presentation/transfer/widgets/move_info.dart';
 import 'package:hermez/utils/address_utils.dart';
@@ -39,7 +39,7 @@ class TransactionDetailsArguments {
   final TransactionStatus status;
   final Account account;
   //final Token token;
-  final PriceToken priceToken;
+  //final PriceToken priceToken;
   final Exit exit;
   final String transactionId;
   final String transactionHash;
@@ -72,7 +72,7 @@ class TransactionDetailsArguments {
     this.status,
     this.account,
     //this.token,
-    this.priceToken,
+    //this.priceToken,
     this.exit,
     this.amount,
     this.addressFrom,
@@ -107,8 +107,8 @@ class TransactionDetailsPage extends StatefulWidget {
 
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Account ethereumAccount;
-  Token ethereumToken;
-  PriceToken ethereumPriceToken;
+  //Token ethereumToken;
+  //PriceToken ethereumPriceToken;
   GasPriceResponse gasPriceResponse;
   //WalletTransferHandler transferStore;
   bool isLoading = false;
@@ -116,12 +116,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   SettingsBloc _settingsBloc;
   TransferBloc _transferBloc = getIt<TransferBloc>();
   AccountBloc _accountBloc = getIt<AccountBloc>();
+  TokensBloc _tokensBloc = getIt<TokensBloc>();
 
   _TransactionDetailsPageState(SettingsBloc settingsBloc)
       : _settingsBloc =
             settingsBloc != null ? settingsBloc : getIt<SettingsBloc>() {
     if (!(_settingsBloc.state is LoadedSettingsState)) {
       _settingsBloc.init();
+    }
+    if (!(_tokensBloc.state is LoadedTokensState)) {
+      _tokensBloc.getTokens([0]);
     }
   }
 
@@ -507,11 +511,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 child: Text(
                   EthAmountFormatter.formatAmount(
                       (widget.arguments.amount *
-                          widget.arguments.priceToken.USD *
-                          /*(currency != "USD"
-                              ? _settingsBloc.state.settings.exchangeRatio
-                              :*/
-                          1),
+                          widget.arguments.account.token.price.USD *
+                          (currency != "USD"
+                              ? state.settings.exchangeRatio
+                              : 1)),
                       currency),
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -950,17 +953,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           double fee = widget.arguments.gasLimit * gasPrice.toDouble();
           currencyFee = EthAmountFormatter.formatAmount(
               fee.toDouble() /
-                  pow(10, ethereumToken.token.decimals) *
-                  (ethereumPriceToken.USD *
-                      /*(currency != "USD"
-                          ? _settingsBloc.state.settings.exchangeRatio
-                          :*/
-                      1),
+                  pow(10, ethereumAccount.token.token.decimals) *
+                  (ethereumAccount.token.price.USD *
+                      (currency != "USD" ? state.settings.exchangeRatio : 1)),
               currency);
 
           tokenFee = EthAmountFormatter.formatAmount(
-              fee.toDouble() / pow(10, ethereumToken.token.decimals),
-              ethereumToken.token.symbol);
+              fee.toDouble() / pow(10, ethereumAccount.token.token.decimals),
+              ethereumAccount.token.token.symbol);
           showSpeed = true;
           speed = widget.arguments.selectedFeeSpeed
                   .toString()
@@ -980,11 +980,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           currencyFee = EthAmountFormatter.formatAmount(
               widget.arguments.fee /
                   pow(10, widget.arguments.account.token.token.decimals) *
-                  (widget.arguments.priceToken.USD *
-                      /*(currency != "USD"
-                          ? _settingsBloc.state.settings.exchangeRatio
-                          :*/
-                      1),
+                  (widget.arguments.account.token.price.USD *
+                      (currency != "USD" ? state.settings.exchangeRatio : 1)),
               currency);
 
           tokenFee = EthAmountFormatter.formatAmount(
@@ -999,11 +996,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           currencyFee = EthAmountFormatter.formatAmount(
               fee.toDouble() /
                   pow(10, widget.arguments.account.token.token.decimals) *
-                  (widget.arguments.priceToken.USD *
-                      /*(currency != "USD"
-                          ? _settingsBloc.state.settings.exchangeRatio
-                          :*/
-                      1),
+                  (widget.arguments.account.token.price.USD *
+                      (currency != "USD" ? state.settings.exchangeRatio : 1)),
               currency);
 
           tokenFee = EthAmountFormatter.formatAmount(
@@ -1016,8 +1010,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           double fee = widget.arguments.fee;
           currencyFee = EthAmountFormatter.formatAmount(
               fee.toDouble() /
-                  pow(10, ethereumToken.token.decimals) *
-                  (ethereumPriceToken.USD *
+                  pow(10, ethereumAccount.token.token.decimals) *
+                  (ethereumAccount.token.price.USD *
                       /*(currency != "USD"
                           ? _settingsBloc.state.settings.exchangeRatio
                           :*/
@@ -1025,8 +1019,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               currency);
 
           tokenFee = EthAmountFormatter.formatAmount(
-              fee.toDouble() / pow(10, ethereumToken.token.decimals),
-              ethereumToken.token.symbol);
+              fee.toDouble() / pow(10, ethereumAccount.token.token.decimals),
+              ethereumAccount.token.token.symbol);
           showSpeed = false;
         }
       }
@@ -1156,7 +1150,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     arguments: FeeSelectorArguments(
                         /*widget.arguments.store,*/
                         selectedFee: widget.arguments.selectedFeeSpeed,
-                        ethereumToken: ethereumToken,
+                        ethereumToken: ethereumAccount.token,
                         estimatedGas: BigInt.from(widget.arguments.gasLimit),
                         gasPriceResponse: gasPriceResponse,
                         onFeeSelected: (selectedFee) {
@@ -1184,8 +1178,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
       String currencyFee = EthAmountFormatter.formatAmount(
           widget.arguments.withdrawEstimatedFee.toDouble() /
-              pow(10, ethereumToken.token.decimals) *
-              (ethereumPriceToken.USD *
+              pow(10, ethereumAccount.token.token.decimals) *
+              (ethereumAccount.token.price.USD *
                   /*(currency != "USD"
                       ? widget.arguments.store.state.exchangeRatio
                       :*/
@@ -1194,8 +1188,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
       String tokenFee = EthAmountFormatter.formatAmount(
           widget.arguments.withdrawEstimatedFee.toDouble() /
-              pow(10, ethereumToken.token.decimals),
-          ethereumToken.token.symbol);
+              pow(10, ethereumAccount.token.token.decimals),
+          ethereumAccount.token.token.symbol);
 
       String speed = widget.arguments.selectedWithdrawFeeSpeed
               .toString()
@@ -1419,7 +1413,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   /// @param {Boolean} iExistingAccount - Whether it's a existingAccount transfer
   /// @returns {number} - Transaction fee
   double getFee(RecommendedFee fees, bool isExistingAccount) {
-    if (widget.arguments.priceToken.USD == 0) {
+    if (widget.arguments.account.token.price.USD == 0) {
       return 0;
     }
 
@@ -1429,7 +1423,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         : fees.createAccount;
 
     return double.parse(
-        (fee / widget.arguments.priceToken.USD).toStringAsFixed(6));
+        (fee / widget.arguments.account.token.price.USD).toStringAsFixed(6));
   }
 
   /// Bubbles up an event to send the transaction accordingly
@@ -1612,7 +1606,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         fee = widget.arguments.fee + widget.arguments.withdrawEstimatedFee;
       }
       if (fee != null && ethereumAccount != null) {
-        return BigInt.parse(ethereumAccount.balance) > BigInt.from(fee);
+        return ethereumAccount.balance > fee;
       } else {
         return true;
       }

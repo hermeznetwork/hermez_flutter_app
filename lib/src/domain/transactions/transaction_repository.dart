@@ -22,12 +22,12 @@ enum TransactionTypeFilter {
 abstract class TransactionRepository {
   // ALL
   Future<List<Transaction>> getTransactions(String address, String accountIndex,
-      [LayerFilter layerFilter = LayerFilter.ALL,
+      {LayerFilter layerFilter = LayerFilter.ALL,
       TransactionStatusFilter transactionStatusFilter =
           TransactionStatusFilter.ALL,
       TransactionTypeFilter transactionTypeFilter = TransactionTypeFilter.ALL,
       List<int> tokenIds,
-      int fromItem = 0]);
+      int fromItem = 0});
 
   Future<dynamic> getTransactionById(String transactionId,
       {LayerFilter layerFilter = LayerFilter.ALL});

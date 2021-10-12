@@ -142,7 +142,7 @@ class ExplorerService implements IExplorerService {
 
   Future<List<dynamic>> getTokenTransferEventsByAccountAddress(
       String address, String tokenAddress,
-      {String sort = 'desc', int startblock = 0}) async {
+      {int tokenId = -1, String sort = 'desc', int startblock = 0}) async {
     try {
       Map<String, dynamic> resp = await _get(
           '?module=account&action=tokentx&contractaddress=$tokenAddress&address=$address&startblock=$startblock&sort=$sort');
@@ -185,6 +185,7 @@ class ExplorerService implements IExplorerService {
             'fee': (int.parse(transferEvent['gasUsed']) *
                     int.parse(transferEvent['gasPrice']))
                 .toString(),
+            'tokenId': tokenId,
             'tokenAddress': transferEvent['contractAddress'],
             'type': type,
           });

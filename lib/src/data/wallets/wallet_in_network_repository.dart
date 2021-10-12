@@ -51,18 +51,17 @@ class WalletInNetworkRepository implements WalletRepository {
         Token token = Token(token: hermezToken, price: priceToken);
         List<dynamic> transactions = await _transactionRepository
             .getTransactions(
-                l2Account.hezEthereumAddress,
-                l2Account.accountIndex,
-                LayerFilter.L2,
-                TransactionStatusFilter.ALL,
-                TransactionTypeFilter.ALL,
-                [hermezToken.id]);
+                l2Account.hezEthereumAddress, l2Account.accountIndex,
+                layerFilter: LayerFilter.L2,
+                transactionStatusFilter: TransactionStatusFilter.ALL,
+                transactionTypeFilter: TransactionTypeFilter.ALL,
+                tokenIds: [hermezToken.id]);
         l2Accounts.add(Account(
             l2Account: true,
             address: l2Account.hezEthereumAddress,
             bjj: l2Account.bjj,
             accountIndex: l2Account.accountIndex,
-            balance: l2Account.balance,
+            balance: double.tryParse(l2Account.balance),
             transactions: transactions,
             token: token));
       }
@@ -98,13 +97,11 @@ class WalletInNetworkRepository implements WalletRepository {
             .firstWhere((priceToken) => priceToken.id == l1Account.tokenId);
         Token token = Token(token: hermezToken, price: priceToken);
         List<dynamic> transactions = await _transactionRepository
-            .getTransactions(
-                l1Account.hezEthereumAddress,
-                "",
-                LayerFilter.L1,
-                TransactionStatusFilter.ALL,
-                TransactionTypeFilter.ALL,
-                [hermezToken.id]);
+            .getTransactions(l1Account.hezEthereumAddress, "",
+                layerFilter: LayerFilter.L1,
+                transactionStatusFilter: TransactionStatusFilter.ALL,
+                transactionTypeFilter: TransactionTypeFilter.ALL,
+                tokenIds: [hermezToken.id]);
         /*List<dynamic> transactions = await _transactionInNetworkRepository
           .getEthereumTransactionsByAddress(
               ethereumAddress, token.id == 0 ? "" : token.ethereumAddress);*/
@@ -112,7 +109,7 @@ class WalletInNetworkRepository implements WalletRepository {
           l2Account: false,
           address: l1Account.hezEthereumAddress,
           token: token,
-          balance: l1Account.balance,
+          balance: double.tryParse(l1Account.balance),
           transactions: transactions,
         ));
       }

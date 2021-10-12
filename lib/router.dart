@@ -17,7 +17,6 @@ import 'package:hermez/src/presentation/settings/widgets/settings_details.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
 
-import 'context/transfer/wallet_transfer_provider.dart';
 import 'dependencies_provider.dart';
 
 Map<String, WidgetBuilder> getRoutes(context) {
@@ -100,6 +99,12 @@ Map<String, WidgetBuilder> getRoutes(context) {
     '/recovery_phrase_confirm': (BuildContext context) {
       return RecoveryPhraseConfirmPage();
     },
+
+    '/transaction_details': (BuildContext context) =>
+        /*WalletTransferProvider(
+      builder: (context, store) {*/
+        TransactionDetailsPage(
+            arguments: ModalRoute.of(context).settings.arguments),
     /*'/pin': (BuildContext context) {
       var configurationService = Provider.of<ConfigurationService>(context);
       return PinPage(
@@ -203,12 +208,5 @@ Map<String, WidgetBuilder> getRoutes(context) {
             return WalletTransferPage(title: "Send Tokens");
           },
         ),*/
-
-    '/transaction_details': (BuildContext context) => WalletTransferProvider(
-          builder: (context, store) {
-            return TransactionDetailsPage(
-                arguments: ModalRoute.of(context).settings.arguments);
-          },
-        ),
   };
 }

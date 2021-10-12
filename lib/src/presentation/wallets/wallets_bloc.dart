@@ -21,6 +21,7 @@ class WalletsBloc extends Bloc<WalletsState> {
 
   void fetchData() {
     _getWalletsUseCase.execute().then((wallets) {
+      walletItems = _mapWalletsToState(wallets);
       if (wallets.isNotEmpty) {
         changeState(WalletsState.loaded(_mapWalletsToState(wallets)));
       } else {
@@ -31,22 +32,54 @@ class WalletsBloc extends Bloc<WalletsState> {
     });
   }
 
-  void refreshAccounts() {
-    for (WalletItemState walletItem in walletItems) {
-      _getAccountsUseCase
-          .execute(
-              walletItem.l2Wallet == true ? LayerFilter.L2 : LayerFilter.L1,
-              walletItem.address)
+  Future<bool> refreshAccounts(
+      [LayerFilter layerFilter = LayerFilter.ALL]) async {
+    if (layerFilter == LayerFilter.ALL) {
+      for (WalletItemState walletItem in walletItems) {
+        await _getAccountsUseCase
+            .execute(
+                walletItem.l2Wallet == true ? LayerFilter.L2 : LayerFilter.L1,
+                walletItem.address)
+            .then((accounts) {
+          walletItem.accounts = accounts;
+        }).catchError((error) {
+          changeState(WalletsState.error('A network error has occurred'));
+        });
+      }
+      changeState(WalletsState.loaded(walletItems));
+      return true;
+    } else if (layerFilter == LayerFilter.L2) {
+      WalletItemState walletItem = walletItems.firstWhere((walletItem) =>
+          layerFilter == LayerFilter.L2 && walletItem.l2Wallet == true);
+      return await _getAccountsUseCase
+          .execute(layerFilter, walletItem.address)
           .then((accounts) {
         walletItem.accounts = accounts;
+        changeState(WalletsState.loaded(walletItems));
+        return true;
       }).catchError((error) {
         changeState(WalletsState.error('A network error has occurred'));
+        return false;
       });
+    } else if (layerFilter == LayerFilter.L1) {
+      WalletItemState walletItem = walletItems.firstWhere((walletItem) =>
+          layerFilter == LayerFilter.L1 && walletItem.l2Wallet == false);
+      return await _getAccountsUseCase
+          .execute(layerFilter, walletItem.address)
+          .then((accounts) {
+        walletItem.accounts = accounts;
+        changeState(WalletsState.loaded(walletItems));
+        return true;
+      }).catchError((error) {
+        changeState(WalletsState.error('A network error has occurred'));
+        return false;
+      });
+    } else {
+      return false;
     }
-    changeState(WalletsState.loaded(walletItems));
   }
 
-  void refreshTransactions([Account account]) {
+  Future<void> refreshTransactions([Account account]) async {
     if (account != null) {
       if (account.accountIndex != null) {
         WalletItemState wallet =

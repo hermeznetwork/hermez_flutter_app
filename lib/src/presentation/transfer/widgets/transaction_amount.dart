@@ -1442,7 +1442,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                   status: TransactionStatus.DRAFT,
                   account: selectedAccount,
                   //token: selectedToken,
-                  priceToken: selectedPriceToken,
+                  //priceToken: selectedPriceToken,
                   amount: amount,
                   addressFrom: selectedAccount.address,
                   addressTo: addressTo,
@@ -1792,7 +1792,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                 1
             : 1;
 
-        balance = double.parse((double.parse(selectedAccount.balance) /
+        balance = double.parse((selectedAccount.balance /
                 pow(10, selectedToken.token.decimals) *
                 currencyValue)
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
@@ -1839,7 +1839,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
               1
           : 1;
 
-      double balance = double.parse((double.parse(selectedAccount.balance) /
+      double balance = double.parse((selectedAccount.balance /
               pow(10, selectedToken.token.decimals) *
               currencyValue)
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
@@ -1863,7 +1863,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         widget.arguments.transactionType == TransactionType.EXIT ||
         widget.arguments.transactionType == TransactionType.FORCEEXIT) {
       if (ethereumAccount != null) {
-        bool result = BigInt.parse(ethereumAccount.balance) >= gasFee;
+        bool result = BigInt.from(ethereumAccount.balance) >= gasFee;
         return result;
       }
       return false;

@@ -4,6 +4,7 @@ import 'package:hermez/src/domain/prices/price_repository.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/tokens/token_repository.dart';
+import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez_sdk/addresses.dart';
 import 'package:hermez_sdk/model/account.dart' as hezAccount;
@@ -13,11 +14,13 @@ class GetAccountsUseCase {
   final TokenRepository _tokenRepository;
   final PriceRepository _priceRepository;
   final AccountRepository _accountRepository;
+  final TransactionRepository _transactionRepository;
 
   GetAccountsUseCase(
     this._tokenRepository,
     this._priceRepository,
     this._accountRepository,
+    this._transactionRepository,
   );
 
   Future<List<Account>> execute(
@@ -55,7 +58,13 @@ class GetAccountsUseCase {
           PriceToken priceToken = priceTokens
               .firstWhere((priceToken) => priceToken.id == hezAccount.tokenId);
           Token token = Token(token: hermezToken, price: priceToken);
-          return Account(l2Account: l2Account, token: token);
+
+          return Account(
+              l2Account: l2Account,
+              address: hezAccount.hezEthereumAddress,
+              bjj: hezAccount.bjj,
+              accountIndex: hezAccount.accountIndex,
+              token: token);
         }));
       }
     }
@@ -79,11 +88,20 @@ class GetAccountsUseCase {
           PriceToken priceToken = priceTokens
               .firstWhere((priceToken) => priceToken.id == hezAccount.tokenId);
           Token token = Token(token: hermezToken, price: priceToken);
+
           return Account(
               l2Account: l2Account, address: ethereumAddress, token: token);
         }));
       }
     }
+
+    accounts.forEach((account) async {
+      List<Transaction> transactions = await _transactionRepository
+          .getTransactions(account.address, account.accountIndex,
+              layerFilter: account.l2Account ? LayerFilter.L2 : LayerFilter.L1,
+              tokenIds: [account.token.token.id]);
+      account.transactions = transactions;
+    });
 
     return accounts; //Account.createEmpty(); _accountRepository.getAccounts();
   }

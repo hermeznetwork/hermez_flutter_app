@@ -1,32 +1,26 @@
-import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hermez/components/wallet/withdrawal_row.dart';
 import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
-import 'package:hermez/src/presentation/accounts/account_bloc.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/settings/settings_state.dart';
-import 'package:hermez/src/presentation/transactions/transactions_bloc.dart';
-import 'package:hermez/src/presentation/transactions/transactions_state.dart';
 import 'package:hermez/src/presentation/transactions/widgets/transaction_details.dart';
 import 'package:hermez/src/presentation/transfer/widgets/transaction_amount.dart';
+import 'package:hermez/src/presentation/wallets/wallets_bloc.dart';
+import 'package:hermez/src/presentation/wallets/wallets_state.dart';
 import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/blinking_text_animation.dart';
 import 'package:hermez/utils/eth_amount_formatter.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 import 'package:hermez/utils/pop_result.dart';
-import 'package:hermez_sdk/addresses.dart';
-import 'package:hermez_sdk/environment.dart';
 import 'package:hermez_sdk/model/exit.dart';
 import 'package:hermez_sdk/model/forged_transaction.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/state_response.dart';
-import 'package:hermez_sdk/tx_utils.dart';
 import 'package:intl/intl.dart';
 
 // You can pass any object to the arguments parameter.
@@ -34,19 +28,14 @@ import 'package:intl/intl.dart';
 // title and message.
 
 class AccountDetailsArguments {
+  final WalletsBloc walletsBloc;
   final SettingsBloc settingsBloc;
   TransactionLevel level;
   Account account;
-  //Token token;
-  //PriceToken priceToken;
   BuildContext parentContext;
 
-  AccountDetailsArguments(
-      this.settingsBloc,
-      this.level,
-      this.account, //this.token,
-      //this.priceToken,
-      this.parentContext);
+  AccountDetailsArguments(this.walletsBloc, this.settingsBloc, this.level,
+      this.account, this.parentContext);
 }
 
 class AccountDetailsPage extends StatefulWidget {
@@ -56,69 +45,475 @@ class AccountDetailsPage extends StatefulWidget {
 
   @override
   _AccountDetailsPageState createState() =>
-      _AccountDetailsPageState(arguments.settingsBloc);
+      _AccountDetailsPageState(arguments.walletsBloc, arguments.settingsBloc);
 }
 
 class _AccountDetailsPageState extends State<AccountDetailsPage> {
   StateResponse _stateResponse;
-  bool _isLoading = true;
+  bool _isLoading = false;
   bool _needRefresh = false;
   int fromItem = 0;
   int pendingItems = 0;
-  List<dynamic> historyTransactions = [];
+  //List<dynamic> historyTransactions = [];
   List<dynamic> transactions = [];
-  List<Exit> exits = [];
-  List<Exit> filteredExits = [];
-  List<bool> allowedInstantWithdraws = [];
+  //List<Exit> exits = [];
+  //List<Exit> filteredExits = [];
+  //List<bool> allowedInstantWithdraws = [];
 
-  List<dynamic> pendingExits = [];
+  /*List<dynamic> pendingExits = [];
   List<dynamic> pendingForceExits = [];
   List<dynamic> pendingWithdraws = [];
   List<dynamic> pendingDeposits = [];
-  List<dynamic> pendingTransfers = [];
+  List<dynamic> pendingTransfers = [];*/
 
   final ScrollController _controller = ScrollController();
 
   double balance = 0.0;
 
-  final AccountBloc _bloc;
+  //final AccountBloc _bloc;
+  final WalletsBloc _walletsBloc;
   final SettingsBloc _settingsBloc;
-  final TransactionsBloc _transactionsBloc;
-  _AccountDetailsPageState(SettingsBloc settingsBloc)
-      : _bloc = getIt<AccountBloc>(),
+  //final TransactionsBloc _transactionsBloc;
+  _AccountDetailsPageState(WalletsBloc walletsBloc, SettingsBloc settingsBloc)
+      : _walletsBloc = walletsBloc != null ? walletsBloc : getIt<WalletsBloc>(),
+        //_bloc = getIt<AccountBloc>(),
         _settingsBloc =
-            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>(),
-        _transactionsBloc = getIt<TransactionsBloc>() {
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>()
+  /*_transactionsBloc = getIt<TransactionsBloc>()*/ {
+    if (_walletsBloc.state is LoadingWalletsState) {
+      _walletsBloc.fetchData();
+    }
     //fetchData();
     if (_settingsBloc.state is InitSettingsState) {
       _settingsBloc.init();
     }
-    if (_transactionsBloc.state is LoadingTransactionsState) {
+    /*if (_transactionsBloc.state is LoadingTransactionsState) {
       _transactionsBloc.getAllTransactions();
+    }*/
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.arguments.account != null) {
+      return Container(
+        color: HermezColors.lightOrange,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: NestedScrollView(
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return _renderHeaderContent(context);
+            },
+            body: _renderAccountDetails(context, widget.arguments.account),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        color: HermezColors.lightOrange,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: StreamBuilder<WalletsState>(
+            initialData: _walletsBloc.state,
+            stream: _walletsBloc.observableState,
+            builder: (context, snapshot) {
+              final state = snapshot.data;
+              if (state is LoadingWalletsState) {
+                return Container(
+                    color: HermezColors.lightOrange,
+                    child: Center(
+                      child:
+                          CircularProgressIndicator(color: HermezColors.orange),
+                    ));
+              } else if (state is ErrorWalletsState) {
+                return _renderErrorContent();
+              } else {
+                return NestedScrollView(
+                  headerSliverBuilder:
+                      (BuildContext context, bool innerBoxIsScrolled) {
+                    return _renderHeaderContent(context);
+                  },
+                  body:
+                      _renderAccountDetails(context, widget.arguments.account),
+                );
+              }
+            },
+          ),
+        ),
+      );
     }
+  }
+
+  List<Widget> _renderHeaderContent(BuildContext context) {
+    return <Widget>[
+      SliverAppBar(
+        floating: true,
+        pinned: true,
+        snap: false,
+        collapsedHeight: kToolbarHeight,
+        expandedHeight: 340.0,
+        backgroundColor: HermezColors.lightOrange,
+        elevation: 0,
+        title: Container(
+          padding: EdgeInsets.only(bottom: 20, top: 20),
+          color: HermezColors.lightOrange,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Expanded(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(widget.arguments.account.token.token.name, // name
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
+                          color: HermezColors.blackTwo,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 20))
+                ],
+              )),
+              Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    color: HermezColors.steel),
+                padding:
+                    EdgeInsets.only(left: 12.0, right: 12.0, top: 4, bottom: 4),
+                child: Text(
+                  widget.arguments.level == TransactionLevel.LEVEL1
+                      ? "L1"
+                      : "L2",
+                  style: TextStyle(
+                    color: HermezColors.lightOrange,
+                    fontSize: 15,
+                    fontFamily: 'ModernEra',
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        flexibleSpace: FlexibleSpaceBar(
+          // here the desired height*/
+          background: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                  height:
+                      MediaQuery.of(context).padding.top + kToolbarHeight + 40),
+              SizedBox(
+                  width: double.infinity,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _isLoading
+                            ? BlinkingTextAnimation(
+                                arguments: BlinkingTextAnimationArguments(
+                                    HermezColors.blackTwo,
+                                    (widget.arguments.account.totalBalance /
+                                                widget.arguments.account.token
+                                                    .token.decimals)
+                                            .toString()
+                                        /*calculateBalance(widget
+                                        .arguments.account.token.token.symbol)*/
+                                        +
+                                        "TODO",
+                                    32,
+                                    FontWeight.w800))
+                            : Text(
+                                /*calculateBalance(widget
+                                    .arguments.account.token.token.symbol)*/
+                                (widget.arguments.account.totalBalance /
+                                            pow(
+                                                10,
+                                                widget.arguments.account.token
+                                                    .token.decimals))
+                                        .toString() +
+                                    " " +
+                                    widget.arguments.account.token.token.symbol,
+                                style: TextStyle(
+                                    color: HermezColors.blackTwo,
+                                    fontFamily: 'ModernEra',
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 32)),
+                      ])),
+              SizedBox(height: 10),
+              _isLoading
+                  ? BlinkingTextAnimation(
+                      arguments: BlinkingTextAnimationArguments(
+                          HermezColors.steel,
+                          (widget.arguments.account.totalBalance /
+                                      pow(
+                                          10,
+                                          widget.arguments.account.token.token
+                                              .decimals))
+                                  .toString() +
+                              " " +
+                              widget.arguments.account.token.token.symbol
+                          /*calculateBalance(
+                              (_settingsBloc.state as LoadedSettingsState)
+                                  .settings
+                                  .defaultCurrency
+                                  .toString()
+                                  .split('.')
+                                  .last)*/
+                          ,
+                          18,
+                          FontWeight.w500),
+                    )
+                  : Text(
+                      BalanceUtils.formatBalance(
+                          widget.arguments.account.totalBalance,
+                          widget.arguments.account.token,
+                          toFiat: true,
+                          currency: (_settingsBloc.state as LoadedSettingsState)
+                              .settings
+                              .defaultCurrency
+                              .toString()
+                              .split('.')
+                              .last,
+                          exchangeRatio:
+                              (_settingsBloc.state as LoadedSettingsState)
+                                  .settings
+                                  .exchangeRatio)
+
+                      /*calculateBalance(
+                          (_settingsBloc.state as LoadedSettingsState)
+                              .settings
+                              .defaultCurrency
+                              .toString()
+                              .split('.')
+                              .last)*/
+                      ,
+                      style: TextStyle(
+                          fontFamily: 'ModernEra',
+                          fontWeight: FontWeight.w500,
+                          color: HermezColors.steel,
+                          fontSize: 18)),
+              SizedBox(height: 30),
+              buildButtonsRow(context),
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    ];
+  }
+
+  Widget _renderAccountDetails(BuildContext context, Account account) {
+    transactions = account.transactions;
+    return Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Expanded(child: _buildTransactionsList()),
+          SafeArea(
+            top: false,
+            bottom: true,
+            child: Container(
+              //height: kBottomNavigationBarHeight,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+    /*if (accounts != null && accounts.length > 0) {
+      _accounts = accounts;
+
+      return Container(
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: buildAccountsList(context, _settingsBloc.state),
+            ),
+            SafeArea(
+              top: false,
+              bottom: true,
+              child: Container(
+                //height: kBottomNavigationBarHeight,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(34.0),
+          child: Column(children: [
+            Text(
+              widget.arguments.transactionLevel == TransactionLevel.LEVEL1
+                  ? 'Transfer tokens to your \n\n Ethereum wallet.'
+                  : 'Transfer tokens to your \n\n Hermez wallet.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: HermezColors.blueyGrey,
+                fontSize: 16,
+                fontFamily: 'ModernEra',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 24),
+            Center(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  padding:
+                  EdgeInsets.only(left: 23, right: 23, bottom: 16, top: 16),
+                  backgroundColor: Color(0xfff3f3f8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+                onPressed: () {
+                  showBarModalBottomSheet(
+                    context: widget.arguments.parentContext,
+                    builder: (context) => Scaffold(
+                      body: StreamBuilder<TokensState>(
+                        initialData: _tokensBloc.state,
+                        stream: _tokensBloc.observableState,
+                        builder: (context, snapshot) {
+                          final state = snapshot.data;
+                          if (state is LoadingTokensState) {
+                            return Container(
+                                color: Colors.white,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                      color: HermezColors.orange),
+                                ));
+                          } else if (state is ErrorTokensState) {
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(34.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'There was an error loading \n\n this page.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: HermezColors.blueyGrey,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            _tokens = state.tokensItem.tokens;
+                            return buildTokensList(context);
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'See supported tokens',
+                      style: TextStyle(
+                        color: HermezColors.blueyGreyTwo,
+                        fontSize: 16,
+                        fontFamily: 'ModernEra',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ]));
+    }*/
+  }
+
+  Widget _renderErrorContent() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(34.0),
+      child: Column(
+        children: [
+          Text(
+            'There was an error loading \n\n this page.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: HermezColors.blueyGrey,
+              fontSize: 16,
+              fontFamily: 'ModernEra',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 24),
+          Center(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                padding:
+                    EdgeInsets.only(left: 23, right: 23, bottom: 16, top: 16),
+                backgroundColor: Color(0xfff3f3f8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+              ),
+              onPressed: () {
+                //_onRefresh();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset('assets/reload.svg',
+                      color: HermezColors.blueyGreyTwo,
+                      semanticsLabel: 'reload'),
+                  SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    'Reload',
+                    style: TextStyle(
+                      color: HermezColors.blueyGreyTwo,
+                      fontSize: 16,
+                      fontFamily: 'ModernEra',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   Future<void> _onRefresh() {
     fromItem = 0;
-    exits = [];
-    filteredExits = [];
-    pendingWithdraws = [];
+    //exits = [];
+    //filteredExits = [];
+    //pendingWithdraws = [];
     transactions = [];
+
     //pendingTransfers = []; // Transfers
     //pendingExits = []; // L2 Exits
     //pendingDeposits = [];
-    setState(() {
+
+    /*setState(() {
       _isLoading = true;
       _needRefresh = true;
       fetchData();
-    });
+    });*/
     return Future.value(null);
   }
 
   @override
   void initState() {
     _controller.addListener(_onScroll);
-    fetchData();
+    //fetchData();
     super.initState();
   }
 
@@ -133,14 +528,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
     if (_controller.offset >= _controller.position.maxScrollExtent &&
         !_controller.position.outOfRange &&
         pendingItems > 0) {
-      setState(() {
+      /*setState(() {
         _isLoading = true;
         fetchData();
-      });
+      });*/
     }
   }
 
-  @override
+  /*@override
   Widget build(BuildContext context) {
     return Container(
       color: HermezColors.lightOrange,
@@ -215,7 +610,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 ),
                 centerTitle: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  // here the desired height*/
+                  // here the desired height
                   background: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -233,17 +628,20 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                         arguments:
                                             BlinkingTextAnimationArguments(
                                                 HermezColors.blackTwo,
-                                                calculateBalance(widget
+                                                "TODO",
+                                                /*calculateBalance(widget
                                                     .arguments
                                                     .account
                                                     .token
                                                     .token
-                                                    .symbol),
+                                                    .symbol),*/
                                                 32,
                                                 FontWeight.w800))
                                     : Text(
-                                        calculateBalance(widget.arguments
-                                            .account.token.token.symbol),
+                                        "TODO"
+                                        /*calculateBalance(widget.arguments
+                                            .account.token.token.symbol)*/
+                                        ,
                                         style: TextStyle(
                                             color: HermezColors.blackTwo,
                                             fontFamily: 'ModernEra',
@@ -290,7 +688,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         ),
       ),
     );
-  }
+  }*/
 
   buildButtonsRow(BuildContext context) {
     return Row(
@@ -428,7 +826,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         PopWithResults popResult = results;
                         if (popResult.toPage == "/home") {
                           // TODO do stuff
-                          _onRefresh();
+                          //_onRefresh();
                         } else {
                           Navigator.of(context).pop(results);
                         }
@@ -455,7 +853,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         ]);
   }
 
-  String calculateBalance(String symbol) {
+  /*String calculateBalance(String symbol) {
     double resultAmount = BalanceUtils.calculatePendingBalance(
             (_settingsBloc.state as LoadedSettingsState).settings.level,
             widget.arguments.account,
@@ -465,7 +863,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         pow(10, widget.arguments.account.token.token.decimals);
 
     return EthAmountFormatter.formatAmount(resultAmount, symbol);
-  }
+  }*/
 
   //widget that builds the list
   Widget _buildTransactionsList() {
@@ -477,10 +875,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
         ),
       );
     } else if (!_isLoading &&
-        transactions.isEmpty &&
+            transactions
+                .isEmpty /*&&
         pendingExits.isEmpty &&
         filteredExits.isEmpty &&
-        pendingWithdraws.isEmpty) {
+        pendingWithdraws.isEmpty*/
+        ) {
       return Container(
           width: double.infinity,
           color: Colors.white,
@@ -507,16 +907,16 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
               // even if there is only a single item.
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: transactions.length +
-                  pendingExits.length +
+                  /*pendingExits.length +
                   pendingForceExits.length +
                   filteredExits.length +
-                  pendingWithdraws.length +
+                  pendingWithdraws.length +*/
                   (_isLoading ? 1 : 0),
               //set the item count so that index won't be out of range
               padding: const EdgeInsets.all(16.0),
               //add some padding to make it look good
               itemBuilder: (context, i) {
-                if ((pendingExits.length > 0 || pendingForceExits.length > 0) &&
+                /*if ((pendingExits.length > 0 || pendingForceExits.length > 0) &&
                     i < pendingExits.length + pendingForceExits.length) {
                   var index = i;
                   Exit exit;
@@ -812,12 +1212,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     instantWithdrawAllowed: isAllowed == true,
                     completeDelayedWithdraw: isAllowed == false,
                   );
-                } else if (pendingExits.length +
+                } else*/
+                if (/*pendingExits.length +
                         pendingForceExits.length +
                         filteredExits.length +
-                        pendingWithdraws.length +
-                        transactions.length ==
-                    i) {
+                        pendingWithdraws.length +*/
+                    transactions.length == i) {
                   return Center(
                     child:
                         CircularProgressIndicator(color: HermezColors.orange),
@@ -828,25 +1228,39 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       HermezColors.statusOrangeBackground;
                   var title = "";
                   var subtitle = "";
-                  final index = i -
-                      pendingExits.length -
+                  final index = i
+                      /* - pendingExits.length -
                       pendingForceExits.length -
                       filteredExits.length -
-                      pendingWithdraws.length;
+                      pendingWithdraws.length*/
+                      ;
                   dynamic element = transactions.elementAt(index);
-                  var type = 'type';
+                  TransactionType type;
                   var txType;
-                  var status = 'status';
-                  var timestamp = 0;
+                  TransactionStatus status;
+                  var timestamp;
                   var txId;
                   var txHash;
                   var addressFrom = 'from';
                   var addressTo = 'to';
-                  var value = '0';
-                  var feeValue = '0';
-                  var fee = 0.0;
+                  double value = 0.0;
+                  double fee = 0.0;
                   var amount;
-                  if (element.runtimeType == ForgedTransaction) {
+                  if (element.runtimeType == Transaction) {
+                    Transaction transaction = element;
+                    type = transaction.type;
+                    status = transaction.status;
+                    timestamp = int.tryParse(transaction.timestamp);
+                    txHash = transaction.id;
+                    addressFrom = transaction.from;
+                    addressTo = transaction.to;
+                    value = transaction.amount;
+                    amount = value /
+                        pow(10, widget.arguments.account.token.token.decimals);
+                    fee = transaction.fee;
+                  }
+
+                  /*if (element.runtimeType == ForgedTransaction) {
                     ForgedTransaction transaction = element;
                     if (transaction.id != null) {
                       txId = transaction.id;
@@ -979,7 +1393,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     amount = double.parse(value) /
                         pow(10, widget.arguments.account.token.token.decimals);
                     fee = double.parse(feeValue);
-                  }
+                  }*/
 
                   final String currency =
                       (_settingsBloc.state as LoadedSettingsState)
@@ -1009,19 +1423,19 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   var isNegative = false;
 
                   switch (type) {
-                    case "RECEIVE":
+                    case TransactionType.RECEIVE:
                       txType = TransactionType.RECEIVE;
                       title = "Received";
                       icon = "assets/tx_receive.png";
                       isNegative = false;
                       break;
-                    case "SEND":
+                    case TransactionType.SEND:
                       txType = TransactionType.SEND;
                       title = "Sent";
                       icon = "assets/tx_send.png";
                       isNegative = true;
                       break;
-                    case 'EXIT':
+                    case TransactionType.EXIT:
                       txType = TransactionType.EXIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
@@ -1030,7 +1444,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               .level ==
                           TransactionLevel.LEVEL2;
                       break;
-                    case 'FORCEEXIT':
+                    case TransactionType.FORCEEXIT:
                       txType = TransactionType.FORCEEXIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
@@ -1039,7 +1453,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               .level ==
                           TransactionLevel.LEVEL2;
                       break;
-                    case "WITHDRAW":
+                    case TransactionType.WITHDRAW:
                       txType = TransactionType.WITHDRAW;
                       title = "Moved";
                       icon = "assets/tx_move.png";
@@ -1048,7 +1462,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               .level ==
                           TransactionLevel.LEVEL2;
                       break;
-                    case "DEPOSIT":
+                    case TransactionType.DEPOSIT:
                       txType = TransactionType.DEPOSIT;
                       title = "Moved";
                       icon = "assets/tx_move.png";
@@ -1060,10 +1474,10 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   }
 
                   TransactionStatus txStatus = TransactionStatus.CONFIRMED;
-                  if (status == "CONFIRMED") {
+                  if (status == TransactionStatus.CONFIRMED) {
                     subtitle = format.format(date);
                     txStatus = TransactionStatus.CONFIRMED;
-                  } else if (status == "INVALID") {
+                  } else if (status == TransactionStatus.INVALID) {
                     subtitle = "Invalid";
                     statusColor = HermezColors.statusRed;
                     statusBackgroundColor = HermezColors.statusRedBackground;
@@ -1090,7 +1504,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      subtitle: status != "CONFIRMED"
+                      subtitle: status != TransactionStatus.CONFIRMED
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
@@ -1174,6 +1588,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         var results = await Navigator.pushNamed(
                             context, "transaction_details",
                             arguments: TransactionDetailsArguments(
+                                settingsBloc: _settingsBloc,
                                 //store: widget.arguments.store,
                                 transactionType: txType,
                                 transactionLevel:
@@ -1195,7 +1610,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           PopWithResults popResult = results;
                           if (popResult.toPage == "/home") {
                             // TODO do stuff
-                            _onRefresh();
+                            //_onRefresh();
                           } else {
                             Navigator.of(context).pop(results);
                           }
@@ -1212,6 +1627,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   }
 
   Future<void> fetchData() async {
+    await _walletsBloc.refreshTransactions(widget.arguments.account);
     /*_stateResponse = await getState();
     if (_needRefresh) {
       _bloc.getAccount(

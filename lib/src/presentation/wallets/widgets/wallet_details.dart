@@ -140,7 +140,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         CircularProgressIndicator(color: HermezColors.orange),
                   ));
             } else if (state is ErrorAccountsState) {
-              return Center(child: Text(state.message));
+              return _renderErrorContent();
             } else {
               return NestedScrollView(
                 headerSliverBuilder:
@@ -544,6 +544,8 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
       _isLoading = true;
     });
 
+    await _walletsBloc.refreshAccounts();
+
     //await widget.arguments.store.getAccounts();
     setState(() {
       _isLoading = false;
@@ -892,8 +894,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       ),
                       onPressed: () async {
                         List<Account> accounts = _accounts
-                            .takeWhile(
-                                (account) => double.parse(account.balance) > 0)
+                            .takeWhile((account) => account.balance > 0)
                             .toList();
                         Account account;
                         hezToken.Token token;
@@ -1451,15 +1452,14 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     duration: Duration(seconds: FLUSHBAR_AUTO_HIDE_DURATION),
                   ).show(context);
                 } else {
-                  var needRefresh =
-                      await Navigator.of(context).pushNamed("account_details",
-                          arguments: AccountDetailsArguments(
-                              _settingsBloc,
-                              widget.arguments.transactionLevel,
-                              account,
-                              //token,
-                              //priceToken,
-                              widget.arguments.parentContext));
+                  var needRefresh = await Navigator.of(context).pushNamed(
+                      "account_details",
+                      arguments: AccountDetailsArguments(
+                          _walletsBloc,
+                          _settingsBloc,
+                          widget.arguments.transactionLevel,
+                          account,
+                          widget.arguments.parentContext));
                   if (needRefresh != null && needRefresh == true) {
                     //_onRefresh();
                   } else {

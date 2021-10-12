@@ -27,11 +27,12 @@ class TransactionInNetworkRepository implements TransactionRepository {
 
   @override
   Future<List<Transaction>> getTransactions(String address, String accountIndex,
-      [LayerFilter layerFilter = LayerFilter.ALL,
-      TransactionStatusFilter transactionFilter = TransactionStatusFilter.ALL,
-      TransactionTypeFilter transactionType = TransactionTypeFilter.ALL,
+      {LayerFilter layerFilter = LayerFilter.ALL,
+      TransactionStatusFilter transactionStatusFilter =
+          TransactionStatusFilter.ALL,
+      TransactionTypeFilter transactionTypeFilter = TransactionTypeFilter.ALL,
       List<int> tokenIds,
-      int fromItem = 0]) async {
+      int fromItem = 0}) async {
     List<Transaction> response = [];
     if (address == null || address.isEmpty) {
       address = await _configurationService.getHermezAddress();
@@ -47,9 +48,9 @@ class TransactionInNetworkRepository implements TransactionRepository {
         validAddress = isHermezEthereumAddress(hermezAddress);
       }
       if (validAddress) {
-        if (transactionType == TransactionTypeFilter.ALL &&
-            (transactionFilter == TransactionStatusFilter.ALL ||
-                transactionFilter == TransactionStatusFilter.HISTORY)) {
+        if (transactionTypeFilter == TransactionTypeFilter.ALL &&
+            (transactionStatusFilter == TransactionStatusFilter.ALL ||
+                transactionStatusFilter == TransactionStatusFilter.HISTORY)) {
           final hermezTransactions = await _getHermezTransactionsByAddress(
               hermezAddress, accountIndex,
               tokenIds: tokenIds, fromItem: fromItem);
@@ -60,9 +61,9 @@ class TransactionInNetworkRepository implements TransactionRepository {
                   )));
         }
 
-        if (transactionType == TransactionTypeFilter.ALL &&
-                transactionFilter == TransactionStatusFilter.ALL ||
-            transactionFilter == TransactionStatusFilter.PENDING) {
+        if (transactionTypeFilter == TransactionTypeFilter.ALL &&
+                transactionStatusFilter == TransactionStatusFilter.ALL ||
+            transactionStatusFilter == TransactionStatusFilter.PENDING) {
           bool isAccountIndex = isHermezAccountIndex(accountIndex);
           if (isAccountIndex) {
             final hermezPoolTransactions =
@@ -89,18 +90,123 @@ class TransactionInNetworkRepository implements TransactionRepository {
         final ethereumTransactions = await _getEthereumTransactionsByAddress(
             ethereumAddress,
             tokenIds: tokenIds);
-        response.addAll(
-            ethereumTransactions.map((ethereumTransaction) => Transaction(
-                  level: TransactionLevel.LEVEL1,
-                  status: TransactionStatus.CONFIRMED,
-                )));
+        response.addAll(ethereumTransactions.map((ethereumTransaction) {
+          String id = "";
+          String block = "";
+          TransactionLevel level;
+          TransactionStatus status;
+          TransactionType type;
+          String timestamp = "";
+          String value = "0.0";
+          String fee = "";
+          String from = "";
+          String to = "";
+          int tokenId = -1;
+          if (ethereumTransaction["type"] == "RECEIVE") {
+            type = TransactionType.RECEIVE;
+          } else if (ethereumTransaction["type"] == "DEPOSIT") {
+            type = TransactionType.DEPOSIT;
+          } else if (ethereumTransaction["type"] == "WITHDRAW") {
+            type = TransactionType.WITHDRAW;
+          }
+          if (ethereumTransaction["status"] == "CONFIRMED") {
+            status = TransactionStatus.CONFIRMED;
+          } else if (ethereumTransaction["status"] == "PENDING") {
+            status = TransactionStatus.PENDING;
+          }
+          if (ethereumTransaction["txHash"] != null) {
+            id = ethereumTransaction["txHash"];
+            block = ethereumTransaction["blockNumber"].toString();
+            level = TransactionLevel.LEVEL1;
+            timestamp = ethereumTransaction["timestamp"].toString();
+            value = ethereumTransaction["value"];
+            fee = ethereumTransaction["fee"];
+            from = ethereumTransaction["from"];
+            to = ethereumTransaction["to"];
+            tokenId = ethereumTransaction["tokenId"];
+          }
+          /*if (ethereumTransaction.type == "Transfer" ||
+              ethereumTransaction.type == "TransferToEthAddr") {
+            String value = ethereumTransaction.amount.toString();
+            /*if (transaction.L1orL2 == 'L1') {
+                        if (transaction.fromHezEthereumAddress.toLowerCase() ==
+                            widget.arguments.store.state.ethereumAddress
+                                .toLowerCase()) {
+                          type = "SEND";
+                        } else if (transaction.toHezEthereumAddress
+                                .toLowerCase() ==
+                            widget.arguments.store.state.ethereumAddress
+                                .toLowerCase()) {}
+                      } else {*/
+            /*if ((ethereumTransaction.fromAccountIndex != null &&
+                    ethereumTransaction.fromAccountIndex ==
+                        widget.arguments.account.accountIndex) ||
+                (ethereumTransaction.fromHezEthereumAddress != null &&
+                    ethereumTransaction.fromHezEthereumAddress.toLowerCase() ==
+                        (_settingsBloc.state as LoadedSettingsState)
+                            .settings
+                            .ethereumAddress
+                            .toLowerCase())) {
+              type = "SEND";
+              if (transaction.batchNum != null) {
+                status = "CONFIRMED";
+                final formatter = DateFormat(
+                    "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                final DateTime dateTimeFromStr =
+                    formatter.parse(transaction.timestamp, true);
+                timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+              } else if (transaction.timestamp.isNotEmpty) {
+                final formatter = DateFormat(
+                    "yyyy-MM-ddThh:mm:ss"); // "2021-03-24T15:42:544802"
+                final DateTime dateTimeFromStr =
+                    formatter.parse(transaction.timestamp, true);
+                timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+              }
+              addressFrom = transaction.fromHezEthereumAddress;
+              addressTo = transaction.toHezEthereumAddress;
+            } else if ((transaction.toAccountIndex != null &&
+                    transaction.toAccountIndex ==
+                        widget.arguments.account.accountIndex) ||
+                (transaction.toHezEthereumAddress != null &&
+                    transaction.toHezEthereumAddress.toLowerCase() ==
+                        (_settingsBloc.state as LoadedSettingsState)
+                            .settings
+                            .ethereumAddress
+                            .toLowerCase())) {
+              type = "RECEIVE";
+              if (transaction.timestamp.isNotEmpty) {
+                status = "CONFIRMED";
+                final formatter = DateFormat(
+                    "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                final DateTime dateTimeFromStr =
+                    formatter.parse(transaction.timestamp, true);
+                timestamp = dateTimeFromStr.millisecondsSinceEpoch;
+              }
+              addressFrom = transaction.fromHezEthereumAddress;
+              addressTo = transaction.toHezEthereumAddress;
+            }*/
+          }*/
+          return Transaction(
+            id: id,
+            block: block,
+            level: level,
+            status: status,
+            type: type,
+            from: from,
+            to: to,
+            timestamp: timestamp,
+            amount: double.tryParse(value),
+            fee: double.tryParse(fee),
+            tokenId: tokenId,
+          );
+        }));
       }
 
-      if ((transactionType == TransactionTypeFilter.ALL ||
-                  transactionType == TransactionTypeFilter.SEND ||
-                  transactionType == TransactionTypeFilter.RECEIVE) &&
-              transactionFilter == TransactionStatusFilter.ALL ||
-          transactionFilter == TransactionStatusFilter.PENDING) {
+      if ((transactionTypeFilter == TransactionTypeFilter.ALL ||
+                  transactionTypeFilter == TransactionTypeFilter.SEND ||
+                  transactionTypeFilter == TransactionTypeFilter.RECEIVE) &&
+              transactionStatusFilter == TransactionStatusFilter.ALL ||
+          transactionStatusFilter == TransactionStatusFilter.PENDING) {
         final pendingTransfers = await getPendingTransfers();
         response.addAll(pendingTransfers.map((pendingTransfer) => Transaction(
               level: TransactionLevel.LEVEL1,
@@ -109,8 +215,8 @@ class TransactionInNetworkRepository implements TransactionRepository {
       }
     }
 
-    if (transactionType == TransactionTypeFilter.ALL ||
-        transactionType == TransactionTypeFilter.EXIT) {
+    if (transactionTypeFilter == TransactionTypeFilter.ALL ||
+        transactionTypeFilter == TransactionTypeFilter.EXIT) {
       String hermezAddress = address;
       bool validAddress = false;
       validAddress = isHermezEthereumAddress(hermezAddress) ||
@@ -128,10 +234,10 @@ class TransactionInNetworkRepository implements TransactionRepository {
       }
     }
 
-    if ((transactionType == TransactionTypeFilter.ALL ||
-                transactionType == TransactionTypeFilter.DEPOSIT) &&
-            transactionFilter == TransactionStatusFilter.ALL ||
-        transactionFilter == TransactionStatusFilter.PENDING) {
+    if ((transactionTypeFilter == TransactionTypeFilter.ALL ||
+                transactionTypeFilter == TransactionTypeFilter.DEPOSIT) &&
+            transactionStatusFilter == TransactionStatusFilter.ALL ||
+        transactionStatusFilter == TransactionStatusFilter.PENDING) {
       final pendingDeposits = await getPendingDeposits();
       response.addAll(pendingDeposits.map((pendingDeposit) => Transaction(
             level: TransactionLevel.LEVEL1,
@@ -139,10 +245,10 @@ class TransactionInNetworkRepository implements TransactionRepository {
           )));
     }
 
-    if ((transactionType == TransactionTypeFilter.ALL ||
-                transactionType == TransactionTypeFilter.WITHDRAW) &&
-            transactionFilter == TransactionStatusFilter.ALL ||
-        transactionFilter == TransactionStatusFilter.PENDING) {
+    if ((transactionTypeFilter == TransactionTypeFilter.ALL ||
+                transactionTypeFilter == TransactionTypeFilter.WITHDRAW) &&
+            transactionStatusFilter == TransactionStatusFilter.ALL ||
+        transactionStatusFilter == TransactionStatusFilter.PENDING) {
       final pendingWithdraws = await getPendingWithdraws();
       response.addAll(pendingWithdraws.map((pendingWithdraw) => Transaction(
             level: TransactionLevel.LEVEL1,
@@ -150,10 +256,10 @@ class TransactionInNetworkRepository implements TransactionRepository {
           )));
     }
 
-    if ((transactionType == TransactionTypeFilter.ALL ||
-                transactionType == TransactionTypeFilter.FORCEEXIT) &&
-            transactionFilter == TransactionStatusFilter.ALL ||
-        transactionFilter == TransactionStatusFilter.PENDING) {
+    if ((transactionTypeFilter == TransactionTypeFilter.ALL ||
+                transactionTypeFilter == TransactionTypeFilter.FORCEEXIT) &&
+            transactionStatusFilter == TransactionStatusFilter.ALL ||
+        transactionStatusFilter == TransactionStatusFilter.PENDING) {
       final pendingForceExits = await getPendingForceExits();
       response.addAll(pendingForceExits.map((pendingForceExits) => Transaction(
             level: TransactionLevel.LEVEL1,
@@ -199,26 +305,49 @@ class TransactionInNetworkRepository implements TransactionRepository {
   Future<List<dynamic>> _getEthereumTransactionsByAddress(String address,
       {List<int> tokenIds}) async {
     List response = [];
-    response.addAll(
-      tokenIds.map(
-        (tokenId) async {
-          if (tokenId == 0) {
-            return _explorerService.getTransactionsByAccountAddress(address);
-          } else {
-            Token token;
-            try {
-              token = await getToken(tokenId);
-            } catch (e) {}
-            if (token != null) {
-              List<dynamic> transactions =
-                  await _explorerService.getTokenTransferEventsByAccountAddress(
-                      address, token.ethereumAddress);
-              return transactions;
-            }
+    for (int tokenId in tokenIds) {
+      if (tokenId == 0) {
+        try {
+          List<dynamic> transactions =
+              await _explorerService.getTransactionsByAccountAddress(address);
+          response.addAll(transactions);
+        } catch (e) {}
+      } else {
+        Token token;
+        try {
+          token = await getToken(tokenId);
+        } catch (e) {}
+        if (token != null) {
+          List<dynamic> transactions =
+              await _explorerService.getTokenTransferEventsByAccountAddress(
+                  address, token.ethereumAddress,
+                  tokenId: token.id);
+          response.addAll(transactions);
+        }
+      }
+    }
+    /*response.addAll(tokenIds.map(
+      (tokenId) async {
+        if (tokenId == 0) {
+          try {
+            List<dynamic> transactions =
+                await _explorerService.getTransactionsByAccountAddress(address);
+            return transactions;
+          } catch (e) {}
+        } else {
+          Token token;
+          try {
+            token = await getToken(tokenId);
+          } catch (e) {}
+          if (token != null) {
+            List<dynamic> transactions =
+                await _explorerService.getTokenTransferEventsByAccountAddress(
+                    address, token.ethereumAddress);
+            return transactions;
           }
-        },
-      ),
-    );
+        }
+      },
+    ).toList());*/
     return response;
   }
 

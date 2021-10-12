@@ -42,6 +42,43 @@ class BalanceUtils {
     return result;
   }
 
+  static String formatBalance(double amount, Token token,
+      {bool toFiat = false,
+      String currency = "USD",
+      double exchangeRatio = 1}) {
+    double value = (amount / pow(10, token.token.decimals));
+    String result = "";
+    if (toFiat) {
+      value *= token.price.USD;
+      String locale = "";
+      String symbol = "";
+      if (currency == "EUR") {
+        locale = 'eu';
+        symbol = '€';
+      } else if (currency == "CNY") {
+        locale = 'en';
+        symbol = '\¥';
+      } else if (currency == "JPY") {
+        locale = 'en';
+        symbol = "\¥";
+      } else if (currency == "GBP") {
+        locale = 'en';
+        symbol = "\£";
+      } else {
+        locale = 'en';
+        symbol = '\$';
+      }
+
+      if (currency != "USD") {
+        value *= exchangeRatio;
+      }
+
+      result = NumberFormat.currency(locale: locale, symbol: symbol)
+          .format(getDoubleWithPrecision(value));
+    } else {}
+    return result;
+  }
+
   static String balanceOfAccounts(
       TransactionLevel txLevel,
       List<Account> _accounts,
@@ -82,9 +119,8 @@ class BalanceUtils {
         PriceToken priceToken = token.price;
         if (priceToken.USD != null) {
           tokens.add(token);
-          double value = priceToken.USD *
-              double.parse(account.balance) /
-              pow(10, token.token.decimals);
+          double value =
+              priceToken.USD * account.balance / pow(10, token.token.decimals);
           if (currency != "USD") {
             value *= exchangeRatio;
           }
@@ -218,7 +254,7 @@ class BalanceUtils {
       isCurrency = true;
     }
     double resultAmount = 0;
-    double balanceAmount = double.parse(account.balance);
+    double balanceAmount = account.balance;
     double withdrawsAmount = 0;
     double depositsAmount = 0;
     Token token = account.token;

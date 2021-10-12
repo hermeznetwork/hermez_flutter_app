@@ -96,11 +96,13 @@ class _HomePageState extends State<HomePage> {
             final AccountDetailsArguments args = settings.arguments;
             page = AccountDetailsPage(arguments: args);
           } else if (settings.name == 'transaction_details') {
-            page = WalletTransferProvider(
+            page =
+                /*WalletTransferProvider(
               builder: (context, store) {
-                return TransactionDetailsPage(arguments: settings.arguments);
-              },
-            );
+                return*/
+                TransactionDetailsPage(arguments: settings.arguments);
+            //},
+            //);
           }
 
           return MaterialPageRoute(builder: (_) => page);

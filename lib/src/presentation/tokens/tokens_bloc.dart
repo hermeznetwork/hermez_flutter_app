@@ -9,8 +9,8 @@ class TokensBloc extends Bloc<TokensState> {
     changeState(TokensState.loading());
   }
 
-  void getTokens() {
-    _getTokensUseCase.getTokens().then((tokens) {
+  void getTokens([List<int> tokenIds]) {
+    _getTokensUseCase.getTokens(tokenIds).then((tokens) {
       changeState(TokensState.loaded(TokensItemState(tokens)));
     }).catchError((error) {
       changeState(TokensState.error('A network error has occurred'));

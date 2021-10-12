@@ -15,12 +15,10 @@ class GetAllTransactionsUseCase {
       tokenIds = [];
     }
 
-    return _transactionRepository.getTransactions(
-        address,
-        accountIndex,
-        layerFilter,
-        TransactionStatusFilter.ALL,
-        TransactionTypeFilter.ALL,
-        tokenIds);
+    return _transactionRepository.getTransactions(address, accountIndex,
+        layerFilter: layerFilter,
+        transactionStatusFilter: TransactionStatusFilter.ALL,
+        transactionTypeFilter: TransactionTypeFilter.ALL,
+        tokenIds: tokenIds);
   }
 }
