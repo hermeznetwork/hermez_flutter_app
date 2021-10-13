@@ -913,7 +913,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Widget _buildFeeRow(BuildContext context, LoadedSettingsState state) {
     if (widget.arguments.status == TransactionStatus.DRAFT ||
         (widget.arguments.status != TransactionStatus.DRAFT &&
-            widget.arguments.transactionType != TransactionType.DEPOSIT &&
+            //widget.arguments.transactionType != TransactionType.DEPOSIT &&
             widget.arguments.transactionType != TransactionType.RECEIVE &&
             widget.arguments.transactionType != TransactionType.FORCEEXIT)) {
       bool enoughFee = isFeeEnough();
@@ -993,29 +993,28 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         if (widget.arguments.transactionLevel == TransactionLevel.LEVEL2) {
           title = 'Hermez fee';
           double fee = widget.arguments.fee;
-          currencyFee = EthAmountFormatter.formatAmount(
-              fee.toDouble() /
-                  pow(10, widget.arguments.account.token.token.decimals) *
-                  (widget.arguments.account.token.price.USD *
-                      (currency != "USD" ? state.settings.exchangeRatio : 1)),
-              currency);
+          if (fee != null) {
+            currencyFee = EthAmountFormatter.formatAmount(
+                fee *
+                    (widget.arguments.account.token.price.USD *
+                        (currency != "USD" ? state.settings.exchangeRatio : 1)),
+                currency);
 
-          tokenFee = EthAmountFormatter.formatAmount(
-              fee.toDouble() /
-                  pow(10, widget.arguments.account.token.token.decimals),
-              widget.arguments.account.token.token.symbol);
-          showSpeed = false;
+            tokenFee = EthAmountFormatter.formatAmount(
+                fee, widget.arguments.account.token.token.symbol);
+            showSpeed = false;
+          }
         } else {
           title = 'Ethereum fee';
           double fee = widget.arguments.fee;
+          if (widget.arguments.account.token.token.id == 0) {
+            ethereumAccount = widget.arguments.account;
+          }
           currencyFee = EthAmountFormatter.formatAmount(
               fee.toDouble() /
                   pow(10, ethereumAccount.token.token.decimals) *
                   (ethereumAccount.token.price.USD *
-                      /*(currency != "USD"
-                          ? _settingsBloc.state.settings.exchangeRatio
-                          :*/
-                      1),
+                      (currency != "USD" ? state.settings.exchangeRatio : 1)),
               currency);
 
           tokenFee = EthAmountFormatter.formatAmount(

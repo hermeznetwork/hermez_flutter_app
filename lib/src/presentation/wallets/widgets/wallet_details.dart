@@ -274,17 +274,15 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                                 widget.arguments.address.length)
                                             .toUpperCase() ??
                                     ""
-                                : "hez:" +
-                                        "0x" +
-                                        AddressUtils.strip0x(widget
+                                : "hez:0x" +
+                                        AddressUtils.stripHez0x(widget
                                                 .arguments.address
-                                                .substring(0, 6))
+                                                .substring(0, 10))
                                             .toUpperCase() +
                                         " ･･･ " +
                                         widget.arguments.address
                                             .substring(
-                                                widget.arguments.address.length -
-                                                    4,
+                                                widget.arguments.address.length - 4,
                                                 widget.arguments.address.length)
                                             .toUpperCase() ??
                                     "")

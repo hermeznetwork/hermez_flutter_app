@@ -1257,7 +1257,13 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     value = transaction.amount;
                     amount = value /
                         pow(10, widget.arguments.account.token.token.decimals);
-                    fee = transaction.fee;
+                    if (transaction.level == TransactionLevel.LEVEL2) {
+                      fee = transaction.fee /
+                          pow(10,
+                              widget.arguments.account.token.token.decimals);
+                    } else {
+                      fee = transaction.fee;
+                    }
                   }
 
                   /*if (element.runtimeType == ForgedTransaction) {

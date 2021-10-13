@@ -15,6 +15,7 @@ import 'package:hermez_sdk/model/forged_transactions_response.dart';
 import 'package:hermez_sdk/model/pool_transaction.dart';
 import 'package:hermez_sdk/model/token.dart';
 import 'package:hermez_sdk/tx_utils.dart';
+import 'package:intl/intl.dart';
 import 'package:web3dart/web3dart.dart' as web3;
 
 class TransactionInNetworkRepository implements TransactionRepository {
@@ -54,11 +55,86 @@ class TransactionInNetworkRepository implements TransactionRepository {
           final hermezTransactions = await _getHermezTransactionsByAddress(
               hermezAddress, accountIndex,
               tokenIds: tokenIds, fromItem: fromItem);
+
           response.addAll(hermezTransactions.transactions
-              .map((forgedTransaction) => Transaction(
-                    level: TransactionLevel.LEVEL2,
-                    status: TransactionStatus.CONFIRMED,
-                  )));
+              .map((ForgedTransaction forgedTransaction) {
+            String id = "";
+            String block = "";
+            TransactionType type;
+            TransactionLevel level;
+            TransactionStatus status;
+            String timestamp = "";
+            String value = "0.0";
+            String fee = "";
+            String from = "";
+            String to = "";
+            int tokenId = -1;
+            if (forgedTransaction.type == "Receive") {
+              type = TransactionType.RECEIVE;
+            } else if (forgedTransaction.type == "Deposit" ||
+                forgedTransaction.type == "CreateAccountDeposit") {
+              type = TransactionType.DEPOSIT;
+            } else if (forgedTransaction.type == "Exit") {
+              type = TransactionType.EXIT;
+            } else if (forgedTransaction.type == "Withdraw") {
+              type = TransactionType.WITHDRAW;
+            } else if (forgedTransaction.type == "Transfer") {
+              type = TransactionType.SEND;
+            }
+            if (forgedTransaction.timestamp != null) {
+              status = TransactionStatus.CONFIRMED;
+            } else {
+              status = TransactionStatus.PENDING;
+            }
+            if (forgedTransaction.id != null) {
+              id = forgedTransaction.id;
+              block = forgedTransaction.batchNum.toString();
+              level = TransactionLevel.LEVEL2;
+              if (forgedTransaction != null) {
+                final formatter = DateFormat(
+                    "yyyy-MM-ddThh:mm:ssZ"); // "2021-03-18T10:42:01Z"
+                final DateTime dateTimeFromStr =
+                    formatter.parse(forgedTransaction.timestamp, true);
+                timestamp = dateTimeFromStr.millisecondsSinceEpoch.toString();
+              }
+              if (type == TransactionType.DEPOSIT) {
+                value = forgedTransaction.l1info.depositAmount;
+              } else {
+                value = forgedTransaction.amount;
+              }
+              fee = forgedTransaction.l2info.fee.toString();
+              if (type == TransactionType.DEPOSIT) {
+                from = getEthereumAddress(
+                    forgedTransaction.fromHezEthereumAddress);
+              } else {
+                from = forgedTransaction.fromHezEthereumAddress;
+              }
+              if (type == TransactionType.DEPOSIT) {
+                to = forgedTransaction.fromHezEthereumAddress;
+              } else if (type == TransactionType.EXIT ||
+                  type == TransactionType.WITHDRAW) {
+                to = getEthereumAddress(
+                    forgedTransaction.fromHezEthereumAddress);
+              } else {
+                to = forgedTransaction.toHezEthereumAddress;
+              }
+              tokenId = forgedTransaction.token.id;
+            }
+            return Transaction(
+              id: id,
+              block: block,
+              level: level,
+              status: status,
+              type: type,
+              from: from,
+              to: to,
+              timestamp: timestamp,
+              amount: double.tryParse(value),
+              fee: double.tryParse(fee),
+              tokenId: tokenId,
+            );
+            return Transaction();
+          }));
         }
 
         if (transactionTypeFilter == TransactionTypeFilter.ALL &&
@@ -108,6 +184,8 @@ class TransactionInNetworkRepository implements TransactionRepository {
             type = TransactionType.DEPOSIT;
           } else if (ethereumTransaction["type"] == "WITHDRAW") {
             type = TransactionType.WITHDRAW;
+          } else if (ethereumTransaction["type"] == "SEND") {
+            type = TransactionType.SEND;
           }
           if (ethereumTransaction["status"] == "CONFIRMED") {
             status = TransactionStatus.CONFIRMED;
