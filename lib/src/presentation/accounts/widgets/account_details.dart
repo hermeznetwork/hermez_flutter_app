@@ -704,13 +704,9 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                   var results = await Navigator.pushNamed(
                     widget.arguments.parentContext,
                     "/transaction_amount",
-                    arguments: TransactionAmountArguments(
-                        //widget.arguments.store,
-                        widget.arguments.level,
-                        TransactionType.SEND,
+                    arguments: TransactionAmountArguments(_settingsBloc,
+                        widget.arguments.level, TransactionType.SEND,
                         account: widget.arguments.account,
-                        //token: widget.arguments.token,
-                        //priceToken: widget.arguments.priceToken,
                         allowChangeLevel: false),
                   );
                   if (results is PopWithResults) {
@@ -807,7 +803,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                         widget.arguments.parentContext,
                         "/transaction_amount",
                         arguments: TransactionAmountArguments(
-                            //widget.arguments.store,
+                            _settingsBloc,
                             (_settingsBloc.state as LoadedSettingsState)
                                 .settings
                                 .level,
@@ -818,8 +814,6 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 ? TransactionType.DEPOSIT
                                 : TransactionType.EXIT,
                             account: widget.arguments.account,
-                            //token: widget.arguments.token,
-                            //priceToken: widget.arguments.priceToken,
                             allowChangeLevel: false),
                       );
                       if (results is PopWithResults) {
@@ -1258,9 +1252,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     amount = value /
                         pow(10, widget.arguments.account.token.token.decimals);
                     if (transaction.level == TransactionLevel.LEVEL2) {
-                      fee = transaction.fee /
-                          pow(10,
-                              widget.arguments.account.token.token.decimals);
+                      if (transaction.fee != null) {
+                        fee = transaction.fee /
+                            pow(10,
+                                widget.arguments.account.token.token.decimals);
+                      }
                     } else {
                       fee = transaction.fee;
                     }

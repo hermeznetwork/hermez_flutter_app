@@ -39,6 +39,7 @@ import 'package:web3dart/crypto.dart';
 import 'fee_selector.dart';
 
 class TransactionAmountArguments {
+  SettingsBloc settingsBloc;
   TransactionLevel txLevel;
   TransactionType transactionType;
   final Account account;
@@ -48,7 +49,8 @@ class TransactionAmountArguments {
   final String addressTo;
   final bool allowChangeLevel;
 
-  TransactionAmountArguments(this.txLevel, this.transactionType,
+  TransactionAmountArguments(
+      this.settingsBloc, this.txLevel, this.transactionType,
       {this.account,
       this.token,
       this.priceToken,
@@ -63,7 +65,8 @@ class TransactionAmountPage extends StatefulWidget {
   final TransactionAmountArguments arguments;
 
   @override
-  _TransactionAmountPageState createState() => _TransactionAmountPageState();
+  _TransactionAmountPageState createState() =>
+      _TransactionAmountPageState(arguments.settingsBloc);
 }
 
 class _TransactionAmountPageState extends State<TransactionAmountPage>
@@ -90,9 +93,20 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
   final TextEditingController amountController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
 
-  final SettingsBloc _settingsBloc = getIt<SettingsBloc>();
+  SettingsBloc _settingsBloc;
   final TransferBloc _transferBloc = getIt<TransferBloc>();
   final AccountBloc _accountBloc = getIt<AccountBloc>();
+
+  _TransactionAmountPageState(SettingsBloc settingsBloc)
+      : _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>() {
+    if (!(_settingsBloc.state is LoadedSettingsState)) {
+      _settingsBloc.init();
+    }
+    /*if (!(_tokensBloc.state is LoadedTokensState)) {
+      _tokensBloc.getTokens([0]);
+    }*/
+  }
 
   @override
   void initState() {
@@ -128,12 +142,43 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<SettingsState>(
+        initialData: _settingsBloc.state,
+        stream: _settingsBloc.observableState,
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+
+          if (state is LoadingSettingsState) {
+            return Container(
+                color: Colors.white,
+                child: Center(
+                  child: CircularProgressIndicator(color: HermezColors.orange),
+                ));
+          } else if (state is ErrorSettingsState) {
+            return Center(child: Text(state.message));
+          } else {
+            return _renderTransactionAmountContent(context, state);
+          }
+        });
+  }
+
+  Widget _renderTransactionAmountContent(
+      BuildContext context, LoadedSettingsState state) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: getAppBar(),
+      body: _buildAmountForm(context, state),
+    );
+  }
+
+  /*@override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: getAppBar(),
       body: _buildAmountForm(context),
     );
-  }
+  }*/
 
   String getTitle() {
     String operation = "amount";
@@ -212,19 +257,16 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     );
   }
 
-  FutureBuilder _buildAmountForm(BuildContext parentContext) {
+  FutureBuilder _buildAmountForm(
+      BuildContext parentContext, LoadedSettingsState state) {
     return FutureBuilder(
       future: fetchData(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           String feeText = getFeeText(snapshot.connectionState);
           BigInt estimatedFee = getEstimatedFee(); //snapshot.data;
-          final String currency = (_settingsBloc.state as LoadedSettingsState)
-              .settings
-              .defaultCurrency
-              .toString()
-              .split('.')
-              .last;
+          final String currency =
+              state.settings.defaultCurrency.toString().split('.').last;
 
           return Container(
             padding: EdgeInsets.all(10),
@@ -258,13 +300,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                               .USD
                                                           : widget.arguments
                                                               .priceToken.USD) *
-                                                      /*(currency != "USD"
-                                                          ? _settingsBloc
-                                                              .state
-                                                              .settings
+                                                      (currency != "USD"
+                                                          ? state.settings
                                                               .exchangeRatio
-                                                          :*/
-                                                      1)
+                                                          : 1))
                                                   .toStringAsFixed(6)),
                                           selectedToken != null
                                               ? selectedToken
@@ -553,10 +592,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                     arguments: AccountSelectorArguments(
                                         null,
                                         _settingsBloc,
-                                        (_settingsBloc.state
-                                                as LoadedSettingsState)
-                                            .settings
-                                            .level,
+                                        state.settings.level,
                                         widget.arguments.transactionType,
                                         ""
                                         //widget.arguments.store,
@@ -590,13 +626,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                       arguments: AccountSelectorArguments(
                                           null,
                                           _settingsBloc,
-                                          (_settingsBloc.state
-                                                  as LoadedSettingsState)
-                                              .settings
-                                              .level,
+                                          state.settings.level,
                                           widget.arguments.transactionType,
-                                          ""
-                                          /*widget.arguments.store*/));
+                                          state.settings.level ==
+                                                  TransactionLevel.LEVEL1
+                                              ? state.settings.ethereumAddress
+                                              : state.settings.hermezAddress));
                               if (account != null) {
                                 setState(() {
                                   amountController.clear();
@@ -625,7 +660,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                       Container(
                                         alignment: Alignment.centerLeft,
                                         child: Text(
-                                          'Select token',
+                                          'Select account',
                                           style: TextStyle(
                                             color: HermezColors.blackTwo,
                                             fontSize: 16,

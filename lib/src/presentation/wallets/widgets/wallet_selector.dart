@@ -476,12 +476,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   widget.arguments.parentContext,
                                   "/transaction_amount",
                                   arguments: TransactionAmountArguments(
-                                    //widget.arguments.store,
+                                    _settingsBloc,
                                     TransactionLevel.LEVEL1,
                                     TransactionType.DEPOSIT,
                                     account: selectedAccount,
-                                    //token: token,
-                                    //priceToken: priceToken,
                                     allowChangeLevel: true,
                                   )).then((value) {
                                 setState(() {});
@@ -518,12 +516,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   widget.arguments.parentContext,
                                   "/transaction_amount",
                                   arguments: TransactionAmountArguments(
-                                    //widget.arguments.store,
+                                    _settingsBloc,
                                     TransactionLevel.LEVEL2,
                                     TransactionType.EXIT,
                                     account: selectedAccount,
-                                    //token: token,
-                                    //priceToken: priceToken,
                                     allowChangeLevel: true,
                                   )).then((value) {
                                 setState(() {});
@@ -555,12 +551,10 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                   widget.arguments.parentContext,
                                   "/transaction_amount",
                                   arguments: TransactionAmountArguments(
-                                    //widget.arguments.store,
+                                    _settingsBloc,
                                     TransactionLevel.LEVEL1,
                                     TransactionType.DEPOSIT,
                                     account: selectedAccount,
-                                    //token: token,
-                                    //priceToken: priceToken,
                                     allowChangeLevel: true,
                                   )).then((value) {
                                 setState(() {});

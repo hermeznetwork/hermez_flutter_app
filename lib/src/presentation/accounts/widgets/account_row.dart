@@ -19,7 +19,7 @@ class AccountRow extends StatelessWidget {
   final Account account;
   final String name;
   final String symbol;
-  final double price;
+  final num price;
   final String defaultCurrency;
   final double amount;
   final bool simplified;

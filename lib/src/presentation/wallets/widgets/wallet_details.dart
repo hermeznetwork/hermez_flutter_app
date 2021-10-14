@@ -911,6 +911,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                             widget.arguments.parentContext,
                             "/transaction_amount",
                             arguments: TransactionAmountArguments(
+                              _settingsBloc,
                               widget.arguments.transactionLevel,
                               TransactionType.SEND,
                               account: account,

@@ -63,26 +63,29 @@ class Account {
   static num _calculateTotalBalance(
       bool l2Account, List<Transaction> transactions) {
     // TODO:
-    return transactions.fold(0.0, (accumulator, transaction) {
-      if (l2Account == true) {
-        if (transaction.type == TransactionType.DEPOSIT) {
-          return accumulator + transaction.amount;
-        } else if (transaction.type == TransactionType.RECEIVE) {
-          return accumulator + transaction.amount;
+    if (transactions != null) {
+      return transactions.fold(0.0, (accumulator, transaction) {
+        if (l2Account == true) {
+          if (transaction.type == TransactionType.DEPOSIT) {
+            return accumulator + transaction.amount;
+          } else if (transaction.type == TransactionType.RECEIVE) {
+            return accumulator + transaction.amount;
+          } else {
+            return accumulator;
+          }
         } else {
-          return accumulator;
+          if (transaction.type == TransactionType.DEPOSIT) {
+            return accumulator - (transaction.amount + transaction.fee);
+          } else if (transaction.type == TransactionType.RECEIVE) {
+            return accumulator + transaction.amount;
+          } else {
+            return accumulator;
+          }
         }
-      } else {
-        if (transaction.type == TransactionType.DEPOSIT) {
-          return accumulator - (transaction.amount + transaction.fee);
-        } else if (transaction.type == TransactionType.RECEIVE) {
-          return accumulator + transaction.amount;
-        } else {
-          return accumulator;
-        }
-      }
-    });
-    return 0;
+      });
+    } else {
+      return 0;
+    }
     //items.fold(0, (accumulator, item) => accumulator + item.quantity);
   }
 

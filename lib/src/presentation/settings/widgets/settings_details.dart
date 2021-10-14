@@ -310,12 +310,10 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                           Navigator.pushNamed(widget.arguments.parentContext,
                                   "/transaction_amount",
                                   arguments: TransactionAmountArguments(
-                                      //widget.arguments.store,
+                                      _settingsBloc,
                                       TransactionLevel.LEVEL2,
                                       TransactionType.FORCEEXIT,
                                       account: selectedAccount,
-                                      //token: token,
-                                      //priceToken: priceToken,
                                       allowChangeLevel: false))
                               .then((results) {
                             if (results is PopWithResults) {

@@ -345,6 +345,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                 : Navigator.pushReplacementNamed(
                                     context, "/transaction_amount",
                                     arguments: TransactionAmountArguments(
+                                      _settingsBloc,
                                         (_settingsBloc.state as LoadedSettingsState).settings.level,
                                         TransactionType.RECEIVE,
                                         allowChangeLevel: false));

@@ -254,7 +254,7 @@ class BalanceUtils {
       isCurrency = true;
     }
     double resultAmount = 0;
-    double balanceAmount = account.balance;
+    double balanceAmount = account.balance != null ? account.balance : 0.0;
     double withdrawsAmount = 0;
     double depositsAmount = 0;
     Token token = account.token;

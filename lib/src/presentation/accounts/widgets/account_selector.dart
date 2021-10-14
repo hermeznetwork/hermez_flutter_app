@@ -35,8 +35,11 @@ class AccountSelectorPage extends StatefulWidget {
   final AccountSelectorArguments arguments;
 
   @override
-  _AccountSelectorPageState createState() =>
-      _AccountSelectorPageState(arguments.accounts);
+  _AccountSelectorPageState createState() => _AccountSelectorPageState(
+      arguments.accounts,
+      arguments.txLevel,
+      arguments.transactionType,
+      arguments.address);
 }
 
 class _AccountSelectorPageState extends State<AccountSelectorPage> {
@@ -44,14 +47,21 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   //List<Token> _tokens;
 
   final AccountsBloc _bloc;
-  _AccountSelectorPageState(List<Account> accounts)
+  _AccountSelectorPageState(List<Account> accounts, TransactionLevel level,
+      TransactionType type, String address)
       : _bloc = getIt<AccountsBloc>() {
     if (accounts == null) {
-      fetchData();
+      if ((level == TransactionLevel.LEVEL1 &&
+              type != TransactionType.FORCEEXIT) ||
+          type == TransactionType.DEPOSIT) {
+        _bloc.getAccounts(LayerFilter.L1, address);
+      } else {
+        _bloc.getAccounts(LayerFilter.L2, address);
+      }
     }
   }
 
-  void fetchData() {
+  /*void fetchData() {
     if ((widget.arguments.txLevel == TransactionLevel.LEVEL1 &&
             widget.arguments.transactionType != TransactionType.FORCEEXIT) ||
         widget.arguments.transactionType == TransactionType.DEPOSIT) {
@@ -59,7 +69,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
     } else {
       _bloc.getAccounts(LayerFilter.L2, widget.arguments.address);
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +95,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
           } else if (state is ErrorAccountsState) {
             return _renderErrorContent();
           } else {
+            widget.arguments.accounts = state.accountsItem.accounts;
             return _renderAccountsContent(context, state.accountsItem.accounts);
           }
         },
@@ -291,7 +302,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   }*/
 
   Future<void> _onRefresh() async {
-    fetchData();
+    //fetchData();
     //setState(() {});
   }
 
