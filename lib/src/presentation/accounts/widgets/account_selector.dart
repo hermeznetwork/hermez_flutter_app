@@ -50,7 +50,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   _AccountSelectorPageState(List<Account> accounts, TransactionLevel level,
       TransactionType type, String address)
       : _bloc = getIt<AccountsBloc>() {
-    if (accounts == null) {
+    if (!(_bloc.state is LoadedAccountsState)) {
       if ((level == TransactionLevel.LEVEL1 &&
               type != TransactionType.FORCEEXIT) ||
           type == TransactionType.DEPOSIT) {
@@ -95,7 +95,6 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
           } else if (state is ErrorAccountsState) {
             return _renderErrorContent();
           } else {
-            widget.arguments.accounts = state.accountsItem.accounts;
             return _renderAccountsContent(context, state.accountsItem.accounts);
           }
         },

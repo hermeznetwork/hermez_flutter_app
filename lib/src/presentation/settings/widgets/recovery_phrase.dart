@@ -66,7 +66,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
 
           if (state is LoadingSettingsState) {
             return Container(
-                color: Colors.white,
+                color: HermezColors.lightOrange,
                 child: Center(
                   child: CircularProgressIndicator(color: HermezColors.orange),
                 ));
@@ -553,6 +553,8 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
   }
 
   Future<void> disableCapture() async {
-    await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+    try {
+      await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+    } catch (e) {}
   }
 }

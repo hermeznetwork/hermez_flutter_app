@@ -72,8 +72,8 @@ class TransactionAmountPage extends StatefulWidget {
 class _TransactionAmountPageState extends State<TransactionAmountPage>
 /*with AfterLayoutMixin<TransactionAmountPage>*/ {
   Account selectedAccount;
-  Token selectedToken;
-  PriceToken selectedPriceToken;
+  //Token selectedToken;
+  //PriceToken selectedPriceToken;
   bool needRefresh = true;
   bool amountIsValid = true;
   bool addressIsValid = true;
@@ -129,8 +129,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     selectedWithdrawFeeSpeed =
         (_settingsBloc.state as LoadedSettingsState).settings.defaultFee;
     selectedAccount = widget.arguments.account;
-    selectedToken = widget.arguments.token;
-    selectedPriceToken = widget.arguments.priceToken;
+    //selectedToken = widget.arguments.token;
+    //selectedPriceToken = widget.arguments.priceToken;
   }
 
   @override
@@ -257,37 +257,37 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     );
   }
 
-  FutureBuilder _buildAmountForm(
+  Widget _buildAmountForm(
       BuildContext parentContext, LoadedSettingsState state) {
-    return FutureBuilder(
+    /*return FutureBuilder(
       future: fetchData(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          String feeText = getFeeText(snapshot.connectionState);
-          BigInt estimatedFee = getEstimatedFee(); //snapshot.data;
-          final String currency =
-              state.settings.defaultCurrency.toString().split('.').last;
+        if (snapshot.hasData) {*/
+    String feeText = getFeeText(null /*snapshot.connectionState*/);
+    BigInt estimatedFee = getEstimatedFee(); //snapshot.data;
+    final String currency =
+        state.settings.defaultCurrency.toString().split('.').last;
 
-          return Container(
-            padding: EdgeInsets.all(10),
-            color: Colors.white,
-            child: SingleChildScrollView(
-              child: PaperForm(
-                actionButtons: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      Container(
-                        child: Align(
-                          alignment: FractionalOffset.bottomCenter,
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: FlatButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(100.0),
-                              ),
-                              onPressed: isButtonEnabled()
-                                  ? () {
-                                      this.onSubmit(
+    return Container(
+      padding: EdgeInsets.all(10),
+      color: Colors.white,
+      child: SingleChildScrollView(
+        child: PaperForm(
+          actionButtons: <Widget>[
+            Column(
+              children: <Widget>[
+                Container(
+                  child: Align(
+                    alignment: FractionalOffset.bottomCenter,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FlatButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100.0),
+                        ),
+                        onPressed: isButtonEnabled()
+                            ? () {
+                                /*this.onSubmit(
                                           !defaultCurrencySelected
                                               ? double.parse(
                                                   amountController.value.text)
@@ -321,49 +321,45 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                           addressController.value.text,
                                           gasLimit.toInt(),
                                           getGasPrice(selectedFeeSpeed).toInt(),
-                                          depositGasLimit);
-                                    }
-                                  : null,
-                              padding: EdgeInsets.only(
-                                  top: 18.0,
-                                  bottom: 18.0,
-                                  right: 24.0,
-                                  left: 24.0),
-                              disabledColor: HermezColors.blueyGreyTwo,
-                              color: HermezColors.darkOrange,
-                              textColor: Colors.white,
-                              disabledTextColor: Colors.grey,
-                              child: Text(
-                                  widget.arguments.transactionType !=
-                                          TransactionType.RECEIVE
-                                      ? "Continue"
-                                      : "Request",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  )),
-                            ),
-                          ),
-                        ),
+                                          depositGasLimit);*/
+                              }
+                            : null,
+                        padding: EdgeInsets.only(
+                            top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
+                        disabledColor: HermezColors.blueyGreyTwo,
+                        color: HermezColors.darkOrange,
+                        textColor: Colors.white,
+                        disabledTextColor: Colors.grey,
+                        child: Text(
+                            widget.arguments.transactionType !=
+                                    TransactionType.RECEIVE
+                                ? "Continue"
+                                : "Request",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontFamily: 'ModernEra',
+                              fontWeight: FontWeight.w700,
+                            )),
                       ),
-                      selectedAccount != null
-                          ? Container(
-                              alignment: Alignment.center,
-                              margin: EdgeInsets.only(top: 24.0),
-                              child: TextButton(
-                                onPressed: (((_settingsBloc.state
-                                                        as LoadedSettingsState)
-                                                    .settings
+                    ),
+                  ),
+                ),
+                selectedAccount != null
+                    ? Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.only(top: 24.0),
+                        child: TextButton(
+                          onPressed:
+                              null /*(((state.settings
                                                     .level ==
                                                 TransactionLevel.LEVEL2 &&
                                             widget.arguments.transactionType ==
                                                 TransactionType.SEND) ||
-                                        snapshot.connectionState !=
+                                        /*snapshot.connectionState !=
                                             ConnectionState.done
                                     ? null
-                                    : () {
+                                    :*/ () {
                                         if (widget.arguments.transactionType ==
                                                 TransactionType.EXIT ||
                                             widget.arguments.transactionType ==
@@ -390,82 +386,75 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                     });
                                                   }));
                                         }
-                                      }),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      feeText,
-                                      style: TextStyle(
-                                        color: (((_settingsBloc.state
-                                                                as LoadedSettingsState)
-                                                            .settings
-                                                            .level ==
-                                                        TransactionLevel
-                                                            .LEVEL2 &&
-                                                    widget.arguments
-                                                            .transactionType ==
-                                                        TransactionType
-                                                            .SEND)) ||
+                                      })*/
+                          ,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                feeText,
+                                style: TextStyle(
+                                  color: (state.settings.level ==
+                                              TransactionLevel.LEVEL2 &&
+                                          widget.arguments.transactionType ==
+                                              TransactionType.SEND)
+                                      /*||
                                                 snapshot.connectionState !=
-                                                    ConnectionState.done
-                                            ? HermezColors.blueyGreyTwo
-                                            : HermezColors.blackTwo,
-                                        fontSize: 16,
-                                        fontFamily: 'ModernEra',
-                                        fontWeight: ((_settingsBloc.state
-                                                                as LoadedSettingsState)
-                                                            .settings
-                                                            .level ==
-                                                        TransactionLevel
-                                                            .LEVEL2 &&
-                                                    widget.arguments
-                                                            .transactionType ==
-                                                        TransactionType.SEND) ||
+                                                    ConnectionState.done*/
+                                      ? HermezColors.blueyGreyTwo
+                                      : HermezColors.blackTwo,
+                                  fontSize: 16,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: ((_settingsBloc.state
+                                                      as LoadedSettingsState)
+                                                  .settings
+                                                  .level ==
+                                              TransactionLevel.LEVEL2 &&
+                                          widget.arguments.transactionType ==
+                                              TransactionType.SEND)
+                                      /*||
                                                 snapshot.connectionState !=
-                                                    ConnectionState.done
-                                            ? FontWeight.w500
-                                            : FontWeight.w700,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    ((_settingsBloc.state as LoadedSettingsState)
-                                                    .settings
-                                                    .level ==
-                                                TransactionLevel.LEVEL2 &&
-                                            widget.arguments.transactionType ==
-                                                TransactionType.SEND)
-                                        ? Container()
-                                        : snapshot.connectionState ==
+                                                    ConnectionState.done*/
+                                      ? FontWeight.w500
+                                      : FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              ((_settingsBloc.state as LoadedSettingsState)
+                                              .settings
+                                              .level ==
+                                          TransactionLevel.LEVEL2 &&
+                                      widget.arguments.transactionType ==
+                                          TransactionType.SEND)
+                                  ? Container()
+                                  : /*snapshot.connectionState ==
                                                 ConnectionState.done
-                                            ? widget.arguments.transactionType ==
-                                                        TransactionType.EXIT ||
-                                                    widget.arguments.transactionType ==
-                                                        TransactionType
-                                                            .FORCEEXIT
-                                                ? Container(
-                                                    alignment: Alignment.center,
-                                                    margin: EdgeInsets.only(
-                                                        left: 6, bottom: 2),
-                                                    child: SvgPicture.asset(
-                                                        showEstimatedFees
-                                                            ? 'assets/arrow_up.svg'
-                                                            : 'assets/arrow_down.svg',
-                                                        color: HermezColors.blackTwo,
-                                                        semanticsLabel: 'fee_selector'))
-                                                : Container(
-                                                    alignment: Alignment.center,
-                                                    margin: EdgeInsets.only(
-                                                        left: 6, bottom: 2),
-                                                    child: SvgPicture.asset(
-                                                        'assets/arrow_right.svg',
-                                                        color: HermezColors
-                                                            .blackTwo,
-                                                        semanticsLabel:
-                                                            'fee_selector'),
-                                                  )
-                                            : Container(
+                                            ?*/
+                                  widget.arguments.transactionType ==
+                                              TransactionType.EXIT ||
+                                          widget.arguments.transactionType ==
+                                              TransactionType.FORCEEXIT
+                                      ? Container(
+                                          alignment: Alignment.center,
+                                          margin: EdgeInsets.only(
+                                              left: 6, bottom: 2),
+                                          child: SvgPicture.asset(
+                                              showEstimatedFees
+                                                  ? 'assets/arrow_up.svg'
+                                                  : 'assets/arrow_down.svg',
+                                              color: HermezColors.blackTwo,
+                                              semanticsLabel: 'fee_selector'))
+                                      : Container(
+                                          alignment: Alignment.center,
+                                          margin: EdgeInsets.only(
+                                              left: 6, bottom: 2),
+                                          child: SvgPicture.asset(
+                                              'assets/arrow_right.svg',
+                                              color: HermezColors.blackTwo,
+                                              semanticsLabel: 'fee_selector'),
+                                        )
+                              /*: Container(
                                                 alignment: Alignment.center,
                                                 margin: EdgeInsets.only(left: 6, bottom: 1),
                                                 child: CircularProgressIndicator(
@@ -477,42 +466,39 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                   strokeWidth: 2,
                                                 ),
                                                 width: 10,
-                                                height: 10),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : Container(),
-                      showEstimatedFees &&
-                              needRefresh == false &&
-                              selectedAccount != null
-                          ? buildFeesList()
-                          : Container(),
-                    ],
-                  ),
-                ],
-                children: <Widget>[
-                  widget.arguments.transactionType == TransactionType.EXIT ||
-                          widget.arguments.transactionType ==
-                              TransactionType.FORCEEXIT ||
-                          widget.arguments.transactionType ==
-                              TransactionType.DEPOSIT
-                      ? MoveRow(
-                          (_settingsBloc.state as LoadedSettingsState)
-                              .settings
-                              .level,
-                          widget.arguments.allowChangeLevel &&
-                                  needRefresh == false
-                              ? () async {
-                                  setState(() {
-                                    gasPriceResponse = null;
-                                    if ((widget.arguments.txLevel ==
-                                        TransactionLevel.LEVEL1)) {
-                                      widget.arguments.txLevel =
-                                          TransactionLevel.LEVEL2;
-                                      if (selectedAccount != null) {
-                                        selectedAccount = null;
-                                        /*widget
+                                                height: 10)*/
+                              ,
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(),
+                showEstimatedFees &&
+                        needRefresh == false &&
+                        selectedAccount != null
+                    ? buildFeesList()
+                    : Container(),
+              ],
+            ),
+          ],
+          children: <Widget>[
+            widget.arguments.transactionType == TransactionType.EXIT ||
+                    widget.arguments.transactionType ==
+                        TransactionType.FORCEEXIT ||
+                    widget.arguments.transactionType == TransactionType.DEPOSIT
+                ? MoveRow(
+                    (_settingsBloc.state as LoadedSettingsState).settings.level,
+                    widget.arguments.allowChangeLevel && needRefresh == false
+                        ? () async {
+                            setState(() {
+                              gasPriceResponse = null;
+                              if ((widget.arguments.txLevel ==
+                                  TransactionLevel.LEVEL1)) {
+                                widget.arguments.txLevel =
+                                    TransactionLevel.LEVEL2;
+                                if (selectedAccount != null) {
+                                  selectedAccount = null;
+                                  /*widget
                                             .arguments.store.state.l2Accounts
                                             .firstWhere(
                                                 (account) =>
@@ -520,16 +506,16 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                     selectedAccount
                                                         .token.token.id,
                                                 orElse: () => null);*/
-                                        //selectedToken = await widget.arguments.store.getTokenById(selectedAccount.tokenId);
-                                      }
-                                      widget.arguments.transactionType =
-                                          TransactionType.EXIT;
-                                    } else {
-                                      widget.arguments.txLevel =
-                                          TransactionLevel.LEVEL1;
-                                      if (selectedAccount != null) {
-                                        selectedAccount =
-                                                null /*widget
+                                  //selectedToken = await widget.arguments.store.getTokenById(selectedAccount.tokenId);
+                                }
+                                widget.arguments.transactionType =
+                                    TransactionType.EXIT;
+                              } else {
+                                widget.arguments.txLevel =
+                                    TransactionLevel.LEVEL1;
+                                if (selectedAccount != null) {
+                                  selectedAccount =
+                                          null /*widget
                                             .arguments.store.state.l1Accounts
                                             .firstWhere(
                                                 (account) =>
@@ -537,171 +523,156 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                                     selectedAccount
                                                         .token.token.id,
                                                 orElse: () => null)*/
-                                            ;
-                                      }
-                                      widget.arguments.transactionType =
-                                          TransactionType.DEPOSIT;
-                                    }
-                                    if (selectedAccount == null) {
-                                      defaultCurrencySelected = true;
-                                    }
-                                    needRefresh = true;
-                                    amountController.clear();
-                                  });
+                                      ;
                                 }
-                              : null,
-                        )
-                      : Container(),
-                  selectedAccount != null || widget.arguments.token != null
-                      ? AccountRow(
-                          selectedAccount,
-                          //widget.arguments.token,
-                          selectedToken != null
-                              ? selectedToken.token.name
-                              : widget.arguments.token.token.name,
-                          selectedToken != null
-                              ? selectedToken.token.symbol
-                              : widget.arguments.token.token.symbol,
-                          currency != "USD"
-                              ? (selectedPriceToken != null
-                                      ? selectedPriceToken.USD
-                                      : widget.arguments.priceToken.USD) *
-                                  1
-                              //widget.arguments.store.state.exchangeRatio
-                              : selectedPriceToken != null
-                                  ? selectedPriceToken.USD
-                                  : widget.arguments.priceToken.USD,
-                          currency,
-                          selectedAccount != null
-                              ? BalanceUtils.calculatePendingBalance(
-                                    (_settingsBloc.state as LoadedSettingsState)
-                                        .settings
-                                        .level,
-                                    selectedAccount,
-                                    selectedToken.token.symbol,
-                                    /*widget.arguments.store*/
-                                  ) /
-                                  pow(10, selectedToken.token.decimals)
-                              : 0,
-                          true,
-                          defaultCurrencySelected,
-                          false,
-                          (account, _, amount) async {
-                            final account = await Navigator.of(parentContext)
-                                .pushNamed("/account_selector",
-                                    arguments: AccountSelectorArguments(
-                                        null,
-                                        _settingsBloc,
-                                        state.settings.level,
-                                        widget.arguments.transactionType,
-                                        ""
-                                        //widget.arguments.store,
-                                        ));
-                            if (account != null) {
-                              setState(() {
-                                amountController.clear();
-                                needRefresh = true;
-                                if (account is Account) {
-                                  selectedAccount = account;
-                                  selectedToken = account.token;
-                                  selectedPriceToken = selectedToken.price;
-                                } else if (account is Token) {
-                                  widget.arguments.token = account;
-                                  selectedPriceToken = account.price;
-                                }
-                              });
-                            }
-                          },
-                        )
-                      : Container(
-                          padding: EdgeInsets.only(bottom: 15.0),
-                          child: FlatButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                                side:
-                                    BorderSide(color: HermezColors.lightGrey)),
-                            onPressed: () async {
-                              final account = await Navigator.of(parentContext)
-                                  .pushNamed("/account_selector",
-                                      arguments: AccountSelectorArguments(
-                                          null,
-                                          _settingsBloc,
-                                          state.settings.level,
-                                          widget.arguments.transactionType,
-                                          state.settings.level ==
-                                                  TransactionLevel.LEVEL1
-                                              ? state.settings.ethereumAddress
-                                              : state.settings.hermezAddress));
-                              if (account != null) {
-                                setState(() {
-                                  amountController.clear();
-                                  needRefresh = true;
-                                  if (account is Account) {
-                                    selectedAccount = account;
-                                    selectedToken = account.token;
-                                    selectedPriceToken = selectedToken.price;
-                                  } else if (account is Token) {
-                                    widget.arguments.token = account;
-                                    selectedPriceToken = account.price;
-                                  }
-                                });
+                                widget.arguments.transactionType =
+                                    TransactionType.DEPOSIT;
                               }
-                            },
-                            padding: EdgeInsets.all(20.0),
-                            color: HermezColors.lightGrey,
-                            textColor: HermezColors.blackTwo,
-                            child: Row(
+                              if (selectedAccount == null) {
+                                defaultCurrencySelected = true;
+                              }
+                              needRefresh = true;
+                              amountController.clear();
+                            });
+                          }
+                        : null,
+                  )
+                : Container(),
+            selectedAccount != null || widget.arguments.token != null
+                ? AccountRow(
+                    selectedAccount,
+                    selectedAccount.token.token.name,
+                    selectedAccount.token.token.symbol,
+                    currency != "USD"
+                        ? (selectedAccount.token.price.USD) * 1
+                        //widget.arguments.store.state.exchangeRatio
+                        : selectedAccount.token.price.USD,
+                    currency,
+                    selectedAccount != null
+                        ? BalanceUtils.calculatePendingBalance(
+                              (_settingsBloc.state as LoadedSettingsState)
+                                  .settings
+                                  .level,
+                              selectedAccount,
+                              selectedAccount.token.token.symbol,
+                              /*widget.arguments.store*/
+                            ) /
+                            pow(10, selectedAccount.token.token.decimals)
+                        : 0,
+                    true,
+                    defaultCurrencySelected,
+                    false,
+                    (account, _, amount) async {
+                      final account = await Navigator.of(parentContext)
+                          .pushNamed("/account_selector",
+                              arguments: AccountSelectorArguments(
+                                  null,
+                                  _settingsBloc,
+                                  state.settings.level,
+                                  widget.arguments.transactionType,
+                                  ""
+                                  //widget.arguments.store,
+                                  ));
+                      if (account != null) {
+                        setState(() {
+                          amountController.clear();
+                          //needRefresh = true;
+                          if (account is Account) {
+                            selectedAccount = account;
+                            //selectedToken = account.token;
+                            //selectedPriceToken = selectedToken.price;
+                          } else if (account is Token) {
+                            widget.arguments.token = account;
+                            //selectedPriceToken = account.price;
+                          }
+                        });
+                      }
+                    },
+                  )
+                : Container(
+                    padding: EdgeInsets.only(bottom: 15.0),
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          side: BorderSide(color: HermezColors.lightGrey)),
+                      onPressed: () async {
+                        final account = await Navigator.of(parentContext)
+                            .pushNamed(
+                                "/account_selector",
+                                arguments: AccountSelectorArguments(
+                                    null,
+                                    _settingsBloc,
+                                    state.settings.level,
+                                    widget.arguments.transactionType,
+                                    state.settings.level ==
+                                            TransactionLevel.LEVEL1
+                                        ? state.settings.ethereumAddress
+                                        : state.settings.hermezAddress));
+                        if (account != null) {
+                          setState(() {
+                            amountController.clear();
+                            needRefresh = true;
+                            if (account is Account) {
+                              selectedAccount = account;
+                              //selectedToken = account.token;
+                              //selectedPriceToken = selectedToken.price;
+                            } else if (account is Token) {
+                              widget.arguments.token = account;
+                              //selectedPriceToken = account.price;
+                            }
+                          });
+                        }
+                      },
+                      padding: EdgeInsets.all(20.0),
+                      color: HermezColors.lightGrey,
+                      textColor: HermezColors.blackTwo,
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Container(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          'Select account',
-                                          style: TextStyle(
-                                            color: HermezColors.blackTwo,
-                                            fontSize: 16,
-                                            fontFamily: 'ModernEra',
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Select account',
+                                    style: TextStyle(
+                                      color: HermezColors.blackTwo,
+                                      fontSize: 16,
+                                      fontFamily: 'ModernEra',
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],
-                            ), //title to be name of the crypto
-                          )),
-                  (widget.arguments.transactionType ==
-                                  TransactionType.FORCEEXIT ||
-                              widget.arguments.transactionType ==
-                                  TransactionType.EXIT) &&
-                          enoughGas == false &&
-                          !needRefresh &&
-                          selectedAccount != null
-                      ? _buildNoGasRow()
-                      : Container(),
-                  _buildAmountRow(
-                      context, null, amountController, estimatedFee),
-                  widget.arguments.transactionType == TransactionType.SEND
-                      ? _buildAddressRow()
-                      : Container()
-                ],
-              ),
-            ),
-          );
-        } else {
+                            ),
+                          ),
+                        ],
+                      ), //title to be name of the crypto
+                    )),
+            (widget.arguments.transactionType == TransactionType.FORCEEXIT ||
+                        widget.arguments.transactionType ==
+                            TransactionType.EXIT) &&
+                    enoughGas == false &&
+                    !needRefresh &&
+                    selectedAccount != null
+                ? _buildNoGasRow()
+                : Container(),
+            _buildAmountRow(context, null, amountController, estimatedFee),
+            widget.arguments.transactionType == TransactionType.SEND
+                ? _buildAddressRow()
+                : Container()
+          ],
+        ),
+      ),
+    );
+    /*} else {
           // We can show the loading view until the data comes back.
           //debugPrint('Step 1, build loading widget');
           return new Center(
             child: new CircularProgressIndicator(color: HermezColors.orange),
           );
-        }
-      },
-    );
+        }*/
   }
 
   Widget _buildNoGasRow() {
@@ -812,9 +783,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                             selectedAccount == null &&
                                 widget.arguments.token == null
                         ? currency
-                        : selectedToken != null
-                            ? selectedToken.token.symbol
-                            : widget.arguments.token.token.symbol,
+                        : selectedAccount != null
+                            ? selectedAccount.token.token.symbol
+                            : widget.arguments.account.token.token.symbol,
                     style: TextStyle(
                       color: HermezColors.black,
                       fontSize: 16,
@@ -952,8 +923,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                                   ),
                                   label: Text(
                                     defaultCurrencySelected
-                                        ? selectedToken != null
-                                            ? selectedToken.token.symbol
+                                        ? selectedAccount != null
+                                            ? selectedAccount.token.token.symbol
                                             : widget
                                                 .arguments.token.token.symbol
                                         : currency,
@@ -1232,8 +1203,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             PriceToken priceToken;
             if (widget.arguments.transactionType == TransactionType.EXIT) {
               title = "Hermez fee";
-              token = selectedToken;
-              priceToken = selectedPriceToken;
+              token = selectedAccount.token;
+              priceToken = token.price;
             } else if (widget.arguments.transactionType ==
                 TransactionType.FORCEEXIT) {
               title = "Ethereum fee";
@@ -1538,12 +1509,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           (gasLimit * gasPrice) + (withdrawGasLimit * withdrawGasPrice));
 
       double amount = 0;
-      if (selectedPriceToken != null) {
+      if (selectedAccount != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  selectedPriceToken.USD;
+                  selectedAccount.token.price.USD;
         }
       }
       amountIsValid =
@@ -1569,19 +1540,19 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         //StateResponse state = await widget.arguments.store.getState();
         RecommendedFee fees = await _transferBloc.getHermezFees();
         gasLimit = BigInt.from(fees.existingAccount /
-            selectedPriceToken.USD *
-            pow(10, selectedToken.token.decimals));
+            selectedAccount.token.price.USD *
+            pow(10, selectedAccount.token.token.decimals));
       }
       gasPrice = getGasPrice(selectedWithdrawFeeSpeed);
       enoughGas = await isEnoughGas(withdrawGasLimit * gasPrice);
 
       double amount = 0;
-      if (selectedPriceToken != null) {
+      if (selectedAccount != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  selectedPriceToken.USD;
+                  selectedAccount.token.price.USD;
         }
       }
       amountIsValid =
@@ -1595,12 +1566,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         //    await widget.arguments.store.getPriceTokenById(ethereumToken.token.id);
         ethereumAccount = await getEthereumAccount();
         double amount = 0;
-        if (selectedPriceToken != null) {
+        if (selectedAccount != null) {
           if (amountController.value.text.isNotEmpty) {
             amount = !defaultCurrencySelected
                 ? double.parse(amountController.value.text)
                 : double.parse(amountController.value.text) /
-                    selectedPriceToken.USD;
+                    selectedAccount.token.price.USD;
           }
         }
 
@@ -1610,19 +1581,23 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         String to = getCurrentEnvironment().contracts['Hermez'];
         if (isEthereumAddress(addressController.value.text)) {
           to = addressController.value.text;
-        } else if (selectedToken != null && selectedToken.token.id != 0) {
-          to = selectedToken.token.ethereumAddress;
+        } else if (selectedAccount.token.token != null &&
+            selectedAccount.token.token.id != 0) {
+          to = selectedAccount.token.token.ethereumAddress;
         }
         BigInt value = BigInt.one;
         if (amount > 0) {
           value = BigInt.from(amount *
-              pow(10,
-                  selectedToken != null ? selectedToken.token.decimals : 18));
+              pow(
+                  10,
+                  selectedAccount != null
+                      ? selectedAccount.token.token.decimals
+                      : 18));
         }
 
-        gasLimit = selectedToken != null
+        gasLimit = selectedAccount != null
             ? await _transferBloc.getGasLimit(
-                from, to, value, selectedToken.token)
+                from, to, value, selectedAccount.token.token)
             : BigInt.zero;
         gasPrice = getGasPrice(selectedFeeSpeed);
         enoughGas = await isEnoughGas(gasLimit * gasPrice);
@@ -1635,18 +1610,18 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           //StateResponse state = await widget.arguments.store.getState();
           RecommendedFee fees = await _transferBloc.getHermezFees();
           gasLimit = BigInt.from(fees.existingAccount /
-              selectedPriceToken.USD *
-              pow(10, selectedToken.token.decimals));
+              selectedAccount.token.price.USD *
+              pow(10, selectedAccount.token.token.decimals));
         }
         enoughGas = await isEnoughGas(gasLimit);
 
         double amount = 0;
-        if (selectedPriceToken != null) {
+        if (selectedAccount != null) {
           if (amountController.value.text.isNotEmpty) {
             amount = !defaultCurrencySelected
                 ? double.parse(amountController.value.text)
                 : double.parse(amountController.value.text) /
-                    selectedPriceToken.USD;
+                    selectedAccount.token.price.USD;
           }
         }
         amountIsValid =
@@ -1663,10 +1638,10 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       if (widget.arguments.transactionType == TransactionType.DEPOSIT) {
         String addressTo = getCurrentEnvironment().contracts['Hermez'];
         gasLimit = BigInt.zero;
-        if (selectedToken != null) {
+        if (selectedAccount != null) {
           double amountToEstimate = BigInt.one.toDouble();
           depositGasLimit = await _transferBloc.depositGasLimit(
-              amountToEstimate, selectedToken.token);
+              amountToEstimate, selectedAccount.token.token);
           depositGasLimit.forEach((String key, BigInt value) {
             gasLimit += value;
           });
@@ -1698,12 +1673,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       }
 
       double amount = 0;
-      if (selectedPriceToken != null) {
+      if (selectedAccount != null) {
         if (amountController.value.text.isNotEmpty) {
           amount = !defaultCurrencySelected
               ? double.parse(amountController.value.text)
               : double.parse(amountController.value.text) /
-                  selectedPriceToken.USD;
+                  selectedAccount.token.price.USD;
         }
       }
       amountIsValid =
@@ -1711,14 +1686,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     }
   }
 
-  Future<bool> fetchData() async {
+  /*Future<bool> fetchData() async {
     if (needRefresh == true) {
       showEstimatedFees = false;
       await calculateFees();
       needRefresh = false;
     }
     return true;
-  }
+  }*/
 
   bool isButtonEnabled() {
     if (widget.arguments.transactionType == TransactionType.RECEIVE) {
@@ -1818,9 +1793,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           .split('.')
           .last;
       double currencyValue = 0;
-      if (selectedPriceToken != null) {
+      if (selectedAccount.token.price != null) {
         currencyValue = defaultCurrencySelected
-            ? selectedPriceToken.USD *
+            ? selectedAccount.token.price.USD *
                 /*(currency != 'USD'
                     ? widget.arguments.store.state.exchangeRatio
                     :*/
@@ -1828,14 +1803,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             : 1;
 
         balance = double.parse((selectedAccount.balance /
-                pow(10, selectedToken.token.decimals) *
+                pow(10, selectedAccount.token.token.decimals) *
                 currencyValue)
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
 
         amount = double.parse((double.parse(value) +
                 (currencyValue *
                     estimatedFee.toDouble() /
-                    pow(10, selectedToken.token.decimals)))
+                    pow(10, selectedAccount.token.token.decimals)))
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
       }
     }
@@ -1865,9 +1840,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         .toString()
         .split('.')
         .last;
-    if (selectedPriceToken != null) {
+    if (selectedAccount.token.price != null) {
       double currencyValue = defaultCurrencySelected
-          ? selectedPriceToken.USD *
+          ? selectedAccount.token.price.USD *
               /*(currency != 'USD'
                   ? widget.arguments.store.state.exchangeRatio
                   :*/
@@ -1875,14 +1850,14 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
           : 1;
 
       double balance = double.parse((selectedAccount.balance /
-              pow(10, selectedToken.token.decimals) *
+              pow(10, selectedAccount.token.token.decimals) *
               currencyValue)
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
 
       amount = double.parse((balance -
               (currencyValue *
                   estimatedFee.toDouble() /
-                  pow(10, selectedToken.token.decimals)))
+                  pow(10, selectedAccount.token.token.decimals)))
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
     }
     if (amount < 0) {
@@ -1924,6 +1899,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
     BigInt gasPrice = BigInt.one;
     if (widget.arguments.transactionType != TransactionType.EXIT) {
       gasPrice = getGasPrice(selectedFeeSpeed);
+    }
+    if (gasLimit == null) {
+      gasLimit = BigInt.zero;
     }
     return gasLimit * gasPrice;
   }
@@ -2006,8 +1984,8 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
       // calculate fee l2 (exit) and l1 (withdraw)
 
       // fee l2 (exit)
-      Token token = selectedToken;
-      PriceToken priceToken = selectedPriceToken;
+      Token token = selectedAccount.token;
+      PriceToken priceToken = token.price;
       double exitFee = estimatedFee.toDouble() /
           pow(10, token.token.decimals) *
           (priceToken.USD *
@@ -2039,11 +2017,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         token = ethereumToken;
         priceToken = ethereumPriceToken;
       } else {
-        token = selectedToken;
-        priceToken = selectedPriceToken;
+        token = selectedAccount.token;
+        priceToken = token.price;
       }
       String feeSend = EthAmountFormatter.formatAmount(
-          estimatedFee.toDouble() /
+          estimatedFee
+              .toDouble() /* /
               pow(10, token.token.decimals) *
               (defaultCurrencySelected
                   ? (priceToken.USD *
@@ -2051,8 +2030,9 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                           ? widget.arguments.store.state.exchangeRatio
                           :*/
                       1)
-                  : 1),
-          defaultCurrencySelected ? currency : token.token.symbol);
+                  : 1)*/
+          ,
+          /*defaultCurrencySelected ?*/ currency /*: token.token.symbol*/);
       return 'Fee ' + feeSend;
     } else if (widget.arguments.transactionType == TransactionType.DEPOSIT ||
         widget.arguments.transactionType == TransactionType.WITHDRAW) {

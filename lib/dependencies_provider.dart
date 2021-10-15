@@ -199,7 +199,7 @@ void registerAccountDependencies() {
   getIt.registerFactory(() => AccountBloc(getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(
-      () => GetAccountsUseCase(getIt(), getIt(), getIt(), getIt()));
+      () => GetAccountsUseCase(getIt(), getIt(), getIt(), getIt(), getIt()));
 
   getIt.registerLazySingleton(
       () => GetAccountUseCase(getIt(), getIt(), getIt()));

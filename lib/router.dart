@@ -9,6 +9,7 @@ import 'package:hermez/src/presentation/onboarding/widgets/intro.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode_scanner.dart';
 import 'package:hermez/src/presentation/security/widgets/pin.dart';
+import 'package:hermez/src/presentation/settings/widgets/backup_info.dart';
 import 'package:hermez/src/presentation/settings/widgets/recovery_phrase.dart';
 import 'package:hermez/src/presentation/settings/widgets/recovery_phrase_confirm.dart';
 import 'package:hermez/src/presentation/settings/widgets/remove_account_info.dart';
@@ -62,6 +63,9 @@ Map<String, WidgetBuilder> getRoutes(context) {
     },
     '/remove_account_info': (BuildContext context) {
       return RemoveAccountInfoPage(ModalRoute.of(context).settings.arguments);
+    },
+    '/backup_info': (BuildContext context) {
+      return BackupInfoPage();
     },
 
     '/import': (BuildContext context) {

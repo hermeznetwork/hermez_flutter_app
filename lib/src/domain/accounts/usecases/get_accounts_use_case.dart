@@ -2,6 +2,7 @@ import 'package:hermez/src/domain/accounts/account.dart';
 import 'package:hermez/src/domain/accounts/account_repository.dart';
 import 'package:hermez/src/domain/prices/price_repository.dart';
 import 'package:hermez/src/domain/prices/price_token.dart';
+import 'package:hermez/src/domain/settings/settings_repository.dart';
 import 'package:hermez/src/domain/tokens/token.dart';
 import 'package:hermez/src/domain/tokens/token_repository.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
@@ -11,12 +12,14 @@ import 'package:hermez_sdk/model/account.dart' as hezAccount;
 import 'package:hermez_sdk/model/token.dart' as hezToken;
 
 class GetAccountsUseCase {
+  final SettingsRepository _settingsRepository;
   final TokenRepository _tokenRepository;
   final PriceRepository _priceRepository;
   final AccountRepository _accountRepository;
   final TransactionRepository _transactionRepository;
 
   GetAccountsUseCase(
+    this._settingsRepository,
     this._tokenRepository,
     this._priceRepository,
     this._accountRepository,
@@ -27,10 +30,6 @@ class GetAccountsUseCase {
       [LayerFilter layerFilter = LayerFilter.ALL,
       String address = "",
       List<int> tokenIds]) async {
-    /*if (address == null || address == "") {
-      hezAddress = addresses.getHermezAddress(state.ethereumAddress);
-    }*/
-
     if (tokenIds == null) {
       tokenIds = [];
     }
@@ -41,6 +40,9 @@ class GetAccountsUseCase {
 
     if (layerFilter == LayerFilter.ALL || layerFilter == LayerFilter.L2) {
       String hermezAddress = address;
+      if (address == null || address == "") {
+        hermezAddress = await _settingsRepository.getHermezAddress();
+      }
       bool validAddress = false;
       validAddress = isHermezEthereumAddress(hermezAddress);
       if (!validAddress && isEthereumAddress(address)) {
@@ -71,6 +73,9 @@ class GetAccountsUseCase {
 
     if (layerFilter == LayerFilter.ALL || layerFilter == LayerFilter.L1) {
       String ethereumAddress = address;
+      if (address == null || address == "") {
+        ethereumAddress = await _settingsRepository.getEthereumAddress();
+      }
       bool validAddress = false;
       validAddress = isEthereumAddress(ethereumAddress);
       if (!validAddress && isHermezEthereumAddress(address)) {
