@@ -6,9 +6,9 @@ import 'package:hermez/utils/hermez_colors.dart';
 class AccountRow extends StatelessWidget {
   AccountRow(
       this.account,
-      this.name,
-      this.symbol,
-      this.price,
+      //this.name,
+      //this.symbol,
+      //this.price,
       this.defaultCurrency,
       this.amount,
       this.simplified,
@@ -17,9 +17,9 @@ class AccountRow extends StatelessWidget {
       this.onPressed);
 
   final Account account;
-  final String name;
-  final String symbol;
-  final num price;
+  //final String name;
+  //final String symbol;
+  //final num price;
   final String defaultCurrency;
   final double amount;
   final bool simplified;
@@ -45,7 +45,7 @@ class AccountRow extends StatelessWidget {
               ? () {
                   this.onPressed(
                     account,
-                    symbol,
+                    account.token.token.symbol,
                     amount.toString(),
                   );
                 }
@@ -65,7 +65,9 @@ class AccountRow extends StatelessWidget {
                     Container(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        simplified ? this.name : this.symbol,
+                        simplified
+                            ? this.account.token.token.name
+                            : this.account.token.token.symbol,
                         style: TextStyle(
                           color: pendingDeposit
                               ? Colors.white
@@ -98,7 +100,7 @@ class AccountRow extends StatelessWidget {
                             : Container(
                                 padding: EdgeInsets.only(top: 15.0),
                                 alignment: Alignment.centerLeft,
-                                child: Text(this.name,
+                                child: Text(this.account.token.token.name,
                                     style: TextStyle(
                                       color: HermezColors.blueyGreyTwo,
                                       fontFamily: 'ModernEra',
@@ -116,12 +118,17 @@ class AccountRow extends StatelessWidget {
                         simplified
                             ? EthAmountFormatter.formatAmount(
                                 currencyFirst
-                                    ? (this.price * this.amount)
+                                    ? (this.account.token.price.USD *
+                                        this.amount)
                                     : this.amount,
-                                currencyFirst ? defaultCurrency : this.symbol)
+                                currencyFirst
+                                    ? defaultCurrency
+                                    : this.account.token.token.symbol)
                             : EthAmountFormatter.formatAmount(
-                                currencyFirst ? this.amount : this.price,
-                                this.symbol),
+                                currencyFirst
+                                    ? this.amount
+                                    : this.account.token.price,
+                                this.account.token.token.symbol),
                         style: TextStyle(
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w600,
@@ -138,12 +145,13 @@ class AccountRow extends StatelessWidget {
                             padding: EdgeInsets.only(top: 15.0),
                             child: Text(
                               EthAmountFormatter.formatAmount(
-                                  currencyFirst
-                                      ? (this.price * this.amount)
+                                  currencyFirst && this.account.token != null
+                                      ? (this.account.token.price.USD *
+                                          this.amount)
                                       : this.amount,
                                   currencyFirst
                                       ? defaultCurrency
-                                      : this.symbol),
+                                      : this.account.token.token.symbol),
                               style: TextStyle(
                                 fontFamily: 'ModernEra',
                                 fontWeight: FontWeight.w500,

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hermez/dependencies_provider.dart';
 import 'package:hermez/src/domain/accounts/account.dart';
-import 'package:hermez/src/domain/prices/price_token.dart';
 import 'package:hermez/src/domain/transactions/transaction.dart';
 import 'package:hermez/src/domain/transactions/transaction_repository.dart';
 import 'package:hermez/src/presentation/accounts/accounts_bloc.dart';
@@ -14,9 +13,7 @@ import 'package:hermez/src/presentation/accounts/widgets/account_row.dart';
 import 'package:hermez/src/presentation/qrcode/widgets/qrcode.dart';
 import 'package:hermez/src/presentation/settings/settings_bloc.dart';
 import 'package:hermez/src/presentation/settings/settings_state.dart';
-import 'package:hermez/utils/balance_utils.dart';
 import 'package:hermez/utils/hermez_colors.dart';
-import 'package:hermez_sdk/model/token.dart';
 
 class AccountSelectorArguments {
   List<Account> accounts;
@@ -37,6 +34,7 @@ class AccountSelectorPage extends StatefulWidget {
   @override
   _AccountSelectorPageState createState() => _AccountSelectorPageState(
       arguments.accounts,
+      arguments.settingsBloc,
       arguments.txLevel,
       arguments.transactionType,
       arguments.address);
@@ -47,9 +45,15 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   //List<Token> _tokens;
 
   final AccountsBloc _bloc;
-  _AccountSelectorPageState(List<Account> accounts, TransactionLevel level,
-      TransactionType type, String address)
-      : _bloc = getIt<AccountsBloc>() {
+  final SettingsBloc _settingsBloc;
+  _AccountSelectorPageState(List<Account> accounts, SettingsBloc settingsBloc,
+      TransactionLevel level, TransactionType type, String address)
+      : _settingsBloc =
+            settingsBloc != null ? settingsBloc : getIt<SettingsBloc>(),
+        _bloc = getIt<AccountsBloc>() {
+    if (!(_settingsBloc.state is LoadedSettingsState)) {
+      _settingsBloc.init();
+    }
     if (!(_bloc.state is LoadedAccountsState)) {
       if ((level == TransactionLevel.LEVEL1 &&
               type != TransactionType.FORCEEXIT) ||
@@ -650,34 +654,38 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                         //add some padding to make it look good
                         itemBuilder: (context, i) {
                           final index = i;
-                          final String currency = (widget.arguments.settingsBloc
-                                  .state as LoadedSettingsState)
-                              .settings
-                              .defaultCurrency
-                              .toString()
-                              .split('.')
-                              .last;
+                          final String currency =
+                              (_settingsBloc.state as LoadedSettingsState)
+                                  .settings
+                                  .defaultCurrency
+                                  .toString()
+                                  .split('.')
+                                  .last;
                           final Account account =
                               widget.arguments.accounts[index];
-                          Token token = account.token.token;
-                          PriceToken priceToken = account.token.price;
+                          //Token token = account.token.token;
+                          //PriceToken priceToken = account.token.price;
                           return AccountRow(
                             account,
-                            token.name,
+                            /*token.name,
                             token.symbol,
                             priceToken.USD *
                                 (currency != "USD"
-                                    ? (widget.arguments.settingsBloc.state
+                                    ? (_settingsBloc.state
                                             as LoadedSettingsState)
                                         .settings
                                         .exchangeRatio
-                                    : 1),
+                                    : 1),*/
                             currency,
-                            BalanceUtils.calculatePendingBalance(
-                                    widget.arguments.txLevel,
-                                    account,
-                                    token.symbol) /
-                                pow(10, token.decimals),
+                            account.totalBalance /
+                                pow(10, account.token.token.decimals)
+                            /*BalanceUtils.calculatePendingBalance(
+                                widget.arguments.txLevel,
+                                account,
+                                token
+                                    .symbol)*/ /*/
+                                pow(10, token.decimals)*/
+                            ,
                             false,
                             true,
                             false,

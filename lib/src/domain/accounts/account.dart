@@ -6,10 +6,10 @@ class Account {
   final String address;
   final String bjj;
   final String accountIndex;
-  final num balance;
+  //final num balance;
   List<Transaction> transactions;
   final Token token;
-  final num totalBalance;
+  //final num totalBalance;
   final num totalPrice;
 
   Account(
@@ -17,16 +17,20 @@ class Account {
       this.address,
       this.bjj,
       this.accountIndex,
-      this.balance,
+      //this.balance,
       this.transactions,
       this.token})
-      : totalBalance = balance != null
+      : /*totalBalance = balance != null
             ? balance
-            : _calculateTotalBalance(l2Account, transactions),
+            : _calculateTotalBalance(l2Account, transactions),*/
         totalPrice = _calculateTotalPrice(transactions);
 
   factory Account.createEmpty() {
     return Account();
+  }
+
+  num get totalBalance {
+    return _calculateTotalBalance();
   }
 
   factory Account.fromJson(Map<String, dynamic> json) {
@@ -35,7 +39,7 @@ class Account {
       address: json['address'],
       bjj: json['bjj'],
       accountIndex: json['accountIndex'],
-      balance: json['balance'],
+      //balance: json['balance'],
       transactions: json['transactions'],
       token: json['token'],
     );
@@ -46,7 +50,7 @@ class Account {
         'address': address,
         'bjj': bjj,
         'accountIndex': accountIndex,
-        'balance': balance,
+        //'balance': balance,
         'transactions': transactions,
         'token': token,
       };
@@ -60,12 +64,11 @@ class Account {
     return double.parse(price.toStringAsFixed(2));*/
   }
 
-  static num _calculateTotalBalance(
-      bool l2Account, List<Transaction> transactions) {
+  num _calculateTotalBalance() {
     // TODO:
-    if (transactions != null) {
+    if (this.transactions != null) {
       return transactions.fold(0.0, (accumulator, transaction) {
-        if (l2Account == true) {
+        if (this.l2Account == true) {
           if (transaction.type == TransactionType.DEPOSIT) {
             return accumulator + transaction.amount;
           } else if (transaction.type == TransactionType.RECEIVE) {

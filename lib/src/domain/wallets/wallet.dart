@@ -54,7 +54,7 @@ class Wallet {
     if (accounts.isNotEmpty) {
       for (Account account in accounts) {
         totalBalance +=
-            (account.balance / pow(10, account.token.token.decimals)) *
+            (account.totalBalance / pow(10, account.token.token.decimals)) *
                 account.token.price.USD;
       }
     }

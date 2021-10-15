@@ -100,13 +100,17 @@ class GetAccountsUseCase {
       }
     }
 
-    accounts.forEach((account) async {
+    for (Account account in accounts) {
       List<Transaction> transactions = await _transactionRepository
           .getTransactions(account.address, account.accountIndex,
               layerFilter: account.l2Account ? LayerFilter.L2 : LayerFilter.L1,
               tokenIds: [account.token.token.id]);
       account.transactions = transactions;
-    });
+    }
+
+    /*accounts.forEach((account) async {
+
+    });*/
 
     return accounts; //Account.createEmpty(); _accountRepository.getAccounts();
   }

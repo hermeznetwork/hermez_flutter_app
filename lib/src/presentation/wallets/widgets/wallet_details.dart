@@ -892,7 +892,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       ),
                       onPressed: () async {
                         List<Account> accounts = _accounts
-                            .takeWhile((account) => account.balance > 0)
+                            .takeWhile((account) => account.totalBalance > 0)
                             .toList();
                         Account account;
                         hezToken.Token token;

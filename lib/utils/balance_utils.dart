@@ -119,8 +119,9 @@ class BalanceUtils {
         PriceToken priceToken = token.price;
         if (priceToken.USD != null) {
           tokens.add(token);
-          double value =
-              priceToken.USD * account.balance / pow(10, token.token.decimals);
+          double value = priceToken.USD *
+              account.totalBalance /
+              pow(10, token.token.decimals);
           if (currency != "USD") {
             value *= exchangeRatio;
           }
@@ -254,7 +255,8 @@ class BalanceUtils {
       isCurrency = true;
     }
     double resultAmount = 0;
-    double balanceAmount = account.balance != null ? account.balance : 0.0;
+    double balanceAmount =
+        account.totalBalance != null ? account.totalBalance : 0.0;
     double withdrawsAmount = 0;
     double depositsAmount = 0;
     Token token = account.token;

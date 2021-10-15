@@ -1605,7 +1605,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         fee = widget.arguments.fee + widget.arguments.withdrawEstimatedFee;
       }
       if (fee != null && ethereumAccount != null) {
-        return ethereumAccount.balance > fee;
+        return ethereumAccount.totalBalance > fee;
       } else {
         return true;
       }

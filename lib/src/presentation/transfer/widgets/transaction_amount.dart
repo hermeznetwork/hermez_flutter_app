@@ -541,12 +541,12 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
             selectedAccount != null || widget.arguments.token != null
                 ? AccountRow(
                     selectedAccount,
-                    selectedAccount.token.token.name,
+                    /*selectedAccount.token.token.name,
                     selectedAccount.token.token.symbol,
                     currency != "USD"
                         ? (selectedAccount.token.price.USD) * 1
                         //widget.arguments.store.state.exchangeRatio
-                        : selectedAccount.token.price.USD,
+                        : selectedAccount.token.price.USD,*/
                     currency,
                     selectedAccount != null
                         ? BalanceUtils.calculatePendingBalance(
@@ -1802,7 +1802,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
                 1
             : 1;
 
-        balance = double.parse((selectedAccount.balance /
+        balance = double.parse((selectedAccount.totalBalance /
                 pow(10, selectedAccount.token.token.decimals) *
                 currencyValue)
             .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
@@ -1849,7 +1849,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
               1
           : 1;
 
-      double balance = double.parse((selectedAccount.balance /
+      double balance = double.parse((selectedAccount.totalBalance /
               pow(10, selectedAccount.token.token.decimals) *
               currencyValue)
           .toStringAsFixed(defaultCurrencySelected ? 2 : 6));
@@ -1873,7 +1873,7 @@ class _TransactionAmountPageState extends State<TransactionAmountPage>
         widget.arguments.transactionType == TransactionType.EXIT ||
         widget.arguments.transactionType == TransactionType.FORCEEXIT) {
       if (ethereumAccount != null) {
-        bool result = BigInt.from(ethereumAccount.balance) >= gasFee;
+        bool result = BigInt.from(ethereumAccount.totalBalance) >= gasFee;
         return result;
       }
       return false;

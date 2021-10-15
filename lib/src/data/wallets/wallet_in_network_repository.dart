@@ -61,7 +61,7 @@ class WalletInNetworkRepository implements WalletRepository {
             address: l2Account.hezEthereumAddress,
             bjj: l2Account.bjj,
             accountIndex: l2Account.accountIndex,
-            balance: double.tryParse(l2Account.balance),
+            //balance: double.tryParse(l2Account.balance),
             transactions: transactions,
             token: token));
       }
@@ -109,7 +109,7 @@ class WalletInNetworkRepository implements WalletRepository {
           l2Account: false,
           address: l1Account.hezEthereumAddress,
           token: token,
-          balance: double.tryParse(l1Account.balance),
+          //balance: double.tryParse(l1Account.balance),
           transactions: transactions,
         ));
       }
