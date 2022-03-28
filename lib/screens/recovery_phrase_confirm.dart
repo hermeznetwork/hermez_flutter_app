@@ -614,7 +614,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
     final random = new Random();
     var i = 0;
     do {
-      int value = random.nextInt(11) + 1;
+      int value = random.nextInt(12) + 1;
       if (!positions.contains(value)) {
         positions.add(value);
         i++;
@@ -622,7 +622,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
     } while (i < 4);
     i = 0;
     do {
-      int value = random.nextInt(2) + 1;
+      int value = random.nextInt(3) + 1;
       correctCombination.add(value);
       i++;
     } while (i < 4);
