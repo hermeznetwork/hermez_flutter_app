@@ -11,6 +11,7 @@
 		2F2D5627466A39EEDE7CB288 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E5DED9B0D8DCD29E6912348 /* Pods_Runner.framework */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		955B0A3F2795AC1100209549 /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 95C518702630601D0041A3C1 /* libresolv.tbd */; };
 		95C5186F263060130041A3C1 /* libbabyjubjub.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 95C5186E263060070041A3C1 /* libbabyjubjub.a */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -60,6 +61,7 @@
 			files = (
 				95C5186F263060130041A3C1 /* libbabyjubjub.a in Frameworks */,
 				2F2D5627466A39EEDE7CB288 /* Pods_Runner.framework in Frameworks */,
+				955B0A3F2795AC1100209549 /* libresolv.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -163,7 +165,7 @@
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1230;
+				LastUpgradeCheck = 1300;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {

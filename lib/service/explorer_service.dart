@@ -191,7 +191,7 @@ class ExplorerService implements IExplorerService {
         return [];
       }
     } catch (e) {
-      throw 'Error! Get token transfers events failed for - address: $address --- $e';
+      throw 'Error! Get token transfers events failed for - address: $address - tokenAddress: $tokenAddress --- $e';
     }
   }
 

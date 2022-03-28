@@ -256,14 +256,19 @@ class ContractService implements IContractService {
 
   Future<BigInt> getTokenBalance(EthereumAddress from,
       EthereumAddress tokenContractAddress, String tokenContractName) async {
-    final contract = await ContractParser.fromAssets(
-        'ERC20ABI.json', tokenContractAddress.hex, tokenContractName);
+      final contract = await ContractParser.fromAssets(
+          'ERC20ABI.json', tokenContractAddress.hex, tokenContractName);
 
-    var response = await client.call(
-      contract: contract,
-      function: _balanceFunction(contract),
-      params: [from],
-    );
+    List<dynamic> response = [BigInt.zero];
+    try {
+      response = await client.call(
+        contract: contract,
+        function: _balanceFunction(contract),
+        params: [from],
+      );
+    } catch (e) {
+      print(e);
+    }
 
     return response[0] as BigInt;
   }
