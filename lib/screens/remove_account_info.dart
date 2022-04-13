@@ -23,14 +23,14 @@ class RemoveAccountInfoPage extends HookWidget {
         title: new Text("Remove account",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.darkTwo,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
+        backgroundColor: HermezColors.lightTernary,
       ),
-      backgroundColor: HermezColors.lightOrange,
+      backgroundColor: HermezColors.lightTernary,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -65,7 +65,7 @@ class RemoveAccountInfoPage extends HookWidget {
                               'recovery phrase, you won’t be able to '
                               'restore your account after that.',
                               style: TextStyle(
-                                color: HermezColors.blackTwo,
+                                color: HermezColors.darkTwo,
                                 fontSize: 20,
                                 height: 1.5,
                                 fontFamily: 'ModernEra',
@@ -105,10 +105,10 @@ class RemoveAccountInfoPage extends HookWidget {
                     disabledTextColor: Colors.grey,
                     disabledColor: Colors.blueGrey,
                     color: Colors.white,
-                    textColor: HermezColors.blackTwo,
+                    textColor: HermezColors.darkTwo,
                     child: Text("Remove account",
                         style: TextStyle(
-                          color: HermezColors.blackTwo,
+                          color: HermezColors.darkTwo,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w700,
@@ -134,10 +134,10 @@ class RemoveAccountInfoPage extends HookWidget {
                     padding: EdgeInsets.only(
                         top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                     disabledTextColor: Colors.grey,
-                    textColor: HermezColors.blackTwo,
+                    textColor: HermezColors.darkTwo,
                     child: Text("Cancel",
                         style: TextStyle(
-                          color: HermezColors.blackTwo,
+                          color: HermezColors.darkTwo,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,

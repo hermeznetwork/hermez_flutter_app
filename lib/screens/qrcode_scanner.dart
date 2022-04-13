@@ -75,7 +75,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                         Platform.isIOS
                             ? Icons.arrow_back_ios
                             : Icons.arrow_back,
-                        color: HermezColors.lightOrange),
+                        color: HermezColors.lightTernary),
                     onPressed: () {
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);
@@ -92,7 +92,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                 'Scan another Hermez code to\n send or receive tokens in your \nHermez wallet.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: HermezColors.lightGrey,
+                  color: HermezColors.quaternaryThree,
                   fontSize: 16,
                   height: 1.57,
                   fontFamily: 'ModernEra',
@@ -254,7 +254,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       key: qrKey,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-          borderColor: HermezColors.lightOrange,
+          borderColor: HermezColors.lightTernary,
           borderRadius: 50,
           borderLength: 60,
           borderWidth: 7,

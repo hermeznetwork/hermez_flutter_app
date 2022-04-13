@@ -35,8 +35,8 @@ class AccountRow extends StatelessWidget {
 
   Widget build(BuildContext context) {
     String status = "Pending";
-    Color statusColor = HermezColors.statusOrange;
-    Color statusBackgroundColor = HermezColors.statusOrangeBackground;
+    Color statusColor = HermezColors.warning;
+    Color statusBackgroundColor = HermezColors.warningBackground;
 
     return Container(
         padding: EdgeInsets.only(bottom: 15.0),
@@ -45,8 +45,8 @@ class AccountRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(12.0),
               side: BorderSide(
                   color: pendingDeposit
-                      ? HermezColors.blackTwo
-                      : HermezColors.lightGrey)),
+                      ? HermezColors.darkTwo
+                      : HermezColors.quaternaryThree)),
           onPressed: onPressed != null
               ? () {
                   this.onPressed(
@@ -59,10 +59,10 @@ class AccountRow extends StatelessWidget {
               : null,
           padding: EdgeInsets.all(20.0),
           color:
-              pendingDeposit ? HermezColors.blackTwo : HermezColors.lightGrey,
+              pendingDeposit ? HermezColors.darkTwo : HermezColors.quaternaryThree,
           textColor: pendingDeposit ? Colors.white : Colors.black,
           disabledColor:
-              pendingDeposit ? HermezColors.blackTwo : HermezColors.lightGrey,
+              pendingDeposit ? HermezColors.darkTwo : HermezColors.quaternaryThree,
           child: Row(
             children: <Widget>[
               Expanded(
@@ -76,7 +76,7 @@ class AccountRow extends StatelessWidget {
                         style: TextStyle(
                           color: pendingDeposit
                               ? Colors.white
-                              : HermezColors.blackTwo,
+                              : HermezColors.darkTwo,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w600,
@@ -107,7 +107,7 @@ class AccountRow extends StatelessWidget {
                                 alignment: Alignment.centerLeft,
                                 child: Text(this.name,
                                     style: TextStyle(
-                                      color: HermezColors.blueyGreyTwo,
+                                      color: HermezColors.quaternaryTwo,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
                                     )),
@@ -137,7 +137,7 @@ class AccountRow extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                   color: pendingDeposit
                                       ? Colors.white
-                                      : HermezColors.blackTwo,
+                                      : HermezColors.darkTwo,
                                   fontSize: 16),
                               textAlign: TextAlign.right,
                             ),
@@ -157,7 +157,7 @@ class AccountRow extends StatelessWidget {
                                     style: TextStyle(
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
-                                      color: HermezColors.blueyGreyTwo,
+                                      color: HermezColors.quaternaryTwo,
                                     ),
                                     textAlign: TextAlign.right,
                                   ),

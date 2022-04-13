@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 40 40">
-    <circle cx="20" cy="20" r="20" fill="#E75A2B" transform="rotate(90 20 20)"/>
+    <circle cx="20" cy="20" r="20" fill="#7B3FE4" transform="rotate(90 20 20)"/>
     <path stroke="#fff" stroke-linecap="round" stroke-width="2.2" d="M13.656 20.063h11.025M21 14.87l4.999 4.998M21 25.256l4.999-4.999"/>
 </svg>

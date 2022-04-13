@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:hermez/environment.dart';
 import 'package:hermez/router.dart';
 import 'package:hermez/services_provider.dart';
+import 'package:hermez/utils/hermez_colors.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -13,9 +14,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  //setEnvironment('goerli');
-  //setEnvironment('rinkeby');
-  setEnvironment('mainnet');
+  // setEnvironment('goerli');
+  setEnvironment('rinkeby');
+  // setEnvironment('mainnet');
 
   final stores = await createProviders(getCurrentEnvironment());
 
@@ -54,35 +55,25 @@ class MainApp extends StatelessWidget {
         FirebaseAnalyticsObserver(analytics: analytics),
       ],*/
       theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          primarySwatch: primaryWhite,
-          accentColor: primaryOrange,
+          primarySwatch: HermezColors.primarySwatch,
           buttonTheme: ButtonThemeData(
-            buttonColor: primaryOrange,
+            buttonColor: HermezColors.secondary,
             textTheme: ButtonTextTheme.accent,
           ),
           fontFamily: 'ModernEra'),
     );
   }
 
-  // Otherwise, show something whilst waiting for initialization to complete
-  /*return Container(
+// Otherwise, show something whilst waiting for initialization to complete
+/*return Container(
               color: Colors.white,
               child: Center(
                 child: new CircularProgressIndicator(
                   valueColor: new AlwaysStoppedAnimation<Color>(primaryOrange),
                 ),
               ));*/
-  //});
-  //}
+//});
+//}
 }
 
 const MaterialColor primaryWhite = MaterialColor(

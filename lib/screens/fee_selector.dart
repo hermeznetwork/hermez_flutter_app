@@ -47,7 +47,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
         title: new Text("Select fee",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.darkTwo,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
@@ -75,7 +75,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
               separatorBuilder: (BuildContext context, int index) {
                 return Container(
                     padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: Divider(color: HermezColors.steel));
+                    child: Divider(color: HermezColors.quaternary));
               },
               itemBuilder: (context, i) {
                 if (i == 0) {
@@ -93,7 +93,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                   ' your transaction. Higher fees are '
                                   'more likely to be processed.',
                           style: TextStyle(
-                            color: HermezColors.blueyGreyTwo,
+                            color: HermezColors.quaternaryTwo,
                             fontSize: 16,
                             height: 1.5,
                             fontFamily: 'ModernEra',
@@ -150,7 +150,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                               .toLowerCase(),
                                       style: TextStyle(
                                           fontFamily: 'ModernEra',
-                                          color: HermezColors.blackTwo,
+                                          color: HermezColors.darkTwo,
                                           fontWeight: FontWeight.w500,
                                           fontSize: 16),
                                       textAlign: TextAlign.left,
@@ -175,7 +175,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                                     .symbol),
                                             style: TextStyle(
                                                 fontFamily: 'ModernEra',
-                                                color: HermezColors.blackTwo,
+                                                color: HermezColors.darkTwo,
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 16),
                                             textAlign: TextAlign.left,
@@ -222,7 +222,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                             style: TextStyle(
                                                 fontFamily: 'ModernEra',
                                                 color:
-                                                    HermezColors.blueyGreyTwo,
+                                                    HermezColors.quaternaryTwo,
                                                 fontWeight: FontWeight.w500,
                                                 fontSize: 16),
                                             textAlign: TextAlign.left,
@@ -239,7 +239,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                                       element)
                               ? Radio(
                                   groupValue: null,
-                                  activeColor: HermezColors.blackTwo,
+                                  activeColor: HermezColors.darkTwo,
                                   value: null,
                                   onChanged: (value) {
                                     setState(() {
@@ -263,7 +263,7 @@ class _FeeSelectorPageState extends State<FeeSelectorPage> {
                               : Radio(
                                   groupValue: null,
                                   value: element.toString().split(".").last,
-                                  activeColor: HermezColors.blackTwo,
+                                  activeColor: HermezColors.darkTwo,
                                   onChanged: (value) {
                                     setState(() {
                                       if (widget.arguments.selectedFee !=

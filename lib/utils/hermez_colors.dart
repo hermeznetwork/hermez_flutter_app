@@ -1,41 +1,82 @@
+import 'dart:math';
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
 
 class HermezColors {
   HermezColors._();
 
+  // Colors
+
+  static final primarySwatch = generateMaterialColor(primary);
+
   static const Color transparent = Color(0x00000000);
 
-  static const Color lightGrey = Color(0xfff3f3f8);
+  static const Color error = Color(0xffff4b40);
 
-  static const Color black = Color(0xFF333333);
+  static const Color success = Color(0xff219653);
 
-  static const Color blackTwo = Color(0xFF2b2b2b);
+  static const Color warning = Color(0xffd8853b);
 
-  static const Color blueyGrey = Color(0xff8f92b3);
+  static const Color warningBackground = Color(0xfff2994a);
 
-  static const Color blueyGreyTwo = Color(0xff888baa);
+  /// Dark
+  static const Color dark = Color(0xFF000411);
 
-  static const Color blueyGreyThree = Color(0xffe1e1f1);
+  static const Color darkTwo = Color(0xFF081132);
 
-  static const Color steel = Color(0xff7a7c89);
+  /// Primary
+  static final Color primary = const Color(0xffffffff);
 
-  static const Color redError = Color(0xffff4b40);
+  /// Secondary
+  static const Color secondary = const Color(0xff7B3FE4);
 
-  static const Color darkOrange = Color(0xffe75a2b);
+  /// Ternary
+  static const Color ternary = const Color(0xffffa600);
 
-  static const Color orange = Color(0xffffa600);
+  static const Color darkTernary = Color(0xffe75a2b);
 
-  static const Color mediumOrange = Color(0xfff6e9d3);
+  static const Color mediumTernary = Color(0xfff6e9d3);
 
-  static const Color lightOrange = Color(0xfffaf4ea);
+  static const Color lightTernary = Color(0xfffaf4ea);
 
-  static const Color green = Color(0xff219653);
+  /// Quaternary
+  static const Color quaternary = Color(0xff7a7c89);
 
-  static const Color statusOrange = Color(0xffd8853b);
+  static const Color quaternaryTwo = Color(0xff565662);
 
-  static const Color statusOrangeBackground = Color(0xfff2994a);
-
-  static const Color statusRed = Color(0xffff4b40);
-
-  static const Color statusRedBackground = Color(0xffff4b40);
+  static const Color quaternaryThree = Color(0xfff3f3f8);
 }
+
+MaterialColor generateMaterialColor(Color color) {
+  return MaterialColor(color.value, {
+    50: tintColor(color, 0.9),
+    100: tintColor(color, 0.8),
+    200: tintColor(color, 0.6),
+    300: tintColor(color, 0.4),
+    400: tintColor(color, 0.2),
+    500: color,
+    600: shadeColor(color, 0.1),
+    700: shadeColor(color, 0.2),
+    800: shadeColor(color, 0.3),
+    900: shadeColor(color, 0.4),
+  });
+}
+
+int tintValue(int value, double factor) =>
+    max(0, min((value + ((255 - value) * factor)).round(), 255));
+
+Color tintColor(Color color, double factor) => Color.fromRGBO(
+    tintValue(color.red, factor),
+    tintValue(color.green, factor),
+    tintValue(color.blue, factor),
+    1);
+
+int shadeValue(int value, double factor) =>
+    max(0, min(value - (value * factor).round(), 255));
+
+Color shadeColor(Color color, double factor) => Color.fromRGBO(
+    shadeValue(color.red, factor),
+    shadeValue(color.green, factor),
+    shadeValue(color.blue, factor),
+    1);

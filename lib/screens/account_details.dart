@@ -118,7 +118,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: HermezColors.lightOrange,
+      color: HermezColors.lightTernary,
       child: Scaffold(
         body: NestedScrollView(
           body: Container(
@@ -146,11 +146,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 snap: false,
                 collapsedHeight: kToolbarHeight,
                 expandedHeight: 340.0,
-                backgroundColor: HermezColors.lightOrange,
+                backgroundColor: HermezColors.lightTernary,
                 elevation: 0,
                 title: Container(
                   padding: EdgeInsets.only(bottom: 20, top: 20),
-                  color: HermezColors.lightOrange,
+                  color: HermezColors.lightTernary,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
@@ -161,7 +161,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           Text(widget.arguments.account.token.name, // name
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
-                                  color: HermezColors.blackTwo,
+                                  color: HermezColors.darkTwo,
                                   fontWeight: FontWeight.w800,
                                   fontSize: 20))
                         ],
@@ -169,7 +169,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16.0),
-                            color: HermezColors.steel),
+                            color: HermezColors.quaternary),
                         padding: EdgeInsets.only(
                             left: 12.0, right: 12.0, top: 4, bottom: 4),
                         child: Text(
@@ -178,7 +178,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               ? "L1"
                               : "L2",
                           style: TextStyle(
-                            color: HermezColors.lightOrange,
+                            color: HermezColors.lightTernary,
                             fontSize: 15,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w800,
@@ -207,7 +207,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                     ? BlinkingTextAnimation(
                                         arguments:
                                             BlinkingTextAnimationArguments(
-                                                HermezColors.blackTwo,
+                                                HermezColors.darkTwo,
                                                 calculateBalance(widget
                                                     .arguments
                                                     .account
@@ -219,7 +219,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                         calculateBalance(widget
                                             .arguments.account.token.symbol),
                                         style: TextStyle(
-                                            color: HermezColors.blackTwo,
+                                            color: HermezColors.darkTwo,
                                             fontFamily: 'ModernEra',
                                             fontWeight: FontWeight.w800,
                                             fontSize: 32)),
@@ -228,7 +228,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                       _isLoading
                           ? BlinkingTextAnimation(
                               arguments: BlinkingTextAnimationArguments(
-                                  HermezColors.steel,
+                                  HermezColors.quaternary,
                                   calculateBalance(widget
                                       .arguments.store.state.defaultCurrency
                                       .toString()
@@ -246,7 +246,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               style: TextStyle(
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w500,
-                                  color: HermezColors.steel,
+                                  color: HermezColors.quaternary,
                                   fontSize: 18)),
                       SizedBox(height: 30),
                       buildButtonsRow(context),
@@ -291,14 +291,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             },
             padding: EdgeInsets.all(10.0),
             color: Colors.transparent,
-            textColor: HermezColors.blackTwo,
+            textColor: HermezColors.darkTwo,
             child: Column(
               children: <Widget>[
                 SvgPicture.asset("assets/bt_send.svg"),
                 Text(
                   'Send',
                   style: TextStyle(
-                    color: HermezColors.blackTwo,
+                    color: HermezColors.darkTwo,
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w700,
                   ),
@@ -337,7 +337,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             },
             padding: EdgeInsets.all(10.0),
             color: Colors.transparent,
-            textColor: HermezColors.blackTwo,
+            textColor: HermezColors.darkTwo,
             child: Column(
               children: <Widget>[
                 SizedBox(
@@ -347,7 +347,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 Text(
                   'Receive',
                   style: TextStyle(
-                    color: HermezColors.blackTwo,
+                    color: HermezColors.darkTwo,
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w700,
                   ),
@@ -388,14 +388,14 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 },
                 padding: EdgeInsets.all(10.0),
                 color: Colors.transparent,
-                textColor: HermezColors.blackTwo,
+                textColor: HermezColors.darkTwo,
                 child: Column(
                   children: <Widget>[
                     SvgPicture.asset("assets/bt_move.svg"),
                     Text(
                       'Move',
                       style: TextStyle(
-                        color: HermezColors.blackTwo,
+                        color: HermezColors.darkTwo,
                         fontFamily: 'ModernEra',
                         fontWeight: FontWeight.w700,
                       ),
@@ -481,7 +481,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       return Container(
         color: Colors.white,
         child: Center(
-          child: CircularProgressIndicator(color: HermezColors.orange),
+          child: CircularProgressIndicator(color: HermezColors.secondary),
         ),
       );
     } else if (!_isLoading &&
@@ -497,7 +497,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
             'Account transactions will appear here.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: HermezColors.blueyGrey,
+              color: HermezColors.quaternary,
               fontSize: 16,
               fontFamily: 'ModernEra',
               fontWeight: FontWeight.w500,
@@ -507,7 +507,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
       return Container(
         color: Colors.white,
         child: RefreshIndicator(
-          color: HermezColors.orange,
+          color: HermezColors.secondary,
           child: ListView.builder(
               controller: _controller, // ???
               shrinkWrap: true,
@@ -792,12 +792,12 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     i) {
                   return Center(
                     child:
-                        CircularProgressIndicator(color: HermezColors.orange),
+                        CircularProgressIndicator(color: HermezColors.secondary),
                   );
                 } else {
-                  Color statusColor = HermezColors.statusOrange;
+                  Color statusColor = HermezColors.warning;
                   Color statusBackgroundColor =
-                      HermezColors.statusOrangeBackground;
+                      HermezColors.warningBackground;
                   var title = "";
                   var subtitle = "";
                   final index = i -
@@ -1023,8 +1023,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                     txStatus = TransactionStatus.CONFIRMED;
                   } else if (status == "INVALID") {
                     subtitle = "Invalid";
-                    statusColor = HermezColors.statusRed;
-                    statusBackgroundColor = HermezColors.statusRedBackground;
+                    statusColor = HermezColors.error;
+                    statusBackgroundColor = HermezColors.error;
                     txStatus = TransactionStatus.INVALID;
                   } else {
                     subtitle = "Pending";
@@ -1040,7 +1040,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                           title,
                           maxLines: 1,
                           style: TextStyle(
-                            color: HermezColors.black,
+                            color: HermezColors.dark,
                             fontSize: 16,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w700,
@@ -1075,7 +1075,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: HermezColors.blueyGreyTwo,
+                                  color: HermezColors.quaternaryTwo,
                                   fontSize: 16,
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w500,
@@ -1092,7 +1092,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                 EthAmountFormatter.formatAmount(amount,
                                     widget.arguments.account.token.symbol),
                                 style: TextStyle(
-                                  color: HermezColors.black,
+                                  color: HermezColors.dark,
                                   fontSize: 16,
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w700,
@@ -1114,8 +1114,8 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                                         currency),
                                 style: TextStyle(
                                   color: isNegative
-                                      ? HermezColors.blueyGreyTwo
-                                      : HermezColors.green,
+                                      ? HermezColors.quaternaryTwo
+                                      : HermezColors.success,
                                   fontSize: 16,
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w500,

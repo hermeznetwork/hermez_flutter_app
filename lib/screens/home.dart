@@ -115,9 +115,9 @@ class _HomePageState extends State<HomePage> {
         builder: (context, snapshot) {*/
     if (widget.arguments.store.state.ethereumAddress == null) {
       return Container(
-          color: HermezColors.lightOrange,
+          color: HermezColors.lightTernary,
           child: Center(
-            child: CircularProgressIndicator(color: HermezColors.orange),
+            child: CircularProgressIndicator(color: HermezColors.secondary),
           ));
     } else {
       return WillPopScope(
@@ -129,8 +129,8 @@ class _HomePageState extends State<HomePage> {
             extendBody: true,
             bottomNavigationBar: BottomNavigationBar(
                 elevation: 0,
-                selectedItemColor: HermezColors.blackTwo,
-                unselectedItemColor: HermezColors.blueyGreyTwo,
+                selectedItemColor: HermezColors.darkTwo,
+                unselectedItemColor: HermezColors.quaternaryTwo,
                 backgroundColor: Colors.transparent, // transparent
                 showSelectedLabels: false,
                 showUnselectedLabels: false,
@@ -350,16 +350,16 @@ class _HomePageState extends State<HomePage> {
         })),
         icon: SvgPicture.asset('assets/tab_home.svg',
             color: _currentIndex.value == 0
-                ? HermezColors.blackTwo
-                : HermezColors.blueyGreyTwo),
+                ? HermezColors.darkTwo
+                : HermezColors.quaternary),
         title: "Home",
       ),
       TabNavigationItem(
         page: Container(),
         icon: SvgPicture.asset('assets/tab_scan.svg',
             color: _currentIndex.value == 1
-                ? HermezColors.blackTwo
-                : HermezColors.blueyGreyTwo),
+                ? HermezColors.darkTwo
+                : HermezColors.quaternary),
         title: "QR Scan",
       ),
       TabNavigationItem(
@@ -367,8 +367,8 @@ class _HomePageState extends State<HomePage> {
         icon: Stack(children: [
           SvgPicture.asset('assets/tab_settings.svg',
               color: _currentIndex.value == 2
-                  ? HermezColors.blackTwo
-                  : HermezColors.blueyGreyTwo),
+                  ? HermezColors.darkTwo
+                  : HermezColors.quaternary),
           Positioned(
               bottom: -1,
               right: -1,
@@ -377,7 +377,7 @@ class _HomePageState extends State<HomePage> {
                   widget.arguments.configurationService.didBackupWallet()
                       ? Container()
                       : Icon(Icons.brightness_1,
-                          size: 8.0, color: HermezColors.darkOrange)
+                          size: 8.0, color: HermezColors.darkTernary)
                 ],
               ))
         ]),

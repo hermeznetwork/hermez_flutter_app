@@ -11,7 +11,7 @@ class BackupRow extends StatelessWidget {
     return Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.0),
-            color: HermezColors.blackTwo),
+            color: HermezColors.darkTwo),
         padding: EdgeInsets.all(6.0),
         child: ListTile(
           onTap: () {

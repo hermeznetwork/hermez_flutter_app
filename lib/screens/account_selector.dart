@@ -73,7 +73,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
         title: new Text(operation[0].toUpperCase() + operation.substring(1),
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.darkTwo,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
@@ -131,7 +131,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                               : 'move your funds.'),
                       textAlign: TextAlign.left,
                       style: TextStyle(
-                        color: HermezColors.blackTwo,
+                        color: HermezColors.darkTwo,
                         fontSize: 18,
                         height: 1.5,
                         fontFamily: 'ModernEra',
@@ -165,8 +165,8 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                             borderRadius: BorderRadius.circular(16.0),
                             color: widget.arguments.txLevel ==
                                     TransactionLevel.LEVEL1
-                                ? HermezColors.blueyGreyTwo
-                                : HermezColors.darkOrange),
+                                ? HermezColors.quaternaryTwo
+                                : HermezColors.darkTernary),
                         padding: EdgeInsets.all(24.0),
                         child: Column(
                           children: [
@@ -192,7 +192,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                                       color: widget.arguments.txLevel ==
                                               TransactionLevel.LEVEL1
                                           ? Colors.white
-                                          : HermezColors.orange),
+                                          : HermezColors.secondary),
                                   padding: EdgeInsets.only(
                                       left: 12.0,
                                       right: 12.0,
@@ -204,7 +204,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                                         ? 'L1'
                                         : 'L2',
                                     style: TextStyle(
-                                      color: HermezColors.blackTwo,
+                                      color: HermezColors.darkTwo,
                                       fontSize: 15,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w800,
@@ -251,7 +251,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
   Widget handleAccountsList(AsyncSnapshot snapshot, BuildContext context) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return Center(
-        child: CircularProgressIndicator(color: HermezColors.orange),
+        child: CircularProgressIndicator(color: HermezColors.secondary),
       );
     } else {
       if (snapshot.hasError) {
@@ -264,7 +264,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                 'There was an error loading \n\n this page.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: HermezColors.blueyGrey,
+                  color: HermezColors.quaternary,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w500,
@@ -288,7 +288,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       SvgPicture.asset('assets/reload.svg',
-                          color: HermezColors.blueyGreyTwo,
+                          color: HermezColors.quaternaryTwo,
                           semanticsLabel: 'reload'),
                       SizedBox(
                         width: 8,
@@ -296,7 +296,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                       Text(
                         'Reload',
                         style: TextStyle(
-                          color: HermezColors.blueyGreyTwo,
+                          color: HermezColors.quaternaryTwo,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w700,
@@ -331,7 +331,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                         : 'move your funds.'),
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: HermezColors.blackTwo,
+                  color: HermezColors.darkTwo,
                   fontSize: 18,
                   height: 1.5,
                   fontFamily: 'ModernEra',
@@ -363,8 +363,8 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16.0),
                       color: widget.arguments.txLevel == TransactionLevel.LEVEL1
-                          ? HermezColors.blueyGreyTwo
-                          : HermezColors.darkOrange),
+                          ? HermezColors.quaternaryTwo
+                          : HermezColors.darkTernary),
                   padding: EdgeInsets.all(24.0),
                   child: Column(
                     children: [
@@ -390,7 +390,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                                 color: widget.arguments.txLevel ==
                                         TransactionLevel.LEVEL1
                                     ? Colors.white
-                                    : HermezColors.orange),
+                                    : HermezColors.secondary),
                             padding: EdgeInsets.only(
                                 left: 12.0, right: 12.0, top: 6, bottom: 6),
                             child: Text(
@@ -399,7 +399,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                                   ? 'L1'
                                   : 'L2',
                               style: TextStyle(
-                                color: HermezColors.blackTwo,
+                                color: HermezColors.darkTwo,
                                 fontSize: 15,
                                 fontFamily: 'ModernEra',
                                 fontWeight: FontWeight.w800,
@@ -470,7 +470,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: HermezColors.blackTwo,
+                color: HermezColors.darkTwo,
                 fontSize: 16,
                 fontFamily: 'ModernEra',
                 fontWeight: FontWeight.w500,
@@ -480,7 +480,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
             Container(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.0),
-                  color: HermezColors.blueyGreyTwo),
+                  color: HermezColors.quaternaryTwo),
               padding:
                   EdgeInsets.only(left: 12.0, right: 12.0, top: 4, bottom: 4),
               child: Text(
@@ -504,7 +504,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
           child: Container(
             color: Colors.white,
             child: RefreshIndicator(
-              color: HermezColors.orange,
+              color: HermezColors.secondary,
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount:

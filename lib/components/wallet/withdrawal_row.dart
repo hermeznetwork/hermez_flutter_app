@@ -37,28 +37,28 @@ class WithdrawalRow extends StatelessWidget {
 
   Widget build(BuildContext context) {
     String status = "";
-    Color statusColor = HermezColors.statusOrange;
-    Color statusBackgroundColor = HermezColors.statusOrangeBackground;
+    Color statusColor = HermezColors.warning;
+    Color statusBackgroundColor = HermezColors.warningBackground;
     calculateRemainingTime();
     String stepTitle = "1";
     switch (step) {
       case 1:
         stepTitle = "1";
         status = "Initiated";
-        statusColor = HermezColors.statusOrange;
-        statusBackgroundColor = HermezColors.statusOrangeBackground;
+        statusColor = HermezColors.warning;
+        statusBackgroundColor = HermezColors.warningBackground;
         break;
       case 2:
         stepTitle = "2";
         status = "On hold";
-        statusColor = HermezColors.statusRed;
-        statusBackgroundColor = HermezColors.statusRedBackground;
+        statusColor = HermezColors.error;
+        statusBackgroundColor = HermezColors.error;
         break;
       case 3:
         stepTitle = "2";
         status = "Pending";
-        statusColor = HermezColors.statusOrange;
-        statusBackgroundColor = HermezColors.statusOrangeBackground;
+        statusColor = HermezColors.warning;
+        statusBackgroundColor = HermezColors.warningBackground;
         break;
     }
 
@@ -80,7 +80,7 @@ class WithdrawalRow extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.0),
-            color: HermezColors.blackTwo),
+            color: HermezColors.darkTwo),
         padding: EdgeInsets.all(20.0),
         child: Column(
           children: [
@@ -92,7 +92,7 @@ class WithdrawalRow extends StatelessWidget {
                     Container(
                       child: Text("STEP $stepTitle/2",
                           style: TextStyle(
-                            color: HermezColors.steel,
+                            color: HermezColors.quaternary,
                             fontSize: 13,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,
@@ -138,7 +138,7 @@ class WithdrawalRow extends StatelessWidget {
                   Container(
                     child: Text("",
                         style: TextStyle(
-                          color: HermezColors.steel,
+                          color: HermezColors.quaternary,
                           fontSize: 13,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
@@ -171,7 +171,7 @@ class WithdrawalRow extends StatelessWidget {
                                 .toStringAsFixed(2),
                         // On Hold, Pending
                         style: TextStyle(
-                          color: HermezColors.steel,
+                          color: HermezColors.quaternary,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
@@ -215,7 +215,7 @@ class WithdrawalRow extends StatelessWidget {
                                               "assets/info.svg",
                                               width: 15,
                                               height: 15,
-                                              color: HermezColors.steel),
+                                              color: HermezColors.quaternary),
                                         ),
                                       ),
                                       TextSpan(
@@ -223,7 +223,7 @@ class WithdrawalRow extends StatelessWidget {
                                               ? "There was an error\nprocessing the withdraw"
                                               : "Sign required to\nfinalize withdraw",
                                           style: TextStyle(
-                                            color: HermezColors.steel,
+                                            color: HermezColors.quaternary,
                                             fontSize: 14,
                                             height: 1.43,
                                             fontFamily: 'ModernEra',
@@ -255,8 +255,8 @@ class WithdrawalRow extends StatelessWidget {
                                                           null &&
                                                       calculateDelayedWithdrawRequestRemainingTime() ==
                                                           0)
-                                              ? Color(0xffe75a2b)
-                                              : HermezColors.steel
+                                              ? HermezColors.secondary
+                                              : HermezColors.quaternary
                                                   .withOpacity(0.5)),
                                     ),
                                     onPressed: () {
@@ -279,8 +279,8 @@ class WithdrawalRow extends StatelessWidget {
                                                     null &&
                                                 calculateDelayedWithdrawRequestRemainingTime() ==
                                                     0)
-                                        ? Color(0xffe75a2b)
-                                        : HermezColors.steel.withOpacity(0.5),
+                                        ? HermezColors.secondary
+                                        : HermezColors.quaternary.withOpacity(0.5),
                                     textColor: Colors.white,
                                     child: Text(
                                         instantWithdrawAllowed ||
@@ -311,7 +311,7 @@ class WithdrawalRow extends StatelessWidget {
                             child: Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16.0),
-                                    color: HermezColors.steel.withOpacity(0.5)),
+                                    color: HermezColors.quaternary.withOpacity(0.5)),
                                 padding: EdgeInsets.only(
                                     left: 24.0,
                                     top: 20.0,
@@ -410,7 +410,7 @@ class WithdrawalRow extends StatelessWidget {
                                         borderRadius:
                                             BorderRadius.circular(100.0),
                                         side: BorderSide(
-                                            color: Color(0xffe75a2b)),
+                                            color: HermezColors.secondary),
                                       ),
                                       onPressed: () {
                                         //this.onPressed();
@@ -420,7 +420,7 @@ class WithdrawalRow extends StatelessWidget {
                                           bottom: 13.0,
                                           right: 24.0,
                                           left: 24.0),
-                                      color: Color(0xffe75a2b),
+                                      color: HermezColors.secondary,
                                       textColor: Colors.white,
                                       child: Text("Check availability in 10m",
                                           style: TextStyle(
@@ -450,7 +450,7 @@ class WithdrawalRow extends StatelessWidget {
                                         borderRadius:
                                             BorderRadius.circular(100.0),
                                         side: BorderSide(
-                                            color: HermezColors.steel
+                                            color: HermezColors.quaternary
                                                 .withOpacity(0.5)),
                                       ),
                                       onPressed: () {
@@ -463,7 +463,7 @@ class WithdrawalRow extends StatelessWidget {
                                           right: 24.0,
                                           left: 24.0),
                                       color:
-                                          HermezColors.steel.withOpacity(0.5),
+                                          HermezColors.quaternary.withOpacity(0.5),
                                       textColor: Colors.white,
                                       child: Text(
                                           "Schedule Move (approx " +

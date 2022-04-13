@@ -10,14 +10,14 @@ class BackupInfoPage extends StatelessWidget {
         title: new Text("Back up your wallet",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.darkTwo,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
+        backgroundColor: HermezColors.lightTernary,
       ),
-      backgroundColor: HermezColors.lightOrange,
+      backgroundColor: HermezColors.lightTernary,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -51,7 +51,7 @@ class BackupInfoPage extends StatelessWidget {
                               ' phone gets stolen or lost, you will only be able'
                               ' to recover your funds with this recovery phrase.',
                               style: TextStyle(
-                                color: HermezColors.blackTwo,
+                                color: HermezColors.darkTwo,
                                 fontSize: 18,
                                 height: 1.5,
                                 fontFamily: 'ModernEra',
@@ -83,7 +83,7 @@ class BackupInfoPage extends StatelessWidget {
                         top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                     disabledTextColor: Colors.grey,
                     disabledColor: Colors.blueGrey,
-                    color: HermezColors.darkOrange,
+                    color: HermezColors.secondary,
                     textColor: Colors.white,
                     child: Text("Back up now",
                         style: TextStyle(

@@ -64,17 +64,17 @@ class _PinPageState extends State<PinPage> {
                 : "Create passcode",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.darkTwo,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
+        backgroundColor: HermezColors.lightTernary,
       ),
-      backgroundColor: HermezColors.lightOrange,
+      backgroundColor: HermezColors.lightTernary,
       body: SafeArea(
         child: Container(
-          color: HermezColors.lightOrange,
+          color: HermezColors.lightTernary,
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -177,7 +177,7 @@ class _PinPageState extends State<PinPage> {
                                       ? SvgPicture.asset("assets/info.svg",
                                           width: 17,
                                           height: 17,
-                                          color: HermezColors.redError)
+                                          color: HermezColors.error)
                                       : null,
                                 ),
                               ),
@@ -185,8 +185,8 @@ class _PinPageState extends State<PinPage> {
                                 text: pinInfoText,
                                 style: TextStyle(
                                   color: pinError
-                                      ? HermezColors.redError
-                                      : HermezColors.steel,
+                                      ? HermezColors.error
+                                      : HermezColors.quaternary,
                                   fontSize: 16,
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w500,

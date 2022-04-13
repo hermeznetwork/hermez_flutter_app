@@ -22,9 +22,9 @@ class IntroPage extends HookWidget {
     return Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
+        backgroundColor: HermezColors.lightTernary,
       ),
-      backgroundColor: HermezColors.lightOrange,
+      backgroundColor: HermezColors.lightTernary,
       body: SafeArea(
         child: Container(
           child: new Column(
@@ -52,7 +52,7 @@ class IntroPage extends HookWidget {
                             'Secure wallet for low-cost\n token transfers',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: HermezColors.steel,
+                              color: HermezColors.quaternary,
                               fontSize: 18,
                               height: 1.8,
                               decoration: TextDecoration.none,
@@ -101,7 +101,7 @@ class IntroPage extends HookWidget {
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                       disabledTextColor: Colors.grey,
                       disabledColor: Colors.blueGrey,
-                      color: HermezColors.darkOrange,
+                      color: HermezColors.secondary,
                       textColor: Colors.white,
                       child: Text("Create new wallet",
                           style: TextStyle(
@@ -131,10 +131,10 @@ class IntroPage extends HookWidget {
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                       disabledTextColor: Colors.grey,
-                      textColor: HermezColors.blackTwo,
+                      textColor: HermezColors.darkTwo,
                       child: Text("Import a wallet",
                           style: TextStyle(
-                            color: HermezColors.blackTwo,
+                            color: HermezColors.darkTwo,
                             fontSize: 16,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,

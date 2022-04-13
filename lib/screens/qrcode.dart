@@ -68,23 +68,23 @@ class _QRCodePageState extends State<QRCodePage> {
     }
 
     return Scaffold(
-      backgroundColor: HermezColors.lightOrange,
+      backgroundColor: HermezColors.lightTernary,
       appBar: new AppBar(
           title: new Text(title,
               style: TextStyle(
                   fontFamily: 'ModernEra',
-                  color: HermezColors.blackTwo,
+                  color: HermezColors.darkTwo,
                   fontWeight: FontWeight.w800,
                   fontSize: 20)),
           centerTitle: true,
           elevation: 0.0,
-          backgroundColor: HermezColors.lightOrange,
+          backgroundColor: HermezColors.lightTernary,
           actions:
           widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT ?
                <Widget>[
                   IconButton(
                     icon: Image.asset("assets/share.png",
-                        color: HermezColors.blackTwo,
+                        color: HermezColors.darkTwo,
                         alignment: Alignment.topLeft,
                         height: 20),
                     onPressed: () async {
@@ -109,7 +109,7 @@ class _QRCodePageState extends State<QRCodePage> {
                     'Transfer tokens to your Ethereum wallet first and'
                         ' then move them to your Hermez wallet.',
                     style: TextStyle(
-                      color: HermezColors.steel,
+                      color: HermezColors.quaternary,
                       fontSize: 18,
                       height: 1.5,
                       fontFamily: 'ModernEra',
@@ -120,7 +120,7 @@ class _QRCodePageState extends State<QRCodePage> {
             ), Center(
                     child:RepaintBoundary(
                       key: qrCodeKey,
-                      child:Container( color: HermezColors.lightOrange,child:
+                      child:Container( color: HermezColors.lightTernary,child:
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -137,7 +137,7 @@ class _QRCodePageState extends State<QRCodePage> {
                               eyeStyle: QrEyeStyle(
                                   eyeShape: QrEyeShape.square,
                                   color: Colors.black),
-                              backgroundColor: HermezColors.lightOrange,
+                              backgroundColor: HermezColors.lightTernary,
                               embeddedImage: AssetImage('assets/qr_hermez_logo.png'),
                               embeddedImageStyle: QrEmbeddedImageStyle(
                                 size: Size(36, 36),
@@ -168,7 +168,7 @@ class _QRCodePageState extends State<QRCodePage> {
                         Container(
                           width: 290,
                           padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                          color: HermezColors.lightOrange,
+                          color: HermezColors.lightTernary,
                           child: FittedBox(
                             fit: BoxFit.contain,
                             child: Text(
@@ -225,7 +225,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                               : '') : ''
                                       )),
                               style: TextStyle(
-                                color: HermezColors.blackTwo,
+                                color: HermezColors.darkTwo,
                                 fontSize: 16,
                                 height: 1.5,
                                 fontFamily: 'ModernEra',
@@ -279,7 +279,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                   'Copied',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: HermezColors.blackTwo,
+                                    color: HermezColors.darkTwo,
                                     fontSize: 16,
                                     fontFamily: 'ModernEra',
                                     fontWeight: FontWeight.w700,
@@ -288,14 +288,14 @@ class _QRCodePageState extends State<QRCodePage> {
                                 boxShadows: [
                                   BoxShadow(
                                     color:
-                                        HermezColors.blueyGreyTwo.withAlpha(64),
+                                        HermezColors.quaternaryTwo.withAlpha(64),
                                     offset: Offset(0, 4),
                                     blurRadius: 16,
                                     spreadRadius: 0,
                                   ),
                                 ],
                                 borderColor:
-                                    HermezColors.blueyGreyTwo.withAlpha(64),
+                                    HermezColors.quaternaryTwo.withAlpha(64),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(12)),
                                 backgroundColor: Colors.white,
@@ -310,16 +310,16 @@ class _QRCodePageState extends State<QRCodePage> {
                                 right: 24.0,
                                 left: 24.0),
                             color: Color(0xfff6e9d3),
-                            textColor: HermezColors.steel,
+                            textColor: HermezColors.quaternary,
                             child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Image.asset("assets/paste.png",
-                                      color: HermezColors.steel, height: 20),
+                                      color: HermezColors.quaternary, height: 20),
                                   SizedBox(width: 8),
                                   Text("Copy",
                                       style: TextStyle(
-                                        color: HermezColors.steel,
+                                        color: HermezColors.quaternary,
                                         fontSize: 16,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w700,
@@ -354,7 +354,7 @@ class _QRCodePageState extends State<QRCodePage> {
                           },
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
-                          textColor: HermezColors.steel,
+                          textColor: HermezColors.quaternary,
                           color: Color(0xfff6e9d3),
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -364,7 +364,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                             QRCodeType.REQUEST_PAYMENT
                                         ? "assets/share.png"
                                         : "assets/deposit.png",
-                                    color: HermezColors.steel,
+                                    color: HermezColors.quaternary,
                                     height: 20),
                                 SizedBox(width: 8),
                                 Text(
@@ -373,7 +373,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                         ? "Share payment link"
                                         : "Request payment",
                                     style: TextStyle(
-                                      color: HermezColors.steel,
+                                      color: HermezColors.quaternary,
                                       fontSize: 16,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w700,
@@ -389,7 +389,7 @@ class _QRCodePageState extends State<QRCodePage> {
               margin: EdgeInsets.only(left: 30, right: 30,top: 20.0, bottom: 20.0),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
-                  color: HermezColors.blackTwo),
+                  color: HermezColors.darkTwo),
               padding: EdgeInsets.all(20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -427,7 +427,7 @@ class _QRCodePageState extends State<QRCodePage> {
                           ),
                           TextButton(
                             style: TextButton.styleFrom(
-                              backgroundColor: HermezColors.steel.withOpacity(0.5),
+                              backgroundColor: HermezColors.quaternary.withOpacity(0.5),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16)),
                             ),
@@ -448,7 +448,7 @@ class _QRCodePageState extends State<QRCodePage> {
                               child: Text(
                                 'More info',
                                 style: TextStyle(
-                                  color: HermezColors.lightGrey,
+                                  color: HermezColors.quaternaryThree,
                                   fontSize: 15,
                                   fontFamily: 'ModernEra',
                                   fontWeight: FontWeight.w500,
@@ -476,7 +476,7 @@ class _QRCodePageState extends State<QRCodePage> {
   Widget handleTokensList(AsyncSnapshot snapshot, BuildContext context) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return Center(
-        child: CircularProgressIndicator(color: HermezColors.orange),
+        child: CircularProgressIndicator(color: HermezColors.secondary),
       );
     } else {
       if (snapshot.hasError) {
@@ -489,7 +489,7 @@ class _QRCodePageState extends State<QRCodePage> {
                 'There was an error loading \n\n this page.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: HermezColors.blueyGrey,
+                  color: HermezColors.quaternary,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w500,
@@ -521,7 +521,7 @@ class _QRCodePageState extends State<QRCodePage> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: HermezColors.blackTwo,
+                color: HermezColors.darkTwo,
                 fontSize: 18,
                 fontFamily: 'ModernEra',
                 fontWeight: FontWeight.w800,

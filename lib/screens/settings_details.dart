@@ -73,7 +73,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
           title: new Text(title,
               style: TextStyle(
                   fontFamily: 'ModernEra',
-                  color: HermezColors.blackTwo,
+                  color: HermezColors.darkTwo,
                   fontWeight: FontWeight.w800,
                   fontSize: 20)),
           centerTitle: true,
@@ -233,7 +233,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                     child: Text(
                       title,
                       style: TextStyle(
-                          color: HermezColors.black,
+                          color: HermezColors.dark,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
                           fontSize: 16),
@@ -248,7 +248,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                           child: Text(
                             subtitle,
                             style: TextStyle(
-                                color: HermezColors.blueyGreyTwo,
+                                color: HermezColors.quaternaryTwo,
                                 fontFamily: 'ModernEra',
                                 height: 1.5,
                                 fontWeight: FontWeight.w500,
@@ -344,7 +344,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                                   'Your passcode has been changed',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: HermezColors.blackTwo,
+                                    color: HermezColors.darkTwo,
                                     fontSize: 16,
                                     fontFamily: 'ModernEra',
                                     fontWeight: FontWeight.w700,
@@ -353,14 +353,14 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                                 boxShadows: [
                                   BoxShadow(
                                     color:
-                                        HermezColors.blueyGreyTwo.withAlpha(64),
+                                        HermezColors.quaternaryTwo.withAlpha(64),
                                     offset: Offset(0, 4),
                                     blurRadius: 16,
                                     spreadRadius: 0,
                                   ),
                                 ],
                                 borderColor:
-                                    HermezColors.blueyGreyTwo.withAlpha(64),
+                                    HermezColors.quaternaryTwo.withAlpha(64),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(12)),
                                 backgroundColor: Colors.white,
@@ -446,7 +446,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                         : 'disabled'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: HermezColors.blackTwo,
+                  color: HermezColors.darkTwo,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w700,
@@ -454,13 +454,13 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               ),
               boxShadows: [
                 BoxShadow(
-                  color: HermezColors.blueyGreyTwo.withAlpha(64),
+                  color: HermezColors.quaternaryTwo.withAlpha(64),
                   offset: Offset(0, 4),
                   blurRadius: 16,
                   spreadRadius: 0,
                 ),
               ],
-              borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+              borderColor: HermezColors.quaternaryTwo.withAlpha(64),
               borderRadius: BorderRadius.all(Radius.circular(12)),
               backgroundColor: Colors.white,
               margin: EdgeInsets.all(16.0),
@@ -485,7 +485,7 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
                         : 'disabled'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: HermezColors.blackTwo,
+                  color: HermezColors.darkTwo,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w700,
@@ -493,13 +493,13 @@ class _SettingsDetailsPageState extends State<SettingsDetailsPage> {
               ),
               boxShadows: [
                 BoxShadow(
-                  color: HermezColors.blueyGreyTwo.withAlpha(64),
+                  color: HermezColors.quaternaryTwo.withAlpha(64),
                   offset: Offset(0, 4),
                   blurRadius: 16,
                   spreadRadius: 0,
                 ),
               ],
-              borderColor: HermezColors.blueyGreyTwo.withAlpha(64),
+              borderColor: HermezColors.quaternaryTwo.withAlpha(64),
               borderRadius: BorderRadius.all(Radius.circular(12)),
               backgroundColor: Colors.white,
               margin: EdgeInsets.all(16.0),
