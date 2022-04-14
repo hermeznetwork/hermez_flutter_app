@@ -22,9 +22,9 @@ class IntroPage extends HookWidget {
     return Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
-        backgroundColor: HermezColors.lightTernary,
+        backgroundColor: HermezColors.quaternaryThree,
       ),
-      backgroundColor: HermezColors.lightTernary,
+      backgroundColor: HermezColors.quaternaryThree,
       body: SafeArea(
         child: Container(
           child: new Column(

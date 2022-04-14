@@ -39,7 +39,7 @@ class _InfoPageState extends State<InfoPage> {
       startTime(context);
     }
     return Scaffold(
-      backgroundColor: HermezColors.lightTernary,
+      backgroundColor: HermezColors.quaternaryThree,
       body: Container(
           margin: EdgeInsets.all(16),
           child: Column(

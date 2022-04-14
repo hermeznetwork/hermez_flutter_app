@@ -44,7 +44,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
         child: Scaffold(
           appBar: new AppBar(
             elevation: 0.0,
-            backgroundColor: HermezColors.lightTernary,
+            backgroundColor: HermezColors.quaternaryThree,
             actions: <Widget>[
               !Navigator.canPop(context)
                   ? new IconButton(
@@ -57,7 +57,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                   : Container(),
             ],
           ),
-          backgroundColor: HermezColors.lightTernary,
+          backgroundColor: HermezColors.quaternaryThree,
           body: SafeArea(
               child: Container(
             margin: EdgeInsets.all(20.0),

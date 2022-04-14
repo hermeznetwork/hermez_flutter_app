@@ -22,7 +22,7 @@
     <!-- END HERE -->
 
     <application
-        android:label="Hermez"
+        android:label="Polygon Hermez"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher"
         tools:targetApi="m">

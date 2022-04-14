@@ -48,7 +48,7 @@ class MainApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done) {*/
     return new MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Hermez Wallet',
+      title: 'Polygon Hermez',
       initialRoute: '/',
       routes: getRoutes(context),
       /*navigatorObservers: [

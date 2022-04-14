@@ -187,7 +187,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: HermezColors.lightTernary,
+      color: HermezColors.quaternaryThree,
       child: FutureBuilder(
         future: fetchAccounts(),
         builder: (buildContext, snapshot) {
@@ -205,7 +205,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     expandedHeight: 340.0,
                     title: Container(
                       padding: EdgeInsets.all(20),
-                      color: HermezColors.lightTernary,
+                      color: HermezColors.quaternaryThree,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -255,7 +255,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(56.0),
                                   side: BorderSide(
-                                      color: HermezColors.mediumTernary)),
+                                      color: HermezColors.quaternaryFour)),
                               onPressed: () {
                                 Clipboard.setData(ClipboardData(
                                     text:
@@ -301,7 +301,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   right: 10.0,
                                   top: 10.0,
                                   bottom: 10.0),
-                              color: HermezColors.mediumTernary,
+                              color: HermezColors.quaternaryFour,
                               textColor: HermezColors.quaternary,
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -363,7 +363,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                           ? "L1"
                                           : "L2",
                                       style: TextStyle(
-                                        color: HermezColors.mediumTernary,
+                                        color: HermezColors.quaternaryFour,
                                         fontSize: 15,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w800,
@@ -397,7 +397,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         ],
                       ),
                     ),
-                    backgroundColor: HermezColors.lightTernary,
+                    backgroundColor: HermezColors.quaternaryThree,
                   ),
                 ];
               },

@@ -29,23 +29,22 @@ class HermezColors {
   static final Color primary = const Color(0xffffffff);
 
   /// Secondary
-  static const Color secondary = const Color(0xff7B3FE4);
+  static const Color secondary = const Color(0xff8248E5);
 
   /// Ternary
   static const Color ternary = const Color(0xffffa600);
 
   static const Color darkTernary = Color(0xffe75a2b);
 
-  static const Color mediumTernary = Color(0xfff6e9d3);
-
-  static const Color lightTernary = Color(0xfffaf4ea);
-
   /// Quaternary
   static const Color quaternary = Color(0xff7a7c89);
 
   static const Color quaternaryTwo = Color(0xff565662);
 
-  static const Color quaternaryThree = Color(0xfff3f3f8);
+  static const Color quaternaryThree = Color(0xffF6F7FA);
+
+  static const Color quaternaryFour = Color(0xffE9ECF4);
+
 }
 
 MaterialColor generateMaterialColor(Color color) {

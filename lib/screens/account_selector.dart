@@ -233,7 +233,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                                   widget.arguments.txLevel ==
                                           TransactionLevel.LEVEL1
                                       ? 'assets/ethereum_logo.png'
-                                      : 'assets/hermez_logo_white.png',
+                                      : 'assets/ hermez_logo_white.png',
                                   width: 30,
                                   height: 30,
                                 )
