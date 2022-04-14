@@ -203,40 +203,36 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     snap: false,
                     collapsedHeight: kToolbarHeight,
                     expandedHeight: 340.0,
-                    title: Container(
-                      padding: EdgeInsets.all(20),
-                      color: HermezColors.quaternaryThree,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Image.asset(
-                            'assets/' +
-                                (widget.arguments.store.state.txLevel ==
-                                        TransactionLevel.LEVEL1
-                                    ? "ethereum_logo"
-                                    : "hermez_logo") +
-                                '.png',
-                            width: 30,
-                            height: 30,
-                          ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          new Text(
-                              widget.arguments.store.state.txLevel ==
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/' +
+                              (widget.arguments.store.state.txLevel ==
                                       TransactionLevel.LEVEL1
-                                  ? "Ethereum Wallet"
-                                  : "Hermez Wallet",
-                              style: TextStyle(
-                                  fontFamily: 'ModernEra',
-                                  color: HermezColors.darkTwo,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 20)),
-                          SizedBox(
-                            width: 60,
-                          ),
-                        ],
-                      ),
+                                  ? "ethereum_logo"
+                                  : "hermez_logo") +
+                              '.png',
+                          width: 30,
+                          height: 30,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        new Text(
+                            widget.arguments.store.state.txLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? "Ethereum Wallet"
+                                : "Hermez Wallet",
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                color: HermezColors.darkTwo,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20)),
+                        SizedBox(
+                          width: 60,
+                        ),
+                      ],
                     ),
                     centerTitle: true,
                     elevation: 0.0,
@@ -569,7 +565,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     primary: Colors.white,
                     padding: EdgeInsets.only(
                         left: 23, right: 23, bottom: 16, top: 16),
-                    backgroundColor: Color(0xfff3f3f8),
+                    backgroundColor: HermezColors.quaternaryThree,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                   ),
@@ -647,7 +643,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       primary: Colors.white,
                       padding: EdgeInsets.only(
                           left: 23, right: 23, bottom: 16, top: 16),
-                      backgroundColor: Color(0xfff3f3f8),
+                      backgroundColor: HermezColors.quaternaryThree,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30)),
                     ),

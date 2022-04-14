@@ -309,7 +309,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                 bottom: 18.0,
                                 right: 24.0,
                                 left: 24.0),
-                            color: Color(0xfff6e9d3),
+                            color: HermezColors.quaternaryFour,
                             textColor: HermezColors.quaternary,
                             child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -355,7 +355,7 @@ class _QRCodePageState extends State<QRCodePage> {
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                           textColor: HermezColors.quaternary,
-                          color: Color(0xfff6e9d3),
+                          color: HermezColors.quaternaryFour,
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

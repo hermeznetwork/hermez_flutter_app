@@ -187,7 +187,7 @@ class WithdrawalRow extends StatelessWidget {
                       margin: EdgeInsets.only(top: 15, bottom: 15),
                       //width: double.infinity,
                       child: Divider(
-                          color: Color(0x757a7c89), height: 0.5, thickness: 2),
+                          color: HermezColors.quaternaryTwo, height: 0.5, thickness: 2),
                     ))
                   : Container(),
             ]),
@@ -393,7 +393,7 @@ class WithdrawalRow extends StatelessWidget {
                                 margin: EdgeInsets.only(top: 15, bottom: 15),
                                 //width: double.infinity,
                                 child: Divider(
-                                    color: Color(0x757a7c89),
+                                    color: HermezColors.quaternaryTwo,
                                     height: 0.5,
                                     thickness: 2),
                               ))

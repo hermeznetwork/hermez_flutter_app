@@ -277,7 +277,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                     primary: Colors.white,
                     padding: EdgeInsets.only(
                         left: 23, right: 23, bottom: 16, top: 16),
-                    backgroundColor: Color(0xfff3f3f8),
+                    backgroundColor: HermezColors.quaternaryThree,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                   ),

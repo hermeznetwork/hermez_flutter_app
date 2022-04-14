@@ -96,7 +96,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xfff8ecd6),
+                            color: HermezColors.quaternary.withOpacity(0.2),
                             offset: Offset(0, 4),
                             blurRadius: 8,
                             spreadRadius: 0,
