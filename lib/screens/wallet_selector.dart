@@ -164,13 +164,13 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: HermezColors.lightTernary,
+      backgroundColor: HermezColors.quaternaryThree,
       body: FutureBuilder(
           future: fetchData(),
           builder: (context, snapshot) {
             if (widget.arguments.store.state.ethereumAddress == null) {
               return Container(
-                  color: HermezColors.lightTernary,
+                  color: HermezColors.quaternaryThree,
                   child: Center(
                     child:
                         CircularProgressIndicator(color: HermezColors.secondary),

@@ -68,7 +68,7 @@ class _QRCodePageState extends State<QRCodePage> {
     }
 
     return Scaffold(
-      backgroundColor: HermezColors.lightTernary,
+      backgroundColor: HermezColors.quaternaryThree,
       appBar: new AppBar(
           title: new Text(title,
               style: TextStyle(
@@ -78,7 +78,7 @@ class _QRCodePageState extends State<QRCodePage> {
                   fontSize: 20)),
           centerTitle: true,
           elevation: 0.0,
-          backgroundColor: HermezColors.lightTernary,
+          backgroundColor: HermezColors.quaternaryThree,
           actions:
           widget.arguments.qrCodeType != QRCodeType.REQUEST_PAYMENT ?
                <Widget>[
@@ -120,7 +120,7 @@ class _QRCodePageState extends State<QRCodePage> {
             ), Center(
                     child:RepaintBoundary(
                       key: qrCodeKey,
-                      child:Container( color: HermezColors.lightTernary,child:
+                      child:Container( color: HermezColors.quaternaryThree,child:
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -137,8 +137,8 @@ class _QRCodePageState extends State<QRCodePage> {
                               eyeStyle: QrEyeStyle(
                                   eyeShape: QrEyeShape.square,
                                   color: Colors.black),
-                              backgroundColor: HermezColors.lightTernary,
-                              embeddedImage: AssetImage('assets/qr_hermez_logo.png'),
+                              backgroundColor: HermezColors.quaternaryThree,
+                              embeddedImage: AssetImage('assets/hermez_logo_white.png'),
                               embeddedImageStyle: QrEmbeddedImageStyle(
                                 size: Size(36, 36),
                               ),
@@ -168,7 +168,7 @@ class _QRCodePageState extends State<QRCodePage> {
                         Container(
                           width: 290,
                           padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                          color: HermezColors.lightTernary,
+                          color: HermezColors.quaternaryThree,
                           child: FittedBox(
                             fit: BoxFit.contain,
                             child: Text(
@@ -309,7 +309,7 @@ class _QRCodePageState extends State<QRCodePage> {
                                 bottom: 18.0,
                                 right: 24.0,
                                 left: 24.0),
-                            color: Color(0xfff6e9d3),
+                            color: HermezColors.quaternaryFour,
                             textColor: HermezColors.quaternary,
                             child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -355,7 +355,7 @@ class _QRCodePageState extends State<QRCodePage> {
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                           textColor: HermezColors.quaternary,
-                          color: Color(0xfff6e9d3),
+                          color: HermezColors.quaternaryFour,
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

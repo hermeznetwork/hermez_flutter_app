@@ -138,7 +138,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.lightTernary,
+        backgroundColor: HermezColors.quaternaryThree,
         actions: <Widget>[
           new IconButton(
               icon: new Icon(Icons.close),
@@ -443,7 +443,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
     // returns a row with the desired properties
     return Container(
-        color: HermezColors.lightTernary,
+        color: HermezColors.quaternaryThree,
         padding: EdgeInsets.only(bottom: 15.0),
         child: ListTile(
           title: Column(

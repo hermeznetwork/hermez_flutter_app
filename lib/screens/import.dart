@@ -49,9 +49,9 @@ class _ImportWalletState extends State<ImportWalletPage> {
                   fontSize: 20)),
           centerTitle: true,
           elevation: 0.0,
-          backgroundColor: HermezColors.lightTernary,
+          backgroundColor: HermezColors.quaternaryThree,
         ),
-        backgroundColor: HermezColors.lightTernary,
+        backgroundColor: HermezColors.quaternaryThree,
         body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

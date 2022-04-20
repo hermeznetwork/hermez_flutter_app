@@ -1,5 +1,5 @@
 name: hermez
-description: Hermez native wallet project.
+description: Polygon Hermez native wallet project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -102,8 +102,6 @@ flutter:
     - move.svg
     - hermez_logo.png
     - ethereum_logo.png
-    - qr_hermez_logo.svg
-    - qr_hermez_logo.png
     - change_move_enable.svg
     - change_move_disable.svg
     - deposit3.png

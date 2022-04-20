@@ -187,7 +187,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: HermezColors.lightTernary,
+      color: HermezColors.quaternaryThree,
       child: FutureBuilder(
         future: fetchAccounts(),
         builder: (buildContext, snapshot) {
@@ -203,40 +203,36 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     snap: false,
                     collapsedHeight: kToolbarHeight,
                     expandedHeight: 340.0,
-                    title: Container(
-                      padding: EdgeInsets.all(20),
-                      color: HermezColors.lightTernary,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Image.asset(
-                            'assets/' +
-                                (widget.arguments.store.state.txLevel ==
-                                        TransactionLevel.LEVEL1
-                                    ? "ethereum_logo"
-                                    : "hermez_logo") +
-                                '.png',
-                            width: 30,
-                            height: 30,
-                          ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          new Text(
-                              widget.arguments.store.state.txLevel ==
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/' +
+                              (widget.arguments.store.state.txLevel ==
                                       TransactionLevel.LEVEL1
-                                  ? "Ethereum Wallet"
-                                  : "Hermez Wallet",
-                              style: TextStyle(
-                                  fontFamily: 'ModernEra',
-                                  color: HermezColors.darkTwo,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 20)),
-                          SizedBox(
-                            width: 60,
-                          ),
-                        ],
-                      ),
+                                  ? "ethereum_logo"
+                                  : "hermez_logo") +
+                              '.png',
+                          width: 30,
+                          height: 30,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        new Text(
+                            widget.arguments.store.state.txLevel ==
+                                    TransactionLevel.LEVEL1
+                                ? "Ethereum Wallet"
+                                : "Hermez Wallet",
+                            style: TextStyle(
+                                fontFamily: 'ModernEra',
+                                color: HermezColors.darkTwo,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20)),
+                        SizedBox(
+                          width: 60,
+                        ),
+                      ],
                     ),
                     centerTitle: true,
                     elevation: 0.0,
@@ -255,7 +251,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(56.0),
                                   side: BorderSide(
-                                      color: HermezColors.mediumTernary)),
+                                      color: HermezColors.quaternaryFour)),
                               onPressed: () {
                                 Clipboard.setData(ClipboardData(
                                     text:
@@ -301,7 +297,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                   right: 10.0,
                                   top: 10.0,
                                   bottom: 10.0),
-                              color: HermezColors.mediumTernary,
+                              color: HermezColors.quaternaryFour,
                               textColor: HermezColors.quaternary,
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -363,7 +359,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                                           ? "L1"
                                           : "L2",
                                       style: TextStyle(
-                                        color: HermezColors.mediumTernary,
+                                        color: HermezColors.quaternaryFour,
                                         fontSize: 15,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w800,
@@ -397,7 +393,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                         ],
                       ),
                     ),
-                    backgroundColor: HermezColors.lightTernary,
+                    backgroundColor: HermezColors.quaternaryThree,
                   ),
                 ];
               },
@@ -569,7 +565,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                     primary: Colors.white,
                     padding: EdgeInsets.only(
                         left: 23, right: 23, bottom: 16, top: 16),
-                    backgroundColor: Color(0xfff3f3f8),
+                    backgroundColor: HermezColors.quaternaryThree,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                   ),
@@ -647,7 +643,7 @@ class _WalletDetailsPageState extends State<WalletDetailsPage> {
                       primary: Colors.white,
                       padding: EdgeInsets.only(
                           left: 23, right: 23, bottom: 16, top: 16),
-                      backgroundColor: Color(0xfff3f3f8),
+                      backgroundColor: HermezColors.quaternaryThree,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30)),
                     ),

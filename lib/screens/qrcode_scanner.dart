@@ -75,7 +75,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                         Platform.isIOS
                             ? Icons.arrow_back_ios
                             : Icons.arrow_back,
-                        color: HermezColors.lightTernary),
+                        color: HermezColors.quaternaryThree),
                     onPressed: () {
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);
@@ -254,7 +254,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       key: qrKey,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-          borderColor: HermezColors.lightTernary,
+          borderColor: HermezColors.quaternaryThree,
           borderRadius: 50,
           borderLength: 60,
           borderWidth: 7,

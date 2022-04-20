@@ -118,7 +118,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: HermezColors.lightTernary,
+      color: HermezColors.quaternaryThree,
       child: Scaffold(
         body: NestedScrollView(
           body: Container(
@@ -146,11 +146,11 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                 snap: false,
                 collapsedHeight: kToolbarHeight,
                 expandedHeight: 340.0,
-                backgroundColor: HermezColors.lightTernary,
+                backgroundColor: HermezColors.quaternaryThree,
                 elevation: 0,
                 title: Container(
                   padding: EdgeInsets.only(bottom: 20, top: 20),
-                  color: HermezColors.lightTernary,
+                  color: HermezColors.quaternaryThree,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
@@ -178,7 +178,7 @@ class _AccountDetailsPageState extends State<AccountDetailsPage> {
                               ? "L1"
                               : "L2",
                           style: TextStyle(
-                            color: HermezColors.lightTernary,
+                            color: HermezColors.quaternaryThree,
                             fontSize: 15,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w800,

@@ -49,9 +49,9 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.lightTernary,
+        backgroundColor: HermezColors.quaternaryThree,
       ),
-      backgroundColor: HermezColors.lightTernary,
+      backgroundColor: HermezColors.quaternaryThree,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -96,7 +96,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xfff8ecd6),
+                            color: HermezColors.quaternary.withOpacity(0.2),
                             offset: Offset(0, 4),
                             blurRadius: 8,
                             spreadRadius: 0,

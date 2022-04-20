@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Base colors-->
-    <color name="hermezLightOrange">#FAF4EA</color>
+    <color name="background">#E9ECF4</color>
 </resources>
