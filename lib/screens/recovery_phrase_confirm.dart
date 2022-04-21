@@ -42,14 +42,14 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
         title: new Text("Recovery phrase",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.darkTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.quaternaryThree,
+        backgroundColor: HermezColors.neutralLight,
       ),
-      backgroundColor: HermezColors.quaternaryThree,
+      backgroundColor: HermezColors.neutralLight,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -69,7 +69,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                             'Select the words according to your'
                             ' recovery phrase.',
                             style: TextStyle(
-                              color: HermezColors.quaternary,
+                              color: HermezColors.neutral,
                               fontSize: 18,
                               height: 1.5,
                               fontFamily: 'ModernEra',
@@ -101,7 +101,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[0] == 1
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[0] == 1
                                     ? Colors.black
                                     : Colors.white,
@@ -133,7 +133,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[0] == 2
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[0] == 2
                                     ? Colors.black
                                     : Colors.white,
@@ -167,7 +167,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[0] == 3
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[0] == 3
                                     ? Colors.black
                                     : Colors.white,
@@ -220,7 +220,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[1] == 1
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[1] == 1
                                     ? Colors.black
                                     : Colors.white,
@@ -252,7 +252,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[1] == 2
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[1] == 2
                                     ? Colors.black
                                     : Colors.white,
@@ -284,7 +284,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[1] == 3
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[1] == 3
                                     ? Colors.black
                                     : Colors.white,
@@ -337,7 +337,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[2] == 1
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[2] == 1
                                     ? Colors.black
                                     : Colors.white,
@@ -369,7 +369,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[2] == 2
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[2] == 2
                                     ? Colors.black
                                     : Colors.white,
@@ -401,7 +401,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[2] == 3
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[2] == 3
                                     ? Colors.black
                                     : Colors.white,
@@ -454,7 +454,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[3] == 1
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[3] == 1
                                     ? Colors.black
                                     : Colors.white,
@@ -486,7 +486,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[3] == 2
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[3] == 2
                                     ? Colors.black
                                     : Colors.white,
@@ -518,7 +518,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               style: TextButton.styleFrom(
                                 primary: selectedCombination[3] == 3
                                     ? Colors.white
-                                    : HermezColors.darkTwo,
+                                    : HermezColors.dark,
                                 backgroundColor: selectedCombination[3] == 3
                                     ? Colors.black
                                     : Colors.white,
@@ -570,7 +570,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                               var value = await Navigator.of(context).pushNamed(
                                   "/info",
                                   arguments: InfoArguments(
-                                      "info_backup_success.png",
+                                      "info_backup_success.svg",
                                       false,
                                       "Your wallet is backed up",
                                       iconSize: 300));
@@ -579,7 +579,7 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                             } else {
                               var value = await Navigator.of(context).pushNamed(
                                   "/info",
-                                  arguments: InfoArguments("info_failure.png",
+                                  arguments: InfoArguments("info_failure.svg",
                                       false, "Invalid recovery phrase"));
                               Navigator.pop(context);
                             }
@@ -587,8 +587,8 @@ class _RecoveryPhraseConfirmPageState extends State<RecoveryPhraseConfirmPage> {
                         : null,
                     padding: EdgeInsets.only(
                         top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
-                    disabledColor: HermezColors.quaternaryTwo,
-                    color: HermezColors.secondary,
+                    disabledColor: HermezColors.neutral,
+                    color: HermezColors.primary,
                     textColor: Colors.white,
                     child: Text("Continue",
                         style: TextStyle(

@@ -18,6 +18,7 @@ class QRCodeScannerArguments {
   final QRCodeScannerType type;
   final OnScanned onScanned;
   final bool closeWhenScanned;
+
   QRCodeScannerArguments(
       {this.store,
       this.type = QRCodeScannerType.ALL,
@@ -75,7 +76,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                         Platform.isIOS
                             ? Icons.arrow_back_ios
                             : Icons.arrow_back,
-                        color: HermezColors.quaternaryThree),
+                        color: HermezColors.neutralMedium),
                     onPressed: () {
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);
@@ -92,7 +93,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                 'Scan another Hermez code to\n send or receive tokens in your \nHermez wallet.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: HermezColors.quaternaryThree,
+                  color: HermezColors.neutralMedium,
                   fontSize: 16,
                   height: 1.57,
                   fontFamily: 'ModernEra',
@@ -124,15 +125,12 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                                       IconButton(
                                           iconSize: 56,
                                           padding: EdgeInsets.all(0),
-                                          icon: snapshot.data[1] == true
-                                              ? Image.asset(
-                                                  "assets/flash_on.png",
-                                                  width: 56,
-                                                  height: 56)
-                                              : SvgPicture.asset(
-                                                  "assets/flash_off.svg",
-                                                  width: 56,
-                                                  height: 56),
+                                          icon: SvgPicture.asset(
+                                              snapshot.data[1] == true
+                                                  ? "assets/flash_on.svg"
+                                                  : "assets/flash_off.svg",
+                                              width: 56,
+                                              height: 56),
                                           onPressed: () async {
                                             await controller?.toggleFlash();
                                             setState(() {});
@@ -155,13 +153,12 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                                   IconButton(
                                       iconSize: 56,
                                       padding: EdgeInsets.all(0),
-                                      icon: flashStatus == true
-                                          ? Image.asset("assets/flash_on.png",
-                                              width: 56, height: 56)
-                                          : SvgPicture.asset(
-                                              "assets/flash_off.svg",
-                                              width: 56,
-                                              height: 56),
+                                      icon: SvgPicture.asset(
+                                          flashStatus == true
+                                              ? "assets/flash_on.svg"
+                                              : "assets/flash_off.svg",
+                                          width: 56,
+                                          height: 56),
                                       onPressed: () async {
                                         await controller?.toggleFlash();
                                         setState(() {});
@@ -254,7 +251,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
       key: qrKey,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-          borderColor: HermezColors.quaternaryThree,
+          borderColor: HermezColors.neutralMedium,
           borderRadius: 50,
           borderLength: 60,
           borderWidth: 7,

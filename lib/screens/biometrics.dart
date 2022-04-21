@@ -32,17 +32,17 @@ class _BiometricsPageState extends State<BiometricsPage> {
                 (widget.arguments.isFingerprint ? 'Fingerprint' : 'Face ID'),
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.darkTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.quaternaryThree,
+        backgroundColor: HermezColors.neutralLight,
       ),
-      backgroundColor: HermezColors.quaternaryThree,
+      backgroundColor: HermezColors.neutralLight,
       body: SafeArea(
         child: Container(
-          color: HermezColors.quaternaryThree,
+          color: HermezColors.neutralMedium,
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -72,7 +72,7 @@ class _BiometricsPageState extends State<BiometricsPage> {
                                     : 'Face ID'),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: HermezColors.darkTwo,
+                              color: HermezColors.dark,
                               fontSize: 18,
                               height: 1.8,
                               decoration: TextDecoration.none,
@@ -143,7 +143,7 @@ class _BiometricsPageState extends State<BiometricsPage> {
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                       disabledTextColor: Colors.grey,
                       disabledColor: Colors.blueGrey,
-                      color: HermezColors.secondary,
+                      color: HermezColors.primary,
                       textColor: Colors.white,
                       child: Text(
                           'Enable ' +
@@ -177,10 +177,10 @@ class _BiometricsPageState extends State<BiometricsPage> {
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                       disabledTextColor: Colors.grey,
-                      textColor: HermezColors.darkTwo,
+                      textColor: HermezColors.dark,
                       child: Text("Skip",
                           style: TextStyle(
-                            color: HermezColors.darkTwo,
+                            color: HermezColors.dark,
                             fontSize: 16,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,

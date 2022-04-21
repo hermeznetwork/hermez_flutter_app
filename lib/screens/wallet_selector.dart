@@ -164,16 +164,16 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: HermezColors.quaternaryThree,
+      backgroundColor: HermezColors.neutralLight,
       body: FutureBuilder(
           future: fetchData(),
           builder: (context, snapshot) {
             if (widget.arguments.store.state.ethereumAddress == null) {
               return Container(
-                  color: HermezColors.quaternaryThree,
+                  color: HermezColors.neutralLight,
                   child: Center(
                     child:
-                        CircularProgressIndicator(color: HermezColors.secondary),
+                        CircularProgressIndicator(color: HermezColors.primary),
                   ));
             } else {
               return SafeArea(
@@ -213,7 +213,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                               height: width * 0.58,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
-                                  color: HermezColors.secondary),
+                                  color: HermezColors.primary),
                               padding: EdgeInsets.only(
                                   left: 24.0,
                                   top: 16.0,
@@ -238,7 +238,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(16.0),
-                                            color: HermezColors.ternary),
+                                            color: HermezColors.secondary),
                                         padding: EdgeInsets.only(
                                             left: 12.0,
                                             right: 12.0,
@@ -247,7 +247,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         child: Text(
                                           'L2',
                                           style: TextStyle(
-                                            color: HermezColors.darkTwo,
+                                            color: HermezColors.dark,
                                             fontSize: 15,
                                             fontFamily: 'ModernEra',
                                             fontWeight: FontWeight.w800,
@@ -377,7 +377,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                               primary: Colors.white,
                               padding: EdgeInsets.only(
                                   left: 23, right: 23, bottom: 16, top: 16),
-                              backgroundColor: HermezColors.darkTwo,
+                              backgroundColor: HermezColors.dark,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30)),
                             ),
@@ -549,7 +549,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                               height: width * 0.58,
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16.0),
-                                  color: HermezColors.quaternaryTwo),
+                                  color: HermezColors.neutral),
                               padding: EdgeInsets.only(
                                   left: 24.0,
                                   top: 16.0,
@@ -583,7 +583,7 @@ class _WalletSelectorPageState extends State<WalletSelectorPage>
                                         child: Text(
                                           'L1',
                                           style: TextStyle(
-                                            color: HermezColors.darkTwo,
+                                            color: HermezColors.dark,
                                             fontSize: 15,
                                             fontFamily: 'ModernEra',
                                             fontWeight: FontWeight.w800,

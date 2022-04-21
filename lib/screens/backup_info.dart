@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/screens/recovery_phrase.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
@@ -10,14 +11,13 @@ class BackupInfoPage extends StatelessWidget {
         title: new Text("Back up your wallet",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.darkTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.quaternaryThree,
       ),
-      backgroundColor: HermezColors.quaternaryThree,
+      backgroundColor: HermezColors.neutralLight,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -33,8 +33,8 @@ class BackupInfoPage extends StatelessWidget {
                       Container(
                         child: Align(
                           alignment: Alignment.center,
-                          child: Image.asset(
-                            'assets/info_backup.png',
+                          child: SvgPicture.asset(
+                            'assets/info_backup.svg',
                             width: 300,
                             height: 300,
                           ),
@@ -46,12 +46,11 @@ class BackupInfoPage extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                              'If you continue you will see your recovery phrase.'
-                              ' This is the only key to your wallet. If your'
-                              ' phone gets stolen or lost, you will only be able'
-                              ' to recover your funds with this recovery phrase.',
+                            'You are about to see your recovery phrase. '
+                              'If your phone gets stolen or lost, '
+                              'you can only recover your funds with your recovery phrase.',
                               style: TextStyle(
-                                color: HermezColors.darkTwo,
+                                color: HermezColors.dark,
                                 fontSize: 18,
                                 height: 1.5,
                                 fontFamily: 'ModernEra',
@@ -83,7 +82,7 @@ class BackupInfoPage extends StatelessWidget {
                         top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                     disabledTextColor: Colors.grey,
                     disabledColor: Colors.blueGrey,
-                    color: HermezColors.secondary,
+                    color: HermezColors.primary,
                     textColor: Colors.white,
                     child: Text("Back up now",
                         style: TextStyle(

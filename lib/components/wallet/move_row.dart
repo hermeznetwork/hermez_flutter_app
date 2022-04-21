@@ -24,7 +24,7 @@ class MoveRow extends StatelessWidget {
                           ? 'Ethereum'
                           : 'Hermez'),
                   style: TextStyle(
-                    color: HermezColors.darkTwo,
+                    color: HermezColors.dark,
                     fontSize: 16,
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w700,
@@ -35,7 +35,7 @@ class MoveRow extends StatelessWidget {
                   width: double.infinity,
                   padding: EdgeInsets.all(20.0),
                   decoration: BoxDecoration(
-                    color: HermezColors.quaternaryThree,
+                    color: HermezColors.neutralLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Image.asset(
@@ -70,7 +70,7 @@ class MoveRow extends StatelessWidget {
                           ? 'Hermez'
                           : 'Ethereum'),
                   style: TextStyle(
-                    color: HermezColors.darkTwo,
+                    color: HermezColors.dark,
                     fontSize: 16,
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w700,
@@ -81,7 +81,7 @@ class MoveRow extends StatelessWidget {
                   width: double.infinity,
                   padding: EdgeInsets.all(20.0),
                   decoration: BoxDecoration(
-                    color: HermezColors.quaternaryThree,
+                    color: HermezColors.neutralLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Image.asset(

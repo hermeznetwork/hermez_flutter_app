@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class InfoArguments {
@@ -39,7 +40,7 @@ class _InfoPageState extends State<InfoPage> {
       startTime(context);
     }
     return Scaffold(
-      backgroundColor: HermezColors.quaternaryThree,
+      backgroundColor: HermezColors.neutralLight,
       body: Container(
           margin: EdgeInsets.all(16),
           child: Column(
@@ -49,7 +50,7 @@ class _InfoPageState extends State<InfoPage> {
               Container(
                 child: Align(
                   alignment: Alignment.center,
-                  child: Image.asset(
+                  child: SvgPicture.asset(
                     'assets/' + args.imagePath,
                     width: args.iconSize,
                     height: args.iconSize,
@@ -78,12 +79,12 @@ class _InfoPageState extends State<InfoPage> {
                         height: 56,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(50.0),
-                            side: BorderSide(color: HermezColors.secondary)),
+                            side: BorderSide(color: HermezColors.primary)),
                         onPressed: () {
                           route();
                         },
                         padding: EdgeInsets.all(15.0),
-                        color: HermezColors.secondary,
+                        color: HermezColors.primary,
                         textColor: Colors.white,
                         child: Text("Done",
                             style: TextStyle(

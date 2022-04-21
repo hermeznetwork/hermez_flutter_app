@@ -44,14 +44,14 @@ class _ImportWalletState extends State<ImportWalletPage> {
           title: new Text("Import wallet",
               style: TextStyle(
                   fontFamily: 'ModernEra',
-                  color: HermezColors.darkTwo,
+                  color: HermezColors.dark,
                   fontWeight: FontWeight.w800,
                   fontSize: 20)),
           centerTitle: true,
           elevation: 0.0,
-          backgroundColor: HermezColors.quaternaryThree,
+          backgroundColor: HermezColors.neutralLight,
         ),
-        backgroundColor: HermezColors.quaternaryThree,
+        backgroundColor: HermezColors.neutralLight,
         body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -69,7 +69,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                           alignment: Alignment.centerLeft,
                           child: Text('Introduce your recovery phrase',
                               style: TextStyle(
-                                color: HermezColors.quaternary,
+                                color: HermezColors.neutral,
                                 fontSize: 17,
                                 fontFamily: 'ModernEra',
                                 fontWeight: FontWeight.w500,
@@ -92,7 +92,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                     alignment: Alignment.center,
                                     child: Text('1',
                                         style: TextStyle(
-                                          color: HermezColors.quaternaryTwo,
+                                          color: HermezColors.neutral,
                                           fontSize: 14,
                                           fontFamily: 'ModernEra',
                                           fontWeight: FontWeight.w500,
@@ -107,7 +107,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         controller: textEditingControllers[0],
                                         autocorrect: false,
                                         focusNode: focusNodes[0],
-                                        cursorColor: HermezColors.secondary,
+                                        cursorColor: HermezColors.primary,
                                         textInputAction: TextInputAction.next,
                                         onChanged: (text) {
                                           setState(() {
@@ -127,7 +127,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                           fillColor: Colors.white,
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
-                                                color: HermezColors.secondary),
+                                                color: HermezColors.primary),
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
@@ -146,7 +146,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                     alignment: Alignment.center,
                                     child: Text('7',
                                         style: TextStyle(
-                                          color: HermezColors.quaternaryTwo,
+                                          color: HermezColors.neutral,
                                           fontSize: 14,
                                           fontFamily: 'ModernEra',
                                           fontWeight: FontWeight.w500,
@@ -161,7 +161,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         controller: textEditingControllers[6],
                                         autocorrect: false,
                                         focusNode: focusNodes[6],
-                                        cursorColor: HermezColors.secondary,
+                                        cursorColor: HermezColors.primary,
                                         textInputAction: TextInputAction.next,
                                         onChanged: (text) {
                                           setState(() {
@@ -181,7 +181,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                           fillColor: Colors.white,
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
-                                                color: HermezColors.secondary),
+                                                color: HermezColors.primary),
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
@@ -203,7 +203,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('2',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -218,7 +218,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[1],
                                       autocorrect: false,
                                       focusNode: focusNodes[1],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -238,7 +238,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -257,7 +257,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('8',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -272,7 +272,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[7],
                                       autocorrect: false,
                                       focusNode: focusNodes[7],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -292,7 +292,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -313,7 +313,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('3',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -328,7 +328,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[2],
                                       autocorrect: false,
                                       focusNode: focusNodes[2],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -348,7 +348,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -367,7 +367,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('9',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -382,7 +382,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[8],
                                       autocorrect: false,
                                       focusNode: focusNodes[8],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -402,7 +402,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -423,7 +423,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('4',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -438,7 +438,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[3],
                                       autocorrect: false,
                                       focusNode: focusNodes[3],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -458,7 +458,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -477,7 +477,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('10',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -492,7 +492,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[9],
                                       autocorrect: false,
                                       focusNode: focusNodes[9],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -512,7 +512,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -533,7 +533,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('5',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -548,7 +548,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[4],
                                       autocorrect: false,
                                       focusNode: focusNodes[4],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -568,7 +568,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -587,7 +587,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                   alignment: Alignment.center,
                                   child: Text('11',
                                       style: TextStyle(
-                                        color: HermezColors.quaternaryTwo,
+                                        color: HermezColors.neutral,
                                         fontSize: 14,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -602,7 +602,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                       controller: textEditingControllers[10],
                                       autocorrect: false,
                                       focusNode: focusNodes[10],
-                                      cursorColor: HermezColors.secondary,
+                                      cursorColor: HermezColors.primary,
                                       textInputAction: TextInputAction.next,
                                       onChanged: (text) {
                                         setState(() {
@@ -622,7 +622,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         fillColor: Colors.white,
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: HermezColors.secondary),
+                                              color: HermezColors.primary),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -644,7 +644,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                     alignment: Alignment.center,
                                     child: Text('6',
                                         style: TextStyle(
-                                          color: HermezColors.quaternaryTwo,
+                                          color: HermezColors.neutral,
                                           fontSize: 14,
                                           fontFamily: 'ModernEra',
                                           fontWeight: FontWeight.w500,
@@ -659,7 +659,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         controller: textEditingControllers[5],
                                         autocorrect: false,
                                         focusNode: focusNodes[5],
-                                        cursorColor: HermezColors.secondary,
+                                        cursorColor: HermezColors.primary,
                                         textInputAction: TextInputAction.next,
                                         onChanged: (text) {
                                           setState(() {
@@ -679,7 +679,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                           fillColor: Colors.white,
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
-                                                color: HermezColors.secondary),
+                                                color: HermezColors.primary),
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
@@ -698,7 +698,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                     alignment: Alignment.center,
                                     child: Text('12',
                                         style: TextStyle(
-                                          color: HermezColors.quaternaryTwo,
+                                          color: HermezColors.neutral,
                                           fontSize: 14,
                                           fontFamily: 'ModernEra',
                                           fontWeight: FontWeight.w500,
@@ -713,7 +713,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                         controller: textEditingControllers[11],
                                         autocorrect: false,
                                         focusNode: focusNodes[11],
-                                        cursorColor: HermezColors.secondary,
+                                        cursorColor: HermezColors.primary,
                                         textInputAction: TextInputAction.done,
                                         onChanged: (text) {
                                           setState(() {
@@ -731,7 +731,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
                                           fillColor: Colors.white,
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
-                                                color: HermezColors.secondary),
+                                                color: HermezColors.primary),
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
@@ -857,8 +857,8 @@ class _ImportWalletState extends State<ImportWalletPage> {
                           : null,
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
-                      disabledColor: HermezColors.quaternaryTwo,
-                      color: HermezColors.secondary,
+                      disabledColor: HermezColors.neutral,
+                      color: HermezColors.primary,
                       textColor: Colors.white,
                       child: Text("Import wallet",
                           style: TextStyle(
@@ -893,7 +893,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
       Navigator.of(context).pushNamed(
         "/info",
         arguments: InfoArguments(
-            "info_success.png", false, "Wallet imported successfully",
+            "info_success.svg", false, "Wallet imported successfully",
             onFinished: () {
           Navigator.pushNamedAndRemoveUntil(
               context, "/home", (Route<dynamic> route) => false);
@@ -903,7 +903,7 @@ class _ImportWalletState extends State<ImportWalletPage> {
       Navigator.of(context).pushNamed(
         "/info",
         arguments:
-            InfoArguments("info_failure.png", false, "Invalid recovery phrase",
+            InfoArguments("info_failure.svg", false, "Invalid recovery phrase",
                 onFinished: () {
           Navigator.pushNamedAndRemoveUntil(
               context, "/home", (Route<dynamic> route) => false);

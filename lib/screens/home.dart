@@ -115,9 +115,9 @@ class _HomePageState extends State<HomePage> {
         builder: (context, snapshot) {*/
     if (widget.arguments.store.state.ethereumAddress == null) {
       return Container(
-          color: HermezColors.quaternaryThree,
+          color: HermezColors.neutralMedium,
           child: Center(
-            child: CircularProgressIndicator(color: HermezColors.secondary),
+            child: CircularProgressIndicator(color: HermezColors.primary),
           ));
     } else {
       return WillPopScope(
@@ -129,8 +129,8 @@ class _HomePageState extends State<HomePage> {
             extendBody: true,
             bottomNavigationBar: BottomNavigationBar(
                 elevation: 0,
-                selectedItemColor: HermezColors.darkTwo,
-                unselectedItemColor: HermezColors.quaternaryTwo,
+                selectedItemColor: HermezColors.dark,
+                unselectedItemColor: HermezColors.neutral,
                 backgroundColor: Colors.transparent, // transparent
                 showSelectedLabels: false,
                 showUnselectedLabels: false,
@@ -350,16 +350,16 @@ class _HomePageState extends State<HomePage> {
         })),
         icon: SvgPicture.asset('assets/tab_home.svg',
             color: _currentIndex.value == 0
-                ? HermezColors.darkTwo
-                : HermezColors.quaternary),
+                ? HermezColors.dark
+                : HermezColors.neutral),
         title: "Home",
       ),
       TabNavigationItem(
         page: Container(),
         icon: SvgPicture.asset('assets/tab_scan.svg',
             color: _currentIndex.value == 1
-                ? HermezColors.darkTwo
-                : HermezColors.quaternary),
+                ? HermezColors.dark
+                : HermezColors.neutral),
         title: "QR Scan",
       ),
       TabNavigationItem(
@@ -367,8 +367,8 @@ class _HomePageState extends State<HomePage> {
         icon: Stack(children: [
           SvgPicture.asset('assets/tab_settings.svg',
               color: _currentIndex.value == 2
-                  ? HermezColors.darkTwo
-                  : HermezColors.quaternary),
+                  ? HermezColors.dark
+                  : HermezColors.neutral),
           Positioned(
               bottom: -1,
               right: -1,

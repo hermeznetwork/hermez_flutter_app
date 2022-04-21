@@ -42,11 +42,8 @@ class AccountRow extends StatelessWidget {
         padding: EdgeInsets.only(bottom: 15.0),
         child: FlatButton(
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              side: BorderSide(
-                  color: pendingDeposit
-                      ? HermezColors.darkTwo
-                      : HermezColors.quaternaryThree)),
+            borderRadius: BorderRadius.circular(12.0),
+          ),
           onPressed: onPressed != null
               ? () {
                   this.onPressed(
@@ -58,11 +55,10 @@ class AccountRow extends StatelessWidget {
                 }
               : null,
           padding: EdgeInsets.all(20.0),
-          color:
-              pendingDeposit ? HermezColors.darkTwo : HermezColors.quaternaryThree,
+          color: pendingDeposit ? HermezColors.dark : HermezColors.neutralLight,
           textColor: pendingDeposit ? Colors.white : Colors.black,
           disabledColor:
-              pendingDeposit ? HermezColors.darkTwo : HermezColors.quaternaryThree,
+              pendingDeposit ? HermezColors.dark : HermezColors.neutralMedium,
           child: Row(
             children: <Widget>[
               Expanded(
@@ -74,9 +70,8 @@ class AccountRow extends StatelessWidget {
                       child: Text(
                         simplified ? this.name : this.symbol,
                         style: TextStyle(
-                          color: pendingDeposit
-                              ? Colors.white
-                              : HermezColors.darkTwo,
+                          color:
+                              pendingDeposit ? Colors.white : HermezColors.dark,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w600,
@@ -90,7 +85,7 @@ class AccountRow extends StatelessWidget {
                                 padding: EdgeInsets.all(8.0),
                                 margin: EdgeInsets.only(top: 8.0),
                                 decoration: BoxDecoration(
-                                  color: statusBackgroundColor.withOpacity(0.1),
+                                  color: statusBackgroundColor,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(status,
@@ -107,7 +102,7 @@ class AccountRow extends StatelessWidget {
                                 alignment: Alignment.centerLeft,
                                 child: Text(this.name,
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
                                     )),
@@ -137,7 +132,7 @@ class AccountRow extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                   color: pendingDeposit
                                       ? Colors.white
-                                      : HermezColors.darkTwo,
+                                      : HermezColors.dark,
                                   fontSize: 16),
                               textAlign: TextAlign.right,
                             ),
@@ -157,7 +152,7 @@ class AccountRow extends StatelessWidget {
                                     style: TextStyle(
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                     ),
                                     textAlign: TextAlign.right,
                                   ),

@@ -23,14 +23,14 @@ class RemoveAccountInfoPage extends HookWidget {
         title: new Text("Remove account",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.darkTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.quaternaryThree,
+        backgroundColor: HermezColors.neutralLight,
       ),
-      backgroundColor: HermezColors.quaternaryThree,
+      backgroundColor: HermezColors.neutralLight,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -60,12 +60,11 @@ class RemoveAccountInfoPage extends HookWidget {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                              'This will remove your account from this device. '
-                              'If you didn’t make a backup and saved your '
-                              'recovery phrase, you won’t be able to '
-                              'restore your account after that.',
+                              'You are about to remove your account. '
+                              'If you didn’t save your recovery phrase, '
+                              'your account can’t be restored after that.',
                               style: TextStyle(
-                                color: HermezColors.darkTwo,
+                                color: HermezColors.dark,
                                 fontSize: 20,
                                 height: 1.5,
                                 fontFamily: 'ModernEra',
@@ -105,10 +104,10 @@ class RemoveAccountInfoPage extends HookWidget {
                     disabledTextColor: Colors.grey,
                     disabledColor: Colors.blueGrey,
                     color: Colors.white,
-                    textColor: HermezColors.darkTwo,
+                    textColor: HermezColors.dark,
                     child: Text("Remove account",
                         style: TextStyle(
-                          color: HermezColors.darkTwo,
+                          color: HermezColors.dark,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w700,
@@ -134,10 +133,10 @@ class RemoveAccountInfoPage extends HookWidget {
                     padding: EdgeInsets.only(
                         top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                     disabledTextColor: Colors.grey,
-                    textColor: HermezColors.darkTwo,
+                    textColor: HermezColors.dark,
                     child: Text("Cancel",
                         style: TextStyle(
-                          color: HermezColors.darkTwo,
+                          color: HermezColors.dark,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,

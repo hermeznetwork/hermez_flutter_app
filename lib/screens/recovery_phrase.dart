@@ -40,18 +40,15 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new AppBar(
+      appBar: AppBar(
         title: new Text("Recovery phrase",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.darkTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
-        elevation: 0.0,
-        backgroundColor: HermezColors.quaternaryThree,
       ),
-      backgroundColor: HermezColors.quaternaryThree,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -73,7 +70,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   'Back up these words manually and keep '
                                   'them in a safe place.',
                                   style: TextStyle(
-                                    color: HermezColors.quaternary,
+                                    color: HermezColors.neutral,
                                     fontSize: 18,
                                     height: 1.5,
                                     fontFamily: 'ModernEra',
@@ -96,7 +93,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: HermezColors.quaternary.withOpacity(0.2),
+                            color: HermezColors.neutral.withOpacity(0.2),
                             offset: Offset(0, 4),
                             blurRadius: 8,
                             spreadRadius: 0,
@@ -111,7 +108,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('1',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -123,7 +120,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                               Expanded(
                                 child: Text(words[0],
                                     style: TextStyle(
-                                      color: HermezColors.darkTwo,
+                                      color: HermezColors.dark,
                                       fontSize: 18,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -133,7 +130,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('7',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -147,7 +144,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(words[6],
                                       style: TextStyle(
-                                        color: HermezColors.darkTwo,
+                                        color: HermezColors.dark,
                                         fontSize: 18,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -162,7 +159,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('2',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -174,7 +171,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                               Expanded(
                                 child: Text(words[1],
                                     style: TextStyle(
-                                      color: HermezColors.darkTwo,
+                                      color: HermezColors.dark,
                                       fontSize: 18,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -184,7 +181,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('8',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -198,7 +195,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(words[7],
                                       style: TextStyle(
-                                        color: HermezColors.darkTwo,
+                                        color: HermezColors.dark,
                                         fontSize: 18,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -213,7 +210,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('3',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -225,7 +222,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                               Expanded(
                                 child: Text(words[2],
                                     style: TextStyle(
-                                      color: HermezColors.darkTwo,
+                                      color: HermezColors.dark,
                                       fontSize: 18,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -235,7 +232,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('9',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -249,7 +246,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(words[8],
                                       style: TextStyle(
-                                        color: HermezColors.darkTwo,
+                                        color: HermezColors.dark,
                                         fontSize: 18,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -264,7 +261,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('4',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -276,7 +273,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                               Expanded(
                                 child: Text(words[3],
                                     style: TextStyle(
-                                      color: HermezColors.darkTwo,
+                                      color: HermezColors.dark,
                                       fontSize: 18,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -286,7 +283,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('10',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -300,7 +297,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(words[9],
                                       style: TextStyle(
-                                        color: HermezColors.darkTwo,
+                                        color: HermezColors.dark,
                                         fontSize: 18,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -315,7 +312,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('5',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -327,7 +324,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                               Expanded(
                                 child: Text(words[4],
                                     style: TextStyle(
-                                      color: HermezColors.darkTwo,
+                                      color: HermezColors.dark,
                                       fontSize: 18,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -337,7 +334,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('11',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -351,7 +348,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(words[10],
                                       style: TextStyle(
-                                        color: HermezColors.darkTwo,
+                                        color: HermezColors.dark,
                                         fontSize: 18,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -366,7 +363,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('6',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -378,7 +375,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                               Expanded(
                                 child: Text(words[5],
                                     style: TextStyle(
-                                      color: HermezColors.darkTwo,
+                                      color: HermezColors.dark,
                                       fontSize: 18,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -388,7 +385,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                 alignment: Alignment.center,
                                 child: Text('12',
                                     style: TextStyle(
-                                      color: HermezColors.quaternaryTwo,
+                                      color: HermezColors.neutral,
                                       fontSize: 14,
                                       fontFamily: 'ModernEra',
                                       fontWeight: FontWeight.w500,
@@ -402,7 +399,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(words[11],
                                       style: TextStyle(
-                                        color: HermezColors.darkTwo,
+                                        color: HermezColors.dark,
                                         fontSize: 18,
                                         fontFamily: 'ModernEra',
                                         fontWeight: FontWeight.w500,
@@ -437,7 +434,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                         'I understand this is my only'
                                         ' key to recover my funds.',
                                         style: TextStyle(
-                                          color: HermezColors.darkTwo,
+                                          color: HermezColors.dark,
                                           fontSize: 18,
                                           height: 1.5,
                                           fontFamily: 'ModernEra',
@@ -456,7 +453,7 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                                   ' to your wallet and could be used to'
                                   ' steal your funds.',
                                   style: TextStyle(
-                                    color: HermezColors.darkTwo,
+                                    color: HermezColors.dark,
                                     fontSize: 18,
                                     height: 1.5,
                                     fontFamily: 'ModernEra',
@@ -488,8 +485,8 @@ class _RecoveryPhrasePageState extends State<RecoveryPhrasePage> {
                               : null,
                           padding: EdgeInsets.only(
                               top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
-                          disabledColor: HermezColors.quaternaryTwo,
-                          color: HermezColors.secondary,
+                          disabledColor: HermezColors.neutral,
+                          color: HermezColors.primary,
                           textColor: Colors.white,
                           child: Text("Continue",
                               style: TextStyle(

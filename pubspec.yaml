@@ -46,7 +46,7 @@ dependencies:
   flutter_hooks: ^0.17.0
   built_value: ^8.0.6
   built_collection: ^5.1.0
-  flutter_svg: ^0.22.0
+  flutter_svg: ^1.0.3
   auto_size_text: ^3.0.0-nullsafety.0
   grouped_list: ^4.0.0
   local_auth: ^1.1.8
@@ -79,11 +79,10 @@ flutter:
     - intro_hermez_logo.png
     # Info
     - info.svg
-    - info_success.png
-    - info_failure.png
-    - info_tx_failure.png
-    - info_backup.png
-    - info_backup_success.png
+    - info_success.svg
+    - info_failure.svg
+    - info_backup.svg
+    - info_backup_success.svg
     # Biometrics
     - biometrics_fingerprint.svg
     - biometrics_face.svg
@@ -127,8 +126,7 @@ flutter:
     - settings_remove_account.svg
     # Scanner
     - switch_camera.svg
-    - flash_on.png
-    # - flash_on.svg
+    - flash_on.svg
     - flash_off.svg
     - qr_gallery.svg
 
@@ -144,7 +142,6 @@ flutter:
     - WithdrawalDelayerABI.json
 
     - arrows_up_down.png
-    - success.png
     - scan.svg
     - show_explorer.png
     - paste.png

@@ -59,9 +59,9 @@ class _AmountInputState extends State<AmountInput> {
       maxLines: 1,
       enabled: widget.enabled,
       cursorWidth: 5.0,
-      cursorColor: HermezColors.secondary,
+      cursorColor: HermezColors.primary,
       style: TextStyle(
-        color: HermezColors.darkTwo,
+        color: HermezColors.dark,
         fontSize: 40,
         fontFamily: 'ModernEra',
         fontWeight: FontWeight.w700,
@@ -103,7 +103,7 @@ class _AmountInputState extends State<AmountInput> {
       ],
       decoration: InputDecoration.collapsed(
         hintStyle: TextStyle(
-          color: HermezColors.darkTwo,
+          color: HermezColors.dark,
           fontSize: 40,
           fontFamily: 'ModernEra',
           fontWeight: FontWeight.w700,

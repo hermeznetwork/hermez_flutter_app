@@ -33,13 +33,14 @@ class SettingsPage extends HookWidget {
         title: new Text("Settings",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.darkTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
+        backgroundColor: HermezColors.light,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: HermezColors.light,
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -67,7 +68,7 @@ class SettingsPage extends HookWidget {
           } else {
             return Container(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: Divider(color: HermezColors.quaternaryThree));
+                child: Divider(color: HermezColors.neutralMediumLight));
           }
         },
         //set the item count so that index won't be out of range
@@ -103,7 +104,7 @@ class SettingsPage extends HookWidget {
               trailing: Container(
                   padding: EdgeInsets.only(top: 20.0),
                   child: SvgPicture.asset("assets/arrow_right.svg",
-                      height: 12, color: HermezColors.darkTwo)),
+                      height: 12, color: HermezColors.dark)),
               title: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(

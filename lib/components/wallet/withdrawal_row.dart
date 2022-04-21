@@ -52,7 +52,7 @@ class WithdrawalRow extends StatelessWidget {
         stepTitle = "2";
         status = "On hold";
         statusColor = HermezColors.error;
-        statusBackgroundColor = HermezColors.error;
+        statusBackgroundColor = HermezColors.errorBackground;
         break;
       case 3:
         stepTitle = "2";
@@ -80,7 +80,7 @@ class WithdrawalRow extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.0),
-            color: HermezColors.darkTwo),
+            color: HermezColors.dark),
         padding: EdgeInsets.all(20.0),
         child: Column(
           children: [
@@ -92,7 +92,7 @@ class WithdrawalRow extends StatelessWidget {
                     Container(
                       child: Text("STEP $stepTitle/2",
                           style: TextStyle(
-                            color: HermezColors.quaternary,
+                            color: HermezColors.neutral,
                             fontSize: 13,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,
@@ -117,7 +117,7 @@ class WithdrawalRow extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
-                        color: statusBackgroundColor.withOpacity(0.1),
+                        color: statusBackgroundColor,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(status,
@@ -138,7 +138,7 @@ class WithdrawalRow extends StatelessWidget {
                   Container(
                     child: Text("",
                         style: TextStyle(
-                          color: HermezColors.quaternary,
+                          color: HermezColors.neutral,
                           fontSize: 13,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
@@ -171,7 +171,7 @@ class WithdrawalRow extends StatelessWidget {
                                 .toStringAsFixed(2),
                         // On Hold, Pending
                         style: TextStyle(
-                          color: HermezColors.quaternary,
+                          color: HermezColors.neutral,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
@@ -187,7 +187,7 @@ class WithdrawalRow extends StatelessWidget {
                       margin: EdgeInsets.only(top: 15, bottom: 15),
                       //width: double.infinity,
                       child: Divider(
-                          color: HermezColors.quaternaryTwo, height: 0.5, thickness: 2),
+                          color: HermezColors.neutral, height: 0.5, thickness: 2),
                     ))
                   : Container(),
             ]),
@@ -215,7 +215,7 @@ class WithdrawalRow extends StatelessWidget {
                                               "assets/info.svg",
                                               width: 15,
                                               height: 15,
-                                              color: HermezColors.quaternary),
+                                              color: HermezColors.neutral),
                                         ),
                                       ),
                                       TextSpan(
@@ -223,7 +223,7 @@ class WithdrawalRow extends StatelessWidget {
                                               ? "There was an error\nprocessing the withdraw"
                                               : "Sign required to\nfinalize withdraw",
                                           style: TextStyle(
-                                            color: HermezColors.quaternary,
+                                            color: HermezColors.neutral,
                                             fontSize: 14,
                                             height: 1.43,
                                             fontFamily: 'ModernEra',
@@ -255,8 +255,8 @@ class WithdrawalRow extends StatelessWidget {
                                                           null &&
                                                       calculateDelayedWithdrawRequestRemainingTime() ==
                                                           0)
-                                              ? HermezColors.secondary
-                                              : HermezColors.quaternary
+                                              ? HermezColors.primary
+                                              : HermezColors.neutral
                                                   .withOpacity(0.5)),
                                     ),
                                     onPressed: () {
@@ -279,8 +279,8 @@ class WithdrawalRow extends StatelessWidget {
                                                     null &&
                                                 calculateDelayedWithdrawRequestRemainingTime() ==
                                                     0)
-                                        ? HermezColors.secondary
-                                        : HermezColors.quaternary.withOpacity(0.5),
+                                        ? HermezColors.primary
+                                        : HermezColors.neutral.withOpacity(0.5),
                                     textColor: Colors.white,
                                     child: Text(
                                         instantWithdrawAllowed ||
@@ -311,7 +311,7 @@ class WithdrawalRow extends StatelessWidget {
                             child: Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16.0),
-                                    color: HermezColors.quaternary.withOpacity(0.5)),
+                                    color: HermezColors.neutral.withOpacity(0.5)),
                                 padding: EdgeInsets.only(
                                     left: 24.0,
                                     top: 20.0,
@@ -393,7 +393,7 @@ class WithdrawalRow extends StatelessWidget {
                                 margin: EdgeInsets.only(top: 15, bottom: 15),
                                 //width: double.infinity,
                                 child: Divider(
-                                    color: HermezColors.quaternaryTwo,
+                                    color: HermezColors.neutral,
                                     height: 0.5,
                                     thickness: 2),
                               ))
@@ -450,7 +450,7 @@ class WithdrawalRow extends StatelessWidget {
                                         borderRadius:
                                             BorderRadius.circular(100.0),
                                         side: BorderSide(
-                                            color: HermezColors.quaternary
+                                            color: HermezColors.neutral
                                                 .withOpacity(0.5)),
                                       ),
                                       onPressed: () {
@@ -463,7 +463,7 @@ class WithdrawalRow extends StatelessWidget {
                                           right: 24.0,
                                           left: 24.0),
                                       color:
-                                          HermezColors.quaternary.withOpacity(0.5),
+                                          HermezColors.neutral.withOpacity(0.5),
                                       textColor: Colors.white,
                                       child: Text(
                                           "Schedule Move (approx " +

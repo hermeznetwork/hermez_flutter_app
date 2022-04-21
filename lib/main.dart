@@ -55,57 +55,17 @@ class MainApp extends StatelessWidget {
         FirebaseAnalyticsObserver(analytics: analytics),
       ],*/
       theme: ThemeData(
-          primarySwatch: HermezColors.primarySwatch,
+          colorScheme: HermezColors.appColorScheme,
+          scaffoldBackgroundColor: HermezColors.appColorScheme.background,
+          appBarTheme: AppBarTheme(
+              backgroundColor: HermezColors.appColorScheme.background,
+              foregroundColor: HermezColors.dark,
+              elevation: 0.0),
           buttonTheme: ButtonThemeData(
-            buttonColor: HermezColors.secondary,
+            buttonColor: HermezColors.primary,
             textTheme: ButtonTextTheme.accent,
           ),
           fontFamily: 'ModernEra'),
     );
   }
-
-// Otherwise, show something whilst waiting for initialization to complete
-/*return Container(
-              color: Colors.white,
-              child: Center(
-                child: new CircularProgressIndicator(
-                  valueColor: new AlwaysStoppedAnimation<Color>(primaryOrange),
-                ),
-              ));*/
-//});
-//}
 }
-
-const MaterialColor primaryWhite = MaterialColor(
-  _whitePrimaryValue,
-  <int, Color>{
-    50: Color(0xFFFFFFFF),
-    100: Color(0xFFFFFFFF),
-    200: Color(0xFFFFFFFF),
-    300: Color(0xFFFFFFFF),
-    400: Color(0xFFFFFFFF),
-    500: Color(_whitePrimaryValue),
-    600: Color(0xFFFFFFFF),
-    700: Color(0xFFFFFFFF),
-    800: Color(0xFFFFFFFF),
-    900: Color(0xFFFFFFFF),
-  },
-);
-const int _whitePrimaryValue = 0xFFFFFFFF;
-
-const MaterialColor primaryOrange = MaterialColor(
-  _orangePrimaryValue,
-  <int, Color>{
-    50: Color(0xffffa600),
-    100: Color(0xffffa600),
-    200: Color(0xffffa600),
-    300: Color(0xffffa600),
-    400: Color(0xffffa600),
-    500: Color(_orangePrimaryValue),
-    600: Color(0xffffa600),
-    700: Color(0xffffa600),
-    800: Color(0xffffa600),
-    900: Color(0xffffa600),
-  },
-);
-const int _orangePrimaryValue = 0xffffa600;

@@ -24,9 +24,9 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
     return Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
-        backgroundColor: Colors.white,
+        backgroundColor: HermezColors.light,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: HermezColors.light,
       body: SafeArea(
         child: Container(
           margin: EdgeInsets.all(24.0),
@@ -40,7 +40,7 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
                   'it can’t be canceled.',
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    color: HermezColors.quaternaryTwo,
+                    color: HermezColors.neutral,
                     fontSize: 16,
                     height: 1.57,
                     fontFamily: 'ModernEra',
@@ -54,7 +54,7 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
               Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16.0),
-                    color: HermezColors.quaternaryThree),
+                    color: HermezColors.neutralLight),
                 padding: EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +68,7 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
                       child: Text(
                         'Step 1',
                         style: TextStyle(
-                          color: HermezColors.quaternaryTwo,
+                          color: HermezColors.neutral,
                           fontSize: 15,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
@@ -86,7 +86,7 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
                                 : 'Ethereum gas fees'),
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          color: HermezColors.darkTwo,
+                          color: HermezColors.dark,
                           fontSize: 16,
                           height: 1.57,
                           fontFamily: 'ModernEra',
@@ -103,7 +103,7 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
               Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16.0),
-                    color: HermezColors.quaternaryThree),
+                    color: HermezColors.neutralLight),
                 padding: EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +117,7 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
                       child: Text(
                         'Step 2',
                         style: TextStyle(
-                          color: HermezColors.quaternaryTwo,
+                          color: HermezColors.neutral,
                           fontSize: 15,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
@@ -131,7 +131,7 @@ class _MoveInfoPageState extends State<MoveInfoPage> {
                         'You will pay for Ethereum gas fees and it may vary from the estimation in step 1.',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          color: HermezColors.darkTwo,
+                          color: HermezColors.dark,
                           fontSize: 16,
                           height: 1.57,
                           fontFamily: 'ModernEra',

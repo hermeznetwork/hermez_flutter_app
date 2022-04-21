@@ -11,7 +11,7 @@ class BackupRow extends StatelessWidget {
     return Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.0),
-            color: HermezColors.darkTwo),
+            color: HermezColors.dark),
         padding: EdgeInsets.all(6.0),
         child: ListTile(
           onTap: () {
@@ -151,7 +151,7 @@ class BackupRow extends StatelessWidget {
                         margin: EdgeInsets.only(top: 15, bottom: 15),
                         //width: double.infinity,
                         child: Divider(
-                            color: HermezColors.quaternaryTwo,
+                            color: HermezColors.quaternary,
                             height: 0.5,
                             thickness: 2),
                       ))
