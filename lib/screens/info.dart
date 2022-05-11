@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hermez/utils/hermez_colors.dart';
 
 class InfoArguments {
@@ -39,7 +40,7 @@ class _InfoPageState extends State<InfoPage> {
       startTime(context);
     }
     return Scaffold(
-      backgroundColor: HermezColors.lightOrange,
+      backgroundColor: HermezColors.neutralLight,
       body: Container(
           margin: EdgeInsets.all(16),
           child: Column(
@@ -49,7 +50,7 @@ class _InfoPageState extends State<InfoPage> {
               Container(
                 child: Align(
                   alignment: Alignment.center,
-                  child: Image.asset(
+                  child: SvgPicture.asset(
                     'assets/' + args.imagePath,
                     width: args.iconSize,
                     height: args.iconSize,
@@ -62,7 +63,7 @@ class _InfoPageState extends State<InfoPage> {
                 child: Text(args.message,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: HermezColors.black,
+                      color: HermezColors.dark,
                       fontSize: 20,
                       height: 1.5,
                       fontFamily: 'ModernEra',
@@ -78,12 +79,12 @@ class _InfoPageState extends State<InfoPage> {
                         height: 56,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(50.0),
-                            side: BorderSide(color: HermezColors.darkOrange)),
+                            side: BorderSide(color: HermezColors.primary)),
                         onPressed: () {
                           route();
                         },
                         padding: EdgeInsets.all(15.0),
-                        color: HermezColors.darkOrange,
+                        color: HermezColors.primary,
                         textColor: Colors.white,
                         child: Text("Done",
                             style: TextStyle(

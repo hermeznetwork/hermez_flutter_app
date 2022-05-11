@@ -28,14 +28,14 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
         title: new Text("Currency conversion",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: Colors.white,
+        backgroundColor: HermezColors.light,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: HermezColors.light,
       body: Column(
         children: <Widget>[
           buildCurrencyList(),
@@ -57,7 +57,7 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
               separatorBuilder: (BuildContext context, int index) {
                 return Container(
                     padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: Divider(color: HermezColors.steel));
+                    child: Divider(color: HermezColors.neutralMediumLight));
               },
               itemBuilder: (context, i) {
                 //item builder returns a row for each index i=0,1,2,3,4
@@ -79,7 +79,7 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
                           element.toString().split(".").last,
                           style: TextStyle(
                               fontFamily: 'ModernEra',
-                              color: HermezColors.blackTwo,
+                              color: HermezColors.dark,
                               fontWeight: FontWeight.w500,
                               fontSize: 16),
                           textAlign: TextAlign.left,
@@ -89,7 +89,7 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
                     trailing: widget.store.state.defaultCurrency == element
                         ? Radio(
                             groupValue: null,
-                            activeColor: HermezColors.blackTwo,
+                            activeColor: HermezColors.dark,
                             value: null,
                             onChanged: (value) {
                               setState(() {
@@ -100,7 +100,7 @@ class _SettingsCurrencyPageState extends State<SettingsCurrencyPage> {
                         : Radio(
                             groupValue: null,
                             value: element.toString().split(".").last,
-                            activeColor: HermezColors.blackTwo,
+                            activeColor: HermezColors.dark,
                             onChanged: (value) {
                               setState(() {
                                 widget.store.updateDefaultCurrency(element);

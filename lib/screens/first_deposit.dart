@@ -44,7 +44,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
         child: Scaffold(
           appBar: new AppBar(
             elevation: 0.0,
-            backgroundColor: HermezColors.lightOrange,
+            backgroundColor: HermezColors.neutralLight,
             actions: <Widget>[
               !Navigator.canPop(context)
                   ? new IconButton(
@@ -57,7 +57,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                   : Container(),
             ],
           ),
-          backgroundColor: HermezColors.lightOrange,
+          backgroundColor: HermezColors.neutralLight,
           body: SafeArea(
               child: Container(
             margin: EdgeInsets.all(20.0),
@@ -68,7 +68,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                   'Make your first deposit',
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    color: HermezColors.blackTwo,
+                    color: HermezColors.dark,
                     fontSize: 20,
                     height: 1.5,
                     fontFamily: 'ModernEra',
@@ -95,7 +95,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                   height: 200,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16.0),
-                      color: HermezColors.darkOrange),
+                      color: HermezColors.primary),
                   padding: EdgeInsets.all(24.0),
                   child: Column(
                     children: [
@@ -115,13 +115,13 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                           Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16.0),
-                                color: HermezColors.orange),
+                                color: HermezColors.primary),
                             padding: EdgeInsets.only(
                                 left: 12.0, right: 12.0, top: 6, bottom: 6),
                             child: Text(
                               'L2',
                               style: TextStyle(
-                                color: HermezColors.blackTwo,
+                                color: HermezColors.dark,
                                 fontSize: 15,
                                 fontFamily: 'ModernEra',
                                 fontWeight: FontWeight.w800,
@@ -175,7 +175,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                   height: 200,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16.0),
-                      color: HermezColors.blueyGreyTwo),
+                      color: HermezColors.neutral),
                   padding: EdgeInsets.all(24.0),
                   child: Column(
                     children: [
@@ -201,7 +201,7 @@ class _FirstDepositPageState extends State<FirstDepositPage> {
                             child: Text(
                               'L1',
                               style: TextStyle(
-                                color: HermezColors.blackTwo,
+                                color: HermezColors.dark,
                                 fontSize: 15,
                                 fontFamily: 'ModernEra',
                                 fontWeight: FontWeight.w800,

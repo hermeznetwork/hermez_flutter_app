@@ -20,11 +20,6 @@ class IntroPage extends HookWidget {
   Widget build(BuildContext context) {
     final store = useWalletSetup(context);
     return Scaffold(
-      appBar: new AppBar(
-        elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
-      ),
-      backgroundColor: HermezColors.lightOrange,
       body: SafeArea(
         child: Container(
           child: new Column(
@@ -52,7 +47,7 @@ class IntroPage extends HookWidget {
                             'Secure wallet for low-cost\n token transfers',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: HermezColors.steel,
+                              color: HermezColors.neutral,
                               fontSize: 18,
                               height: 1.8,
                               decoration: TextDecoration.none,
@@ -85,7 +80,7 @@ class IntroPage extends HookWidget {
                           String mnemonic = await store.generateMnemonic();
                           Navigator.of(context).pushNamed("/info",
                               arguments: InfoArguments(
-                                  "info_backup_success.png",
+                                  "info_backup_success.svg",
                                   false,
                                   "Your wallet has been created",
                                   iconSize: 300, onFinished: () {
@@ -101,7 +96,7 @@ class IntroPage extends HookWidget {
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                       disabledTextColor: Colors.grey,
                       disabledColor: Colors.blueGrey,
-                      color: HermezColors.darkOrange,
+                      color: HermezColors.primary,
                       textColor: Colors.white,
                       child: Text("Create new wallet",
                           style: TextStyle(
@@ -131,10 +126,10 @@ class IntroPage extends HookWidget {
                       padding: EdgeInsets.only(
                           top: 18.0, bottom: 18.0, right: 24.0, left: 24.0),
                       disabledTextColor: Colors.grey,
-                      textColor: HermezColors.blackTwo,
+                      textColor: HermezColors.dark,
                       child: Text("Import a wallet",
                           style: TextStyle(
-                            color: HermezColors.blackTwo,
+                            color: HermezColors.dark,
                             fontSize: 16,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w500,

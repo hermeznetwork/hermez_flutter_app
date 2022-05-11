@@ -128,17 +128,17 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   Widget build(BuildContext context) {
     transferStore = useWalletTransfer(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: HermezColors.light,
       appBar: new AppBar(
         title: new Text(getTitleLabel(),
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
         elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
+        backgroundColor: HermezColors.neutralLight,
         actions: <Widget>[
           new IconButton(
               icon: new Icon(Icons.close),
@@ -167,7 +167,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               child: Column(
                                   children: ListTile.divideTiles(
                                       context: context,
-                                      color: HermezColors.blueyGreyThree,
+                                      color: HermezColors.neutralMediumLight,
                                       tiles: [
                                 _buildExitInfoRow(context),
                                 _buildStatusRow(),
@@ -216,7 +216,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                   Navigator.of(context)
                                                       .pushNamed("/info",
                                                           arguments: InfoArguments(
-                                                              "success.png",
+                                                              "info_success.svg",
                                                               true,
                                                               "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
                                                               iconSize: 300))
@@ -238,10 +238,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                   Navigator.of(context)
                                                       .pushNamed("/info",
                                                           arguments: InfoArguments(
-                                                              "success.png",
+                                                              "info_success.svg",
                                                               true,
                                                               "Your withdrawal is awaiting verification.",
-                                                              iconSize: 300))
+                                                              iconSize: 150))
                                                       .then((value) {
                                                     Navigator.of(context).pop(
                                                       PopWithResults(
@@ -260,7 +260,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                   Navigator.of(context)
                                                       .pushNamed("/info",
                                                           arguments: InfoArguments(
-                                                              "success.png",
+                                                              "info_success.svg",
                                                               true,
                                                               "Withdrawal has been initiated and will require additional confirmation in a few minutes.",
                                                               iconSize: 300))
@@ -280,10 +280,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                   Navigator.of(context)
                                                       .pushNamed("/info",
                                                           arguments: InfoArguments(
-                                                              "success.png",
+                                                              "info_success.svg",
                                                               true,
                                                               "Your transaction is awaiting verification.",
-                                                              iconSize: 300))
+                                                              iconSize: 150))
                                                       .then((value) {
                                                     Navigator.of(context).pop(
                                                       PopWithResults(
@@ -302,7 +302,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                                     .pushNamed(
                                                   "/info",
                                                   arguments: InfoArguments(
-                                                      "info_tx_failure.png",
+                                                      "info_failure.svg",
                                                       true,
                                                       "There has been an error with your transaction.",
                                                       iconSize: 250),
@@ -336,8 +336,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                       bottom: 18.0,
                                       right: 24.0,
                                       left: 24.0),
-                                  disabledColor: HermezColors.blueyGreyTwo,
-                                  color: HermezColors.darkOrange,
+                                  disabledColor: HermezColors.neutral,
+                                  color: HermezColors.primary,
                                   textColor: Colors.white,
                                   disabledTextColor: Colors.grey,
                                   child: Text(
@@ -365,7 +365,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 Expanded(
                   child: Center(
                     child: new CircularProgressIndicator(
-                        color: HermezColors.orange),
+                        color: HermezColors.primary),
                   ),
                 )
               ]);
@@ -443,7 +443,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
     // returns a row with the desired properties
     return Container(
-        color: HermezColors.lightOrange,
+        color: HermezColors.neutralLight,
         padding: EdgeInsets.only(bottom: 15.0),
         child: ListTile(
           title: Column(
@@ -455,7 +455,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         widget.arguments.amount, widget.arguments.token.symbol),
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: HermezColors.blackTwo,
+                      color: HermezColors.dark,
                       fontSize: 32.0,
                       fontFamily: 'ModernEra',
                       fontWeight: FontWeight.w800,
@@ -473,7 +473,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       currency),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: HermezColors.steel,
+                    color: HermezColors.neutral,
                     fontSize: 18,
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w500,
@@ -491,7 +491,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         widget.arguments.status == TransactionStatus.DRAFT) {
       return Card(
         margin: EdgeInsets.only(bottom: 15),
-        color: HermezColors.blackTwo,
+        color: HermezColors.dark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Container(
           padding: EdgeInsets.only(top: 16, bottom: 16, right: 24, left: 20),
@@ -502,7 +502,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               Container(
                 margin: EdgeInsets.only(top: 8, right: 12),
                 child: SvgPicture.asset("assets/info.svg",
-                    color: HermezColors.lightGrey,
+                    color: HermezColors.neutralLight,
                     alignment: Alignment.topLeft,
                     height: 20),
               ),
@@ -514,7 +514,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       Text(
                         'Moving funds has 2 steps. Once initiated it can’t be canceled.',
                         style: TextStyle(
-                          color: HermezColors.lightGrey,
+                          color: HermezColors.neutralLight,
                           fontFamily: 'ModernEra',
                           fontSize: 15,
                           height: 1.7,
@@ -526,9 +526,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: HermezColors.steel.withOpacity(0.5),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                              borderRadius: BorderRadius.circular(16),
+                              side:
+                                  BorderSide(color: HermezColors.neutralLight)),
                         ),
                         onPressed: () {
                           Navigator.of(context).pushNamed("/move_info",
@@ -541,7 +542,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                           child: Text(
                             'More info',
                             style: TextStyle(
-                              color: HermezColors.lightGrey,
+                              color: HermezColors.neutralLight,
                               fontSize: 15,
                               fontFamily: 'ModernEra',
                               fontWeight: FontWeight.w500,
@@ -584,14 +585,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             contentPadding: EdgeInsets.only(top: 20, bottom: 20),
             title: Text('Status',
                 style: TextStyle(
-                  color: HermezColors.blackTwo,
+                  color: HermezColors.dark,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w500,
                 )),
             trailing: Text(statusText,
                 style: TextStyle(
-                  color: HermezColors.black,
+                  color: HermezColors.dark,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w700,
@@ -609,7 +610,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             children: <Widget>[
               Text('From',
                   style: TextStyle(
-                    color: HermezColors.blackTwo,
+                    color: HermezColors.dark,
                     fontSize: 16,
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w500,
@@ -637,7 +638,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               ? 'My Ethereum address'
                               : 'My Hermez address',
                           style: TextStyle(
-                            color: HermezColors.black,
+                            color: HermezColors.dark,
                             fontSize: 16,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w700,
@@ -671,7 +672,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                     widget.arguments.addressFrom.length)
                                 .toUpperCase(),
                         style: TextStyle(
-                          color: HermezColors.black,
+                          color: HermezColors.dark,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w700,
@@ -716,7 +717,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                     .length)
                             .toUpperCase(),
                     style: TextStyle(
-                      color: HermezColors.blueyGreyTwo,
+                      color: HermezColors.neutral,
                       fontSize: 16,
                       fontFamily: 'ModernEra',
                       fontWeight: FontWeight.w500,
@@ -744,7 +745,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                     widget.arguments.addressFrom.length)
                                 .toUpperCase(),
                         style: TextStyle(
-                          color: HermezColors.blueyGreyTwo,
+                          color: HermezColors.neutral,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w500,
@@ -767,7 +768,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             children: <Widget>[
               Text('To',
                   style: TextStyle(
-                    color: HermezColors.blackTwo,
+                    color: HermezColors.dark,
                     fontSize: 16,
                     fontFamily: 'ModernEra',
                     fontWeight: FontWeight.w500,
@@ -795,7 +796,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               ? 'My Hermez address'
                               : 'My Ethereum address',
                           style: TextStyle(
-                            color: HermezColors.black,
+                            color: HermezColors.dark,
                             fontSize: 16,
                             fontFamily: 'ModernEra',
                             fontWeight: FontWeight.w700,
@@ -829,7 +830,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                     widget.arguments.addressTo.length)
                                 .toUpperCase(),
                         style: TextStyle(
-                          color: HermezColors.black,
+                          color: HermezColors.dark,
                           fontSize: 16,
                           fontFamily: 'ModernEra',
                           fontWeight: FontWeight.w700,
@@ -879,7 +880,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                     .length)
                             .toUpperCase(),
                     style: TextStyle(
-                      color: HermezColors.blueyGreyTwo,
+                      color: HermezColors.neutral,
                       fontSize: 16,
                       fontFamily: 'ModernEra',
                       fontWeight: FontWeight.w500,
@@ -1033,7 +1034,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         title,
                         style: TextStyle(
                             fontFamily: 'ModernEra',
-                            color: HermezColors.blackTwo,
+                            color: HermezColors.dark,
                             fontWeight: FontWeight.w500,
                             height: 1.71,
                             fontSize: 16),
@@ -1045,7 +1046,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         subtitle,
                         style: TextStyle(
                             fontFamily: 'ModernEra',
-                            color: HermezColors.blueyGreyTwo,
+                            color: HermezColors.neutral,
                             fontWeight: FontWeight.w500,
                             height: 1.53,
                             fontSize: 16),
@@ -1063,7 +1064,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       currencyFee,
                       style: TextStyle(
                           fontFamily: 'ModernEra',
-                          color: HermezColors.blackTwo,
+                          color: HermezColors.dark,
                           fontWeight: FontWeight.w700,
                           height: 1.71,
                           fontSize: 16),
@@ -1075,7 +1076,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       tokenFee,
                       style: TextStyle(
                           fontFamily: 'ModernEra',
-                          color: HermezColors.blueyGreyTwo,
+                          color: HermezColors.neutral,
                           fontWeight: FontWeight.w500,
                           height: 1.53,
                           fontSize: 16),
@@ -1092,7 +1093,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                 speed,
                                 style: TextStyle(
                                     fontFamily: 'ModernEra',
-                                    color: HermezColors.blackTwo,
+                                    color: HermezColors.dark,
                                     fontWeight: FontWeight.w700,
                                     height: 1.73,
                                     fontSize: 15),
@@ -1105,7 +1106,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                     margin: EdgeInsets.only(left: 6, top: 4),
                                     child: SvgPicture.asset(
                                         'assets/arrow_right.svg',
-                                        color: HermezColors.blackTwo,
+                                        color: HermezColors.dark,
                                         semanticsLabel: 'fee_selector'),
                                   )
                                 : Container()
@@ -1116,7 +1117,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       ? Text(
                           'Insufficient ETH to cover gas fee.',
                           style: TextStyle(
-                            color: HermezColors.redError,
+                            color: HermezColors.error,
                             height: 1.73,
                             fontSize: 15,
                             fontFamily: 'ModernEra',
@@ -1207,7 +1208,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         title,
                         style: TextStyle(
                             fontFamily: 'ModernEra',
-                            color: HermezColors.blackTwo,
+                            color: HermezColors.dark,
                             fontWeight: FontWeight.w500,
                             height: 1.6,
                             fontSize: 16),
@@ -1219,7 +1220,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                         subtitle,
                         style: TextStyle(
                             fontFamily: 'ModernEra',
-                            color: HermezColors.blueyGreyTwo,
+                            color: HermezColors.neutral,
                             fontWeight: FontWeight.w500,
                             height: 1.53,
                             fontSize: 16),
@@ -1237,7 +1238,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       currencyFee,
                       style: TextStyle(
                           fontFamily: 'ModernEra',
-                          color: HermezColors.blackTwo,
+                          color: HermezColors.dark,
                           fontWeight: FontWeight.w700,
                           height: 1.71,
                           fontSize: 16),
@@ -1249,7 +1250,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       tokenFee,
                       style: TextStyle(
                           fontFamily: 'ModernEra',
-                          color: HermezColors.blueyGreyTwo,
+                          color: HermezColors.neutral,
                           fontWeight: FontWeight.w500,
                           height: 1.53,
                           fontSize: 16),
@@ -1265,7 +1266,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                           speed,
                           style: TextStyle(
                               fontFamily: 'ModernEra',
-                              color: HermezColors.blackTwo,
+                              color: HermezColors.dark,
                               fontWeight: FontWeight.w700,
                               height: 1.73,
                               fontSize: 15),
@@ -1278,7 +1279,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       ? Text(
                           'Insufficient ETH to cover gas fee.',
                           style: TextStyle(
-                            color: HermezColors.redError,
+                            color: HermezColors.error,
                             height: 1.73,
                             fontSize: 15,
                             fontFamily: 'ModernEra',
@@ -1309,14 +1310,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             contentPadding: EdgeInsets.only(top: 20, bottom: 20),
             title: Text('Date',
                 style: TextStyle(
-                  color: HermezColors.blackTwo,
+                  color: HermezColors.dark,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w500,
                 )),
             trailing: Text(date,
                 style: TextStyle(
-                  color: HermezColors.black,
+                  color: HermezColors.dark,
                   fontSize: 16,
                   fontFamily: 'ModernEra',
                   fontWeight: FontWeight.w700,
@@ -1335,7 +1336,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
               children: [
                 Container(
                     child: Center(
-                  child: CircularProgressIndicator(color: HermezColors.orange),
+                  child: CircularProgressIndicator(color: HermezColors.primary),
                 ))
               ],
             ),
@@ -1380,7 +1381,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                     'View in explorer',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: HermezColors.blueyGreyTwo,
+                      color: HermezColors.neutral,
                       fontSize: 16,
                       fontFamily: 'ModernEra',
                       fontWeight: FontWeight.w700,

@@ -41,9 +41,9 @@ class AddressInput extends StatelessWidget {
       textAlign: TextAlign.left,
       maxLines: 1,
       cursorWidth: 2.0,
-      cursorColor: HermezColors.orange,
+      cursorColor: HermezColors.primary,
       style: TextStyle(
-        color: HermezColors.blackTwo,
+        color: HermezColors.dark,
         fontSize: 16.0,
         fontFamily: 'ModernEra',
         fontWeight: FontWeight.w500,
@@ -53,7 +53,7 @@ class AddressInput extends StatelessWidget {
       onChanged: this.onChanged,
       decoration: InputDecoration.collapsed(
         hintStyle: TextStyle(
-          color: HermezColors.blueyGreyTwo,
+          color: HermezColors.neutral,
           fontSize: 16,
           fontFamily: 'ModernEra',
           fontWeight: FontWeight.w500,

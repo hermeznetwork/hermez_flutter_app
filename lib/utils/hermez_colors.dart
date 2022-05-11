@@ -1,41 +1,45 @@
+import 'dart:math';
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
 
 class HermezColors {
   HermezColors._();
 
-  static const Color transparent = Color(0x00000000);
+  static final appColorScheme =
+      ColorScheme.fromSeed(seedColor: primary, background: neutralLight);
 
-  static const Color lightGrey = Color(0xfff3f3f8);
+  /// Semantic
+  static const Color error = Color(0xffE8430D);
 
-  static const Color black = Color(0xFF333333);
+  static final Color errorBackground = error.withOpacity(0.1);
 
-  static const Color blackTwo = Color(0xFF2b2b2b);
+  static const Color success = Color(0xff34C095);
 
-  static const Color blueyGrey = Color(0xff8f92b3);
+  static const Color warning = Color(0xffE17E26);
 
-  static const Color blueyGreyTwo = Color(0xff888baa);
+  static final Color warningBackground = warning.withOpacity(0.1);
 
-  static const Color blueyGreyThree = Color(0xffe1e1f1);
+  /// Dark
+  static const Color dark = Color(0xFF081132);
 
-  static const Color steel = Color(0xff7a7c89);
+  /// Primary
+  // static const Color secondary = const Color(0xff8248E5);
+  static const Color primary = const Color(0xff7B3FE4);
 
-  static const Color redError = Color(0xffff4b40);
+  /// Secondary
+  static const Color secondary = const Color(0xffFFC55A);
 
-  static const Color darkOrange = Color(0xffe75a2b);
+  static const Color darkTernary = Color(0xffe75a2b);
 
-  static const Color orange = Color(0xffffa600);
+  /// Neutral
+  static const Color neutral = Color(0xff7C7E96);
 
-  static const Color mediumOrange = Color(0xfff6e9d3);
+  static const Color neutralMedium = Color(0xffC9CDD7);
 
-  static const Color lightOrange = Color(0xfffaf4ea);
+  static const Color neutralMediumLight = Color(0xffE2E5EE);
 
-  static const Color green = Color(0xff219653);
+  static const Color neutralLight = Color(0xffF0F1F6);
 
-  static const Color statusOrange = Color(0xffd8853b);
-
-  static const Color statusOrangeBackground = Color(0xfff2994a);
-
-  static const Color statusRed = Color(0xffff4b40);
-
-  static const Color statusRedBackground = Color(0xffff4b40);
+  static const Color light = Colors.white;
 }

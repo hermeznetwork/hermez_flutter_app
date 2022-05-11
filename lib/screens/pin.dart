@@ -64,462 +64,456 @@ class _PinPageState extends State<PinPage> {
                 : "Create passcode",
             style: TextStyle(
                 fontFamily: 'ModernEra',
-                color: HermezColors.blackTwo,
+                color: HermezColors.dark,
                 fontWeight: FontWeight.w800,
                 fontSize: 20)),
         centerTitle: true,
-        elevation: 0.0,
-        backgroundColor: HermezColors.lightOrange,
       ),
-      backgroundColor: HermezColors.lightOrange,
       body: SafeArea(
-        child: Container(
-          color: HermezColors.lightOrange,
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Expanded(
-                flex: 1,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 80),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            height: 15.0,
-                            width: 15.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: position1Selected ? Colors.black : null,
-                              border:
-                                  Border.all(color: Colors.black, width: 1.0),
-                            ),
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 80),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 10.0),
+                          height: 15.0,
+                          width: 15.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: position1Selected ? Colors.black : null,
+                            border:
+                                Border.all(color: Colors.black, width: 1.0),
                           ),
-                          Container(
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            height: 15.0,
-                            width: 15.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: position2Selected ? Colors.black : null,
-                              border:
-                                  Border.all(color: Colors.black, width: 1.0),
-                            ),
+                        ),
+                        Container(
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 10.0),
+                          height: 15.0,
+                          width: 15.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: position2Selected ? Colors.black : null,
+                            border:
+                                Border.all(color: Colors.black, width: 1.0),
                           ),
-                          Container(
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            height: 15.0,
-                            width: 15.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: position3Selected ? Colors.black : null,
-                              border:
-                                  Border.all(color: Colors.black, width: 1.0),
-                            ),
+                        ),
+                        Container(
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 10.0),
+                          height: 15.0,
+                          width: 15.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: position3Selected ? Colors.black : null,
+                            border:
+                                Border.all(color: Colors.black, width: 1.0),
                           ),
-                          Container(
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            height: 15.0,
-                            width: 15.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: position4Selected ? Colors.black : null,
-                              border:
-                                  Border.all(color: Colors.black, width: 1.0),
-                            ),
+                        ),
+                        Container(
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 10.0),
+                          height: 15.0,
+                          width: 15.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: position4Selected ? Colors.black : null,
+                            border:
+                                Border.all(color: Colors.black, width: 1.0),
                           ),
-                          Container(
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            height: 15.0,
-                            width: 15.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: position5Selected ? Colors.black : null,
-                              border:
-                                  Border.all(color: Colors.black, width: 1.0),
-                            ),
+                        ),
+                        Container(
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 10.0),
+                          height: 15.0,
+                          width: 15.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: position5Selected ? Colors.black : null,
+                            border:
+                                Border.all(color: Colors.black, width: 1.0),
                           ),
-                          Container(
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            height: 15.0,
-                            width: 15.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: position6Selected ? Colors.black : null,
-                              border:
-                                  Border.all(color: Colors.black, width: 1.0),
-                            ),
+                        ),
+                        Container(
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 10.0),
+                          height: 15.0,
+                          width: 15.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: position6Selected ? Colors.black : null,
+                            border:
+                                Border.all(color: Colors.black, width: 1.0),
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 40),
+                    Container(
+                      child: RichText(
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.bodyText2,
+                          children: [
+                            WidgetSpan(
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 5.0),
+                                child: pinError
+                                    ? SvgPicture.asset("assets/info.svg",
+                                        width: 17,
+                                        height: 17,
+                                        color: HermezColors.error)
+                                    : null,
+                              ),
+                            ),
+                            TextSpan(
+                              text: pinInfoText,
+                              style: TextStyle(
+                                color: pinError
+                                    ? HermezColors.error
+                                    : HermezColors.neutral,
+                                fontSize: 16,
+                                fontFamily: 'ModernEra',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 40),
-                      Container(
-                        child: RichText(
-                          text: TextSpan(
-                            style: Theme.of(context).textTheme.bodyText2,
-                            children: [
-                              WidgetSpan(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 5.0),
-                                  child: pinError
-                                      ? SvgPicture.asset("assets/info.svg",
-                                          width: 17,
-                                          height: 17,
-                                          color: HermezColors.redError)
-                                      : null,
-                                ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(
+                  left: 30.0, right: 30.0, top: 30.0, bottom: 30.0),
+              child: Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 10),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
-                              TextSpan(
-                                text: pinInfoText,
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(1);
+                                });
+                              },
+                              child: Text(
+                                '1',
                                 style: TextStyle(
-                                  color: pinError
-                                      ? HermezColors.redError
-                                      : HermezColors.steel,
-                                  fontSize: 16,
+                                  fontSize: 24,
                                   fontFamily: 'ModernEra',
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w700,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(4);
+                                });
+                              },
+                              child: Text(
+                                '4',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(7);
+                                });
+                              },
+                              child: Text(
+                                '7',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            faceEnabled || fingerprintEnabled
+                                ? TextButton(
+                                    style: TextButton.styleFrom(
+                                      primary: Colors.black,
+                                      minimumSize: Size(60, 60),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30)),
+                                    ),
+                                    onPressed: () {
+                                      checkBiometrics();
+                                    },
+                                    child: Image.asset(
+                                      faceEnabled
+                                          ? 'assets/face.png'
+                                          : 'assets/fingerprint.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  )
+                                : Container(
+                                    height: 60.0,
+                                    width: 60.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                            SizedBox(height: 10),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 10),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(2);
+                                });
+                              },
+                              child: Text(
+                                '2',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(5);
+                                });
+                              },
+                              child: Text(
+                                '5',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(8);
+                                });
+                              },
+                              child: Text(
+                                '8',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(0);
+                                });
+                              },
+                              child: Text(
+                                '0',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 10),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(3);
+                                });
+                              },
+                              child: Text(
+                                '3',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(6);
+                                });
+                              },
+                              child: Text(
+                                '6',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  pinNumberSelected(9);
+                                });
+                              },
+                              child: Text(
+                                '9',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                primary: Colors.black,
+                                minimumSize: Size(60, 60),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  deletePinNumberSelected();
+                                });
+                              },
+                              child: Text(
+                                '<',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontFamily: 'ModernEra',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(
-                    left: 30.0, right: 30.0, top: 30.0, bottom: 30.0),
-                child: Align(
-                  alignment: FractionalOffset.bottomCenter,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(height: 10),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(1);
-                                  });
-                                },
-                                child: Text(
-                                  '1',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(4);
-                                  });
-                                },
-                                child: Text(
-                                  '4',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(7);
-                                  });
-                                },
-                                child: Text(
-                                  '7',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              faceEnabled || fingerprintEnabled
-                                  ? TextButton(
-                                      style: TextButton.styleFrom(
-                                        primary: Colors.black,
-                                        minimumSize: Size(60, 60),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(30)),
-                                      ),
-                                      onPressed: () {
-                                        checkBiometrics();
-                                      },
-                                      child: Image.asset(
-                                        faceEnabled
-                                            ? 'assets/face.png'
-                                            : 'assets/fingerprint.png',
-                                        width: 20,
-                                        height: 20,
-                                      ),
-                                    )
-                                  : Container(
-                                      height: 60.0,
-                                      width: 60.0,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                              SizedBox(height: 10),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              SizedBox(height: 10),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(2);
-                                  });
-                                },
-                                child: Text(
-                                  '2',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(5);
-                                  });
-                                },
-                                child: Text(
-                                  '5',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(8);
-                                  });
-                                },
-                                child: Text(
-                                  '8',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(0);
-                                  });
-                                },
-                                child: Text(
-                                  '0',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              SizedBox(height: 10),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(3);
-                                  });
-                                },
-                                child: Text(
-                                  '3',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(6);
-                                  });
-                                },
-                                child: Text(
-                                  '6',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    pinNumberSelected(9);
-                                  });
-                                },
-                                child: Text(
-                                  '9',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  primary: Colors.black,
-                                  minimumSize: Size(60, 60),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    deletePinNumberSelected();
-                                  });
-                                },
-                                child: Text(
-                                  '<',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontFamily: 'ModernEra',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -601,7 +595,7 @@ class _PinPageState extends State<PinPage> {
             Navigator.of(context)
                 .pushNamed("/info",
                     arguments: InfoArguments(
-                        "info_failure.png", false, "Invalid passcode"))
+                        "info_failure.svg", false, "Invalid passcode"))
                 .then((value) {
               if (Navigator.canPop(context)) {
                 Navigator.pop(context, false);
